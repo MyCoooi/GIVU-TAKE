@@ -60,12 +60,14 @@ public class Users extends BaseTimeEntity {
     private String profileImageUrl;
 
     @Column(name = "roles", nullable = false)
+    @Enumerated(EnumType.STRING)
     private Roles roles;
 
     @Column(name = "is_social", nullable = false)
     private boolean isSocial;
 
     @Column(name = "social_type", nullable = true)
+    @Enumerated(EnumType.STRING)
     private SocialType socialType;
 
     @Column(name = "social_serial_num", nullable = true)

@@ -1,8 +1,7 @@
 package com.accepted.givutake.user.admin.model;
 
-import com.accepted.givutake.user.client.model.ClientDto;
 import com.accepted.givutake.user.common.entity.Users;
-import com.accepted.givutake.user.common.model.AbstractUserDto;
+import com.accepted.givutake.user.common.model.UserDto;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -12,7 +11,7 @@ import lombok.experimental.SuperBuilder;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class AdminDto extends AbstractUserDto {
+public class AdminDto extends UserDto {
 
     public Users toEntity() {
         return Users.builder()
@@ -36,7 +35,7 @@ public class AdminDto extends AbstractUserDto {
                 .build();
     }
 
-    public AdminDto toDto(Users users) {
+    public static AdminDto toDto(Users users) {
         return AdminDto.builder()
                 .userIdx(users.getUserIdx())
                 .name(users.getName())

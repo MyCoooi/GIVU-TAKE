@@ -1,6 +1,6 @@
 package com.accepted.givutake.user.corporation.model;
 
-import com.accepted.givutake.user.common.model.AbstractUserDto;
+import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.entity.Users;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -11,7 +11,7 @@ import lombok.experimental.SuperBuilder;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class CorporationDto extends AbstractUserDto {
+public class CorporationDto extends UserDto {
 
     private Integer regionIdx;
 
@@ -37,7 +37,7 @@ public class CorporationDto extends AbstractUserDto {
                 .build();
     }
 
-    public CorporationDto toDto(Users users) {
+    public static CorporationDto toDto(Users users) {
         return CorporationDto.builder()
                 .userIdx(users.getUserIdx())
                 .name(users.getName())

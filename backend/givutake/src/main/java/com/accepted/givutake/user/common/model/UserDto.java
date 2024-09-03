@@ -1,19 +1,41 @@
-package com.accepted.givutake.user.client.model;
+package com.accepted.givutake.user.common.model;
 
-import com.accepted.givutake.user.common.model.UserDto;
+import com.accepted.givutake.user.admin.model.AdminDto;
 import com.accepted.givutake.user.common.entity.Users;
+import com.accepted.givutake.user.common.enumType.Roles;
+import com.accepted.givutake.user.common.enumType.SocialType;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
-@SuperBuilder
 @Getter
 @Setter
 @ToString
-@AllArgsConstructor
+@SuperBuilder
 @NoArgsConstructor
-public class ClientDto extends UserDto {
+@AllArgsConstructor
+public class UserDto {
+
+    protected int userIdx;
+    protected String name;
+    protected String email;
+    protected String password;
+    protected Boolean isMale;
+    protected LocalDateTime birth;
+    protected Integer addressIdx;
+    protected Integer cardIdx;
+    protected Integer regionIdx;
+    protected String phone;
+    protected String profileImageUrl;
+    protected Roles roles;
+    protected boolean isSocial;
+    protected SocialType socialType;
+    protected String socialSerialNum;
+    protected LocalDateTime createDate;
+    protected LocalDateTime modifiedDate;
+    protected int status;
+    protected boolean isWithdraw;
 
     public Users toEntity() {
         return Users.builder()
@@ -25,7 +47,7 @@ public class ClientDto extends UserDto {
                 .isMale(this.isMale)
                 .birth(this.birth)
                 .addressIdx(this.addressIdx)
-                .regionIdx(null)
+                .regionIdx(this.regionIdx)
                 .cardIdx(this.cardIdx)
                 .profileImageUrl(this.profileImageUrl)
                 .roles(this.roles)
@@ -37,17 +59,18 @@ public class ClientDto extends UserDto {
                 .build();
     }
 
-    public static ClientDto toDto(Users users) {
-        return ClientDto.builder()
+    public static UserDto toDto(Users users) {
+        return UserDto.builder()
                 .userIdx(users.getUserIdx())
                 .name(users.getName())
                 .email(users.getEmail())
                 .password(users.getPassword())
-                .phone(users.getPhone())
                 .isMale(users.getIsMale())
                 .birth(users.getBirth())
                 .addressIdx(users.getAddressIdx())
+                .regionIdx(users.getRegionIdx())
                 .cardIdx(users.getCardIdx())
+                .phone(users.getPhone())
                 .profileImageUrl(users.getProfileImageUrl())
                 .roles(users.getRoles())
                 .isSocial(users.isSocial())
@@ -57,4 +80,5 @@ public class ClientDto extends UserDto {
                 .isWithdraw(users.isWithdraw())
                 .build();
     }
+
 }
