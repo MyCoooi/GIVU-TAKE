@@ -1,23 +1,31 @@
 package com.accepted.givutake.user.jwt.model;
 
-import com.accepted.givutake.user.common.model.AbstractUserDto;
+import com.accepted.givutake.user.common.model.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class CustomUserDetailsDto implements UserDetails {
-
-    private final AbstractUserDto user;
+    private final UserDto user;
 
     // 권한을 반환하는 메서드
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // 빈 리스트 반환 (USER, ADMIN과 같은 권한 체계 없음)
-        return Collections.emptyList();
+        List<String> roles = new ArrayList<>();
+
+        roles.add(user.getRoles().toString());
+
+        return roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -27,6 +35,6 @@ public class CustomUserDetailsDto implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getUserId().toString();
+        return Integer.toString(user.getUserIdx());
     }
 }
