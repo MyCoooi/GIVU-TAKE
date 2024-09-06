@@ -1,0 +1,42 @@
+package com.accepted.givutake.global.enumType;
+
+import lombok.Getter;
+import lombok.ToString;
+import org.springframework.http.HttpStatus;
+
+@Getter
+@ToString
+public enum ExceptionEnum {
+    // System Exception
+    RUNTIME_EXCEPTION(HttpStatus.BAD_REQUEST, "ES0001"),
+    ACCESS_DENIED_EXCEPTION(HttpStatus.FORBIDDEN, "ES0002"),
+    METHOD_ARGUMENT_TYPE_MISMATCH_EXCEPTION(HttpStatus.BAD_REQUEST, "ES0003"),
+    METHOD_ARGUMENT_NOT_VALID_EXCEPTION(HttpStatus.BAD_REQUEST, "ES0004"),
+
+    // Custom Exception
+    ILLEGAL_REGION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0001", "지역 정보가 유효하지 않습니다."),
+    ILLEGAL_ISMALE_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0002", "성별 정보가 유효하지 않습니다."),
+    ILLEGAL_BIRTH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0003", "생년월일 정보가 유효하지 않습니다."),
+    ILLEGAL_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0004", "대표 주소 정보가 유효하지 않습니다."),
+    ILLEGAL_REPRESENTATIVE_CARD_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0005", "대표 카드 정보가 유효하지 않습니다."),
+    ILLEGAL_EMAIL_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0005", "이메일 형식이 올바르지 않습니다."),
+    DUPLICATED_EMAIL_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0006", "이미 사용 중인 이메일입니다."),
+    MISSING_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU10001", "대표 주소는 필수 입력 값 입니다."),
+
+    UNEXPECTED_DATA_EXCEPTION(HttpStatus.FORBIDDEN, "EQ0001", "예상치 못한 값이 들어왔습니다.");
+
+    private final HttpStatus status;
+    private final String code;
+    private String message;
+
+    ExceptionEnum(HttpStatus status, String code) {
+        this.status = status;
+        this.code = code;
+    }
+
+    ExceptionEnum(HttpStatus status, String code, String message) {
+        this.status = status;
+        this.code = code;
+        this.message = message;
+    }
+}

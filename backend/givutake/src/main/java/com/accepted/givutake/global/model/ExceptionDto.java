@@ -1,0 +1,17 @@
+package com.accepted.givutake.global.model;
+
+import lombok.*;
+
+@Getter
+@Setter
+@ToString
+@Builder
+@AllArgsConstructor
+public class ExceptionDto {
+
+    @Builder.Default
+    private final boolean success = false;
+    private String code;
+    private String message;
+
+}
