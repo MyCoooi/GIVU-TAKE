@@ -4,19 +4,16 @@ import com.accepted.givutake.global.entity.BaseTimeEntity;
 import com.accepted.givutake.user.common.enumType.Roles;
 import com.accepted.givutake.user.common.enumType.SocialType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Data
 @Table(name="Users")
+@Entity
+@Getter
+@Setter
+@ToString
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class Users extends BaseTimeEntity {
 
     @Id
@@ -27,14 +24,17 @@ public class Users extends BaseTimeEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "email", nullable = false)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "phone", nullable = false)
-    private String phone;
+    @Column(name = "mobile_phone", nullable = true)
+    private String mobilePhone;
+
+    @Column(name = "landline_phone", nullable = true)
+    private String landlinePhone;
 
     // 사용자만 해당
     @Column(name = "is_male", nullable = true)
@@ -73,8 +73,9 @@ public class Users extends BaseTimeEntity {
     @Column(name = "social_serial_num", nullable = true)
     private String socialSerialNum;
 
-    @Column(name = "status", nullable = false)
-    private int status;
+    // 수혜자만 해당
+    @Column(name = "status", nullable = true)
+    private Byte status;
 
     @Column(name = "is_withdraw", nullable = false)
     private boolean isWithdraw;

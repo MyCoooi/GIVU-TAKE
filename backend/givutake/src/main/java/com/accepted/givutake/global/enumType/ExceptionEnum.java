@@ -17,11 +17,22 @@ public enum ExceptionEnum {
     ILLEGAL_REGION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0001", "지역 정보가 유효하지 않습니다."),
     ILLEGAL_ISMALE_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0002", "성별 정보가 유효하지 않습니다."),
     ILLEGAL_BIRTH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0003", "생년월일 정보가 유효하지 않습니다."),
-    ILLEGAL_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0004", "대표 주소 정보가 유효하지 않습니다."),
-    ILLEGAL_REPRESENTATIVE_CARD_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0005", "대표 카드 정보가 유효하지 않습니다."),
-    ILLEGAL_EMAIL_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0005", "이메일 형식이 올바르지 않습니다."),
-    DUPLICATED_EMAIL_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0006", "이미 사용 중인 이메일입니다."),
-    MISSING_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU10001", "대표 주소는 필수 입력 값 입니다."),
+    ILLEGAL_STATUS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0004", "상태 정보가 유효하지 않습니다"),
+    ILLEGAL_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0005", "대표 주소 정보가 유효하지 않습니다."),
+    ILLEGAL_REPRESENTATIVE_CARD_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0006", "대표 카드 정보가 유효하지 않습니다."),
+    ILLEGAL_EMAIL_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0007", "이메일 형식이 올바르지 않습니다."),
+
+    DUPLICATED_EMAIL_EXCEPTION(HttpStatus.BAD_REQUEST, "EU1006", "이미 사용 중인 이메일입니다."),
+
+    UNEXPECTED_REGION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2001", "지역 정보는 포함할 수 없습니다."),
+    UNEXPECTED_ISMALE_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2002", "성별 정보는 포함할 수 없습니다."),
+    UNEXPECTED_BIRTH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2003", "생년월일 정보는 포함할 수 없습니다."),
+    UNEXPECTED_STATUS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2004", "상태 정보는 포함할 수 없습니다."),
+
+    MISSING_REGION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3001", "지역 정보는 필수 입력 값 입니다."),
+    MISSING_ISMALE_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3002", "성별은 필수 입력 값 입니다."),
+    MISSING_BIRTH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3003", "생년월일은 필수 입력 값 입니다."),
+    MISSING_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3005", "대표 주소는 필수 입력 값 입니다."),
 
     UNEXPECTED_DATA_EXCEPTION(HttpStatus.FORBIDDEN, "EQ0001", "예상치 못한 값이 들어왔습니다.");
 

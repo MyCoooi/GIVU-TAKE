@@ -1,7 +1,7 @@
 package com.accepted.givutake.global.config;
 
-import com.accepted.givutake.user.jwt.JwtTokenProvider;
-import com.accepted.givutake.user.jwt.filter.JwtAuthenticationFilter;
+import com.accepted.givutake.user.common.JwtTokenProvider;
+import com.accepted.givutake.user.common.filiter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
