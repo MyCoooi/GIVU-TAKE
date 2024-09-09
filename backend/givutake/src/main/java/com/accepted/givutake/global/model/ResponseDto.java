@@ -1,5 +1,6 @@
 package com.accepted.givutake.global.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 @Getter
@@ -10,6 +11,6 @@ import lombok.*;
 public class ResponseDto {
 
     @Builder.Default
-    private final boolean isSuccess = true;
+    private final boolean success = true;
     private Object data;
 }

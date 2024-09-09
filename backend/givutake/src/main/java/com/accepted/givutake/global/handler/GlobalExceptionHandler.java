@@ -60,10 +60,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionDto> handleValidationExceptions(MethodArgumentNotValidException exp) {
-        log.error("MethodArgumentNotValidException 발생: message = {}", exp.getMessage());
-
         // 여러 필드에서 유효성 검증이 실패했더라도, 첫 번째 오류에 대한 메세지만 반환
         String message = exp.getBindingResult().getFieldError().getDefaultMessage();
+
+        log.error("MethodArgumentNotValidException 발생: message = {}", message);
 
         ExceptionDto exceptionDto = ExceptionDto.builder()
                 .code(ExceptionEnum.METHOD_ARGUMENT_NOT_VALID_EXCEPTION.getCode())

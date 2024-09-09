@@ -12,16 +12,13 @@ import com.accepted.givutake.user.client.repository.AddressRepository;
 import com.accepted.givutake.user.common.repository.UserRepository;
 
 import jakarta.validation.*;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
-
 
 @Slf4j
 @Service
@@ -34,7 +31,6 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final Validator validator;
 
-    @Autowired
     public UserService(UserRepository userRepository, RegionRepository regionRepository, AddressRepository addressRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.regionRepository = regionRepository;
@@ -64,6 +60,10 @@ public class UserService {
         // ref) 관리자는 회원가입할 수 없다. DB를 통해 직접 데이터 추가 요망.
         // 1. 수혜자 회원가입 관련 입력값 검증 및 처리
         if (role == Roles.ROLE_CORPORATION) {
+            // 주소값은 들어오면 안된다
+            if (addressDto != null) {
+                throw new ApiException(ExceptionEnum.UNEXPECTED_REPRESENTATIVE_ADDRESS_EXCEPTION);
+            }
             // 수혜자 회원가입 유효성 검증
             checkArgumentValidityForCorporationSignUp(signUpDto);
             // DB에 회원 정보 저장

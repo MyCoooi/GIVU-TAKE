@@ -18,6 +18,6 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
     @Modifying
     @Transactional
     @Query("UPDATE Users u SET u.addressIdx = :addressIdx WHERE u.userIdx = :userIdx")
-    int updateAddressIdx(@Param("userId") int userIdx, @Param("addressIdx") int addressIdx);
+    int updateAddressIdx(@Param("userIdx") int userIdx, @Param("addressIdx") int addressIdx);
 
 }

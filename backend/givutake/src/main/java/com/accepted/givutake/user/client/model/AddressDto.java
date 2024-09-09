@@ -1,8 +1,7 @@
 package com.accepted.givutake.user.client.model;
 
 import com.accepted.givutake.user.client.entity.Addresses;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Getter
@@ -12,61 +11,61 @@ import lombok.*;
 @Builder
 public class AddressDto {
 
-    @NotBlank(message = "")
+    @NotNull(message = "국가기초구역번호는 필수 입력 값 입니다.")
     private String zoneCode;
 
-    @NotBlank(message = "")
+    @NotNull(message = "기본주소는 필수 입력 값 입니다.")
     private String address;
 
-    @NotBlank(message = "")
+    @NotNull(message = "주소 타입은 필수 입력 값 입니다.")
     private char userSelectedType;
 
-    @NotBlank(message = "")
+    @NotNull(message = "도로명 주소는 필수 입력 값 입니다.")
     private String roadAddress;
 
-    @NotBlank(message = "")
+    @NotNull(message = "지번 주소는 필수 입력 값 입니다.")
     private String jibunAddress;
 
-    @NotBlank(message = "")
+    @NotNull(message = "상세 주소는 필수 입력 값 입니다.")
     private String detailAddress;
 
-    @NotBlank(message = "")
+    @NotNull(message = "임의 도로명 주소는 필수 입력 값 입니다.")
     private String autoRoadAddress;
 
-    @NotBlank(message = "")
+    @NotNull(message = "임의 지번 주소는 필수 입력 값 입니다.")
     private String autoJibunAddress;
 
-    @NotBlank(message = "")
+    @NotNull(message = "건물관리번호는 필수 입력 값 입니다.")
     private String buildingCode;
 
-    @NotBlank(message = "")
+    @NotNull(message = "건물명은 필수 입력 값 입니다.")
     private String buildingName;
 
-    @NotBlank(message = "")
+    @NotNull(message = "공통주택 여부는 필수 입력 값 입니다.")
     private boolean isApartment;
 
-    @NotBlank(message = "")
+    @NotNull(message = "도/시 이름은 필수 입력 값 입니다.")
     private String sido;
 
-    @NotBlank(message = "")
+    @NotNull(message = "시/군/구 이름은 필수 입력 값 입니다.")
     private String sigungu;
 
-    @NotBlank(message = "")
+    @NotNull(message = "시/군/구 코드는 필수 입력 값 입니다.")
     private String sigunguCode;
 
-    @NotBlank(message = "")
+    @NotNull(message = "도로명 코드는 필수 입력 값 입니다.")
     private String roadNameCode;
 
-    @NotBlank(message = "")
+    @NotNull(message = "법정동/법정리 코드는 필수 입력 값 입니다.")
     private String bcode;
 
-    @NotBlank(message = "")
+    @NotNull(message = "도로명은 필수 입력 값 입니다.")
     private String roadName;
 
-    @NotBlank(message = "")
+    @NotNull(message = "법정도/법정리 이름은 필수 입력 값 입니다.")
     private String bname;
 
-    @NotBlank(message = "")
+    @NotNull(message = "법정리의 읍/면 이름은 필수 입력 값 입니다.")
     private String bname1;
 
     // TODO: 추천 알고리즘에 사용
@@ -75,7 +74,6 @@ public class AddressDto {
 
     public Addresses toEntity(int userIdx) {
         return Addresses.builder()
-                .addressIdx(0)
                 .userIdx(userIdx)
                 .zoneCode(this.zoneCode)
                 .address(this.address)

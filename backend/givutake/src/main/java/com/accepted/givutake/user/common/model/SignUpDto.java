@@ -4,7 +4,7 @@ import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.enumType.Roles;
 import com.accepted.givutake.user.common.enumType.SocialType;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @SuperBuilder
+@NoArgsConstructor
 public class SignUpDto extends LoginDto {
 
     @NotBlank(message = "이름은 필수 입력 값 입니다.")
@@ -35,10 +36,10 @@ public class SignUpDto extends LoginDto {
     @Pattern(regexp = "^(http|https)://[\\w.-]+(:\\d+)?(/\\S*)?$", message = "URL 형식이 올바르지 않습니다.")
     private String profileImageUrl;
 
-    @NotBlank(message = "권한은 필수 입력 값 입니다.")
+    @NotNull(message = "권한은 필수 입력 값 입니다.")
     private Roles roles;
 
-    @NotBlank(message = "소셜 로그인 여부는 필수 입력 값 입니다.")
+    @NotNull(message = "소셜 로그인 여부는 필수 입력 값 입니다.")
     private boolean isSocial;
 
     private SocialType socialType;
