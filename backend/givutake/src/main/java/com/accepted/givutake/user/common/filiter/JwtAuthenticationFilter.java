@@ -1,6 +1,6 @@
-package com.accepted.givutake.user.jwt.filiter;
+package com.accepted.givutake.user.common.filiter;
 
-import com.accepted.givutake.user.jwt.JwtTokenProvider;
+import com.accepted.givutake.user.common.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;

@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: givutake
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/givutake?characterEncoding=utf8&serverTimezone=Asia/Seoul
+    username: ssafy
+    password: asdzxcfv10
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 10
+      idle-timeout: 30000
+      pool-name: HikariPool
+      auto-commit: false
+
+  redis:
+    host: redis
+    port: 6379
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+
+  devtools:
+    livereload:
+      enabled: true
+    remote:
+      restart:
+        enabled: true
+
+logging:
+  level:
+    com.pitpat: DEBUG
+
+jwt:
+  header: Authorization
+  secret: c3NhZnktMTEtc2VjcmV0LWtleS10ZXN0LXNzYWZ5LTExLXNlY3JldC1rZXktdGVzdC1zc2FmeS0xMS1zZWNyZXQta2V5LXRlc3Q=

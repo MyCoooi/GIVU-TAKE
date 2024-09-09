@@ -1,9 +1,9 @@
-package com.accepted.givutake.user.jwt.service;
+package com.accepted.givutake.user.common.service;
 
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.repository.UserRepository;
-import com.accepted.givutake.user.jwt.model.CustomUserDetailsDto;
+import com.accepted.givutake.user.common.model.CustomUserDetailsDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;

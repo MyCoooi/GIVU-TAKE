@@ -1,49 +1,66 @@
 package com.accepted.givutake.user.common.model;
 
-import com.accepted.givutake.user.admin.model.AdminDto;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.enumType.Roles;
 import com.accepted.givutake.user.common.enumType.SocialType;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @ToString
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder
 public class UserDto {
 
-    protected int userIdx;
-    protected String name;
-    protected String email;
-    protected String password;
-    protected Boolean isMale;
-    protected LocalDateTime birth;
-    protected Integer addressIdx;
-    protected Integer cardIdx;
-    protected Integer regionIdx;
-    protected String phone;
-    protected String profileImageUrl;
-    protected Roles roles;
-    protected boolean isSocial;
-    protected SocialType socialType;
-    protected String socialSerialNum;
-    protected LocalDateTime createDate;
-    protected LocalDateTime modifiedDate;
-    protected int status;
-    protected boolean isWithdraw;
+    private int userIdx;
+    private String name;
+    private String email;
+    private String password;
+    private String mobilePhone;
+    private String landlinePhone;
+    private Boolean isMale;
+    private LocalDateTime birth;
+    private Integer addressIdx;
+    private Integer regionIdx;
+    private Integer cardIdx;
+    private String profileImageUrl;
+    private Roles roles;
+    private boolean isSocial;
+    private SocialType socialType;
+    private String socialSerialNum;
+    private Byte status;
+    private boolean isWithdraw;
+
+    public static UserDto toDto(Users user) {
+        return UserDto.builder()
+                .userIdx(user.getUserIdx())
+                .name(user.getName())
+                .email(user.getEmail())
+                .mobilePhone(user.getMobilePhone())
+                .landlinePhone(user.getLandlinePhone())
+                .isMale(user.getIsMale())
+                .birth(user.getBirth())
+                .addressIdx(user.getAddressIdx())
+                .regionIdx(user.getRegionIdx())
+                .cardIdx(user.getCardIdx())
+                .profileImageUrl(user.getProfileImageUrl())
+                .roles(user.getRoles())
+                .isSocial(user.isSocial())
+                .socialType(user.getSocialType())
+                .socialSerialNum(user.getSocialSerialNum())
+                .status(user.getStatus())
+                .isWithdraw(user.isWithdraw())
+                .build();
+    }
 
     public Users toEntity() {
         return Users.builder()
                 .userIdx(this.userIdx)
                 .name(this.name)
                 .email(this.email)
-                .password(this.password)
-                .phone(this.phone)
+                .mobilePhone(this.mobilePhone)
+                .landlinePhone(this.landlinePhone)
                 .isMale(this.isMale)
                 .birth(this.birth)
                 .addressIdx(this.addressIdx)
@@ -58,27 +75,4 @@ public class UserDto {
                 .isWithdraw(this.isWithdraw)
                 .build();
     }
-
-    public static UserDto toDto(Users users) {
-        return UserDto.builder()
-                .userIdx(users.getUserIdx())
-                .name(users.getName())
-                .email(users.getEmail())
-                .password(users.getPassword())
-                .isMale(users.getIsMale())
-                .birth(users.getBirth())
-                .addressIdx(users.getAddressIdx())
-                .regionIdx(users.getRegionIdx())
-                .cardIdx(users.getCardIdx())
-                .phone(users.getPhone())
-                .profileImageUrl(users.getProfileImageUrl())
-                .roles(users.getRoles())
-                .isSocial(users.isSocial())
-                .socialType(users.getSocialType())
-                .socialSerialNum(users.getSocialSerialNum())
-                .status(users.getStatus())
-                .isWithdraw(users.isWithdraw())
-                .build();
-    }
-
 }

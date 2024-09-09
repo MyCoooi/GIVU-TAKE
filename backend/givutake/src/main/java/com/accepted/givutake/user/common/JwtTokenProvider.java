@@ -1,12 +1,13 @@
-package com.accepted.givutake.user.jwt;
-import com.accepted.givutake.user.jwt.entity.RefreshTokenEntity;
-import com.accepted.givutake.user.jwt.model.JwtTokenDto;
-import com.accepted.givutake.user.jwt.repository.RefreshTokenRepository;
+package com.accepted.givutake.user.common;
+import com.accepted.givutake.user.common.entity.RefreshTokenEntity;
+import com.accepted.givutake.user.common.model.JwtTokenDto;
+import com.accepted.givutake.user.common.repository.RefreshTokenRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -52,11 +53,6 @@ public class JwtTokenProvider {
 
     // User 정보를 가지고 AccessToken, RefreshToken을 생성하는 메서드
     public JwtTokenDto generateToken(Authentication authentication) {
-        // 권한들 가져오기
-        String authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
-
         // 1. 시간 설정
         long nowMillis = System.currentTimeMillis();
 
@@ -64,8 +60,9 @@ public class JwtTokenProvider {
         String accessToken = generateAccessToken(authentication, nowMillis, ACCESS_TOKEN_EXPIRATION_TIME);
 
         // 3. Refresh Token 생성 후 저장
-        String refreshToken = generateRefreshToken(authentication, nowMillis, REFRESH_TOKEN_EXPIRATION_TIME);
-        saveRefreshToken(Integer.parseInt(authentication.getName()), refreshToken, REFRESH_TOKEN_EXPIRATION_TIME);
+        String email = authentication.getName();
+        String refreshToken = generateRefreshToken(email, nowMillis, REFRESH_TOKEN_EXPIRATION_TIME);
+        saveRefreshToken(email, refreshToken, REFRESH_TOKEN_EXPIRATION_TIME);
 
         return JwtTokenDto.builder()
                 .grantType("Bearer")
@@ -75,10 +72,10 @@ public class JwtTokenProvider {
     }
 
     // Refresh Token을 Redis에 저장
-    public void saveRefreshToken(int userIdx, String refreshToken, long expirationTime) {
+    public void saveRefreshToken(String email, String refreshToken, long expirationTime) {
         long seconds = expirationTime / 1000; // 초 단위로 바꿈
         RefreshTokenEntity refreshTokenEntity = RefreshTokenEntity.builder()
-                                                        .userIdx(userIdx)
+                                                        .email(email)
                                                         .refreshToken(refreshToken)
                                                         .ttl(seconds)
                                                         .build();
@@ -88,7 +85,6 @@ public class JwtTokenProvider {
     // Access Token 생성
     public String generateAccessToken(Authentication authentication, long nowMillis, long expirationTime) {
         Map<String, Object> claims = new HashMap<>();
-        long now = (new Date()).getTime();
 
         // 권한들 가져오기
         String authorities = authentication.getAuthorities().stream()
@@ -100,20 +96,20 @@ public class JwtTokenProvider {
     }
 
     // Refresh Token 생성
-    public String generateRefreshToken(Authentication authentication, long nowMillis, long expirationTime) {
+    public String generateRefreshToken(String email, long nowMillis, long expirationTime) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, authentication.getName(), nowMillis, expirationTime);
+        return createToken(claims, email, nowMillis, expirationTime);
     }
 
     // 전달받은 파라미터로부터 토큰 생성
-    public String createToken(Map<String, Object> claims, String subject, long nowMillis, long expirationTime) {
+    public String createToken(Map<String, Object> claims, String email, long nowMillis, long expirationTime) {
         String ISSUER = "com.accepted.givutake";
         Date now = new Date(nowMillis);
         Date exp = new Date(nowMillis + expirationTime);
 
         return Jwts.builder()
                 .claims(claims) // 기타 정보
-                .subject(subject) // 사용자 식별자
+                .subject(email) // 사용자 식별자
                 .issuer(ISSUER) // 토큰 발행자
                 .notBefore(now) // 활성화 시간
                 .issuedAt(now) // 발행 시간
@@ -129,7 +125,7 @@ public class JwtTokenProvider {
         Claims claims = parseClaims(token);
 
         if (claims.get("auth") == null) {
-            throw new RuntimeException("권한 정보가 없는 토큰 입니다.");
+            throw new AccessDeniedException("권한 정보가 없는 토큰 입니다.");
         }
 
         // 클레임에서 권한 정보 가져오기

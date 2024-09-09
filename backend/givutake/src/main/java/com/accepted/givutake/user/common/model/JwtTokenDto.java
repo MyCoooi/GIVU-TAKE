@@ -1,4 +1,4 @@
-package com.accepted.givutake.user.jwt.model;
+package com.accepted.givutake.user.common.model;
 
 import lombok.*;
 
