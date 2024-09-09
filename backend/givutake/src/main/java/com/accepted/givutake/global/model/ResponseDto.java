@@ -1,6 +1,5 @@
 package com.accepted.givutake.global.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 @Getter

@@ -4,5 +4,10 @@
     <annotationProcessing>
       <profile default="true" name="Default" enabled="true" />
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="givutake" target="17" />
+      <module name="givutake.main" target="17" />
+      <module name="givutake.test" target="17" />
+    </bytecodeTargetLevel>
   </component>
 </project>

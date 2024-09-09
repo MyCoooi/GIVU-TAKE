@@ -79,5 +79,4 @@ public class Users extends BaseTimeEntity {
 
     @Column(name = "is_withdraw", nullable = false)
     private boolean isWithdraw;
-
 }

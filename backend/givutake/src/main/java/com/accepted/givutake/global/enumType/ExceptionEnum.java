@@ -35,6 +35,14 @@ public enum ExceptionEnum {
     MISSING_BIRTH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3003", "생년월일은 필수 입력 값 입니다."),
     MISSING_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3005", "대표 주소는 필수 입력 값 입니다."),
 
+    NOT_FOUND_USER_WITH_EMAIL_EXCEPTION(HttpStatus.NOT_FOUND, "EU4010", "해당 이메일을 찾을 수 없습니다."),
+    NOT_FOUND_CATEGORY_EXCEPTION(HttpStatus.NOT_FOUND, "EC0001", "해당 카테고리를 찾을 수 없습니다."),
+    NOT_FOUND_GIFT_EXCEPTION(HttpStatus.NOT_FOUND,"EG0001", "해당 답례품을 찾을 수 없습니다."),
+    NOT_FOUND_GIFT_REVIEW_EXCEPTION(HttpStatus.NOT_FOUND,"EG1001","해당 답례품 후기를 찾을 수 없습니다."),
+    NOT_FOUND_WISH_EXCEPTION(HttpStatus.NOT_FOUND,"EW0001", "해당 찜을 찾을 수 없습니다."),
+    NOT_FOUND_SHOPPING_CART_EXCEPTION(HttpStatus.NOT_FOUND,"EP0001", "해당 장바구니를 찾을 수 없습니다."),
+    NOT_FOUND_ORDER_EXCEPTION(HttpStatus.NOT_FOUND, "EO0001", "해당 주문을 찾을 수 없습니다."),
+
     UNEXPECTED_DATA_EXCEPTION(HttpStatus.FORBIDDEN, "EQ0001", "예상치 못한 값이 들어왔습니다.");
 
     private final HttpStatus status;
