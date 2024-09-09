@@ -1,0 +1,70 @@
+package com.accepted.givutake.wish.service;
+
+import com.accepted.givutake.gift.entity.Gifts;
+import com.accepted.givutake.gift.repository.GiftRepository;
+import com.accepted.givutake.global.enumType.ExceptionEnum;
+import com.accepted.givutake.global.exception.ApiException;
+import com.accepted.givutake.wish.entity.Wish;
+import com.accepted.givutake.wish.model.WishDto;
+import com.accepted.givutake.wish.repository.WishRepository;
+import com.accepted.givutake.user.common.entity.Users;
+import com.accepted.givutake.user.common.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class WishService {
+
+    private final WishRepository wishRepository;
+    private final GiftRepository giftRepository;
+    private final UserRepository userRepository;
+
+    public void createWish(String email ,WishDto request) { // 찜 추가
+        Gifts gift = giftRepository.findById(request.getGiftIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
+        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        Wish newWish = Wish.builder()
+                .gift(gift)
+                .users(user)
+                .build();
+        wishRepository.save(newWish);
+    }
+
+    public List<Wish> getWishList(String email, int pageNo, int pageSize){
+        Pageable pageable = PageRequest.of(pageNo-1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+
+        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+
+        Page<Wish> wishList = wishRepository.findByUsers(user, pageable);
+
+        return wishList.getContent();
+    }
+
+    public void deleteWish(String email,int wishIdx) {
+        Wish wish = wishRepository.findById(wishIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_WISH_EXCEPTION));
+        if(!wish.getUsers().getEmail().equals(email)) {
+            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
+        }
+        wishRepository.delete(wish);
+    }
+
+    public boolean isWish(String email, int giftIdx) {
+        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        Gifts gift = giftRepository.findById(giftIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
+        Optional<Wish> wish = wishRepository.findByUsersAndGift(user,gift);
+        if(wish.isPresent()) {
+            return true;
+        }else{
+            return false;
+        }
+    }
+}
