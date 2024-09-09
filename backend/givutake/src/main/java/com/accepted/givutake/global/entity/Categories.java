@@ -1,17 +1,16 @@
 package com.accepted.givutake.global.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+@Table(name = "Cgategories")
 @Entity
-@Data
+@Getter
+@Setter
+@ToString
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "categories")
+@NoArgsConstructor
 public class Categories extends BaseTimeEntity{
 
     @Id

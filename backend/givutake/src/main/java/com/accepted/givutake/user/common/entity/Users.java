@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Users extends BaseTimeEntity {
 
     @Id

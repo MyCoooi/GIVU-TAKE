@@ -4,17 +4,16 @@ import com.accepted.givutake.gift.entity.Gifts;
 import com.accepted.givutake.global.entity.BaseTimeEntity;
 import com.accepted.givutake.user.common.entity.Users;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Entity
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "carts")
+@Entity
+@Getter
+@Setter
+@ToString
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Carts extends BaseTimeEntity {
 
     @Id
