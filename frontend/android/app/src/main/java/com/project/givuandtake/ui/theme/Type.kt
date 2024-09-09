@@ -1,4 +1,4 @@
-package com.project.giveandtake.ui.theme
+package com.project.givuandtake.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
