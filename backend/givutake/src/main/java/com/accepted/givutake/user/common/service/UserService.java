@@ -171,7 +171,7 @@ public class UserService {
     public ResponseUserDto modifyUserByEmail(String email, ModifyUserDto modifyUserDto) {
         Optional<Users> optionalExistingUsers = userRepository.findByEmail(email);
 
-        if (optionalExistingUsers.isEmpty()) {
+        if (!optionalExistingUsers.isEmpty()) {
             Users savedUser = optionalExistingUsers.get();
 
             // 사용자 정보 수정
