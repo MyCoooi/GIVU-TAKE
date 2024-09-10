@@ -1,16 +1,16 @@
 package com.accepted.givutake.cart.controller;
 
-import com.accepted.givutake.cart.entity.Carts;
+import com.accepted.givutake.cart.model.CartDto;
 import com.accepted.givutake.cart.model.CreateCartDto;
 import com.accepted.givutake.cart.model.UpdateCartDto;
 import com.accepted.givutake.cart.service.CartService;
 import com.accepted.givutake.global.model.ResponseDto;
-import com.accepted.givutake.user.common.model.CustomUserDetailsDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,10 +25,10 @@ public class CartController {
 
     @GetMapping
     public ResponseEntity<ResponseDto> getCart(
-            @AuthenticationPrincipal CustomUserDetailsDto customUserDetails,
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(value = "pageNo", defaultValue = "1")int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10")int pageSize) {
-        List<Carts> cartsList = cartService.getCartList(customUserDetails.getUsername(), pageNo, pageSize);
+        List<CartDto> cartsList = cartService.getCartList(userDetails.getUsername(), pageNo, pageSize);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(cartsList)
                 .build();
@@ -37,9 +37,9 @@ public class CartController {
 
     @PostMapping
     public ResponseEntity<ResponseDto> createCart(
-            @AuthenticationPrincipal CustomUserDetailsDto customUserDetails,
+            @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody CreateCartDto request){
-        cartService.createCart(customUserDetails.getUsername(), request);
+        cartService.createCart(userDetails.getUsername(), request);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
                 .build();
@@ -48,10 +48,10 @@ public class CartController {
 
     @PatchMapping("/{cartIdx}")
     public ResponseEntity<ResponseDto> updateCart(
-            @AuthenticationPrincipal CustomUserDetailsDto customUserDetails,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int cartIdx,
             @Valid @RequestBody UpdateCartDto request) {
-        cartService.updateCart(customUserDetails.getUsername(), cartIdx, request);
+        cartService.updateCart(userDetails.getUsername(), cartIdx, request);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
                 .build();
@@ -60,9 +60,9 @@ public class CartController {
 
     @DeleteMapping("/{cartIdx}")
     public ResponseEntity<ResponseDto> deleteCart(
-            @AuthenticationPrincipal CustomUserDetailsDto customUserDetails,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int cartIdx) {
-        cartService.deleteCart(customUserDetails.getUsername(), cartIdx);
+        cartService.deleteCart(userDetails.getUsername(), cartIdx);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
                 .build();

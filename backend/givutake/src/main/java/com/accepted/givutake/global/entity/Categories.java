@@ -3,7 +3,7 @@ package com.accepted.givutake.global.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Table(name = "Cg                                                                                                                                                                                                                     ategories")
+@Table(name = "Categories")
 @Entity
 @Getter
 @Setter

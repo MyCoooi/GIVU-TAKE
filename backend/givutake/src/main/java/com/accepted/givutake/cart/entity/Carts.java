@@ -21,11 +21,11 @@ public class Carts extends BaseTimeEntity {
     @Column(name = "cart_idx") // 장바구니 ID
     private int cartIdx;
 
-    @ManyToOne(targetEntity = Gifts.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = Gifts.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "gift_idx", referencedColumnName = "gift_idx") // 답례품 외래키 설정
     private Gifts gifts;
 
-    @ManyToOne(targetEntity = Users.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = Users.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_idx", referencedColumnName = "user_idx")
     private Users users;
 

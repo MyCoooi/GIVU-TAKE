@@ -15,9 +15,6 @@ public class CreateGiftDto {
     private String giftName;
 
     @NotNull
-    private int corporationIdx;
-
-    @NotNull
     private int cartegoryIdx;
 
     private String giftThumbnail;

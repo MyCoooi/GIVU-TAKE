@@ -21,14 +21,14 @@ public class Gifts extends BaseTimeEntity{
     @Column(name = "gift_idx")
     private int giftIdx;
 
-    @Column(name = "gift_name", nullable = false, length = 30) // 답례품명
+    @Column(name = "gift_name", nullable = false, length = 60) // 답례품명
     private String giftName;
 
-    @ManyToOne(targetEntity = Users.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = Users.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "corporation_idx", referencedColumnName = "user_idx")// 지자체 ID 외래키 설정
     private Users corporations;
 
-    @ManyToOne(targetEntity = Categories.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = Categories.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "category_idx", referencedColumnName = "category_idx") // 카테고리 ID 외래키 설정
     private Categories category;
 

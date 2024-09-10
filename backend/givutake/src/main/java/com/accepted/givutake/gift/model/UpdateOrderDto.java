@@ -1,7 +1,6 @@
 package com.accepted.givutake.gift.model;
 
 import com.accepted.givutake.gift.enumType.DeliveryStatus;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -9,6 +8,7 @@ import lombok.*;
 @Setter
 @ToString
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class UpdateOrderDto {
 

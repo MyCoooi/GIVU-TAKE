@@ -21,11 +21,11 @@ public class Wish extends BaseTimeEntity {
     @Column(name = "wish_idx")
     private int wishIdx;
 
-    @ManyToOne(targetEntity = Gifts.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = Gifts.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "gift_idx", referencedColumnName = "gift_idx") // 답례품 외래키 설정
     private Gifts gift;
 
-    @ManyToOne(targetEntity = Users.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = Users.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_idx", referencedColumnName = "user_idx") // 사용자 외래키 설정
     private Users users;
     
