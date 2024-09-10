@@ -13,7 +13,9 @@ public class GiftDto {
     private Integer giftIdx;
     private String giftName;
     private Integer corporationIdx;
+    private String corporationName;
     private Integer cartegoryIdx;
+    private String categoryName;
     private String giftThumbnail;
     private String giftContent;
     private Integer price;
