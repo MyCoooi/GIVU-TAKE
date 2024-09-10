@@ -160,6 +160,13 @@ public class UserService {
         Optional<Users> optionalExistingUsers =  userRepository.findByEmail(email);
 
         if (!optionalExistingUsers.isEmpty()) {
+            Users savedUser = optionalExistingUsers.get();
+
+            // 이미 탈퇴한 회원일 경우 회원 정보 조회 불가
+            if (savedUser.isWithdraw()) {
+                throw new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION);
+            }
+
             return ResponseUserDto.toDto(optionalExistingUsers.get());
         }
         else {
@@ -173,6 +180,11 @@ public class UserService {
 
         if (!optionalExistingUsers.isEmpty()) {
             Users savedUser = optionalExistingUsers.get();
+
+            // 이미 탈퇴한 회원일 경우 회원 정보 수정 불가
+            if (savedUser.isWithdraw()) {
+                throw new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION);
+            }
 
             // 사용자 정보 수정
             savedUser.setName(modifyUserDto.getName());
