@@ -15,6 +15,7 @@ public class GiftReviewDto {
     private String reviewContent;
     private Integer giftIdx;
     private Integer userIdx;
+    private String userName;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
 }
