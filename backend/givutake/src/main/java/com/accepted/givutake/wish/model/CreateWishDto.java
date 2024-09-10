@@ -1,4 +1,4 @@
-package com.accepted.givutake.cart.model;
+package com.accepted.givutake.wish.model;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -9,8 +9,8 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UpdateCartDto {
+public class CreateWishDto {
 
     @NotNull
-    private int amount;
+    private int giftIdx;
 }

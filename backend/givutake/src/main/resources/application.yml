@@ -3,10 +3,11 @@ spring:
     name: givutake
 
   datasource:
+    initialization-mode: always
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/givutake?characterEncoding=utf8&serverTimezone=Asia/Seoul
-    username:
-    password:
+    username: root
+    password: qwer12345
     hikari:
       minimum-idle: 5
       maximum-pool-size: 10
@@ -20,6 +21,7 @@ spring:
 
   jpa:
     show-sql: true
+    generate-ddl: true
     hibernate:
       ddl-auto: update
     properties:

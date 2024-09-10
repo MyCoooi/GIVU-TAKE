@@ -44,20 +44,22 @@ public class GiftService {
         giftRepository.save(newGift);
     }
 
-    public List<GiftDto> getGifts(int corporationIdx, String search, int categoryIdx ,int pageNo, int pageSize) {
+    public List<GiftDto> getGifts(Integer corporationIdx, String search, Integer categoryIdx ,int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo-1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
 
-        Optional<Users> corporation = userRepository.findById(corporationIdx);
-        Optional<Categories> category = categoryRepository.findById(categoryIdx);
 
         Specification<Gifts> spec = Specification.where(null); // 동적 쿼리 생성
-
-        if (corporation.isPresent()) { // 특정 사용자가 등록한 물품
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("corporations"), corporation.get()));
+        if(corporationIdx != null){
+            Optional<Users> corporation = userRepository.findById(corporationIdx);
+            if (corporation.isPresent()) { // 특정 사용자가 등록한 물품
+                spec = spec.and((root, query, cb) -> cb.equal(root.get("corporations"), corporation.get()));
+            }
         }
-
-        if (category.isPresent()) { // 카테고리별 분류
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("category"), category.get()));
+        if(categoryIdx != null) {
+            Optional<Categories> category = categoryRepository.findById(categoryIdx);
+            if (category.isPresent()) { // 카테고리별 분류
+                spec = spec.and((root, query, cb) -> cb.equal(root.get("category"), category.get()));
+            }
         }
 
         if (!search.isEmpty()) { // 검색어 필터링
@@ -77,8 +79,19 @@ public class GiftService {
         ).toList();
     }
 
-    public Gifts getGift(int giftIdx) { // wish 기능 미추가
-        return giftRepository.findById(giftIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
+    public GiftDto getGift(int giftIdx) {
+        Gifts gift = giftRepository.findById(giftIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
+        return GiftDto.builder()
+                .giftIdx(gift.getGiftIdx())
+                .giftName(gift.getGiftName())
+                .giftThumbnail(gift.getGiftThumbnail())
+                .giftContent(gift.getGiftContent())
+                .corporationIdx(gift.getCorporations().getUserIdx())
+                .cartegoryIdx(gift.getCategory().getCategoryIdx())
+                .price(gift.getPrice())
+                .createdDate(gift.getCreatedDate())
+                .modifiedDate(gift.getModifiedDate())
+                .build();
     }
 
     public void updateGift(String email, int giftIdx, UpdateGiftDto request) {
@@ -114,25 +127,42 @@ public class GiftService {
         giftReviewRepository.save(giftReviews);
     }
 
-    public List<GiftReviews> getGiftReviews(int giftIdx, int pageNo, int pageSize) {
+    public List<GiftReviewDto> getGiftReviews(int giftIdx, int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo-1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
 
         Gifts gifts = giftRepository.findById(giftIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
 
         Page<GiftReviews> reviewList = giftReviewRepository.findByGifts(gifts, pageable);
 
-        return reviewList.getContent();
-
+        return reviewList.map(review -> GiftReviewDto.builder()
+                .reviewIdx(review.getReviewIdx())
+                .reviewTitle(review.getReviewTitle())
+                .reviewContent(review.getReviewContent())
+                .giftIdx(review.getGifts().getGiftIdx())
+                .userIdx(review.getUsers().getUserIdx())
+                .createdDate(review.getCreatedDate())
+                .modifiedDate(review.getModifiedDate())
+                .build()
+        ).toList();
     }
 
-    public List<GiftReviews> getUserReviews(String email, int pageNo, int pageSize) {
+    public List<GiftReviewDto> getUserReviews(String email, int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo-1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
 
         Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
 
         Page<GiftReviews> reviewList = giftReviewRepository.findByUsers(user, pageable);
 
-        return reviewList.getContent();
+        return reviewList.map(review -> GiftReviewDto.builder()
+                .reviewIdx(review.getReviewIdx())
+                .reviewTitle(review.getReviewTitle())
+                .reviewContent(review.getReviewContent())
+                .giftIdx(review.getGifts().getGiftIdx())
+                .userIdx(review.getUsers().getUserIdx())
+                .createdDate(review.getCreatedDate())
+                .modifiedDate(review.getModifiedDate())
+                .build()
+        ).toList();
     }
 
     public void updateGiftReviews(String email, int reviewIdx, UpdateGiftReviewDto request) {

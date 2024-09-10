@@ -1,6 +1,7 @@
 package com.accepted.givutake.cart.service;
 
 import com.accepted.givutake.cart.entity.Carts;
+import com.accepted.givutake.cart.model.CartDto;
 import com.accepted.givutake.cart.model.CreateCartDto;
 import com.accepted.givutake.cart.model.UpdateCartDto;
 import com.accepted.givutake.cart.repository.CartRepository;
@@ -41,19 +42,27 @@ public class CartService {
         cartRepository.save(newCart);
     }
 
-    public List<Carts> getCartList(String email, int pageNo, int pageSize){
+    public List<CartDto> getCartList(String email, int pageNo, int pageSize){
         Pageable pageable = PageRequest.of(pageNo-1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
 
         Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
 
         Page<Carts> cartList = cartRepository.findByUsers(user, pageable);
 
-        return cartList.getContent();
+        return cartList.map(cart -> CartDto.builder()
+                .cartIdx(cart.getCartIdx())
+                .giftIdx(cart.getGifts().getGiftIdx())
+                .giftName(cart.getGifts().getGiftName())
+                .userIdx(user.getUserIdx())
+                .amount(cart.getAmount())
+                .price(cart.getAmount()*cart.getGifts().getPrice())
+                .build()
+        ).toList();
     }
 
     public void updateCart(String email, int cartIdx, UpdateCartDto request) {
         Carts cart = cartRepository.findById(cartIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_SHOPPING_CART_EXCEPTION));
-        if(cart.getUsers().getEmail().equals(email)){
+        if(!cart.getUsers().getEmail().equals(email)){
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
         cart.setAmount(request.getAmount());
@@ -62,7 +71,7 @@ public class CartService {
 
     public void deleteCart(String email, int cartIdx) {
         Carts cart = cartRepository.findById(cartIdx).orElseThrow();
-        if(cart.getUsers().getEmail().equals(email)){
+        if(!cart.getUsers().getEmail().equals(email)){
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
         cartRepository.delete(cart);

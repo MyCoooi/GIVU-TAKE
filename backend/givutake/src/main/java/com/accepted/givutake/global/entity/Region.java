@@ -3,13 +3,14 @@ package com.accepted.givutake.global.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+@Table(name="Region")
 @Entity
 @Getter
 @Setter
 @ToString
-@Table(name="Region")
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class Region extends BaseTimeEntity {
 
     @Id
