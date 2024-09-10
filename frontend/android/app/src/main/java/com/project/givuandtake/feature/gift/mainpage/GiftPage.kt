@@ -31,7 +31,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun DonationPage(navController: NavController) {
+fun GiftPage(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -201,14 +201,14 @@ fun ProductCard(index: Int, navController: NavController) {
         modifier = Modifier
             .padding(8.dp)
             .width(150.dp)
-            .clickable { // 클릭 시 상세 페이지로 이동
-                navController.navigate("donation_page_detail/$index")
-            },  // 카드 크기를 설정
+            .clickable {
+                // 경로를 gift_page_detail로 수정
+                navController.navigate("gift_page_detail/$index")
+            },
         shape = RoundedCornerShape(8.dp),
         elevation = 4.dp
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
-            // 이미지 placeholder
             Box(
                 modifier = Modifier
                     .height(100.dp)
@@ -217,12 +217,9 @@ fun ProductCard(index: Int, navController: NavController) {
                 LoadImageFromAssets("blank.PNG")  // placeholder 이미지
             }
             Spacer(modifier = Modifier.height(8.dp))
-            // 상품명
             Text(text = "물품 $index", fontWeight = FontWeight.Bold)
-            // 가격
             Text(text = "$${index * 10000}", color = Color.Gray)
-            // 주소
-            Text(text = "부산광역시 ${index} 로", color = Color.Gray)
+            Text(text = "부산광역시 $index 로", color = Color.Gray)
         }
     }
 }
@@ -243,11 +240,12 @@ fun BottomNavBar() {
 fun MainNavigation() {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "donation_page") {
-        composable("donation_page") { DonationPage(navController) }
-        composable("donation_page_detail/{itemIndex}") { backStackEntry ->
-            val itemIndex = backStackEntry.arguments?.getString("itemIndex")?.toInt() ?: 0
-            DonationPageDetail(itemIndex)
+    NavHost(navController = navController, startDestination = "gift_page") {
+        composable("gift_page") { GiftPage(navController) }
+        composable("gift_page_detail/{itemIndex}") { backStackEntry ->
+            // itemIndex 값을 안전하게 처리
+            val itemIndex = backStackEntry.arguments?.getString("itemIndex")?.toIntOrNull() ?: 0
+            GiftPageDetail(itemIndex)
         }
     }
 }
@@ -259,5 +257,5 @@ fun MainNavigation() {
 @Composable
 fun preview() {
     val navController = rememberNavController() // Preview를 위한 NavController 생성
-    DonationPage(navController) // DonationPage에 NavController 전달
+    GiftPage(navController) // DonationPage에 NavController 전달
 }

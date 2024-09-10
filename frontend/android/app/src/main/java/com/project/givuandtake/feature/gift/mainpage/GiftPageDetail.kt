@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.Modifier
 
 @Composable
-fun DonationPageDetail(itemIndex: Int) {
+fun GiftPageDetail(itemIndex: Int) {
     Scaffold(
         topBar = {
             TopAppBar(
