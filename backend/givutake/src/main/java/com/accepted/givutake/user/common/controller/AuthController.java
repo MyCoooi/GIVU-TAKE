@@ -4,11 +4,13 @@ import com.accepted.givutake.global.model.ResponseDto;
 import com.accepted.givutake.user.common.model.LoginDto;
 import com.accepted.givutake.user.common.service.AuthService;
 import com.accepted.givutake.user.common.model.JwtTokenDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,11 +23,8 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping
-    public ResponseEntity<ResponseDto> login(LoginDto loginDto) {
-        String email = loginDto.getEmail();
-        String password = loginDto.getPassword();
-        JwtTokenDto jwtToken = authService.login(email, password);
-        log.info("[AuthController] login request: email = {}", email);
+    public ResponseEntity<ResponseDto> login(@Valid @RequestBody LoginDto loginDto) {
+        JwtTokenDto jwtToken = authService.login(loginDto);
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(jwtToken)
