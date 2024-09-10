@@ -18,3 +18,14 @@ VALUES
 ('제주특별자치도', NOW(), NOW()),
 ('강원특별자치도', NOW(), NOW()),
 ('전북특별자치도', NOW(), NOW());
+
+-- Insert initial category data
+INSERT INTO categories (category_name, category_type, created_date, modified_date)
+values
+    ('지역상품권', 0, now(), now()),
+    ('농축산물', 0, now(), now()),
+    ('수산물', 0, now(), now()),
+    ('가공식품', 0, now(), now()),
+    ('공예품', 0, now(), now()),
+    ('재난재해', 1, now(), now()),
+    ('지역기부', 1, now(), now());

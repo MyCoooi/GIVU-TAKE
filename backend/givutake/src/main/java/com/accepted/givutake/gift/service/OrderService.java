@@ -4,6 +4,7 @@ import com.accepted.givutake.gift.entity.Gifts;
 import com.accepted.givutake.gift.entity.Orders;
 import com.accepted.givutake.gift.enumType.DeliveryStatus;
 import com.accepted.givutake.gift.model.CreateOrderDto;
+import com.accepted.givutake.gift.model.OrderDto;
 import com.accepted.givutake.gift.model.UpdateOrderDto;
 import com.accepted.givutake.gift.repository.GiftRepository;
 import com.accepted.givutake.gift.repository.OrderRepository;
@@ -44,24 +45,43 @@ public class OrderService {
         orderRepository.save(newOrder);
     }
 
-    public List<Orders> getOrdres(String email,int pageNo, int pageSize){
+    public List<OrderDto> getOrdres(String email, int pageNo, int pageSize){
         Pageable pageable = PageRequest.of(pageNo-1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
 
         Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
 
         Page<Orders> orderList = orderRepository.findByUsers(user, pageable);
 
-        return orderList.getContent();
+        return orderList.map(order -> OrderDto.builder()
+                .orderIdx(order.getOrderIdx())
+                .userIdx(user.getUserIdx())
+                .giftIdx(order.getGift().getGiftIdx())
+                .giftName(order.getGift().getGiftName())
+                .paymentMethod(order.getPaymentMethod())
+                .amount(order.getAmount())
+                .price(order.getPrice())
+                .status(order.getStatus())
+                .build()
+        ).toList();
     }
 
-    public Orders getOrder(String email, int orderIdx){
+    public OrderDto getOrder(String email, int orderIdx){
         Orders order = orderRepository.findById(orderIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_ORDER_EXCEPTION));
 
         if(!order.getUsers().getEmail().equals(email)){
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
 
-        return order;
+        return OrderDto.builder()
+                .orderIdx(order.getOrderIdx())
+                .userIdx(order.getUsers().getUserIdx())
+                .giftIdx(order.getGift().getGiftIdx())
+                .giftName(order.getGift().getGiftName())
+                .paymentMethod(order.getPaymentMethod())
+                .amount(order.getAmount())
+                .price(order.getPrice())
+                .status(order.getStatus())
+                .build();
     }
 
     public void updateOrder(String email, int orderIdx, UpdateOrderDto request){

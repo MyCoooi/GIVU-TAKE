@@ -5,6 +5,7 @@ import com.accepted.givutake.gift.repository.GiftRepository;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.wish.entity.Wish;
+import com.accepted.givutake.wish.model.CreateWishDto;
 import com.accepted.givutake.wish.model.WishDto;
 import com.accepted.givutake.wish.repository.WishRepository;
 import com.accepted.givutake.user.common.entity.Users;
@@ -29,7 +30,7 @@ public class WishService {
     private final GiftRepository giftRepository;
     private final UserRepository userRepository;
 
-    public void createWish(String email ,WishDto request) { // 찜 추가
+    public void createWish(String email , CreateWishDto request) { // 찜 추가
         Gifts gift = giftRepository.findById(request.getGiftIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
         Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
         Wish newWish = Wish.builder()
@@ -39,14 +40,20 @@ public class WishService {
         wishRepository.save(newWish);
     }
 
-    public List<Wish> getWishList(String email, int pageNo, int pageSize){
+    public List<WishDto> getWishList(String email, int pageNo, int pageSize){
         Pageable pageable = PageRequest.of(pageNo-1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
 
         Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
 
         Page<Wish> wishList = wishRepository.findByUsers(user, pageable);
 
-        return wishList.getContent();
+        return wishList.map(wish -> WishDto.builder()
+                .wishIdx(wish.getWishIdx())
+                .giftIdx(wish.getGift().getGiftIdx())
+                .giftName(wish.getGift().getGiftName())
+                .userIdx(wish.getUsers().getUserIdx())
+                .build()
+        ).toList();
     }
 
     public void deleteWish(String email,int wishIdx) {

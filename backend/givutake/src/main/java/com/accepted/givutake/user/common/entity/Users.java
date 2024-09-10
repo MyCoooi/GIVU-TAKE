@@ -4,7 +4,6 @@ import com.accepted.givutake.global.entity.BaseTimeEntity;
 import com.accepted.givutake.user.common.enumType.Roles;
 import com.accepted.givutake.user.common.enumType.SocialType;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
