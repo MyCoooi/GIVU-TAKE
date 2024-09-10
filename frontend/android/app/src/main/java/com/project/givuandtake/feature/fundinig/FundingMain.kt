@@ -24,8 +24,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
@@ -43,7 +41,7 @@ data class FundingCard(
 )
 
 @Composable
-fun FundingMainPage(navController: NavController) {
+fun FundingMainPage() {
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
 
@@ -293,7 +291,6 @@ fun FundingCardComposable(title: String, location: String, startDate: String, en
 @Composable
 fun FundingMainPreview() {
     GivuAndTakeTheme {
-        val navController = rememberNavController() // Preview를 위한 NavController 생성
-        FundingMainPage(navController)
+        FundingMainPage()
     }
 }
