@@ -7,17 +7,23 @@ import com.accepted.givutake.user.client.entity.Addresses;
 import com.accepted.givutake.user.client.model.AddressDto;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.enumType.Roles;
+import com.accepted.givutake.user.common.model.ModifyUserDto;
+import com.accepted.givutake.user.common.model.ResponseUserDto;
 import com.accepted.givutake.user.common.model.SignUpDto;
 import com.accepted.givutake.user.client.repository.AddressRepository;
+import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.repository.UserRepository;
 
 import jakarta.validation.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.management.relation.Role;
+import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
@@ -147,6 +153,43 @@ public class UserService {
     // 비밀번호 암호화
     public String encode(String password) {
         return passwordEncoder.encode(password);
+    }
+
+    // JWT 토큰으로 회원 정보 조회
+    public ResponseUserDto getUserByEmail(String email) {
+        Optional<Users> optionalExistingUsers =  userRepository.findByEmail(email);
+
+        if (!optionalExistingUsers.isEmpty()) {
+            return ResponseUserDto.toDto(optionalExistingUsers.get());
+        }
+        else {
+            throw new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION);
+        }
+    }
+
+    // JWT 토큰으로 회원 정보 수정
+    public ResponseUserDto modifyUserByEmail(String email, ModifyUserDto modifyUserDto) {
+        Optional<Users> optionalExistingUsers = userRepository.findByEmail(email);
+
+        if (optionalExistingUsers.isEmpty()) {
+            Users savedUser = optionalExistingUsers.get();
+
+            // 사용자 정보 수정
+            savedUser.setName(modifyUserDto.getName());
+            savedUser.setIsMale(modifyUserDto.getIsMale());
+            savedUser.setBirth(modifyUserDto.getBirth());
+            savedUser.setMobilePhone(modifyUserDto.getMobilePhone());
+            savedUser.setLandlinePhone(modifyUserDto.getLandlinePhone());
+            savedUser.setProfileImageUrl(modifyUserDto.getProfileImageUrl());
+
+            // 변경된 정보 저장
+            Users modifiedUser = userRepository.save(savedUser);
+
+            return ResponseUserDto.toDto(modifiedUser);
+        }
+        else {
+            throw new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION);
+        }
     }
 
 }
