@@ -91,7 +91,7 @@ public class UserService {
             // DB에 주소 정보 저장
             Addresses savedAddress = addressRepository.save(addressDto.toEntity(savedUser.getUserIdx()));
             // 대표 주소로 지정
-            userRepository.updateAddressIdx(savedUser.getUserIdx(), savedAddress.getAddressIdx());
+            userRepository.updateAddressIdxByUserIdx(savedUser.getUserIdx(), savedAddress.getAddressIdx());
         }
     }
 
@@ -164,7 +164,7 @@ public class UserService {
 
             // 이미 탈퇴한 회원일 경우 회원 정보 조회 불가
             if (savedUser.isWithdraw()) {
-                throw new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION);
+                throw new ApiException(ExceptionEnum.USER_ALREADY_WITHDRAWN_EXCEPTION);
             }
 
             return ResponseUserDto.toDto(optionalExistingUsers.get());
@@ -183,7 +183,7 @@ public class UserService {
 
             // 이미 탈퇴한 회원일 경우 회원 정보 수정 불가
             if (savedUser.isWithdraw()) {
-                throw new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION);
+                throw new ApiException(ExceptionEnum.USER_ALREADY_WITHDRAWN_EXCEPTION);
             }
 
             // 사용자 정보 수정
@@ -198,6 +198,25 @@ public class UserService {
             Users modifiedUser = userRepository.save(savedUser);
 
             return ResponseUserDto.toDto(modifiedUser);
+        }
+        else {
+            throw new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION);
+        }
+    }
+
+    // JWT 토큰으로 회원 탈퇴
+    public void withdrawUserByEmail(String email) {
+        Optional<Users> optionalExistingUsers = userRepository.findByEmail(email);
+
+        if (!optionalExistingUsers.isEmpty()) {
+            Users savedUser = optionalExistingUsers.get();
+
+            // 이미 탈퇴한 회원일 경우 회원 탈퇴 불가
+            if (savedUser.isWithdraw()) {
+                throw new ApiException(ExceptionEnum.USER_ALREADY_WITHDRAWN_EXCEPTION);
+            }
+
+            userRepository.updateIsWithdrawByEmail(email, true);
         }
         else {
             throw new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION);

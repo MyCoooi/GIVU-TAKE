@@ -95,4 +95,18 @@ public class  UserController {
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
+
+    // JWT 토큰으로 회원 탈퇴
+    @DeleteMapping
+    public ResponseEntity<ResponseDto> deleteUserByToken(@AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+
+        userService.withdrawUserByEmail(email);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(null)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
 }
