@@ -28,6 +28,7 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
+    defer-datasource-initialization: true
 
   devtools:
     livereload:
@@ -35,6 +36,9 @@ spring:
     remote:
       restart:
         enabled: true
+  sql:
+    init:
+      mode: always
 
 logging:
   level:
