@@ -12,6 +12,13 @@ public enum ExceptionEnum {
     ACCESS_DENIED_EXCEPTION(HttpStatus.FORBIDDEN, "ES0002"),
     METHOD_ARGUMENT_TYPE_MISMATCH_EXCEPTION(HttpStatus.BAD_REQUEST, "ES0003"),
     METHOD_ARGUMENT_NOT_VALID_EXCEPTION(HttpStatus.BAD_REQUEST, "ES0004"),
+    SECURITY_EXCEPTION(HttpStatus.UNAUTHORIZED, "ES0005", "보안 위반으로 인해 토큰 처리에 실패했습니다."),
+    EXPIRED_TOKEN_EXCEPTION(HttpStatus.UNAUTHORIZED, "ES0006", "만료된 토큰입니다."),
+    UNSUPPORTED_TOKEN_EXCEPTION(HttpStatus.UNAUTHORIZED, "ES0007", "지원하지 않는 토큰입니다."),
+    MALFORMED_TOKEN_EXCEPTION(HttpStatus.UNAUTHORIZED, "ES0008", "잘못된 토큰 형식입니다."),
+    INVALID_SIGNATURE_EXCEPTION(HttpStatus.UNAUTHORIZED, "ES0009", "유효하지 않은 토큰 서명입니다."),
+    INVALID_TOKEN_EXCEPTION(HttpStatus.UNAUTHORIZED, "ES0010", "유효하지 않은 토큰입니다."),
+    INTERNAL_SERVER_ERROR(HttpStatus.UNAUTHORIZED, "ES0011", "서버에 문제가 발생했습니다."),
 
     // Custom Exception
     ILLEGAL_REGION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0001", "지역 정보가 유효하지 않습니다."),
@@ -35,7 +42,7 @@ public enum ExceptionEnum {
     MISSING_BIRTH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3003", "생년월일은 필수 입력 값 입니다."),
     MISSING_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3005", "대표 주소는 필수 입력 값 입니다."),
 
-    NOT_FOUND_USER_WITH_EMAIL_EXCEPTION(HttpStatus.NOT_FOUND, "EU4010", "해당 이메일을 찾을 수 없습니다."),
+    NOT_FOUND_USER_WITH_EMAIL_EXCEPTION(HttpStatus.NOT_FOUND, "EU4010", "해당 이메일을 가진 사용자를 찾을 수 없습니다."),
     NOT_FOUND_CATEGORY_EXCEPTION(HttpStatus.NOT_FOUND, "EC0001", "해당 카테고리를 찾을 수 없습니다."),
     NOT_FOUND_GIFT_EXCEPTION(HttpStatus.NOT_FOUND,"EG0001", "해당 답례품을 찾을 수 없습니다."),
     NOT_FOUND_GIFT_REVIEW_EXCEPTION(HttpStatus.NOT_FOUND,"EG1001","해당 답례품 후기를 찾을 수 없습니다."),

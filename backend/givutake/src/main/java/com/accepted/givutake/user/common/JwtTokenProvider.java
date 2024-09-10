@@ -1,4 +1,8 @@
 package com.accepted.givutake.user.common;
+
+import com.accepted.givutake.global.enumType.ExceptionEnum;
+import com.accepted.givutake.global.exception.ApiException;
+import com.accepted.givutake.global.exception.JwtAuthenticationException;
 import com.accepted.givutake.user.common.entity.RefreshTokenEntity;
 import com.accepted.givutake.user.common.model.JwtTokenDto;
 import com.accepted.givutake.user.common.repository.RefreshTokenRepository;
@@ -135,8 +139,8 @@ public class JwtTokenProvider {
                         .collect(Collectors.toList());
 
         // UserDetails 객체를 만들어서 Authentication return
-        UserDetails principal = new User(claims.getSubject(), null, authorities);
-        return new UsernamePasswordAuthenticationToken(principal, null, authorities);
+        UserDetails principal = new User(claims.getSubject(), "", authorities);
+        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
     
     // 토큰 정보를 검증하는 메서드
@@ -148,19 +152,27 @@ public class JwtTokenProvider {
                     .parseClaimsJws(token);
             return true;
         } catch (SecurityException e) {
-            log.error("Not expected JWT Token format", e);
-        } catch (MalformedJwtException e) {
-            log.error("Invalid JWT Token", e);
+            log.error("보안 관련 예외 발생: {}", e.getMessage());
+            throw new JwtAuthenticationException(ExceptionEnum.SECURITY_EXCEPTION);
         } catch (ExpiredJwtException e) {
-            log.error("Expired JWT Token", e);
+            log.error("토큰이 만료되었습니다: {}", e.getMessage());
+            throw new JwtAuthenticationException(ExceptionEnum.EXPIRED_TOKEN_EXCEPTION);
         } catch (UnsupportedJwtException e) {
-            log.error("Unsupported JWT Token", e);
+            log.error("지원하지 않는 JWT 토큰입니다: {}", e.getMessage());
+            throw new JwtAuthenticationException(ExceptionEnum.UNSUPPORTED_TOKEN_EXCEPTION);
+        } catch (MalformedJwtException e) {
+            log.error("잘못된 JWT 토큰 형식입니다: {}", e.getMessage());
+            throw new JwtAuthenticationException(ExceptionEnum.MALFORMED_TOKEN_EXCEPTION);
+        } catch (SignatureException e) {
+            log.error("JWT 서명 검증 실패: {}", e.getMessage());
+            throw new JwtAuthenticationException(ExceptionEnum.INVALID_SIGNATURE_EXCEPTION);
         } catch (IllegalArgumentException e) {
-            log.error("JWT claims string is empty.", e);
+            log.error("JWT 토큰이 빈 값이거나 null입니다: {}", e.getMessage());
+            throw new JwtAuthenticationException(ExceptionEnum.INVALID_TOKEN_EXCEPTION);
         } catch (Exception e) {
-            log.error("Internal server error.", e);
+            log.error("서버에 문제가 발생했습니다. {}", e.getMessage());
+            throw new JwtAuthenticationException(ExceptionEnum.INTERNAL_SERVER_ERROR);
         }
-        return false;
     }
 
     // jwt 토큰 복호화

@@ -2,6 +2,7 @@ package com.accepted.givutake.global.config;
 
 import com.accepted.givutake.user.common.JwtTokenProvider;
 import com.accepted.givutake.user.common.filiter.JwtAuthenticationFilter;
+import com.accepted.givutake.user.common.filiter.JwtExceptionFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,9 +44,11 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // 필터 추가 및 순서 설정
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
-                // 인증되지 않은 접근 시 401 응답
+                .addFilterBefore(new JwtExceptionFilter(), JwtAuthenticationFilter.class)
+                // 예외 처리 설정
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+//                        .accessDeniedHandler(customAccessDeniedHandler)
                 );
 
         return http.build();

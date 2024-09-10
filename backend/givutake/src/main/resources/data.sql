@@ -1,5 +1,5 @@
 -- Insert initial region data
-INSERT INTO region (region_name, create_date, modified_date)
+INSERT INTO region (region_name, created_date, modified_date)
 VALUES
 ('서울특별시', NOW(), NOW()),
 ('부산광역시', NOW(), NOW()),
