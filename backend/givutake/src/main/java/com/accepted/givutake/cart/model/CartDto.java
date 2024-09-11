@@ -1,4 +1,4 @@
-package com.accepted.givutake.wish.model;
+package com.accepted.givutake.cart.model;
 
 import lombok.*;
 
@@ -7,9 +7,11 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @Builder
-public class WishDto {
-    private Integer wishIdx;
+public class CartDto {
+    private Integer cartIdx;
     private Integer giftIdx;
     private String giftName;
     private Integer userIdx;
+    private Integer amount;
+    private Integer price;
 }

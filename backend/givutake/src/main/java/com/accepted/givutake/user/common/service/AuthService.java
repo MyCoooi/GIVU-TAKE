@@ -1,5 +1,6 @@
 package com.accepted.givutake.user.common.service;
 
+import com.accepted.givutake.user.common.model.LoginDto;
 import com.accepted.givutake.user.common.repository.UserRepository;
 import com.accepted.givutake.user.common.JwtTokenProvider;
 import com.accepted.givutake.user.common.model.JwtTokenDto;
@@ -17,12 +18,12 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserRepository userRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public JwtTokenDto login(String email, String password) {
+    public JwtTokenDto login(LoginDto loginDto) {
+        String email = loginDto.getEmail();
+        String password = loginDto.getPassword();
 
         // 1. `email + password 를 기반으로 Authentication 객체 생성
         // 이때 authentication 은 인증 여부를 확인하는 authenticated 값이 false

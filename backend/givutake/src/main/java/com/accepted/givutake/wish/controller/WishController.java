@@ -1,8 +1,8 @@
 package com.accepted.givutake.wish.controller;
 
 import com.accepted.givutake.global.model.ResponseDto;
-import com.accepted.givutake.user.common.model.CustomUserDetailsDto;
 import com.accepted.givutake.wish.entity.Wish;
+import com.accepted.givutake.wish.model.CreateWishDto;
 import com.accepted.givutake.wish.model.WishDto;
 import com.accepted.givutake.wish.service.WishService;
 import jakarta.validation.Valid;
@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,10 +25,11 @@ public class WishController {
 
     @GetMapping
     public ResponseEntity<ResponseDto> getWish(
-            @AuthenticationPrincipal CustomUserDetailsDto customUserDetails,
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(value = "pageNo", defaultValue = "1")int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10")int pageSize) {
-        List<Wish> wishList = wishService.getWishList(customUserDetails.getUsername(), pageNo, pageSize);
+        List<WishDto> wishList = wishService.getWishList(userDetails.getUsername(), pageNo, pageSize);
+        System.out.println(wishList);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(wishList)
                 .build();
@@ -36,9 +38,9 @@ public class WishController {
 
     @PostMapping
     public ResponseEntity<ResponseDto> createWish(
-            @AuthenticationPrincipal CustomUserDetailsDto customUserDetails,
-            @Valid @RequestBody WishDto request) {
-        wishService.createWish(customUserDetails.getUsername(), request);
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody CreateWishDto request) {
+        wishService.createWish(userDetails.getUsername(), request);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
                 .build();
@@ -47,9 +49,9 @@ public class WishController {
 
     @DeleteMapping
     public ResponseEntity<ResponseDto> deleteWish(
-            @AuthenticationPrincipal CustomUserDetailsDto customUserDetails,
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(value = "wishIdx") int wishIdx) {
-        wishService.deleteWish(customUserDetails.getUsername(), wishIdx);
+        wishService.deleteWish(userDetails.getUsername(), wishIdx);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
                 .build();
@@ -58,9 +60,9 @@ public class WishController {
 
     @GetMapping("/{giftIdx}")
     public ResponseEntity<ResponseDto> getIsWish(
-            @AuthenticationPrincipal CustomUserDetailsDto customUserDetails,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int giftIdx){
-        boolean isWish = wishService.isWish(customUserDetails.getUsername(), giftIdx);
+        boolean isWish = wishService.isWish(userDetails.getUsername(), giftIdx);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(isWish)
                 .build();

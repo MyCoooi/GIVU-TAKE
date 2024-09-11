@@ -4,17 +4,16 @@ import com.accepted.givutake.gift.entity.Gifts;
 import com.accepted.givutake.global.entity.BaseTimeEntity;
 import com.accepted.givutake.user.common.entity.Users;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+@Table(name = "Wish")
 @Entity
-@Data
+@Getter
+@Setter
+@ToString
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "wish")
+@NoArgsConstructor
 public class Wish extends BaseTimeEntity {
 
     @Id
@@ -22,11 +21,11 @@ public class Wish extends BaseTimeEntity {
     @Column(name = "wish_idx")
     private int wishIdx;
 
-    @ManyToOne(targetEntity = Gifts.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = Gifts.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "gift_idx", referencedColumnName = "gift_idx") // 답례품 외래키 설정
     private Gifts gift;
 
-    @ManyToOne(targetEntity = Users.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = Users.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_idx", referencedColumnName = "user_idx") // 사용자 외래키 설정
     private Users users;
     

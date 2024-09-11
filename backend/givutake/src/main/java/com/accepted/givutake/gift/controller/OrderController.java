@@ -1,16 +1,16 @@
 package com.accepted.givutake.gift.controller;
 
-import com.accepted.givutake.gift.entity.Orders;
 import com.accepted.givutake.gift.model.CreateOrderDto;
+import com.accepted.givutake.gift.model.OrderDto;
 import com.accepted.givutake.gift.model.UpdateOrderDto;
 import com.accepted.givutake.gift.service.OrderService;
 import com.accepted.givutake.global.model.ResponseDto;
-import com.accepted.givutake.user.common.model.CustomUserDetailsDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,10 +25,10 @@ public class OrderController {
 
     @GetMapping
     public ResponseEntity<ResponseDto> getOrders(
-            @AuthenticationPrincipal CustomUserDetailsDto customUserDetails,
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(value = "pageNo", defaultValue = "1")int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10")int pageSize) {
-        List<Orders> orders = orderService.getOrdres(customUserDetails.getUsername(), pageNo, pageSize);
+        List<OrderDto> orders = orderService.getOrdres(userDetails.getUsername(), pageNo, pageSize);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(orders)
                 .build();
@@ -37,9 +37,9 @@ public class OrderController {
 
     @GetMapping("/{orderIdx}")
     public ResponseEntity<ResponseDto> getOrder(
-            @AuthenticationPrincipal CustomUserDetailsDto customUserDetails,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int orderIdx){
-        Orders order = orderService.getOrder(customUserDetails.getUsername(), orderIdx);
+        OrderDto order = orderService.getOrder(userDetails.getUsername(), orderIdx);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(order)
                 .build();
@@ -48,9 +48,9 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<ResponseDto> createOrder(
-            @AuthenticationPrincipal CustomUserDetailsDto customUserDetails,
+            @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody CreateOrderDto request) {
-        orderService.createOrder(customUserDetails.getUsername(), request);
+        orderService.createOrder(userDetails.getUsername(), request);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
                 .build();
@@ -59,10 +59,10 @@ public class OrderController {
 
     @PatchMapping("/{orderIdx}")
     public ResponseEntity<ResponseDto> updateOrder(
-            @AuthenticationPrincipal CustomUserDetailsDto customUserDetails,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int orderIdx,
             @Valid @RequestBody UpdateOrderDto request){
-        orderService.updateOrder(customUserDetails.getUsername(), orderIdx, request);
+        orderService.updateOrder(userDetails.getUsername(), orderIdx, request);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
                 .build();
