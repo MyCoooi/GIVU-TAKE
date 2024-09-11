@@ -1,5 +1,6 @@
 package com.project.givuandtake
 
+import GiftPageDetail
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -27,16 +28,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.givuandtake.FundingCard
+import androidx.navigation.navArgument
 import com.example.givuandtake.FundingMainPage
 import com.project.givuandtake.auth.LoginScreen
 import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.gift.mainpage.GiftPage
-import com.project.givuandtake.feature.gift.mainpage.GiftPageDetail
 import com.project.givuandtake.feature.mainpage.MainPage
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
 
@@ -53,30 +54,30 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    // 화면 상단에 NavHost, 하단에 BottomNavBar 배치
-                    Column {
-                        NavHost(navController = navController, startDestination = "mainpage", modifier = Modifier.weight(1f)) {
-                            composable("mainpage") { MainPage(navController) }
-                            composable("funding") { FundingMainPage(navController) }
-                            composable("funding_detail/{title}/{location}/{startDate}/{endDate}/{nowAmount}/{goalAmount}/{imageUrl}") { backStackEntry ->
-                                val fundingCard = MainFundingCard(backStackEntry)
-                                FundingDetailPage(
-                                    fundingCard = fundingCard,
-                                    onBackClick = {
-                                        navController.popBackStack()  // 뒤로가기 처리
-                                    }
-                                )
-                            }
-                            //composable("attraction") { AttractionPage(navController) }
-                            composable("auth") { LoginScreen() }
-                            composable("gift") { GiftPage(navController) }
-                            composable("gift_page_detail/{itemIndex}") { backStackEntry ->
-                                val itemIndex = backStackEntry.arguments?.getString("itemIndex")?.toIntOrNull() ?: 0
-                                GiftPageDetail(itemIndex)
-                            }
-                        }
-                        BottomNavBar(navController, selectedItem) { newIndex ->
-                            selectedItem = newIndex
+                    NavHost(navController = navController, startDestination = "mainpage") {
+                        composable("mainpage") { MainPage(navController) }
+//                        composable("attraction") { AttractionPage(navController) }
+//                        composable("auth") { AuthPage(navController) }
+                        composable("funding") { FundingMainPage(navController) }
+                        composable("gift") { GiftPage(navController) }
+                        composable(
+                            "gift_page_detail/{id}/{name}/{price}/{imageUrl}/{location}",
+                            arguments = listOf(
+                                navArgument("id") { type = NavType.IntType },
+                                navArgument("name") { type = NavType.StringType },
+                                navArgument("price") { type = NavType.IntType },
+                                navArgument("imageUrl") { type = NavType.StringType },
+                                navArgument("location") { type = NavType.StringType }
+                            )
+                        ) { backStackEntry ->
+                            // 전달된 인자를 받아서 사용
+                            val id = backStackEntry.arguments?.getInt("id") ?: 0
+                            val name = backStackEntry.arguments?.getString("name") ?: ""
+                            val price = backStackEntry.arguments?.getInt("price") ?: 0
+                            val imageUrl = backStackEntry.arguments?.getString("imageUrl") ?: ""
+                            val location = backStackEntry.arguments?.getString("location") ?: ""
+
+                            GiftPageDetail(id, name, price, imageUrl, location)
                         }
                     }
                 }
