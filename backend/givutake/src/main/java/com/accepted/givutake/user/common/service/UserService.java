@@ -11,18 +11,15 @@ import com.accepted.givutake.user.common.model.ModifyUserDto;
 import com.accepted.givutake.user.common.model.ResponseUserDto;
 import com.accepted.givutake.user.common.model.SignUpDto;
 import com.accepted.givutake.user.client.repository.AddressRepository;
-import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.repository.UserRepository;
 
 import jakarta.validation.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.management.relation.Role;
 import java.util.Optional;
 import java.util.Set;
 
@@ -49,6 +46,7 @@ public class UserService {
     }
 
     // 이메일 사용자 회원가입
+    @Transactional
     public void emailSignUp(SignUpDto signUpDto, AddressDto addressDto) {
         Roles role = signUpDto.getRoles();
 
@@ -214,6 +212,12 @@ public class UserService {
             // 이미 탈퇴한 회원일 경우 회원 탈퇴 불가
             if (savedUser.isWithdraw()) {
                 throw new ApiException(ExceptionEnum.USER_ALREADY_WITHDRAWN_EXCEPTION);
+            }
+
+            // 관리자는 탈퇴 불가
+            // ref) 관리자는 DB에 직접 접근해서 탈퇴 요망.
+            if (savedUser.getRoles() == Roles.ROLE_ADMIN) {
+                throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
             }
 
             userRepository.updateIsWithdrawByEmail(email, true);
