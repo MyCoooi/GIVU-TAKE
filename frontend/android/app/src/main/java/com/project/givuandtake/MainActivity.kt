@@ -29,16 +29,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.givuandtake.FundingCard
 import com.example.givuandtake.FundingMainPage
 import com.project.givuandtake.auth.LoginScreen
+import com.project.givuandtake.feature.funding.navigation.MainFundingCard
 import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.gift.mainpage.GiftPage
 import com.project.givuandtake.feature.mainpage.MainPage
+import com.project.givuandtake.feature.mypage.ContributorScreen
+import com.project.givuandtake.feature.navigation.addGiftPageDetailRoute
+import com.project.givuandtake.ui.navbar.BottomNavBar
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
 
 class MainActivity : ComponentActivity() {
@@ -54,108 +60,44 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    NavHost(navController = navController, startDestination = "mainpage") {
-                        composable("mainpage") { MainPage(navController) }
-//                        composable("attraction") { AttractionPage(navController) }
-//                        composable("auth") { AuthPage(navController) }
-                        composable("funding") { FundingMainPage(navController) }
-                        composable("gift") { GiftPage(navController) }
-                        composable(
-                            "gift_page_detail/{id}/{name}/{price}/{imageUrl}/{location}",
-                            arguments = listOf(
-                                navArgument("id") { type = NavType.IntType },
-                                navArgument("name") { type = NavType.StringType },
-                                navArgument("price") { type = NavType.IntType },
-                                navArgument("imageUrl") { type = NavType.StringType },
-                                navArgument("location") { type = NavType.StringType }
-                            )
-                        ) { backStackEntry ->
-                            // 전달된 인자를 받아서 사용
-                            val id = backStackEntry.arguments?.getInt("id") ?: 0
-                            val name = backStackEntry.arguments?.getString("name") ?: ""
-                            val price = backStackEntry.arguments?.getInt("price") ?: 0
-                            val imageUrl = backStackEntry.arguments?.getString("imageUrl") ?: ""
-                            val location = backStackEntry.arguments?.getString("location") ?: ""
+                    // 화면 상단에 NavHost, 하단에 BottomNavBar 배치
+                    Column {
+                        NavHost(
+                            navController = navController,
+                            startDestination = "mainpage",
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            // 메인 페이지
+                            composable("mainpage") { MainPage(navController) }
+                            // 펀딩 페이지
+                            composable("funding") { FundingMainPage(navController) }
+                            // 펀딩 상세 페이지
+                            composable(
+                                "funding_detail/{title}/{location}/{startDate}/{endDate}/{nowAmount}/{goalAmount}/{imageUrl}"
+                            ) { backStackEntry ->
+                                val fundingCard = MainFundingCard(backStackEntry)
+                                FundingDetailPage(
+                                    fundingCard = fundingCard,
+                                    onBackClick = { navController.popBackStack() }
+                                )
+                            }
+                            // 로그인 페이지
+                            composable("auth") { LoginScreen() }
+                            // 기프트 페이지
+                            composable("gift") { GiftPage(navController) }
+                            // 기프트 상세 페이지
+                            addGiftPageDetailRoute() // 모듈화된 GiftPageDetailRoute 추가
+                            // 마이 페이지
+                            composable("mypage") { ContributorScreen() }
+                        }
 
-                            GiftPageDetail(id, name, price, imageUrl, location)
+                        // 하단 네비게이션 바
+                        BottomNavBar(navController, selectedItem) { newIndex ->
+                            selectedItem = newIndex
                         }
                     }
                 }
             }
         }
-    }
-
-    // MainFundingCard 함수 위치 조정 (NavHost 외부에 위치해야 함)
-    fun MainFundingCard(backStackEntry: androidx.navigation.NavBackStackEntry): FundingCard {
-        val title = backStackEntry.arguments?.getString("title") ?: ""
-        val location = backStackEntry.arguments?.getString("location") ?: ""
-        val startDate = backStackEntry.arguments?.getString("startDate") ?: ""
-        val endDate = backStackEntry.arguments?.getString("endDate") ?: ""
-        val nowAmount = backStackEntry.arguments?.getString("nowAmount")?.toFloatOrNull() ?: 0f
-        val goalAmount = backStackEntry.arguments?.getString("goalAmount")?.toFloatOrNull() ?: 0f
-        val imageUrl = backStackEntry.arguments?.getString("imageUrl") ?: ""
-
-        return FundingCard(
-            title = title,
-            location = location,
-            startDate = startDate,
-            endDate = endDate,
-            amounts = Pair(nowAmount, goalAmount),
-            imageUrl = imageUrl
-        )
-    }
-}
-
-@Composable
-fun BottomNavBar(navController: NavController, selectedItem: Int, onItemSelected: (Int) -> Unit) {
-    BottomNavigation(
-        backgroundColor = MaterialTheme.colorScheme.primary,  // 네비게이션 바 배경 색상
-        contentColor = MaterialTheme.colorScheme.onPrimary    // 기본 아이템 텍스트 및 아이콘 색상
-    ) {
-        BottomNavigationItem(
-            icon = { Icon(Icons.Default.ShoppingCart, contentDescription = null) },
-            label = { Text("기부") },
-            selected = selectedItem == 0,
-            onClick = {
-                onItemSelected(0)
-                navController.navigate("gift") // 펀딩 페이지로 이동
-            }
-        )
-        BottomNavigationItem(
-            icon = { Icon(Icons.Default.LocationOn, contentDescription = null) },
-            label = { Text("관광") },
-            selected = selectedItem == 1,
-            onClick = {
-                onItemSelected(1)
-                navController.navigate("mainpage")
-            }
-        )
-        BottomNavigationItem(
-            icon = { Icon(Icons.Default.Home, contentDescription = null) },
-            label = { Text("메인") },
-            selected = selectedItem == 2,
-            onClick = {
-                onItemSelected(2)
-                navController.navigate("mainpage")
-            }
-        )
-        BottomNavigationItem(
-            icon = { Icon(Icons.Default.Favorite, contentDescription = null) },
-            label = { Text("펀딩") },
-            selected = selectedItem == 3,
-            onClick = {
-                onItemSelected(3)
-                navController.navigate("funding")
-            }
-        )
-        BottomNavigationItem(
-            icon = { Icon(Icons.Default.Person, contentDescription = null) },
-            label = { Text("마이페이지") },
-            selected = selectedItem == 4,
-            onClick = {
-                onItemSelected(4)
-                navController.navigate("mainpage")
-            }
-        )
     }
 }
