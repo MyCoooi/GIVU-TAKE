@@ -33,6 +33,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.givuandtake.FundingCard
 import com.example.givuandtake.FundingMainPage
+import com.project.givuandtake.auth.LoginScreen
 import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.gift.mainpage.GiftPage
 import com.project.givuandtake.feature.gift.mainpage.GiftPageDetail
@@ -67,7 +68,7 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                             //composable("attraction") { AttractionPage(navController) }
-                            //composable("auth") { AuthPage(navController) }
+                            composable("auth") { LoginScreen() }
                             composable("gift") { GiftPage(navController) }
                             composable("gift_page_detail/{itemIndex}") { backStackEntry ->
                                 val itemIndex = backStackEntry.arguments?.getString("itemIndex")?.toIntOrNull() ?: 0
