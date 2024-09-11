@@ -12,17 +12,31 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GivuAndTake"
         tools:targetApi="31">
+
+        <!-- SplashActivity를 주석 처리 -->
+
+<!--        <activity-->
+<!--            android:name=".SplashActivity"-->
+<!--            android:exported="true"-->
+<!--            android:theme="@style/Theme.GivuAndTake">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+<!--        </activity>-->
+
+
+        <!-- MainActivity를 앱 첫 화면으로 설정 -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.GivuAndTake">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+           <intent-filter>-->
+                <action android:name="android.intent.action.MAIN" />-->
+               <category android:name="android.intent.category.LAUNCHER" />-->
+           </intent-filter>
         </activity>
-    </application>
 
+    </application>
 </manifest>

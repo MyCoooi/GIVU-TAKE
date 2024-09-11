@@ -1,10 +1,21 @@
 package com.example.givuandtake
 
-import com.example.givuandtake.PaginationControls
+import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -16,32 +27,40 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Locale
 
 data class FundingCard(
     val title: String,
     val location: String,
     val startDate: String,
     val endDate: String,
-    val amounts: Pair<Float, Float>
+    val amounts: Pair<Float, Float>,
+    val imageUrl: String // 이미지 URL 또는 리소스 경로 추가
 )
 
 @Composable
-fun FundingMainPage() {
+fun FundingMainPage(navController: NavController) {
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
 
@@ -52,20 +71,31 @@ fun FundingMainPage() {
     var donationSelectedFilter by remember { mutableStateOf("진행 중") }  // 필터 추가
 
     val disasterCards = listOf(
-        FundingCard("태풍 피해 복구 지원 사업", "울산광역시 동구", "2024-07-17", "2024-08-25", Pair(7000000f, 10000000f)),
-        FundingCard("산불 피해 복구 지원 사업", "경상북도 구미시", "2024-07-11", "2024-09-25", Pair(5000000f, 10000000f)),
-        FundingCard("추가 카드1", "위치1", "2024-06-11", "2024-09-25", Pair(3000000f, 10000000f)),
-        FundingCard("추가 카드2", "위치2", "2024-05-11", "2024-11-25", Pair(2000000f, 10000000f)),
-        FundingCard("추가 카드3", "위치3", "2024-04-11", "2024-10-25", Pair(2000000f, 10000000f)),
-        FundingCard("추가 카드3", "위치3", "2024-04-11", "2024-10-25", Pair(2000000f, 10000000f))
+        FundingCard("태풍 피해 복구 지원 사업", "울산광역시 동구", "2024-07-17", "2024-08-25", Pair(7000000f, 10000000f),
+            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg"),
+        FundingCard("산불 피해 복구 지원 사업", "경상북도 구미시", "2024-07-11", "2024-09-25", Pair(5000000f, 10000000f),
+            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg"),
+        FundingCard("추가 카드1", "위치1", "2024-06-11", "2024-09-25", Pair(3000000f, 10000000f),
+            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg"),
+        FundingCard("추가 카드2", "위치2", "2024-05-11", "2024-11-25", Pair(2000000f, 10000000f),
+            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg"),
+        FundingCard("추가 카드3", "위치3", "2024-04-11", "2024-10-25", Pair(2000000f, 10000000f),
+            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg"),
+        FundingCard("추가 카드3", "위치3", "2024-04-11", "2024-10-25", Pair(2000000f, 10000000f),
+            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg")
     )
 
     val localDonationCards = listOf(
-        FundingCard("유기 동물 구조·보호 지원 사업", "경상남도 하동군", "2024-08-11", "2024-08-25", Pair(3000000f, 10000000f)),
-        FundingCard("재난 지원 사업", "울산광역시 서구", "2024-09-11", "2024-09-25", Pair(2000000f, 10000000f)),
-        FundingCard("추가 카드3", "위치3", "2024-07-12", "2024-08-25", Pair(3000000f, 10000000f)),
-        FundingCard("추가 카드4", "위치4", "2024-07-13", "2024-08-25", Pair(2000000f, 10000000f)),
-        FundingCard("추가 카드5", "위치5", "2024-07-14", "2024-08-25", Pair(2000000f, 10000000f))
+        FundingCard("유기 동물 구조·보호 지원 사업", "경상남도 하동군", "2024-08-11", "2024-08-25", Pair(3000000f, 10000000f),
+            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg"),
+        FundingCard("재난 지원 사업", "울산광역시 서구", "2024-09-11", "2024-09-25", Pair(2000000f, 10000000f),
+            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg"),
+        FundingCard("추가 카드3", "위치3", "2024-07-12", "2024-08-25", Pair(3000000f, 10000000f),
+            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg"),
+        FundingCard("추가 카드4", "위치4", "2024-07-13", "2024-08-25", Pair(2000000f, 10000000f),
+            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg"),
+        FundingCard("추가 카드5", "위치5", "2024-07-14", "2024-08-25", Pair(2000000f, 10000000f),
+            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg")
     )
 
     // 필터링된 리스트
@@ -138,13 +168,10 @@ fun FundingMainPage() {
         LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.height(disasterDynamicHeight)) {
             items(disasterItemsToShow) { card ->
                 FundingCardComposable(
-                    title = card.title,
-                    location = card.location,
-                    startDate = card.startDate,
-                    endDate = card.endDate,
-                    nowAmount = card.amounts.first,
-                    goalAmount = card.amounts.second
+                    card = card,
+                    navController = navController  // 네비게이션 추가
                 )
+
             }
         }
 
@@ -191,15 +218,12 @@ fun FundingMainPage() {
         LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.height(donationDynamicHeight)) {
             items(donationItemsToShow) { card ->
                 FundingCardComposable(
-                    title = card.title,
-                    location = card.location,
-                    startDate = card.startDate,
-                    endDate = card.endDate,
-                    nowAmount = card.amounts.first,
-                    goalAmount = card.amounts.second
+                    card = card,
+                    navController = navController  // 네비게이션 추가
                 )
             }
         }
+
 
         PaginationControls(currentPage = currentDonationPage, totalPages = donationTotalPages) { page ->
             coroutineScope.launch {
@@ -217,13 +241,22 @@ fun parseDate(dateString: String): Long {
 }
 
 @Composable
-fun FundingCardComposable(title: String, location: String, startDate: String, endDate: String, nowAmount: Float, goalAmount: Float) {
-    val progress = if (goalAmount > 0) nowAmount / goalAmount else 0f  // 비율 계산
+fun FundingCardComposable(card: FundingCard, navController: NavController) {
+    val progress = if (card.amounts.second > 0) card.amounts.first / card.amounts.second else 0f  // 비율 계산
 
     // 숫자 형식을 한국어 로케일로 포맷팅
-    val formattedGoalAmount = NumberFormat.getNumberInstance(Locale.KOREA).format(goalAmount.toInt())
+    val formattedGoalAmount = NumberFormat.getNumberInstance(Locale.KOREA).format(card.amounts.second.toInt())
 
-    Column(modifier = Modifier.padding(8.dp)) {
+    Column(
+        modifier = Modifier
+            .padding(8.dp)
+            .clickable {
+                // 네비게이션 경로로 이동
+                navController.navigate(
+                    "funding_detail/${Uri.encode(card.title)}/${Uri.encode(card.location)}/${card.startDate}/${card.endDate}/${card.amounts.first}/${card.amounts.second}/${Uri.encode(card.imageUrl)}"
+                )
+            }
+    ) {
         // 위치 표시
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             Icon(
@@ -232,26 +265,27 @@ fun FundingCardComposable(title: String, location: String, startDate: String, en
                 modifier = Modifier.size(16.dp)
             )
             Spacer(modifier = Modifier.width(4.dp))
-            Text(text = location, style = MaterialTheme.typography.bodySmall)
+            Text(text = card.location, style = MaterialTheme.typography.bodySmall)
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // 이미지 부분 복구
-        Box(
+        // 이미지 로드 및 표시
+        Image(
+            painter = rememberAsyncImagePainter(card.imageUrl),  // Coil을 사용하여 이미지 URL로 로드
+            contentDescription = null,  // 이미지 설명
             modifier = Modifier
                 .aspectRatio(1f)  // 1:1 비율로 너비에 맞춰 높이를 조정
                 .fillMaxWidth()
-                .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))  // 둥근 테두리 추가
-        ) {
-            Text(text = "이미지", modifier = Modifier.align(Alignment.Center))
-        }
+                .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp)),  // 둥근 테두리 추가
+            contentScale = ContentScale.Crop  // 이미지 크기 조정
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         // 날짜를 "startDate ~ endDate" 형식으로 표시
         Text(
-            text = "$startDate ~ $endDate",
+            text = "${card.startDate} ~ ${card.endDate}",
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
             maxLines = 1
         )
@@ -260,7 +294,7 @@ fun FundingCardComposable(title: String, location: String, startDate: String, en
 
         // 제목
         Text(
-            text = title,
+            text = card.title,
             style = MaterialTheme.typography.titleMedium.copy(fontSize = 15.sp),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -291,6 +325,7 @@ fun FundingCardComposable(title: String, location: String, startDate: String, en
 @Composable
 fun FundingMainPreview() {
     GivuAndTakeTheme {
-        FundingMainPage()
+        val navController = rememberNavController() // Preview를 위한 NavController 생성
+        FundingMainPage(navController)
     }
 }

@@ -2,10 +2,7 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="FundingMainPagePreview">
-        <State />
-      </entry>
-      <entry key="FundingMainPreview">
+      <entry key="LoginScreenPreview">
         <State />
       </entry>
       <entry key="app">
