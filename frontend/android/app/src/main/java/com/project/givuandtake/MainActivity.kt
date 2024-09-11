@@ -38,6 +38,7 @@ import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.gift.mainpage.GiftPage
 import com.project.givuandtake.feature.gift.mainpage.GiftPageDetail
 import com.project.givuandtake.feature.mainpage.MainPage
+import com.project.givuandtake.feature.mypage.ContributorScreen
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
 
 class MainActivity : ComponentActivity() {
@@ -74,6 +75,7 @@ class MainActivity : ComponentActivity() {
                                 val itemIndex = backStackEntry.arguments?.getString("itemIndex")?.toIntOrNull() ?: 0
                                 GiftPageDetail(itemIndex)
                             }
+                            composable("mypage") { ContributorScreen() }
                         }
                         BottomNavBar(navController, selectedItem) { newIndex ->
                             selectedItem = newIndex
@@ -153,7 +155,7 @@ fun BottomNavBar(navController: NavController, selectedItem: Int, onItemSelected
             selected = selectedItem == 4,
             onClick = {
                 onItemSelected(4)
-                navController.navigate("mainpage")
+                navController.navigate("mypage")
             }
         )
     }
