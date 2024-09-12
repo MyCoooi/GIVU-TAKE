@@ -40,13 +40,12 @@ public class GiftService {
                 .giftThumbnail(request.getGiftThumbnail())
                 .giftContent(request.getGiftContent())
                 .price(request.getPrice())
-            .build();
+                .build();
         giftRepository.save(newGift);
     }
 
     public List<GiftDto> getGifts(Integer corporationIdx, String search, Integer categoryIdx ,int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo-1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
-
 
         Specification<Gifts> spec = Specification.where(null); // 동적 쿼리 생성
         if(corporationIdx != null){
@@ -111,9 +110,9 @@ public class GiftService {
         giftRepository.save(gift);
     }
 
-    public void deleteGift(String email, int giftIdx) {
+    public void deleteGift(String authority, String email, int giftIdx) {
         Gifts gift = giftRepository.findById(giftIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
-        if(!gift.getCorporations().getEmail().equals(email)){
+        if(!(gift.getCorporations().getEmail().equals(email)||authority.equals("ROLE_ADMIN"))){
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
         giftRepository.delete(gift);
@@ -123,7 +122,6 @@ public class GiftService {
         Gifts gift = giftRepository.findById(request.getGiftIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
         Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
         GiftReviews giftReviews = GiftReviews.builder()
-                .reviewTitle(request.getReviewTitle())
                 .reviewContent(request.getReviewContent())
                 .gifts(gift)
                 .users(user)
@@ -140,11 +138,11 @@ public class GiftService {
 
         return reviewList.map(review -> GiftReviewDto.builder()
                 .reviewIdx(review.getReviewIdx())
-                .reviewTitle(review.getReviewTitle())
                 .reviewContent(review.getReviewContent())
                 .giftIdx(review.getGifts().getGiftIdx())
                 .userIdx(review.getUsers().getUserIdx())
                 .userName(review.getUsers().getName())
+                .userProfileImage(review.getUsers().getProfileImageUrl())
                 .createdDate(review.getCreatedDate())
                 .modifiedDate(review.getModifiedDate())
                 .build()
@@ -160,11 +158,11 @@ public class GiftService {
 
         return reviewList.map(review -> GiftReviewDto.builder()
                 .reviewIdx(review.getReviewIdx())
-                .reviewTitle(review.getReviewTitle())
                 .reviewContent(review.getReviewContent())
                 .giftIdx(review.getGifts().getGiftIdx())
                 .userIdx(review.getUsers().getUserIdx())
                 .userName(review.getUsers().getName())
+                .userProfileImage(review.getUsers().getProfileImageUrl())
                 .createdDate(review.getCreatedDate())
                 .modifiedDate(review.getModifiedDate())
                 .build()
@@ -176,14 +174,12 @@ public class GiftService {
         if(!review.getUsers().getEmail().equals(email)){
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
-        review.setReviewTitle(request.getReviewTitle());
         review.setReviewContent(request.getReviewContent());
         giftReviewRepository.save(review);
     }
-
-                                     public void deleteGiftReviews(String email, int reviewIdx) {
+    public void deleteGiftReviews(String authority, String email, int reviewIdx) {
         GiftReviews review = giftReviewRepository.findById(reviewIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_REVIEW_EXCEPTION));
-        if(!review.getUsers().getEmail().equals(email)){
+        if(!(review.getUsers().getEmail().equals(email)||authority.equals("ROLE_ADMIN"))){
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
         giftReviewRepository.delete(review);

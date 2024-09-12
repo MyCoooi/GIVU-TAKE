@@ -20,9 +20,6 @@ public class GiftReviews extends BaseTimeEntity {
     @Column(name = "review_idx")
     private int reviewIdx;
 
-    @Column(name = "review_title", nullable = false, length = 50) // 후기 제목
-    private String reviewTitle;
-
     @Column(name = "review_content", nullable = false, length = 6000) // 후기 내용
     private String reviewContent;
 
