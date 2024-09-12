@@ -11,9 +11,6 @@ import lombok.*;
 @Builder
 public class CreateGiftReviewDto {
 
-    @NotBlank(message = "답례품 리뷰 제목은 필수 입력 값입니다.")
-    private String reviewTitle;
-
     @NotBlank(message = "답례품 리뷰는 필수 입력 값입니다.")
     private String reviewContent;
 
