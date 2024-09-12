@@ -1,5 +1,6 @@
 package com.project.givuandtake
 
+import AttractionMain
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -63,6 +64,7 @@ class MainActivity : ComponentActivity() {
                                     onBackClick = { navController.popBackStack() }
                                 )
                             }
+                            composable("attraction") { AttractionMain(navController) } // Navigate to AttractionMain
                             // 로그인 페이지
                             composable("auth") { LoginScreen(navController) }
                             // 회원가입 페이지
