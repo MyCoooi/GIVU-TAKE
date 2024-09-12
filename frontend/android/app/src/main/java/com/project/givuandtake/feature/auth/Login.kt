@@ -1,10 +1,12 @@
 package com.project.givuandtake.auth
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -14,27 +16,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.project.givuandtake.R
 
-class LoginActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            LoginScreen()
-        }
-    }
-}
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
+    val context = LocalContext.current
     // 로그인 화면 배경색을 하얀색으로 설정
     Surface(
         modifier = Modifier
@@ -169,7 +166,15 @@ fun LoginScreen() {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(text = "비밀번호 찾기", color = Color.Gray)
-                    Text(text = "회원가입", color = Color.Gray)
+
+                    Text(
+                        text = "회원가입",
+                        color = Color.Gray,
+                        modifier = Modifier.clickable {
+                            navController.navigate("signup_step1") // 첫 번째 회원가입 단계로 이동
+                        }
+                    )
+
                 }
             }
         }
