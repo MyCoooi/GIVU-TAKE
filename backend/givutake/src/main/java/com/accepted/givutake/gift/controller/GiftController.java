@@ -1,14 +1,15 @@
 package com.accepted.givutake.gift.controller;
 
-import com.accepted.givutake.gift.entity.GiftReviews;
-import com.accepted.givutake.gift.entity.Gifts;
 import com.accepted.givutake.gift.model.*;
 import com.accepted.givutake.gift.service.GiftService;
+import com.accepted.givutake.global.enumType.ExceptionEnum;
+import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.model.ResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -72,8 +73,10 @@ public class GiftController {
     @DeleteMapping("/{giftsIdx}") // 답례품 삭제
     public ResponseEntity<ResponseDto> deleteGift(
             @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable int giftsIdx) {
-        giftService.deleteGift(userDetails.getUsername(), giftsIdx);
+            @PathVariable int giftsIdx)
+    {
+        GrantedAuthority firstAuthority = userDetails.getAuthorities().stream().findFirst().orElseThrow(() -> new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION));
+        giftService.deleteGift(firstAuthority.getAuthority(), userDetails.getUsername(), giftsIdx);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
                 .build();
@@ -131,7 +134,8 @@ public class GiftController {
     public ResponseEntity<ResponseDto> deleteGiftReview(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int reviewIdx) {
-        giftService.deleteGiftReviews(userDetails.getUsername(), reviewIdx);
+        GrantedAuthority firstAuthority = userDetails.getAuthorities().stream().findFirst().orElseThrow(() -> new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION));
+        giftService.deleteGiftReviews(firstAuthority.getAuthority(), userDetails.getUsername(), reviewIdx);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
                 .build();

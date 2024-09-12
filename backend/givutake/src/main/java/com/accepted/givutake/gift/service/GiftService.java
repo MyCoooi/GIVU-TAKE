@@ -40,7 +40,7 @@ public class GiftService {
                 .giftThumbnail(request.getGiftThumbnail())
                 .giftContent(request.getGiftContent())
                 .price(request.getPrice())
-            .build();
+                .build();
         giftRepository.save(newGift);
     }
 
@@ -110,9 +110,9 @@ public class GiftService {
         giftRepository.save(gift);
     }
 
-    public void deleteGift(String email, int giftIdx) {
+    public void deleteGift(String authority, String email, int giftIdx) {
         Gifts gift = giftRepository.findById(giftIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
-        if(!gift.getCorporations().getEmail().equals(email)){
+        if(!(gift.getCorporations().getEmail().equals(email)||authority.equals("ROLE_ADMIN"))){
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
         giftRepository.delete(gift);
@@ -177,9 +177,9 @@ public class GiftService {
         review.setReviewContent(request.getReviewContent());
         giftReviewRepository.save(review);
     }
-    public void deleteGiftReviews(String email, int reviewIdx) {
+    public void deleteGiftReviews(String authority, String email, int reviewIdx) {
         GiftReviews review = giftReviewRepository.findById(reviewIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_REVIEW_EXCEPTION));
-        if(!review.getUsers().getEmail().equals(email)){
+        if(!(review.getUsers().getEmail().equals(email)||authority.equals("ROLE_ADMIN"))){
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
         giftReviewRepository.delete(review);
