@@ -19,7 +19,7 @@ import com.example.givuandtake.FundingMainPage
 import com.project.givuandtake.auth.LoginScreen
 import com.project.givuandtake.auth.SignupStep1
 import com.project.givuandtake.auth.SignupStep2
-import com.project.givuandtake.feature.auth.SignupStep3
+import com.project.givuandtake.auth.SignupStep3
 import com.project.givuandtake.feature.funding.navigation.MainFundingCard
 import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.gift.mainpage.GiftPage
