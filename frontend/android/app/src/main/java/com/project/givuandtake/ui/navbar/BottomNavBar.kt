@@ -31,7 +31,7 @@ fun BottomNavBar(navController: NavController, selectedItem: Int, onItemSelected
             selected = selectedItem == 1,
             onClick = {
                 onItemSelected(1)
-                navController.navigate("mainpage")
+                navController.navigate("attraction")
             }
         )
         BottomNavigationItem(
