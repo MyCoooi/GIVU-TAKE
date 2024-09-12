@@ -54,7 +54,7 @@ fun BottomNavBar(navController: NavController, selectedItem: Int, onItemSelected
         )
         BottomNavigationItem(
             icon = { Icon(Icons.Default.Person, contentDescription = null) },
-            label = { Text("마이페이지") },
+            label = { Text("회원정보") },
             selected = selectedItem == 4,
             onClick = {
                 onItemSelected(4)

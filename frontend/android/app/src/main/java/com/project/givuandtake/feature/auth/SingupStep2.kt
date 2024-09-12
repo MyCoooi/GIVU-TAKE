@@ -33,7 +33,7 @@ fun SignupStep2(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFFA726))  // 전체 배경색을 오렌지색으로 설정
+            .background(Color(0xFFFFD7C4))  // 전체 배경색을 오렌지색으로 설정
     ) {
         Column(
             modifier = Modifier
@@ -47,7 +47,7 @@ fun SignupStep2(navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp)
-                    .background(Color(0xFFFFA726)),
+                    .background(Color(0xFFFFD7C4)),
                 contentAlignment = Alignment.Center
             ) {
                 // 타이틀 텍스트
@@ -87,14 +87,14 @@ fun SignupStep2(navController: NavController) {
                             modifier = Modifier
                                 .size(18.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFFE0E0E0))  // 활성화된 단계
+                                .background(Color(0xFFE0E0E0))
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Box(
                             modifier = Modifier
                                 .size(18.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFFFFA726))  // 비활성화된 단계
+                                .background(Color(0xFFFF9874))  // 활성화된 단계
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Box(
@@ -129,7 +129,7 @@ fun SignupStep2(navController: NavController) {
                             Icon(Icons.Default.ArrowDropDown, contentDescription = null)
                         },
                         colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = Color(0xFFFFA726),
+                            focusedBorderColor = Color(0xFFFF9874),
                             unfocusedBorderColor = Color.Gray
                         )
                     )
@@ -147,7 +147,7 @@ fun SignupStep2(navController: NavController) {
                         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Phone),
                         shape = RoundedCornerShape(12.dp),
                         colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = Color(0xFFFFA726),
+                            focusedBorderColor = Color(0xFFFF9874),
                             unfocusedBorderColor = Color.Gray
                         )
                     )
@@ -167,7 +167,7 @@ fun SignupStep2(navController: NavController) {
                             Icon(Icons.Default.DateRange, contentDescription = null)
                         },
                         colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = Color(0xFFFFA726),
+                            focusedBorderColor = Color(0xFFFF9874),
                             unfocusedBorderColor = Color.Gray
                         )
                     )
@@ -182,13 +182,13 @@ fun SignupStep2(navController: NavController) {
                         Button(
                             onClick = { gender = "남성" },
                             colors = if (gender == "남성") ButtonDefaults.buttonColors(
-                                backgroundColor = Color(0xFFFFA726),
+                                backgroundColor = Color(0xFFFF9874),
                                 contentColor = Color.White
                             ) else ButtonDefaults.buttonColors(
                                 backgroundColor = Color.White,
-                                contentColor = Color(0xFFFFA726)
+                                contentColor = Color(0xFFFF9874)
                             ),
-                            border = BorderStroke(1.dp, Color(0xFFFFA726)),
+                            border = BorderStroke(1.dp, Color(0xFFFF9874)),
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(8.dp)
@@ -199,13 +199,13 @@ fun SignupStep2(navController: NavController) {
                         Button(
                             onClick = { gender = "여성" },
                             colors = if (gender == "여성") ButtonDefaults.buttonColors(
-                                backgroundColor = Color(0xFFFFA726),
+                                backgroundColor = Color(0xFFFF9874),
                                 contentColor = Color.White
                             ) else ButtonDefaults.buttonColors(
                                 backgroundColor = Color.White,
-                                contentColor = Color(0xFFFFA726)
+                                contentColor = Color(0xFFFF9874)
                             ),
-                            border = BorderStroke(1.dp, Color(0xFFFFA726)),
+                            border = BorderStroke(1.dp, Color(0xFFFF9874)),
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(8.dp)
@@ -227,7 +227,7 @@ fun SignupStep2(navController: NavController) {
                             .fillMaxWidth()
                             .height(56.dp)
                             .clip(RoundedCornerShape(12.dp)),
-                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFFA726))
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFF9874))
                     ) {
                         Text("다음", fontSize = 18.sp,
                             fontWeight = FontWeight.ExtraBold,

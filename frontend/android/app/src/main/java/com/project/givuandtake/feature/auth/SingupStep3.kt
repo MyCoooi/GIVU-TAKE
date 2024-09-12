@@ -23,7 +23,7 @@ fun SignupStep3(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFFA726))  // 전체 배경색을 오렌지색으로 설정
+            .background(Color(0xFFFFD7C4))  // 전체 배경색을 오렌지색으로 설정
     ) {
         Column(
             modifier = Modifier
@@ -37,7 +37,7 @@ fun SignupStep3(navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp)
-                    .background(Color(0xFFFFA726)),
+                    .background(Color(0xFFFFD7C4)),
                 contentAlignment = Alignment.Center
             ) {
                 // 타이틀 텍스트
@@ -89,7 +89,7 @@ fun SignupStep3(navController: NavController) {
                             modifier = Modifier
                                 .size(18.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFFFFA726))  // 활성화된 단계 색상
+                                .background(Color(0xFFFF9874))  // 활성화된 단계 색상
                         )
                     }
 
@@ -138,7 +138,7 @@ fun SignupStep3(navController: NavController) {
                             .fillMaxWidth()
                             .height(56.dp)
                             .clip(RoundedCornerShape(12.dp)),
-                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFFA726))
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFF9874))
                     ) {
                         Text("시작하기", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
                     }

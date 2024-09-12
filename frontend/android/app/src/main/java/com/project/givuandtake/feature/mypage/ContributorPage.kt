@@ -99,7 +99,7 @@ fun ProfileSection() {
         Spacer(modifier = Modifier.width(16.dp))
 
         Column {
-            Text(text = "김프로님", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color(0xFF333333))
+            Text(text = "김수현님", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color(0xFF333333))
         }
     }
 }
@@ -108,7 +108,7 @@ fun ProfileSection() {
 fun DonationSummaryCard() {
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = Color(0xFFDDE7F5), // 라이트 블루 배경
+        color = Color(0XFFFFFFFF),
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(
@@ -160,7 +160,7 @@ fun AnnouncementSection() {
                 tint = Color.Red
             )
             Spacer(modifier = Modifier.width(16.dp))
-            Text(text = "공지사항 쏼라쏼라", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF333333))
+            Text(text = "공지사항 - 폭우로 인한 배송 지연", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF333333))
         }
     }
 }
@@ -187,12 +187,12 @@ fun SectionWithBackground(title: String, actions: List<String>) {
 fun SectionTitle(title: String) {
     Text(
         text = title,
-        fontSize = 30.sp,
+        fontSize = 26.sp,
         fontWeight = FontWeight.Bold,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        color = Color(0xFFA093DE)
+        color = Color.Black
     )
 }
 

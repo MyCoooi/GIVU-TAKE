@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,7 +30,7 @@ fun SignupStep1(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFFA726))  // 전체 배경색을 오렌지색으로 설정
+            .background(Color(0xFFFFD7C4))  // 전체 배경색을 오렌지색으로 설정
     ) {
         Column(
             modifier = Modifier
@@ -43,7 +44,7 @@ fun SignupStep1(navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp)
-                    .background(Color(0xFFFFA726)),
+                    .background(Color(0xFFFFD7C4)),
                 contentAlignment = Alignment.Center
             ) {
                 // 타이틀 텍스트
@@ -83,7 +84,7 @@ fun SignupStep1(navController: NavController) {
                             modifier = Modifier
                                 .size(18.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFFFFA726))  // 활성화된 단계
+                                .background(Color(0xFFFF9874))  // 활성화된 단계
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Box(
@@ -166,7 +167,7 @@ fun SignupStep1(navController: NavController) {
                                         .padding(top = 6.dp)
                                         .clip(RoundedCornerShape(12.dp)),
                                     colors = ButtonDefaults.buttonColors(
-                                        backgroundColor = Color(0xFFFFA726)
+                                        backgroundColor = Color(0xFFFF9874)
                                     )
                                 ) {
                                     Text("인증하기", fontWeight = FontWeight.ExtraBold, color = Color.White)
@@ -216,7 +217,7 @@ fun SignupStep1(navController: NavController) {
                                     .fillMaxWidth()
                                     .height(56.dp)
                                     .clip(RoundedCornerShape(12.dp)),
-                                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFFA726))
+                                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFF9874))
                             ) {
                                 Text("다음", fontSize = 18.sp,
                                     fontWeight = FontWeight.ExtraBold,
