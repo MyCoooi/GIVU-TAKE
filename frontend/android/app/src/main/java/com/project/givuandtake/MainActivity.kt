@@ -46,7 +46,7 @@ class MainActivity : ComponentActivity() {
                     Column {
                         NavHost(
                             navController = navController,
-                            startDestination = "mainpage",
+                            startDestination = "auth",
                             modifier = Modifier.weight(1f)
                         ) {
                             // 메인 페이지
