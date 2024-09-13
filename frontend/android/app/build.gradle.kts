@@ -55,6 +55,8 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.2.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-crashlytics")
+    implementation ("com.github.bumptech.glide:glide:4.12.0")
+    implementation ("com.github.skydoves:landscapist-glide:1.4.6")
 
     //Coil 추가
     implementation("io.coil-kt:coil-compose:2.4.0")

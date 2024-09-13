@@ -1,14 +1,21 @@
 package com.project.givuandtake.auth
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
+import androidx.compose.material.Divider
+import androidx.compose.material.Icon
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,27 +26,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.project.givuandtake.R
 
-class LoginActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            LoginScreen()
-        }
-    }
-}
-
 @Composable
-fun LoginScreen() {
+fun LoginScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    // 로그인 화면 배경색을 하얀색으로 설정
     Surface(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White),  // 바탕 하얀색
+            .background(Color.White),
         color = Color.White
     ) {
         Column(
@@ -51,7 +49,7 @@ fun LoginScreen() {
         ) {
             // 로고 이미지
             Image(
-                painter = painterResource(id = R.drawable.logo), // res/drawable에 로고 파일 필요
+                painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Logo",
                 modifier = Modifier.size(150.dp),
                 contentScale = ContentScale.Fit
@@ -64,16 +62,16 @@ fun LoginScreen() {
                 text = "GIVU & TAKE",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black // 블랙으로 변경하여 깔끔한 인상
+                color = Color.Black
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 로그인 폼을 담는 박스, 하늘색 배경
+            // 입력칸을 담는 박스 (배경 흰색)
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFFE1F5FE), RoundedCornerShape(12.dp))  // 하늘색 배경과 둥근 모서리
+                    .background(Color.White, RoundedCornerShape(12.dp))
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -85,12 +83,10 @@ fun LoginScreen() {
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,  // 흰색 입력칸
-                        unfocusedContainerColor = Color.White,
-                        disabledContainerColor = Color.White,
-                        focusedIndicatorColor = Color.Transparent,  // 밑줄 없애기
-                        unfocusedIndicatorColor = Color.Transparent,  // 밑줄 없애기
+                    colors = TextFieldDefaults.textFieldColors(
+                        focusedIndicatorColor = Color.Gray,  // 테두리 색상 회색
+                        unfocusedIndicatorColor = Color.Gray,  // 테두리 색상 회색
+                        backgroundColor  = Color.White // 텍스트 필드의 배경색
                     )
                 )
 
@@ -104,12 +100,10 @@ fun LoginScreen() {
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,  // 흰색 입력칸
-                        unfocusedContainerColor = Color.White,
-                        disabledContainerColor = Color.White,
-                        focusedIndicatorColor = Color.Transparent,  // 밑줄 없애기
-                        unfocusedIndicatorColor = Color.Transparent,  // 밑줄 없애기
+                    colors = TextFieldDefaults.textFieldColors(
+                        focusedIndicatorColor = Color.Gray,  // 테두리 색상 회색
+                        unfocusedIndicatorColor = Color.Gray,  // 테두리 색상 회색
+                        backgroundColor  = Color.White
                     )
                 )
 
@@ -119,58 +113,85 @@ fun LoginScreen() {
                 Button(
                     onClick = { /* 로그인 처리 */ },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(Color(0xFF64B5F6))  // 버튼을 하늘색으로 변경
+                    colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
                 ) {
-                    Text(text = "로그인", color = Color.White)  // 텍스트 색상은 흰색
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 간편 로그인 텍스트
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(text = "간편 로그인", color = Color.Gray)
+                    Text(text = "이메일로 로그인", color = Color.White)
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // 간편 로그인 아이콘 (카카오, 네이버, 구글)
+                // 회원가입 | 비밀번호 찾기 (이메일로 로그인 아래 좌우로 배치)
                 Row(
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.naver),
-                        contentDescription = "Kakao",
-                        modifier = Modifier.size(40.dp),
-                        tint = Color.Unspecified  // tint를 적용하지 않도록 설정
+                    Text(
+                        text = "비밀번호 찾기",
+                        color = Color.Gray,
+                        modifier = Modifier.clickable {
+                        }
                     )
-                    Icon(
-                        painter = painterResource(id = R.drawable.naver),
-                        contentDescription = "Naver",
-                        modifier = Modifier.size(40.dp),
-                        tint = Color.Unspecified  // tint를 적용하지 않도록 설정
-                    )
-                    Icon(
-                        painter = painterResource(id = R.drawable.naver),
-                        contentDescription = "Google",
-                        modifier = Modifier.size(40.dp),
-                        tint = Color.Unspecified  // tint를 적용하지 않도록 설정
+                    Text(
+                        text = "회원가입",
+                        color = Color.Gray,
+                        modifier = Modifier.clickable {
+                            navController.navigate("signup_step1")
+                        }
                     )
                 }
+            }
 
-                Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-                // 비밀번호 찾기 및 회원가입
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(text = "비밀번호 찾기", color = Color.Gray)
-                    Text(text = "회원가입", color = Color.Gray)
-                }
+            // 간편 로그인 - 선 양옆
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Divider(modifier = Modifier.weight(1f), color = Color.LightGray)
+                Text(
+                    text = "간편 로그인",
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    color = Color.Gray
+                )
+                Divider(modifier = Modifier.weight(1f), color = Color.LightGray)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 간편 로그인 아이콘 (테두리 추가)
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.naver),
+                    contentDescription = "Naver",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(Color.LightGray, CircleShape),
+                    tint = Color.Unspecified
+                )
+                Icon(
+                    painter = painterResource(id = R.drawable.kakao),
+                    contentDescription = "Kakao",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(Color.LightGray, CircleShape),
+                    tint = Color.Unspecified
+
+                )
+                Icon(
+                    painter = painterResource(id = R.drawable.google),
+                    contentDescription = "Google",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(Color.White, CircleShape)
+                        .padding(4.dp),
+                    tint = Color.Unspecified
+                )
             }
         }
     }
