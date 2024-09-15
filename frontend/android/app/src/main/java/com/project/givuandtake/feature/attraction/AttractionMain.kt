@@ -1,3 +1,4 @@
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -45,7 +46,38 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.project.givuandtake.R
 import com.skydoves.landscapist.glide.GlideImage
+import androidx.navigation.compose.rememberNavController
+import androidx.compose.runtime.*
+import com.project.givuandtake.core.apis.RetrofitInstance
+import com.project.givuandtake.core.data.WeatherData
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
+fun getWeatherData(lat: Double, lon: Double, onResult: (String, String) -> Unit) {
+    val apiKey = "fe4c6b378cbe4af2538f2d255f5bdcea" // API 키를 여기에 입력
+
+    RetrofitInstance.api.getWeather(lat, lon, apiKey).enqueue(object : Callback<WeatherData> {
+        override fun onResponse(call: Call<WeatherData>, response: Response<WeatherData>) {
+            if (response.isSuccessful) {
+                val weatherData = response.body()
+                val temperature = weatherData?.main?.temp?.minus(273.15) // 켈빈에서 섭씨로 변환
+                val weatherDes = weatherData?.weather?.get(0)?.main
+                onResult(temperature?.toInt().toString(), weatherDes ?: "")
+            } else {
+                Log.e("Weather", "Error: ${response.code()}")
+                onResult("", "")
+            }
+        }
+
+        override fun onFailure(call: Call<WeatherData>, t: Throwable) {
+            Log.e("Weather", "Failed to get weather data", t)
+            onResult("", "")
+        }
+    })
+}
 @Composable
 fun GifImage() {
     GlideImage(
@@ -177,9 +209,25 @@ fun AttractionMain(navController: NavController) {
     var expandedProvince by remember { mutableStateOf(false) }
     var expandedState by remember { mutableStateOf(false) }
 
+    var temperature by remember { mutableStateOf("1") }
+    var weatherDes by remember { mutableStateOf("") }
+
     // 탭 상태 관리
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("전통시장", "축제", "관광지", "체험마을")
+
+    LaunchedEffect(Unit) {
+        // 서울 좌표를 사용한 예시 (실제로는 선택된 위치에 따라 다르게 설정 가능)
+        val lat = 37.5665
+        val lon = 126.9780
+
+        // 비동기 API 호출로 날씨 데이터를 가져옴
+        getWeatherData(lat, lon) { temp, weather ->
+            temperature = temp // 상태 업데이트
+            weatherDes = weather
+        }
+        Log.e("Weather", "Failed to get weather data")
+    }
 
     Column(
         modifier = Modifier
@@ -290,18 +338,17 @@ fun AttractionMain(navController: NavController) {
                     horizontalAlignment = Alignment.Start
                 ) {
                     Text(
-                        text = if (selectedLocation.isNotEmpty()) selectedLocation else "지역을 선택해주세요",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color.White,
-                        modifier = Modifier.padding(start = 20.dp)
-                    )
-                    Text(
-                        text = if (selectedLocation.isNotEmpty()) "31°C" else "",
+                        text = if (temperature.isNotEmpty()) "$temperature°C. $weatherDes" else "가져오는 중...",
                         fontSize = 32.sp,
                         color = Color(0xFFFCBE22),
                         modifier = Modifier.padding(start = 20.dp, top = 12.dp)
                     )
+//                    Text(
+//                        text = if (selectedLocation.isNotEmpty()) "$temperature°C" else "$temperature°C",
+//                        fontSize = 32.sp,
+//                        color = Color(0xFFFCBE22),
+//                        modifier = Modifier.padding(start = 20.dp, top = 12.dp)
+//                    )
                 }
                 GifImage()
             }

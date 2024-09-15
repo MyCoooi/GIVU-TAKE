@@ -13,6 +13,8 @@
         android:theme="@style/Theme.GivuAndTake"
         tools:targetApi="31">
 
+        <activity android:name=".core.apis.Weather" android:exported="true" />
+
         <!-- SplashActivity를 주석 처리 -->
 
         <activity
@@ -25,7 +27,7 @@
             </intent-filter>
         </activity>
 
-s
+
         <!-- MainActivity를 앱 첫 화면으로 설정 -->
         <activity
             android:name=".MainActivity"
