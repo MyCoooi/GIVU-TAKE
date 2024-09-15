@@ -48,6 +48,11 @@ import com.project.givuandtake.R
 import com.skydoves.landscapist.glide.GlideImage
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.runtime.*
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import coil.compose.rememberImagePainter
 import com.project.givuandtake.core.apis.RetrofitInstance
 import com.project.givuandtake.core.data.WeatherData
 import kotlinx.coroutines.Dispatchers
@@ -56,33 +61,48 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-fun getWeatherData(lat: Double, lon: Double, onResult: (String, String) -> Unit) {
+fun getWeatherData(lat: Double, lon: Double, onResult: (String, String, String) -> Unit) {
     val apiKey = "fe4c6b378cbe4af2538f2d255f5bdcea" // API 키를 여기에 입력
+    val lang = "kr"
 
-    RetrofitInstance.api.getWeather(lat, lon, apiKey).enqueue(object : Callback<WeatherData> {
+    RetrofitInstance.api.getWeather(lat, lon, apiKey, lang).enqueue(object : Callback<WeatherData> {
         override fun onResponse(call: Call<WeatherData>, response: Response<WeatherData>) {
             if (response.isSuccessful) {
                 val weatherData = response.body()
                 val temperature = weatherData?.main?.temp?.minus(273.15) // 켈빈에서 섭씨로 변환
                 val weatherDes = weatherData?.weather?.get(0)?.main
-                onResult(temperature?.toInt().toString(), weatherDes ?: "")
+                val weatherMoreDes = weatherData?.weather?.get(0)?.description
+                onResult(temperature?.toInt().toString(), weatherDes ?: "", weatherMoreDes ?: "")
             } else {
                 Log.e("Weather", "Error: ${response.code()}")
-                onResult("", "")
+                onResult("", "", "")
             }
         }
 
         override fun onFailure(call: Call<WeatherData>, t: Throwable) {
             Log.e("Weather", "Failed to get weather data", t)
-            onResult("", "")
+            onResult("", "", "")
         }
     })
 }
 @Composable
-fun GifImage() {
+fun GifImage(weatherDes: String) {
+    // weatherMain 값을 기반으로 이미지 파일 경로 설정
+    val assetPath = when (weatherDes) {
+        "Clear" -> R.drawable.clear
+        "Clouds" -> R.drawable.clouds
+        "Atmosphere" -> R.drawable.atmosphere
+        "Snow" -> R.drawable.snow
+        "Rain" -> R.drawable.rain
+        "Drizzle" -> R.drawable.drizzle
+        "Thunderstorm" -> R.drawable.thunderstrom
+        else -> R.drawable.clear // 기본값
+    }
+
+    // 이미지 로딩
     GlideImage(
-        imageModel = R.drawable.sunny,
-        modifier = Modifier.size(150.dp)
+        imageModel = assetPath,
+        modifier = Modifier.size(90.dp).clip(RoundedCornerShape(30.dp))
     )
 }
 
@@ -209,8 +229,9 @@ fun AttractionMain(navController: NavController) {
     var expandedProvince by remember { mutableStateOf(false) }
     var expandedState by remember { mutableStateOf(false) }
 
-    var temperature by remember { mutableStateOf("1") }
+    var temperature by remember { mutableStateOf("") }
     var weatherDes by remember { mutableStateOf("") }
+    var weatherMoreDes by remember { mutableStateOf("") }
 
     // 탭 상태 관리
     var selectedTabIndex by remember { mutableStateOf(0) }
@@ -222,11 +243,12 @@ fun AttractionMain(navController: NavController) {
         val lon = 126.9780
 
         // 비동기 API 호출로 날씨 데이터를 가져옴
-        getWeatherData(lat, lon) { temp, weather ->
+        getWeatherData(lat, lon) { temp, weather, des ->
             temperature = temp // 상태 업데이트
             weatherDes = weather
+            weatherMoreDes = des
         }
-        Log.e("Weather", "Failed to get weather data")
+        Log.e("weather", "Failed to get weather data")
     }
 
     Column(
@@ -324,33 +346,59 @@ fun AttractionMain(navController: NavController) {
         Box(
             modifier = Modifier
                 .fillMaxWidth(0.9f)
-                .background(Color(0xFF4099E9), shape = RoundedCornerShape(12.dp))
+                .height(110.dp)
+                .background(Color(0xFF4099E9), shape = RoundedCornerShape(30.dp))
+                .padding(16.dp)
         ) {
             Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(start = 8.dp, top = 4.dp, bottom = 4.dp),
-                    horizontalAlignment = Alignment.Start
+                        .padding(start = 20.dp),
                 ) {
+                    Row {
+                        Image(
+                            painter = painterResource(id = R.drawable.location),
+                            contentDescription = "Location Icon",
+                            modifier = Modifier.size(24.dp) // 이미지 크기 설정
+                        )
+                        Text(
+                            text = " 부산광역시 영도구",
+                            color = Color(0xFFFFFFFF)
+                        )
+                    }
                     Text(
-                        text = if (temperature.isNotEmpty()) "$temperature°C. $weatherDes" else "가져오는 중...",
-                        fontSize = 32.sp,
-                        color = Color(0xFFFCBE22),
-                        modifier = Modifier.padding(start = 20.dp, top = 12.dp)
+                        text = buildAnnotatedString {
+                            append(temperature)
+                            withStyle(style = SpanStyle(fontSize = 20.sp)) {
+                                append("°C   ")
+                            }
+                            withStyle(style = SpanStyle(fontSize = 25.sp)) {
+                                append("$weatherMoreDes")
+                            }
+                        },
+                        fontSize = 30.sp,
+                        color = Color(0xFFFFFFFF),
                     )
-//                    Text(
-//                        text = if (selectedLocation.isNotEmpty()) "$temperature°C" else "$temperature°C",
-//                        fontSize = 32.sp,
-//                        color = Color(0xFFFCBE22),
-//                        modifier = Modifier.padding(start = 20.dp, top = 12.dp)
-//                    )
                 }
-                GifImage()
+                GifImage(weatherDes)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        TabRow(
+            selectedTabIndex = selectedTabIndex,
+            backgroundColor = Color.White,
+            contentColor = Color.Black
+        ) {
+            tabs.forEachIndexed { index, tab ->
+                Tab(
+                    text = { Text(tab) },
+                    selected = selectedTabIndex == index,
+                    onClick = { selectedTabIndex = index }
+                )
             }
         }
 
@@ -373,19 +421,7 @@ fun AttractionMain(navController: NavController) {
         ) {
             Column {
                 // TabRow UI
-                TabRow(
-                    selectedTabIndex = selectedTabIndex,
-                    backgroundColor = Color.White,
-                    contentColor = Color.Black
-                ) {
-                    tabs.forEachIndexed { index, tab ->
-                        Tab(
-                            text = { Text(tab) },
-                            selected = selectedTabIndex == index,
-                            onClick = { selectedTabIndex = index }
-                        )
-                    }
-                }
+
 
                 Spacer(modifier = Modifier.height(16.dp))
 
