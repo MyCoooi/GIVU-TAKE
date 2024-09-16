@@ -182,7 +182,6 @@ fun getMarketData(onResult: (List<MarketProperties>) -> Unit) {
     MarketRetrofitInstance.api.getMarketData(request, apiKey, data, geomFilter, attrFilter).enqueue(object : Callback<TraditionalMarketData> {
         override fun onResponse(call: Call<TraditionalMarketData>, response: Response<TraditionalMarketData>) {
             if (response.isSuccessful) {
-                // 응답에서 market properties를 추출
                 val marketPropertiesList = response.body()?.response?.result?.featureCollection?.features?.map {
                     it.properties
                 } ?: emptyList()
@@ -272,10 +271,4 @@ fun MainMarketTab() {
             }
         }
     }
-}
-
-@Preview
-@Composable
-fun PreviewItem() {
-    SquareMarketItem("동쪽바다중앙시장", "동쪽바다중앙시장동쪽바다중앙시장동쪽", true, true)
 }

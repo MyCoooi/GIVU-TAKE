@@ -42,7 +42,10 @@ import androidx.navigation.NavController
 import com.project.givuandtake.R
 import com.project.givuandtake.core.apis.RetrofitInstance
 import com.project.givuandtake.core.data.WeatherData
+import com.project.givuandtake.feature.attraction.MainFestivalTab
 import com.project.givuandtake.feature.attraction.MainMarketTab
+import com.project.givuandtake.feature.attraction.MainTripTab
+import com.project.givuandtake.feature.attraction.MainVillageTab
 import com.skydoves.landscapist.glide.GlideImage
 import retrofit2.Call
 import retrofit2.Callback
@@ -95,8 +98,6 @@ fun GifImage(weatherDes: String) {
             .clip(RoundedCornerShape(30.dp))
     )
 }
-
-
 
 @Composable
 fun AttractionMain(navController: NavController) {
@@ -303,7 +304,7 @@ fun AttractionMain(navController: NavController) {
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .heightIn(min = 800.dp)
+                .heightIn(min = 540.dp)
                 .background(
                     color = Color.White,
                     shape = RoundedCornerShape(
@@ -320,8 +321,14 @@ fun AttractionMain(navController: NavController) {
                     0 -> {
                         MainMarketTab()
                     }
-                    else -> {
-                        Text("ㄴㄴㄴㄴ", fontSize = 14.sp, color = Color.Gray)
+                    1 -> {
+                        MainFestivalTab()
+                    }
+                    2 -> {
+                        MainTripTab()
+                    }
+                    3 -> {
+                        MainVillageTab()
                     }
                 }
             }
