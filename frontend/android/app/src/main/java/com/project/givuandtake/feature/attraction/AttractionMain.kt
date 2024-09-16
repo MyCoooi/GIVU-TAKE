@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,52 +23,31 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Tab
-import androidx.compose.material.TabRow
-import androidx.compose.material.TabRowDefaults
-import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.project.givuandtake.R
-import com.skydoves.landscapist.glide.GlideImage
-import androidx.navigation.compose.rememberNavController
-import androidx.compose.runtime.*
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
-import coil.compose.rememberImagePainter
 import com.project.givuandtake.core.apis.RetrofitInstance
 import com.project.givuandtake.core.data.WeatherData
 import com.project.givuandtake.feature.attraction.MainMarketTab
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.skydoves.landscapist.glide.GlideImage
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+
 
 fun getWeatherData(lat: Double, lon: Double, onResult: (String, String, String) -> Unit) {
     val apiKey = "fe4c6b378cbe4af2538f2d255f5bdcea" // API 키를 여기에 입력
@@ -110,121 +90,13 @@ fun GifImage(weatherDes: String) {
     // 이미지 로딩
     GlideImage(
         imageModel = assetPath,
-        modifier = Modifier.size(90.dp).clip(RoundedCornerShape(30.dp))
+        modifier = Modifier
+            .size(90.dp)
+            .clip(RoundedCornerShape(30.dp))
     )
 }
 
 
-@Composable
-fun MarketItem(
-    marketName: String,
-    address: String,
-    parkingAvailable: Boolean,
-    restroomAvailable: Boolean
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .shadow(
-                elevation = 4.dp, // 그림자 크기 조정
-                shape = RoundedCornerShape(12.dp),
-                clip = false, // 박스의 하단만 그림자가 나오도록 설정
-                ambientColor = Color.LightGray // 은은한 그림자 색상 설정
-            )
-            .background(Color.White, shape = RoundedCornerShape(12.dp)) // 박스 배경
-            .padding(16.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = address, fontSize = 18.sp, color = Color.Gray) // 추가된 주소 텍스트
-                Text(text = marketName, fontSize = 26.sp, color = Color.Black)
-            }
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally, // 가운데 정렬
-                verticalArrangement = Arrangement.Center
-            ) {
-                if (parkingAvailable) {
-                    Image(
-                        painter = painterResource(id = R.drawable.parking),  // parking.png 사용
-                        contentDescription = "Parking available",
-                        modifier = Modifier.size(24.dp) // 아이콘 크기 조정
-                    )
-                    Spacer(modifier = Modifier.height(4.dp)) // 위아래 간격 추가
-                }
-                if (restroomAvailable) {
-                    Image(
-                        painter = painterResource(id = R.drawable.toilet),  // toilet.png 사용
-                        contentDescription = "Restroom available",
-                        modifier = Modifier.size(24.dp) // 아이콘 크기 조정
-                    )
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
-fun SquareMarketItem(
-    marketName: String,
-    address: String,
-    parkingAvailable: Boolean,
-    restroomAvailable: Boolean
-) {
-    Box(
-        modifier = Modifier
-            .size(150.dp)
-            .shadow(elevation = 4.dp, shape = RoundedCornerShape(12.dp))
-            .background(Color.White, shape = RoundedCornerShape(12.dp))
-            .padding(8.dp)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // 주소 텍스트 (상단)
-            Text(
-                text = address,
-                fontSize = 12.sp,
-                color = Color.Gray,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-
-            Text(
-                text = marketName,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color.Black,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            // 주차장 및 화장실 아이콘 (중간)
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(vertical = 8.dp)
-            ) {
-                if (parkingAvailable) {
-                    Image(
-                        painter = painterResource(id = R.drawable.parking),
-                        contentDescription = "Parking available",
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp)) // 아이콘 간 간격
-                }
-                if (restroomAvailable) {
-                    Image(
-                        painter = painterResource(id = R.drawable.toilet),
-                        contentDescription = "Restroom available",
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun AttractionMain(navController: NavController) {
@@ -397,8 +269,8 @@ fun AttractionMain(navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
 
         LazyRow(
-            modifier = Modifier.fillMaxWidth(0.9f), // 전체 너비 차지
-            horizontalArrangement = Arrangement.Center, // 탭 간 간격 조절
+            modifier = Modifier.fillMaxWidth(0.9f),
+            horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
 
         ) {
@@ -406,7 +278,9 @@ fun AttractionMain(navController: NavController) {
                 Tab(
                     selected = selectedTabIndex == index,
                     onClick = { selectedTabIndex = index },
-                    modifier = Modifier.wrapContentWidth().padding(horizontal = 12.dp) // 탭 너비를 텍스트에 맞춤
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .padding(horizontal = 12.dp) // 탭 너비를 텍스트에 맞춤
                 ) {
                     Text(
                         text = tabs[index],
@@ -423,32 +297,31 @@ fun AttractionMain(navController: NavController) {
                 }
             }
         }
+
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 탭과 모든 콘텐츠를 감싸는 박스
         Box(
             modifier = Modifier
+                .fillMaxHeight()
+                .heightIn(min = 800.dp)
                 .background(
                     color = Color.White,
                     shape = RoundedCornerShape(
-                        topStart = 24.dp, // 왼쪽 상단만 둥글게
-                        topEnd = 24.dp,   // 오른쪽 상단만 둥글게
-                        bottomEnd = 0.dp, // 하단은 그대로
-                        bottomStart = 0.dp // 하단은 그대로
+                        topStart = 24.dp,
+                        topEnd = 24.dp,
+                        bottomEnd = 0.dp,
+                        bottomStart = 0.dp
                     )
                 )
                 .padding(20.dp)
         ) {
             Column {
-                // 탭에 따른 내용
                 when (selectedTabIndex) {
-                    // 전통시장 탭이 선택된 경우에만 내용이 나타남
                     0 -> {
                         MainMarketTab()
                     }
-                    // 다른 탭이 선택된 경우 빈 상태로 둠
                     else -> {
-                        Text("", fontSize = 14.sp, color = Color.Gray)
+                        Text("ㄴㄴㄴㄴ", fontSize = 14.sp, color = Color.Gray)
                     }
                 }
             }
