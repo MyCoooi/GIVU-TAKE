@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -24,6 +26,8 @@ import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
+import androidx.compose.material.TabRowDefaults
+import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -50,11 +54,15 @@ import androidx.navigation.compose.rememberNavController
 import androidx.compose.runtime.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import coil.compose.rememberImagePainter
 import com.project.givuandtake.core.apis.RetrofitInstance
 import com.project.givuandtake.core.data.WeatherData
+import com.project.givuandtake.feature.attraction.MainMarketTab
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Call
@@ -248,7 +256,6 @@ fun AttractionMain(navController: NavController) {
             weatherDes = weather
             weatherMoreDes = des
         }
-        Log.e("weather", "Failed to get weather data")
     }
 
     Column(
@@ -388,26 +395,39 @@ fun AttractionMain(navController: NavController) {
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        TabRow(
-            selectedTabIndex = selectedTabIndex,
-            backgroundColor = Color.White,
-            contentColor = Color.Black
+
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(0.9f), // 전체 너비 차지
+            horizontalArrangement = Arrangement.Center, // 탭 간 간격 조절
+            verticalAlignment = Alignment.CenterVertically
+
         ) {
-            tabs.forEachIndexed { index, tab ->
+            items(tabs.size) { index ->
                 Tab(
-                    text = { Text(tab) },
                     selected = selectedTabIndex == index,
-                    onClick = { selectedTabIndex = index }
-                )
+                    onClick = { selectedTabIndex = index },
+                    modifier = Modifier.wrapContentWidth().padding(horizontal = 12.dp) // 탭 너비를 텍스트에 맞춤
+                ) {
+                    Text(
+                        text = tabs[index],
+                        color = if (selectedTabIndex == index) Color.Black else Color.White, // 선택 여부에 따라 글씨 색상 변경
+                        fontSize = 20.sp,
+                        style = androidx.compose.ui.text.TextStyle(
+                            textDecoration = if (selectedTabIndex == index) {
+                                TextDecoration.Underline // 선택된 탭에 밑줄 적용
+                            } else {
+                                TextDecoration.None // 선택되지 않은 탭은 밑줄 없음
+                            }
+                        )
+                    )
+                }
             }
         }
-
         Spacer(modifier = Modifier.height(16.dp))
 
         // 탭과 모든 콘텐츠를 감싸는 박스
         Box(
             modifier = Modifier
-                .fillMaxSize() // 전체 화면을 채우도록 설정
                 .background(
                     color = Color.White,
                     shape = RoundedCornerShape(
@@ -420,72 +440,16 @@ fun AttractionMain(navController: NavController) {
                 .padding(20.dp)
         ) {
             Column {
-                // TabRow UI
-
-
-                Spacer(modifier = Modifier.height(16.dp))
-
                 // 탭에 따른 내용
                 when (selectedTabIndex) {
-                    0 -> Text("", fontSize = 14.sp, color = Color.Gray)
-                    1 -> Text("", fontSize = 14.sp, color = Color.Gray)
-                    2 -> Text("", fontSize = 14.sp, color = Color.Gray)
-                    3 -> Text("", fontSize = 14.sp, color = Color.Gray)
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "우리 고향 정기 전통시장",
-                    fontSize = 24.sp,
-                    modifier = Modifier.fillMaxWidth().padding(start = 8.dp)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Market 정보
-                Column {
-                    MarketItem(
-                        marketName = "관양시장",
-                        address = "동안구 관평로 336번길 31",
-                        parkingAvailable = true,
-                        restroomAvailable = true
-                    )
-                    MarketItem(
-                        marketName = "석수시장",
-                        address = "만안구 석천로 171번길 20",
-                        parkingAvailable = true,
-                        restroomAvailable = false
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "우리 고향 상설 전통시장",
-                    fontSize = 24.sp,
-                    modifier = Modifier.fillMaxWidth().padding(start = 8.dp)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 의정부시장과 같은 정사각형 박스 추가
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    SquareMarketItem(
-                        marketName = "의정부시장",
-                        address = "시민로 143번길 40",
-                        parkingAvailable = true,
-                        restroomAvailable = true
-                    )
-                    SquareMarketItem(
-                        marketName = "망미동시장",
-                        address = "동안구 관평로 336번길 31",
-                        parkingAvailable = true,
-                        restroomAvailable = true
-                    )
+                    // 전통시장 탭이 선택된 경우에만 내용이 나타남
+                    0 -> {
+                        MainMarketTab()
+                    }
+                    // 다른 탭이 선택된 경우 빈 상태로 둠
+                    else -> {
+                        Text("", fontSize = 14.sp, color = Color.Gray)
+                    }
                 }
             }
         }
