@@ -1,26 +1,82 @@
 package com.project.givuandtake.feature.attraction
 
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.project.givuandtake.core.data.FestivalMainData
+import okhttp3.*
+import java.io.IOException
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
+data class FestivalItemData(
+    val fstvlNm: String,
+    val rdnmadr: String,
+    val fstvlStartDate: String,
+    val fstvlEndDate: String,
+    val fstvlCo: String,
+)
+
+fun fetchFestivalDataWithOkHttp(onDataFetched: (List<FestivalItemData>) -> Unit) {
+    val client = OkHttpClient()
+
+    // API URL
+    val url = "http://api.data.go.kr/openapi/tn_pubr_public_cltur_fstvl_api?serviceKey=ClEl7z%2F9nNW%2Fg0NNpuJsf6wBBPJV5UWiVxKC6SzME5GsWrUpQ85zpxv1aJY4Ockw3%2Bm03%2FeCIYyg60sfOqIOxg%3D%3D&pageNo=1&numOfRows=150&type=json"
+
+    // API 요청 생성
+    val request = Request.Builder()
+        .url(url)
+        .build()
+
+    // 비동기 요청 처리
+    client.newCall(request).enqueue(object : Callback {
+        override fun onFailure(call: Call, e: IOException) {
+            Log.e("OkHttp", "Failed to fetch data", e)
+        }
+
+        override fun onResponse(call: Call, response: Response) {
+            response.use {
+                if (!response.isSuccessful) {
+                    Log.e("OkHttp", "Unexpected code $response")
+                    return
+                }
+
+                // JSON 파싱
+                val responseBody = response.body?.string()
+                if (responseBody != null) {
+                    try {
+                        // GSON을 사용해서 JSON 데이터를 FestivalMainData로 변환
+                        val gson = Gson()
+                        val festivalData = gson.fromJson(responseBody, FestivalMainData::class.java)
+
+                        // 축제 목록 전달 (필터링 없이 전체 데이터)
+                        val festivalList = festivalData.response.body.items
+                        onDataFetched(festivalList)
+                    } catch (e: Exception) {
+                        Log.e("OkHttp", "Error parsing JSON", e)
+                    }
+                }
+            }
+        }
+    })
+}
 
 @Composable
 fun FestivalItem(
@@ -32,86 +88,103 @@ fun FestivalItem(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp) // 카드들 간의 간격
+            .padding(8.dp)
             .shadow(
                 elevation = 4.dp,
                 shape = RoundedCornerShape(12.dp)
             )
             .background(Color.White, shape = RoundedCornerShape(12.dp))
-            .padding(16.dp) // 카드 내부 패딩
+            .padding(16.dp)
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            // 상단 텍스트 (주소 등)
+        Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = location,
-                fontSize = 14.sp,
+                fontSize = 10.sp,
                 color = Color.Gray
             )
             Spacer(modifier = Modifier.height(4.dp))
 
-            // 설명 텍스트
             Text(
                 text = description,
                 fontSize = 12.sp,
-                color = Color.Gray
+                color = Color.Black
             )
             Spacer(modifier = Modifier.height(8.dp))
 
-            // 타이틀과 날짜를 나란히 배치
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = title,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
-                Text(
-                    text = dateRange,
-                    fontSize = 16.sp,
-                    color = Color.Gray
-                )
-            }
+            Text(
+                text = title,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+            Text(
+                text = dateRange,
+                fontSize = 16.sp,
+                color = Color.Gray
+            )
         }
     }
 }
 
+fun formatDateWithoutYear(startDate: String, endDate: String): String {
+    // 날짜를 '-'로 split하고 월-일만 남긴다
+    val startMonthDay = startDate.split("-").slice(1..2).joinToString("-")
+    val endMonthDay = endDate.split("-").slice(1..2).joinToString("-")
+
+    return "$startMonthDay ~ $endMonthDay"
+}
+
 @Composable
 fun MainFestivalTab() {
+    // 상태 변수로 축제 데이터를 관리
+    var festivalData by remember { mutableStateOf<List<FestivalItemData>>(emptyList()) }
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "우리 고향 축제",
-            fontSize = 20.sp,
-            modifier = Modifier.padding(start = 8.dp)
-        )
-        Text(
-            text = "전체보기",
-            fontSize = 14.sp,
-            color = Color.Gray,
-            modifier = Modifier.padding(end=8.dp)
-        )
+    // API 호출
+    LaunchedEffect(Unit) {
+        fetchFestivalDataWithOkHttp { data ->
+            festivalData = data
+        }
     }
 
-    Spacer(modifier = Modifier.height(16.dp))
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "우리 고향 축제",
+                fontSize = 20.sp,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+            Text(
+                text = "전체보기",
+                fontSize = 14.sp,
+                color = Color.Gray,
+                modifier = Modifier.padding(end = 8.dp)
+            )
+        }
 
-//        LazyColumn {
-//            items(5) { // 아이템 수는 필요에 따라 변경
-//                FestivalItem(
-//                    location = "강원특별자치도 영월군 영월읍 단종로 24",
-//                    description = "조선시대국장재현+정순왕후선발대회\n+야간촛불다리기",
-//                    title = "단종문화제",
-//                    dateRange = "4-28 ~ 04-30"
-//                )
-//            }
-//        }
+        Spacer(modifier = Modifier.height(16.dp))
 
+        // 축제 데이터를 표시하는 Column
+        if (festivalData.isEmpty()) {
+            Text(text = "데이터를 불러오는 중입니다...", modifier = Modifier.align(Alignment.CenterHorizontally))
+        } else {
+            Column {
+                // 상위 3개 데이터만 출력
+                festivalData.take(3).forEach { festival ->
+                    FestivalItem(
+                        location = festival.rdnmadr ?: "주소 없음",
+                        description = festival.fstvlCo ?: "설명 없음",
+                        title = festival.fstvlNm,
+                        dateRange = formatDateWithoutYear(festival.fstvlStartDate, festival.fstvlEndDate)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+        }
+
+
+    }
 }

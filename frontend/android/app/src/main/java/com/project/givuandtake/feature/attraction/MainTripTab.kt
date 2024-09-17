@@ -61,16 +61,16 @@ fun getTripIdData(areaCode: Int, sigunguCode: Int, onResult: (List<String>) -> U
 
 @Composable
 fun MainTripTab() {
-//    var tripIdProperties by remember { mutableStateOf(listOf<TourismItem>()) }
-//
-//    LaunchedEffect(Unit) {
-//        val areaCode = 4
-//        val sigunguCode = 4
-//
-//        getTripIdData(areaCode, sigunguCode) { properties ->
-//            tripIdProperties = properties
-//        }
-//    }
+    var tripIdProperties by remember { mutableStateOf(listOf<TourismItem>()) }
+
+    LaunchedEffect(Unit) {
+        val areaCode = 4
+        val sigunguCode = 4
+
+        getTripIdData(areaCode, sigunguCode) { properties ->
+            tripIdProperties = properties
+        }
+    }
     var tripContentIds by remember { mutableStateOf(listOf<String>()) }
 
     LaunchedEffect(Unit) {
