@@ -65,7 +65,7 @@ public class JwtTokenProvider {
 
         // 3. Refresh Token 생성 후 저장
         String email = authentication.getName();
-        String refreshToken = generateRefreshToken(email, nowMillis, REFRESH_TOKEN_EXPIRATION_TIME);
+        String refreshToken = generateRefreshToken(authentication, nowMillis, REFRESH_TOKEN_EXPIRATION_TIME);
         saveRefreshToken(email, refreshToken, REFRESH_TOKEN_EXPIRATION_TIME);
 
         return JwtTokenDto.builder()
@@ -100,9 +100,16 @@ public class JwtTokenProvider {
     }
 
     // Refresh Token 생성
-    public String generateRefreshToken(String email, long nowMillis, long expirationTime) {
+    public String generateRefreshToken(Authentication authentication, long nowMillis, long expirationTime) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, email, nowMillis, expirationTime);
+
+        // 권한들 가져오기
+        String authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+
+        claims.put("auth", authorities);
+        return createToken(claims, authentication.getName(), nowMillis, expirationTime);
     }
 
     // 전달받은 파라미터로부터 토큰 생성
