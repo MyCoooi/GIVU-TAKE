@@ -2,7 +2,7 @@
   <library name="Gradle: org.springframework.boot:spring-boot-starter-aop:3.4.0-SNAPSHOT" type="java-imported" external-system-id="GRADLE">
     <properties groupId="org.springframework.boot" artifactId="spring-boot-starter-aop" version="3.4.0-SNAPSHOT" />
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-aop/3.4.0-SNAPSHOT/4922d861c9a7659eb79c75c3ce98dd1cbf96847/spring-boot-starter-aop-3.4.0-SNAPSHOT.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-aop/3.4.0-SNAPSHOT/45c583c10c36161bfad13d4cd6abb5aecaddb1a3/spring-boot-starter-aop-3.4.0-SNAPSHOT.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

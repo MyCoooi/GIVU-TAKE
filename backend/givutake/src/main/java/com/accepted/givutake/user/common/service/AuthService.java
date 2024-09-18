@@ -1,15 +1,17 @@
 package com.accepted.givutake.user.common.service;
 
-import com.accepted.givutake.user.common.model.LoginDto;
+import com.accepted.givutake.global.enumType.ExceptionEnum;
+import com.accepted.givutake.global.exception.ApiException;
+import com.accepted.givutake.user.common.model.*;
 import com.accepted.givutake.user.common.repository.UserRepository;
 import com.accepted.givutake.user.common.JwtTokenProvider;
-import com.accepted.givutake.user.common.model.JwtTokenDto;
 import com.accepted.givutake.user.common.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
@@ -19,6 +21,8 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
     public JwtTokenDto login(LoginDto loginDto) {
@@ -37,6 +41,20 @@ public class AuthService {
         JwtTokenDto jwtToken = jwtTokenProvider.generateToken(authentication);
 
         return jwtToken;
+    }
+
+    // 해당 이메일을 가진 회원의 비밀번호 검증
+    public void verifyPassword(String email, PasswordDto passwordDto) {
+        String password = passwordDto.getPassword();
+
+        // 1. userId 기반으로 비밀번호를 가져온다
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        String savedPassword = savedUserDto.getPassword();
+
+        boolean isValid = passwordEncoder.matches(password, savedPassword);
+        if (!isValid) {
+            throw new ApiException(ExceptionEnum.PASSWORD_MISMATCH_EXCEPTION);
+        }
     }
 
 }

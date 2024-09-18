@@ -2,7 +2,7 @@
   <library name="Gradle: org.springframework.boot:spring-boot-starter-security:3.4.0-SNAPSHOT" type="java-imported" external-system-id="GRADLE">
     <properties groupId="org.springframework.boot" artifactId="spring-boot-starter-security" version="3.4.0-SNAPSHOT" />
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-security/3.4.0-SNAPSHOT/a3ff02bea0b29380476fd74a94faa363114e5c61/spring-boot-starter-security-3.4.0-SNAPSHOT.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-security/3.4.0-SNAPSHOT/af8e0891109fe15af105be18eedd38371077a40e/spring-boot-starter-security-3.4.0-SNAPSHOT.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

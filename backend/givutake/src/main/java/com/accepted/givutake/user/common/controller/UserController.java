@@ -46,10 +46,11 @@ public class  UserController {
     @GetMapping
     public ResponseEntity<ResponseDto> getUserByToken(@AuthenticationPrincipal UserDetails userDetails) {
         String email = userDetails.getUsername();
-        ResponseUserDto savedUserDto = userService.getUserByEmail(email);
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        ResponseUserDto savedResponseUserDto = savedUserDto.toResponseUserDto();
 
         ResponseDto responseDto = ResponseDto.builder()
-                .data(savedUserDto)
+                .data(savedResponseUserDto)
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
@@ -87,10 +88,11 @@ public class  UserController {
             }
         }
 
-        ResponseUserDto savedUserDto = userService.modifyUserByEmail(email, modifyUserDto);
+        UserDto savedUserDto = userService.modifyUserByEmail(email, modifyUserDto);
+        ResponseUserDto savedResponseUserDto = savedUserDto.toResponseUserDto();
 
         ResponseDto responseDto = ResponseDto.builder()
-                .data(savedUserDto)
+                .data(savedResponseUserDto)
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);

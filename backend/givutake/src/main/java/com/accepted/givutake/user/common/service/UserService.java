@@ -11,6 +11,7 @@ import com.accepted.givutake.user.common.model.ModifyUserDto;
 import com.accepted.givutake.user.common.model.ResponseUserDto;
 import com.accepted.givutake.user.common.model.SignUpDto;
 import com.accepted.givutake.user.client.repository.AddressRepository;
+import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.repository.UserRepository;
 
 import jakarta.validation.*;
@@ -154,7 +155,7 @@ public class UserService {
     }
 
     // JWT 토큰으로 회원 정보 조회
-    public ResponseUserDto getUserByEmail(String email) {
+    public UserDto getUserByEmail(String email) {
         Optional<Users> optionalExistingUsers =  userRepository.findByEmail(email);
 
         if (!optionalExistingUsers.isEmpty()) {
@@ -165,7 +166,7 @@ public class UserService {
                 throw new ApiException(ExceptionEnum.USER_ALREADY_WITHDRAWN_EXCEPTION);
             }
 
-            return ResponseUserDto.toDto(optionalExistingUsers.get());
+            return UserDto.toDto(optionalExistingUsers.get());
         }
         else {
             throw new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION);
@@ -173,7 +174,7 @@ public class UserService {
     }
 
     // JWT 토큰으로 회원 정보 수정
-    public ResponseUserDto modifyUserByEmail(String email, ModifyUserDto modifyUserDto) {
+    public UserDto modifyUserByEmail(String email, ModifyUserDto modifyUserDto) {
         Optional<Users> optionalExistingUsers = userRepository.findByEmail(email);
 
         if (!optionalExistingUsers.isEmpty()) {
@@ -195,7 +196,7 @@ public class UserService {
             // 변경된 정보 저장
             Users modifiedUser = userRepository.save(savedUser);
 
-            return ResponseUserDto.toDto(modifiedUser);
+            return UserDto.toDto(modifiedUser);
         }
         else {
             throw new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION);

@@ -77,4 +77,15 @@ public class UserDto {
                 .isWithdraw(this.isWithdraw)
                 .build();
     }
+
+    public ResponseUserDto toResponseUserDto() {
+        return ResponseUserDto.builder()
+                .name(this.name)
+                .mobilePhone(this.mobilePhone)
+                .landlinePhone(this.landlinePhone)
+                .isMale(this.isMale)
+                .birth(this.birth)
+                .profileImageUrl(this.profileImageUrl)
+                .build();
+    }
 }
