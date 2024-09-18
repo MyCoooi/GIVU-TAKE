@@ -1,6 +1,7 @@
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,15 +15,12 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Tab
 import androidx.compose.material.Text
@@ -44,13 +42,11 @@ import com.project.givuandtake.core.apis.RetrofitInstance
 import com.project.givuandtake.core.data.WeatherData
 import com.project.givuandtake.feature.attraction.MainFestivalTab
 import com.project.givuandtake.feature.attraction.MainMarketTab
-
 import com.project.givuandtake.feature.attraction.MainVillageTab
 import com.skydoves.landscapist.glide.GlideImage
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-
 
 fun getWeatherData(lat: Double, lon: Double, onResult: (String, String, String) -> Unit) {
     val apiKey = "fe4c6b378cbe4af2538f2d255f5bdcea" // API 키를 여기에 입력
@@ -76,6 +72,7 @@ fun getWeatherData(lat: Double, lon: Double, onResult: (String, String, String) 
         }
     })
 }
+
 @Composable
 fun GifImage(weatherDes: String) {
     // weatherMain 값을 기반으로 이미지 파일 경로 설정
@@ -100,15 +97,50 @@ fun GifImage(weatherDes: String) {
 }
 
 @Composable
-fun AttractionMain(navController: NavController) {
+fun AttractionMain(navController: NavController, city: String?) {
     val scrollState = rememberScrollState()
 
-    var province by remember { mutableStateOf("도 선택") }
-    var state by remember { mutableStateOf("구 선택") }
-    var availableStates by remember { mutableStateOf(listOf<String>()) }
-    var selectedLocation by remember { mutableStateOf("") }
-    var expandedProvince by remember { mutableStateOf(false) }
-    var expandedState by remember { mutableStateOf(false) }
+    val displayedCity = city ?: "도 선택"
+    val displayedText = when (displayedCity) {
+        "영도" -> "부산광역시 영도구"
+        "군위" -> "대구광역시 군위군"
+
+        "남원" -> "전북특별자치도 남원시"
+        "무주" -> "전북특별자치도 무주군"
+        "순창" -> "전북특별자치도 순창군"
+        "임실" -> "전북특별자치도 임실군"
+
+        "고흥" -> "전라남도 고흥군"
+        "보성" -> "전라남도 보성군"
+        "신안" -> "전라남도 신안군"
+        "함평" -> "전라남도 함평군"
+
+        "고성" -> "경상남도 고성군"
+        "남해" -> "경상남도 남해군"
+        "하동" -> "경상남도 하동군"
+        "합천" -> "경상남도 합천군"
+
+        "문경" -> "경상북도 문경시"
+        "상주" -> "경상북도 상주시"
+        "안동" -> "경상북도 안동시"
+        "영천" -> "경상북도 영천시"
+
+        "평창" -> "강원특별자치도 평창군"
+        "횡성" -> "강원특별자치도 횡성군"
+        "태백" -> "강원특별자치도 태백시"
+        "정선" -> "강원특별자치도 정선군"
+
+        "괴산" -> "충청북도 괴산군"
+        "보은" -> "충청북도 보은군"
+        "영동" -> "충청북도 영동군"
+        "제천" -> "충청북도 제천시"
+
+        "보령" -> "충청남도 보령시"
+        "부여" -> "충청남도 부여군"
+        "공주" -> "충청남도 공주시"
+        "태안" -> "충청남도 태안군"
+        else -> displayedCity // Default case for cities not specified
+    }
 
     var temperature by remember { mutableStateOf("") }
     var weatherDes by remember { mutableStateOf("") }
@@ -119,9 +151,47 @@ fun AttractionMain(navController: NavController) {
     val tabs = listOf("전통시장", "축제", "관광지", "체험마을")
 
     LaunchedEffect(Unit) {
-        // 서울 좌표를 사용한 예시 (실제로는 선택된 위치에 따라 다르게 설정 가능)
-        val lat = 37.5665
-        val lon = 126.9780
+        val (lat, lon) = when (displayedCity) {
+            "영도" -> Pair(35.0911, 129.0689) // 부산 영도구
+            "군위" -> Pair(36.2395, 128.5727) // 대구 군위군
+
+            "남원" -> Pair(35.4164, 127.3900) // 전북 남원시
+            "무주" -> Pair(35.9078, 127.6606) // 전북 무주군
+            "순창" -> Pair(35.3741, 127.1387) // 전북 순창군
+            "임실" -> Pair(35.6175, 127.2886) // 전북 임실군
+
+            "고흥" -> Pair(34.6050, 127.2827) // 전남 고흥군
+            "보성" -> Pair(34.7717, 127.0802) // 전남 보성군
+            "신안" -> Pair(34.8277, 126.1072) // 전남 신안군
+            "함평" -> Pair(35.0650, 126.5169) // 전남 함평군
+
+            "고성" -> Pair(34.9733, 128.3236) // 경남 고성군
+            "남해" -> Pair(34.8371, 127.8925) // 경남 남해군
+            "하동" -> Pair(35.0666, 127.7514) // 경남 하동군
+            "합천" -> Pair(35.5661, 128.1654) // 경남 합천군
+
+            "문경" -> Pair(36.5866, 128.1996) // 경북 문경시
+            "상주" -> Pair(36.4106, 128.1593) // 경북 상주시
+            "안동" -> Pair(36.5684, 128.7227) // 경북 안동시
+            "영천" -> Pair(35.9733, 128.9389) // 경북 영천시
+
+            "평창" -> Pair(37.3704, 128.3906) // 강원 평창군
+            "횡성" -> Pair(37.4912, 127.9846) // 강원 횡성군
+            "태백" -> Pair(37.1640, 128.9859) // 강원 태백시
+            "정선" -> Pair(37.3800, 128.6608) // 강원 정선군
+
+            "괴산" -> Pair(36.8152, 127.7902) // 충북 괴산군
+            "보은" -> Pair(36.4897, 127.7297) // 충북 보은군
+            "영동" -> Pair(36.1750, 127.7766) // 충북 영동군
+            "제천" -> Pair(37.1325, 128.1900) // 충북 제천시
+
+            "보령" -> Pair(36.3335, 126.6129) // 충남 보령시
+            "부여" -> Pair(36.2744, 126.9094) // 충남 부여군
+            "공주" -> Pair(36.4467, 127.1192) // 충남 공주시
+            "태안" -> Pair(36.7456, 126.2970) // 충남 태안군
+
+            else -> Pair(37.5665, 126.9780) // Default to Seoul if no match
+        }
 
         // 비동기 API 호출로 날씨 데이터를 가져옴
         getWeatherData(lat, lon) { temp, weather, des ->
@@ -139,85 +209,27 @@ fun AttractionMain(navController: NavController) {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 드롭다운 메뉴
-        Box(
+        Row (
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start, // Align items to the left
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFFB3C3F4), shape = RoundedCornerShape(12.dp))
-        ) {
-            Row(
+                .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
+        ){
+
+            Text(
+                text = displayedText,
+                fontSize = 25.sp,
+                color = Color.White,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+            Icon(
+                painter = painterResource(id = R.drawable.baseline_arrow_drop_down_24),
+                contentDescription = "locationselect",
                 modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // 도 선택 버튼
-                Box(modifier = Modifier.wrapContentSize()) {
-                    OutlinedButton(
-                        onClick = { expandedProvince = !expandedProvince },
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            backgroundColor = Color(0xFFFFFFFF), // 원하는 배경색
-                            contentColor = Color.Black // 원하는 텍스트 색
-                        ),
-                        modifier = Modifier.padding(4.dp)
-                    ) {
-                        Text(text = province)
-                    }
-                    DropdownMenu(
-                        expanded = expandedProvince,
-                        onDismissRequest = { expandedProvince = false }
-                    ) {
-                        listOf("부산광역시", "서울특별시", "대구광역시").forEach { selectedProvince ->
-                            DropdownMenuItem(onClick = {
-                                province = selectedProvince
-                                expandedProvince = false
-                                availableStates = when (selectedProvince) {
-                                    "부산광역시" -> listOf("영도구")
-                                    "서울특별시" -> listOf("강남구")
-                                    "대구광역시" -> listOf("수성구")
-                                    else -> listOf()
-                                }
-                                state = "구 선택"
-                                selectedLocation = ""
-                            }) {
-                                Text(text = selectedProvince)
-                            }
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                // 구 선택 버튼
-                Box(modifier = Modifier.wrapContentSize()) {
-                    OutlinedButton(
-                        onClick = { expandedState = !expandedState },
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            backgroundColor = Color(0xFFFFFFFF), // 원하는 배경색
-                            contentColor = Color.Black // 원하는 텍스트 색
-                        ),
-                        modifier = Modifier.padding(4.dp)
-                    ) {
-                        Text(text = state)
-                    }
-                    DropdownMenu(
-                        expanded = expandedState,
-                        onDismissRequest = { expandedState = false }
-                    ) {
-                        availableStates.forEach { selectedState ->
-                            DropdownMenuItem(onClick = {
-                                state = selectedState
-                                expandedState = false
-                                if (province != "도 선택" && state != "구 선택") {
-                                    selectedLocation = "$province $state"
-                                }
-                            }) {
-                                Text(text = selectedState)
-                            }
-                        }
-                    }
-                }
-            }
+                    .size(50.dp)
+                    .clickable { navController.navigate("locationSelection") }
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -244,8 +256,9 @@ fun AttractionMain(navController: NavController) {
                             contentDescription = "Location Icon",
                             modifier = Modifier.size(24.dp) // 이미지 크기 설정
                         )
+                        Spacer(modifier = Modifier.width(3.dp))
                         Text(
-                            text = " 부산광역시 영도구",
+                            text = displayedText,
                             color = Color(0xFFFFFFFF)
                         )
                     }
