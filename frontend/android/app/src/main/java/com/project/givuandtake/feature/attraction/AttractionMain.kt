@@ -44,7 +44,7 @@ import com.project.givuandtake.core.apis.RetrofitInstance
 import com.project.givuandtake.core.data.WeatherData
 import com.project.givuandtake.feature.attraction.MainFestivalTab
 import com.project.givuandtake.feature.attraction.MainMarketTab
-import com.project.givuandtake.feature.attraction.MainTripTab
+
 import com.project.givuandtake.feature.attraction.MainVillageTab
 import com.skydoves.landscapist.glide.GlideImage
 import retrofit2.Call
