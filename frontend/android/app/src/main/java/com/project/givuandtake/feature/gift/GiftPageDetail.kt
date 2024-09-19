@@ -3,13 +3,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,68 +13,198 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.project.givuandtake.R
+import com.project.givuandtake.core.data.CartItem
 import com.project.givuandtake.core.data.Review
 import kotlinx.coroutines.launch
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.IconButton
+import com.project.givuandtake.feature.gift.addToCart
+
 
 @Composable
-fun GiftPageDetail(id: Int, name: String, price: Int, imageUrl: String, address: String) {
-    var selectedTabIndex by remember { mutableStateOf(0) }
+fun GiftPageDetail(
+    id: Int,
+    name: String,
+    price: Int,
+    imageUrl: String,
+    location: String,
+    cartItems: MutableState<List<CartItem>>, // MutableState로 변경
+    onAddToCart: () -> Unit, // 장바구니 항목 업데이트 콜백
+    navController: NavController
+) {
+    var selectedTabIndex by remember { mutableStateOf(0) } // 선택된 탭의 인덱스
+    var searchText by remember { mutableStateOf("") } // 검색창 입력값
+    val currentItem = CartItem(name = name, price = price, quantity = 1, location = location) // 현재 선택된 상품 정보
 
     Scaffold(
-        topBar = { GiftTopBar() },
-        bottomBar = { GiftBottomBar() }
+        topBar = {
+            GiftTopBar(
+                searchText = searchText,
+                onSearchTextChanged = { newText -> searchText = newText },
+                cartItemCount = cartItems.value.size, // 장바구니 아이템 개수 전달
+                onCartClick = {
+                    navController.navigate("cart_page") // 장바구니 페이지로 이동
+                }
+            )
+        },
+        bottomBar = {
+            GiftBottomBar(
+                onAddToCart = {
+                    addToCart(cartItems, currentItem) // cartItems와 currentItem을 직접 전달
+                }
+            )
+        }
     ) { innerPadding ->
-        // 전체 스크롤 가능한 컨텐츠를 LazyColumn으로 처리
+        // 상세 페이지 컨텐츠를 LazyColumn으로 구현
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
+            // 상품 정보 섹션
             item {
-                // 상품 정보
-                GiftInformation(name, price, address)
+                GiftInformation(name = name, price = price, location = location)
             }
+
+            // 탭 섹션
             item {
-                // 탭
-                GiftTabs(selectedTabIndex, onTabSelected = { selectedTabIndex = it })
+                GiftTabs(selectedTabIndex = selectedTabIndex, onTabSelected = { selectedTabIndex = it })
             }
+
+            // 선택된 탭에 따라 다른 내용을 표시
             item {
-                // 탭에 따라 다른 내용을 표시
                 when (selectedTabIndex) {
-                    0 -> ProductIntroduction()
-                    1 -> ProductReview(reviews = dummyReviews)
-                    2 -> RelatedRecommendations()
+                    0 -> ProductIntroduction() // 상품 소개 탭
+                    1 -> ProductReview(reviews = dummyReviews) // 상품 리뷰 탭
+                    2 -> RelatedRecommendations(navController = navController, location = location) // 연관 추천 탭
                 }
             }
         }
     }
 }
 
-@Composable
-fun GiftTopBar() {
-    TopAppBar(
-        title = { Text("상세 페이지", color = Color.Black) },
-        backgroundColor = Color(0xFFDAEBFD)
-    )
-}
+
 
 @Composable
-fun GiftBottomBar() {
-    BottomAppBar(backgroundColor = Color.White, elevation = 8.dp) {
+fun GiftTopBar(
+    searchText: String,
+    onSearchTextChanged: (String) -> Unit,
+    cartItemCount: Int, // 장바구니 아이템 수
+    onCartClick: () -> Unit // 장바구니 아이콘 클릭 처리
+) {
+    // Column을 사용하여 상단 영역 구성
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFFFFFFFF))
+            .padding(16.dp) // 적절한 패딩 추가
+    ) {
+        // 상단 제목 부분
+        Text(
+            text = "GIVU & TAKE",
+            style = TextStyle(color = Color(0xFFA093DE)),
+            fontSize = 14.sp
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // 제목과 장바구니 아이콘을 한 줄로 배치
         Row(
             modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween, // Row의 양 끝에 요소 배치
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // "우리 고향 기부하기" 텍스트
+            Text(
+                text = "우리 고향 기부하기",
+                fontSize = 20.sp,
+                color = Color.Black,
+                fontWeight = FontWeight.Bold // 텍스트를 진하게
+            )
+
+            // 장바구니 아이콘과 아이템 수 표시
+            Box(
+                contentAlignment = Alignment.TopEnd, // 배지를 아이콘의 우측 상단에 배치
+                modifier = Modifier.size(40.dp)
+            ) {
+                IconButton(onClick = { onCartClick() }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_add_shopping_cart_24), // 장바구니 아이콘
+                        contentDescription = "Cart Icon",
+                        tint = Color.Black
+                    )
+                }
+
+                // 장바구니 아이템 개수 표시 (배지)
+                if (cartItemCount > 0) {
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp) // 배지 크기
+                            .background(Color.Red, shape = CircleShape) // 배지 모양과 색상
+                            .align(Alignment.TopEnd) // 배지를 우측 상단에 배치
+                    ) {
+                        Text(
+                            text = cartItemCount.toString(),
+                            color = Color.White,
+                            fontSize = 10.sp,
+                            modifier = Modifier.align(Alignment.Center) // 텍스트를 배지 중앙에 배치
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 검색창 추가
+        TextField(
+            value = searchText,
+            onValueChange = { newText -> onSearchTextChanged(newText) },
+            label = { Text("상품 이름 검색") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(40.dp) // 검색창 높이 조절
+                .background(Color.White)
+                .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                .padding(4.dp),
+            singleLine = true,
+            colors = TextFieldDefaults.textFieldColors(
+                backgroundColor = Color.White,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            )
+        )
+    }
+}
+
+
+
+
+
+@Composable
+fun GiftBottomBar(onAddToCart: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.Transparent) // 배경을 투명하게 설정 -> 안되는데용?
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Button(
-                onClick = { /* 장바구니 추가 */ },
+                onClick = { onAddToCart() },
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 4.dp),
@@ -89,22 +215,24 @@ fun GiftBottomBar() {
             }
 
             Button(
-                onClick = { /* 기부하기 */ },
+                onClick = { /* TODO: 기부하기 기능 추가 */ },
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 4.dp),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFB3C3F4))
             ) {
-                Text("기부 하기", color = Color.White)
+                Text("기부하기", color = Color.White)
             }
         }
     }
 }
 
 
+
+
 @Composable
-fun GiftInformation(name: String, price: Int, address: String) {
+fun GiftInformation(name: String, price: Int, location: String) {
     Image(
         painter = painterResource(id = R.drawable.placeholder), // 실제 이미지 경로 사용
         contentDescription = "상품 이미지",
@@ -117,7 +245,7 @@ fun GiftInformation(name: String, price: Int, address: String) {
     Spacer(modifier = Modifier.height(16.dp))
 
     // 상품 정보
-    Text(text = "주소: $address", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+    Text(text = "주소: $location", fontWeight = FontWeight.Bold, fontSize = 18.sp)
     Spacer(modifier = Modifier.height(8.dp))
     Text(text = "상품 이름: $name", fontWeight = FontWeight.Bold, fontSize = 22.sp)
     Spacer(modifier = Modifier.height(8.dp))
@@ -233,39 +361,66 @@ fun ProductReview(reviews: List<Review>) {
 }
 
 
-    @Composable
-fun RelatedRecommendations() {
+@Composable
+fun RelatedRecommendations(navController: NavController, location: String) {
     Column(modifier = Modifier.padding(16.dp)) {
         // Location information
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                painter = painterResource(id = R.drawable.blank),
+                painter = painterResource(id = R.drawable.baseline_location_on_24),
                 contentDescription = "Location icon"
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("강원특별자치도 원주시", fontSize = 14.sp)
+            Text("$location", fontSize = 14.sp)
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         // Map placeholder
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(150.dp)
-                .background(Color.LightGray),
+                .height(700.dp)
+                .background(Color.White)
+                .border(
+                    width = 1.dp,
+                    color = Color.Black
+                ),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.blank),
-                contentDescription = "Map image"
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 2.dp), // 좌우 여백 추가,
+                horizontalAlignment = Alignment.CenterHorizontally // 중앙 정렬
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.gangwondo_wonju),
+                    contentDescription = "Map image",
+                    modifier = Modifier
+                        .size(300.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp)) // 이미지와 텍스트 사이 간격
+                Text(
+                    text = "강원특별자치도 원주시는 치악산국립공원을 중심으로 한 자연경관을 자랑하는 지역으로, 수도권과의 접근성이 좋아 관광객들이 자주 찾는 도시입니다.\n" +
+                            "\n" +
+                            "주요 관광지로는 빼어난 경치를 자랑하는 치악산국립공원이 있으며, 특히 남대봉에서의 전망이 매우 뛰어납니다. 오크밸리는 스키장과 골프장, 그리고 현대적인 예술 작품이 전시된 뮤지엄 산이 있어 사계절 내내 관광객들이 찾는 인기 명소입니다. 또한, 간현유원지는 여름철 피서지로 유명하며, 소금산 출렁다리 개장 이후 많은 관광객을 끌어모으고 있습니다.\n" +
+                            "\n" +
+                            "역사적으로 중요한 유적지로는 법천사지가 있으며, 국보급 유물인 지광국사탑이 복원될 예정입니다. 이 외에도 고려시대의 세곡미를 보관하던 흥원창, 그리고 박경리 작가의 집필 장소를 기념한 박경리문학공원 등이 있습니다.\n" +
+                            "\n" +
+                            "원주는 한지의 명맥을 이어온 지역으로, 매년 한지 문화제가 개최되며, 원주의 주요 특산품으로 한지가 유명합니다.",
+                    modifier = Modifier.padding(horizontal = 8.dp) // 글자 좌우 여백 추가
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Related places button
-        Button(onClick = { /* TODO: Show related places */ }) {
+        Button(onClick = {
+            // 주변 관광지 버튼 클릭 시 지역 정보를 전달하며 관광 페이지로 이동
+            navController.navigate("attraction?city=${location}")
+        }) {
             Text(text = "+ 주변 관광지")
         }
     }
@@ -290,14 +445,4 @@ val dummyReviews = listOf(
     )
 )
 
-@Preview
-@Composable
-fun preview_detail() {
-    GiftPageDetail(
-        id = 1,
-        name = "상품 이름",
-        price = 10000,
-        imageUrl = "이미지 URL",
-        address = "서울시 강남구"
-    )
-}
+

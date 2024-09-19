@@ -21,9 +21,11 @@ import com.project.givuandtake.auth.LoginScreen
 import com.project.givuandtake.auth.SignupStep1
 import com.project.givuandtake.auth.SignupStep2
 import com.project.givuandtake.auth.SignupStep3
+import com.project.givuandtake.core.data.CartItem
 import com.project.givuandtake.feature.attraction.LocationSelect
 import com.project.givuandtake.feature.funding.navigation.MainFundingCard
 import com.project.givuandtake.feature.fundinig.FundingDetailPage
+import com.project.givuandtake.feature.gift.CartPage
 import com.project.givuandtake.feature.gift.mainpage.GiftPage
 import com.project.givuandtake.feature.mainpage.MainPage
 import com.project.givuandtake.feature.mypage.ContributorScreen
@@ -38,6 +40,7 @@ class MainActivity : ComponentActivity() {
             GivuAndTakeTheme {
                 val navController = rememberNavController() // NavController 생성
                 var selectedItem by remember { mutableStateOf(0) } // 선택된 항목 상태 추가
+                val cartItems = remember { mutableStateOf(listOf<CartItem>()) } // 장바구니 상태
 
                 // A surface container using the 'background' color from the theme
                 Surface(
@@ -73,16 +76,24 @@ class MainActivity : ComponentActivity() {
                             composable("signup_step2") { SignupStep2(navController) }
                             composable("signup_step3") { SignupStep3(navController) }
                             // 기프트 페이지
-                            composable("gift") { GiftPage(navController) }
+                            composable("gift") {
+                                GiftPage(navController = navController) // cartItems는 MutableState로 전달
+                            }
+
                             // 기프트 상세 페이지
-                            addGiftPageDetailRoute() // 모듈화된 GiftPageDetailRoute 추가
+                            addGiftPageDetailRoute(navController, cartItems) // cartItems는 MutableState로 전달
+
+                            // 장바구니 페이지
+                            composable("cart_page") {
+                                CartPage(navController, cartItems) // cartItems.value로 리스트 전달
+                            }
                             // 마이 페이지
                             composable("mypage") { ContributorScreen() }
                             composable("locationSelection") {
                                 LocationSelect(navController)
                             }
                             composable("attraction?city={city}") { backStackEntry ->
-                                val city = backStackEntry.arguments?.getString("city") ?: "도 선택"
+                                val city = backStackEntry.arguments?.getString("city") ?: "지역 선택"
                                 AttractionMain(navController, city)
                             }
                         }
