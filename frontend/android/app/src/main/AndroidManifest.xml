@@ -4,6 +4,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -19,6 +20,9 @@
         <activity android:name=".core.apis.Weather" android:exported="true" />
 
         <!-- SplashActivity를 주석 처리 -->
+        <meta-data
+            android:name="com.kakao.sdk.AppKey"
+            android:value="d4fba6138a867e3f0c9a950799736de5"/>
 
         <activity
             android:name=".SplashActivity"

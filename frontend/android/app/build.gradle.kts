@@ -2,7 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
-    id ("com.google.firebase.crashlytics")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -19,6 +19,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
+        }
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
         }
     }
 
@@ -51,7 +54,12 @@ android {
     }
 }
 
+
+
 dependencies {
+    implementation ("com.kakao.sdk:v2-all:2.20.6") // 전체 모듈 설치, 2.11.0 버전부터 지원
+    implementation ("com.kakao.maps.open:android:2.11.9")
+    implementation ("com.google.accompanist:accompanist-flowlayout:0.30.0")
     implementation("com.squareup.okhttp3:okhttp:4.9.1")
     implementation("com.google.code.gson:gson:2.8.8")
     // Retrofit - 네트워크 요청 라이브러리
@@ -90,3 +98,4 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
+
