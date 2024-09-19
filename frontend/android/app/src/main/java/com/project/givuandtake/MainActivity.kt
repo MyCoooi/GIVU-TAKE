@@ -17,11 +17,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.givuandtake.FundingMainPage
+import com.kakao.vectormap.KakaoMapSdk
 import com.project.givuandtake.auth.LoginScreen
 import com.project.givuandtake.auth.SignupStep1
 import com.project.givuandtake.auth.SignupStep2
 import com.project.givuandtake.auth.SignupStep3
 import com.project.givuandtake.feature.attraction.LocationSelect
+import com.project.givuandtake.feature.attraction.TripPage
 import com.project.givuandtake.feature.funding.navigation.MainFundingCard
 import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.gift.mainpage.GiftPage
@@ -34,6 +36,7 @@ import com.project.givuandtake.ui.theme.GivuAndTakeTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        KakaoMapSdk.init(this, "d4fba6138a867e3f0c9a950799736de5")
         setContent {
             GivuAndTakeTheme {
                 val navController = rememberNavController() // NavController 생성
@@ -65,7 +68,7 @@ class MainActivity : ComponentActivity() {
                                     onBackClick = { navController.popBackStack() }
                                 )
                             }
-                            composable("attraction") { AttractionMain(navController, "") } // Navigate to AttractionMain
+                            composable("attraction") { AttractionMain(navController, "영도") } // Navigate to AttractionMain
                             // 로그인 페이지
                             composable("auth") { LoginScreen(navController) }
                             // 회원가입 페이지
@@ -85,6 +88,7 @@ class MainActivity : ComponentActivity() {
                                 val city = backStackEntry.arguments?.getString("city") ?: "도 선택"
                                 AttractionMain(navController, city)
                             }
+                            composable("trippage") { TripPage(navController) }
                         }
 
                         // 하단 네비게이션 바

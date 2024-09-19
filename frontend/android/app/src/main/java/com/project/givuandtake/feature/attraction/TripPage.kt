@@ -1,5 +1,22 @@
 package com.project.givuandtake.feature.attraction
 
+import android.R
+import android.os.Bundle
+import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.navigation.NavController
+import com.kakao.vectormap.KakaoMap
+import com.kakao.vectormap.KakaoMapReadyCallback
+import com.kakao.vectormap.MapLifeCycleCallback
+import com.kakao.vectormap.MapView
+
+
 //data class TripIdData(
 //    val response: ResponseData
 //)
@@ -94,3 +111,34 @@ package com.project.givuandtake.feature.attraction
 //            modifier = Modifier.padding(8.dp)
 //        )
 //    }
+@Composable
+fun TripPage(navController: NavController) {
+    val context = LocalContext.current
+
+    // AndroidView를 사용하여 MapView 표시
+    AndroidView(
+        factory = { ctx ->
+            MapView(ctx).apply {
+                // KakaoMap의 라이프사이클 콜백 설정
+                start(object : MapLifeCycleCallback() {
+                    override fun onMapDestroy() {
+                        Log.d("KakaoMap", "onMapDestroy")
+                    }
+
+                    override fun onMapError(p0: Exception?) {
+                        Log.e("KakaoMap", "onMapError", p0)
+                    }
+                }, object : KakaoMapReadyCallback() {
+                    override fun onMapReady(kakaoMap: KakaoMap) {
+                        // KakaoMap이 준비되었을 때 필요한 동작 추가
+                        Log.d("KakaoMap", "Map is ready")
+                    }
+                })
+            }
+        },
+        modifier = Modifier.fillMaxSize(), // 화면 전체에 지도 표시
+        update = { mapView ->
+            // 필요 시 업데이트 작업 수행
+        }
+    )
+}
