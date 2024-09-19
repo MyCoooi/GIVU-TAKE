@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
 
@@ -10,6 +12,7 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:usesCleartextTraffic="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GivuAndTake"
@@ -20,9 +23,6 @@
         <activity android:name=".core.apis.Weather" android:exported="true" />
 
         <!-- SplashActivity를 주석 처리 -->
-        <meta-data
-            android:name="com.kakao.sdk.AppKey"
-            android:value="d4fba6138a867e3f0c9a950799736de5"/>
 
         <activity
             android:name=".SplashActivity"
@@ -34,6 +34,9 @@
             </intent-filter>
         </activity>
 
+        <meta-data
+            android:name="com.naver.maps.map.CLIENT_ID"
+            android:value="wlvq2as1zo" />
 
         <!-- MainActivity를 앱 첫 화면으로 설정 -->
         <activity
