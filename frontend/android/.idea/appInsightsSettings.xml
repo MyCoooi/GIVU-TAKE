@@ -10,6 +10,7 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.project.givuandtake" />
+<<<<<<< HEAD
                   <option name="mobileSdkAppId" value="1:43858063704:android:b7dc07eca075425699352d" />
                   <option name="projectId" value="givu-and-take" />
                   <option name="projectNumber" value="43858063704" />
@@ -17,6 +18,20 @@
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
               <option name="timeIntervalDays" value="THIRTY_DAYS" />
+=======
+                  <option name="mobileSdkAppId" value="1:922143119647:android:28c9573acfb3497444f82a" />
+                  <option name="projectId" value="givuandtake-1063b" />
+                  <option name="projectNumber" value="922143119647" />
+                </ConnectionSetting>
+              </option>
+              <option name="failureTypes">
+                <list>
+                  <option value="NON_FATAL" />
+                </list>
+              </option>
+              <option name="signal" value="SIGNAL_UNSPECIFIED" />
+              <option name="timeIntervalDays" value="ONE_DAY" />
+>>>>>>> origin/fe-dev
               <option name="visibilityType" value="ALL" />
             </InsightsFilterSettings>
           </value>
