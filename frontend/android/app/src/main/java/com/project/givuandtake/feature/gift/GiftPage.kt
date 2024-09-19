@@ -46,7 +46,7 @@ import com.project.givuandtake.core.data.Product
 @Composable
 fun GiftPage(navController: NavController) {
     val products = listOf(
-        Product(1, "상품 1", 10000, "url1", "서울"),
+        Product(1, "상품 1", 10000, "url1", "강원도 평창"),
         Product(2, "상품 2", 20000, "url2", "부산"),
         Product(3, "상품 3", 30000, "url3", "대구") ,
         Product(4, "상품 4", 40000, "url4", "광주"),
@@ -74,7 +74,7 @@ fun GiftPage(navController: NavController) {
                 .padding(innerPadding) // Scaffold의 패딩을 적용
                 .padding(horizontal = 16.dp)
         ) {
-            item { 
+            item {
                 Text(text = "우리 고향 기부하기", fontWeight = FontWeight.Bold, fontSize = 25.sp)
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -313,32 +313,32 @@ fun ProductCard(product: Product, navController: NavController) {
 //    }
 //}
 
-@Composable
-fun MainNavigation() {
-    val navController = rememberNavController()
-
-    NavHost(navController = navController, startDestination = "gift_page") {
-        composable("gift_page") { GiftPage(navController) }
-        composable(
-            "gift_page_detail/{id}/{name}/{price}/{imageUrl}/{address}",
-            arguments = listOf(
-                navArgument("id") { type = NavType.IntType },
-                navArgument("name") { type = NavType.StringType },
-                navArgument("price") { type = NavType.IntType },
-                navArgument("imageUrl") { type = NavType.StringType },
-                navArgument("address") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val id = backStackEntry.arguments?.getInt("id") ?: 0
-            val name = backStackEntry.arguments?.getString("name") ?: ""
-            val price = backStackEntry.arguments?.getInt("price") ?: 0
-            val imageUrl = backStackEntry.arguments?.getString("imageUrl") ?: ""
-            val location = backStackEntry.arguments?.getString("address") ?: ""
-
-            GiftPageDetail(id, name, price, imageUrl, location)
-        }
-    }
-}
+//@Composable
+//fun MainNavigation() {
+//    val navController = rememberNavController()
+//
+//    NavHost(navController = navController, startDestination = "gift_page") {
+//        composable("gift_page") { GiftPage(navController) }
+//        composable(
+//            "gift_page_detail/{id}/{name}/{price}/{imageUrl}/{address}",
+//            arguments = listOf(
+//                navArgument("id") { type = NavType.IntType },
+//                navArgument("name") { type = NavType.StringType },
+//                navArgument("price") { type = NavType.IntType },
+//                navArgument("imageUrl") { type = NavType.StringType },
+//                navArgument("address") { type = NavType.StringType }
+//            )
+//        ) { backStackEntry ->
+//            val id = backStackEntry.arguments?.getInt("id") ?: 0
+//            val name = backStackEntry.arguments?.getString("name") ?: ""
+//            val price = backStackEntry.arguments?.getInt("price") ?: 0
+//            val imageUrl = backStackEntry.arguments?.getString("imageUrl") ?: ""
+//            val location = backStackEntry.arguments?.getString("address") ?: ""
+//
+////            GiftPageDetail(id, name, price, imageUrl, location)
+//        }
+//    }
+//}
 
 
 
