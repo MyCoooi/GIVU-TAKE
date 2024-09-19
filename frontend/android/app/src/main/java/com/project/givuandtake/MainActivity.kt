@@ -17,7 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.givuandtake.FundingMainPage
-import com.kakao.vectormap.KakaoMapSdk
+import com.naver.maps.map.NaverMapSdk
 import com.project.givuandtake.auth.LoginScreen
 import com.project.givuandtake.auth.SignupStep1
 import com.project.givuandtake.auth.SignupStep2
@@ -36,7 +36,8 @@ import com.project.givuandtake.ui.theme.GivuAndTakeTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        KakaoMapSdk.init(this, "d4fba6138a867e3f0c9a950799736de5")
+//        NaverMapSdk.getInstance(this).client =
+//            NaverMapSdk.NaverCloudPlatformClient("wlvq2as1zo")
         setContent {
             GivuAndTakeTheme {
                 val navController = rememberNavController() // NavController 생성

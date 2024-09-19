@@ -1,21 +1,30 @@
 package com.project.givuandtake.feature.attraction
 
-import android.R
 import android.os.Bundle
-import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
-import com.kakao.vectormap.KakaoMap
-import com.kakao.vectormap.KakaoMapReadyCallback
-import com.kakao.vectormap.MapLifeCycleCallback
-import com.kakao.vectormap.MapView
+import com.naver.maps.map.MapView
+import kotlinx.coroutines.launch
 
+//import android.R
+//import android.os.Bundle
+//import android.util.Log
+//import androidx.appcompat.app.AppCompatActivity
+//import androidx.compose.foundation.layout.fillMaxSize
+//import androidx.compose.material.Text
+//import androidx.compose.runtime.Composable
+//import androidx.compose.ui.Modifier
+//import androidx.compose.ui.platform.LocalContext
+//import androidx.compose.ui.viewinterop.AndroidView
+//import androidx.navigation.NavController
 
 //data class TripIdData(
 //    val response: ResponseData
@@ -111,34 +120,112 @@ import com.kakao.vectormap.MapView
 //            modifier = Modifier.padding(8.dp)
 //        )
 //    }
+//import androidx.compose.runtime.Composable
+//import androidx.compose.ui.Modifier
+//import androidx.compose.ui.viewinterop.AndroidView
+//import androidx.fragment.app.FragmentActivity
+//import androidx.fragment.app.commit
+//import androidx.navigation.NavController
+//import com.naver.maps.map.MapFragment
+//import androidx.fragment.app.FragmentContainerView
+//import com.project.yourapp.R
+//
+//@Composable
+//fun TripPage(navController: NavController) {
+//    Text("sdfg")
+
+//    AndroidView(
+//        factory = { context ->
+//            FragmentContainerView(context).apply {
+//                id = R.id.map_fragment // ID 설정
+//                (context as FragmentActivity).supportFragmentManager.commit {
+//                    // Naver MapFragment를 추가
+//                    replace(R.id.map_fragment, MapFragment.newInstance())
+//                }
+//            }
+//        },
+//        modifier = Modifier
+//            .fillMaxSize() // 전체 화면 크기 설정
+//    )
+//}
+
+//import androidx.compose.foundation.layout.fillMaxSize
+//import androidx.compose.runtime.Composable
+//import androidx.compose.ui.Modifier
+//import androidx.compose.ui.viewinterop.AndroidView
+//import androidx.fragment.app.FragmentActivity
+//import androidx.fragment.app.FragmentContainerView
+//import androidx.fragment.app.FragmentTransaction
+//import androidx.navigation.NavController
+//import com.naver.maps.map.MapFragment
+//import com.project.givuandtake.R
+//
+//@Composable
+//fun TripPage(navController: NavController) {
+//    // AndroidView를 사용하여 Compose 안에서 Naver Map을 표시
+//    AndroidView(
+//        factory = { context ->
+//            // FragmentContainerView 생성
+//            FragmentContainerView(context).apply {
+//                id = R.id.map_fragment // ID 설정
+//
+//                // FragmentManager를 통해 MapFragment 추가
+//                val fragmentManager = (context as FragmentActivity).supportFragmentManager
+//                val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
+//                val mapFragment = MapFragment.newInstance()
+//
+//                // MapFragment를 FragmentContainerView에 추가
+//                fragmentTransaction.replace(R.id.map_fragment, mapFragment)
+//                fragmentTransaction.commit()
+//            }
+//        },
+//        modifier = Modifier
+//            .fillMaxSize() // 전체 화면 크기로 설정
+//    )
+//}
+
 @Composable
 fun TripPage(navController: NavController) {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val coroutineScope = rememberCoroutineScope()
 
-    // AndroidView를 사용하여 MapView 표시
-    AndroidView(
-        factory = { ctx ->
-            MapView(ctx).apply {
-                // KakaoMap의 라이프사이클 콜백 설정
-                start(object : MapLifeCycleCallback() {
-                    override fun onMapDestroy() {
-                        Log.d("KakaoMap", "onMapDestroy")
-                    }
-
-                    override fun onMapError(p0: Exception?) {
-                        Log.e("KakaoMap", "onMapError", p0)
-                    }
-                }, object : KakaoMapReadyCallback() {
-                    override fun onMapReady(kakaoMap: KakaoMap) {
-                        // KakaoMap이 준비되었을 때 필요한 동작 추가
-                        Log.d("KakaoMap", "Map is ready")
-                    }
-                })
+    // Lifecycle 이벤트를 수신하기 위해 AndroidView의 밖에서 먼저 선언합니다.
+    // recomposition시에도 유지되어야 하기 때문에 remember { } 로 기억합니다.
+    val mapView = remember {
+        MapView(context).apply {
+            getMapAsync { naverMap ->
+//                ... 초기 설정 ...
             }
-        },
-        modifier = Modifier.fillMaxSize(), // 화면 전체에 지도 표시
-        update = { mapView ->
-            // 필요 시 업데이트 작업 수행
         }
-    )
+    }
+
+    // LifecycleEventObserver를 구현하고, 각 이벤트에 맞게 MapView의 Lifecycle 메소드를 호출합니다.
+    val lifecycleObserver = remember {
+        LifecycleEventObserver { source, event ->
+            // CoroutineScope 안에서 호출해야 정상적으로 동작합니다.
+            coroutineScope.launch {
+                when (event) {
+                    Lifecycle.Event.ON_CREATE -> mapView.onCreate(Bundle())
+                    Lifecycle.Event.ON_START -> mapView.onStart()
+                    Lifecycle.Event.ON_RESUME -> mapView.onResume()
+                    Lifecycle.Event.ON_PAUSE -> mapView.onPause()
+                    Lifecycle.Event.ON_STOP -> mapView.onStop()
+                    Lifecycle.Event.ON_DESTROY -> mapView.onDestroy()
+                    else -> Unit
+                }
+            }
+        }
+    }
+
+    // 뷰가 해제될 때 이벤트 리스너를 제거합니다.
+    DisposableEffect(true) {
+        lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(lifecycleObserver)
+        }
+    }
+
+    // 생성된 MapView 객체를 AndroidView로 Wrapping 합니다.
+    AndroidView(factory = { mapView })
 }
