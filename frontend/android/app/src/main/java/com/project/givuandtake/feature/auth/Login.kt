@@ -181,7 +181,6 @@ fun LoginScreen(navController: NavController) {
                         .size(40.dp)
                         .background(Color.LightGray, CircleShape),
                     tint = Color.Unspecified
-
                 )
                 Icon(
                     painter = painterResource(id = R.drawable.google),
