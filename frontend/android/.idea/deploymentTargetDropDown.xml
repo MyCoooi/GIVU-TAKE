@@ -2,10 +2,10 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="MainActivity">
+      <entry key="PreviewPaymentProjectInfo">
         <State />
       </entry>
-      <entry key="Weather">
+      <entry key="PreviewPaymentScreen">
         <State />
       </entry>
       <entry key="app">
@@ -23,9 +23,6 @@
           </targetSelectedWithDropDown>
           <timeTargetWasSelectedWithDropDown value="2024-09-18T14:03:44.708405300Z" />
         </State>
-      </entry>
-      <entry key="asdf">
-        <State />
       </entry>
     </value>
   </component>
