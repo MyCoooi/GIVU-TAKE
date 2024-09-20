@@ -13,23 +13,29 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.givuandtake.FundingMainPage
 import com.project.givuandtake.auth.LoginScreen
 import com.project.givuandtake.auth.SignupStep1
 import com.project.givuandtake.auth.SignupStep2
 import com.project.givuandtake.auth.SignupStep3
 import com.project.givuandtake.feature.attraction.LocationSelect
+import com.project.givuandtake.feature.attraction.TripPage
 import com.project.givuandtake.feature.funding.navigation.MainFundingCard
 import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.gift.mainpage.GiftPage
 import com.project.givuandtake.feature.mainpage.MainPage
 import com.project.givuandtake.feature.mypage.ContributorScreen
+import com.project.givuandtake.feature.mypage.sections.AnnouncementScreen
 import com.project.givuandtake.feature.navigation.addGiftPageDetailRoute
 import com.project.givuandtake.ui.navbar.BottomNavBar
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
+import com.project.payment.PaymentScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,7 +44,8 @@ class MainActivity : ComponentActivity() {
             GivuAndTakeTheme {
                 val navController = rememberNavController() // NavController 생성
                 var selectedItem by remember { mutableStateOf(0) } // 선택된 항목 상태 추가
-
+                val currentBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentDestination = currentBackStackEntry?.destination?.route
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -62,10 +69,11 @@ class MainActivity : ComponentActivity() {
                                 val fundingCard = MainFundingCard(backStackEntry)
                                 FundingDetailPage(
                                     fundingCard = fundingCard,
+                                    navController = navController,
                                     onBackClick = { navController.popBackStack() }
                                 )
                             }
-                            composable("attraction") { AttractionMain(navController, "") } // Navigate to AttractionMain
+                            composable("attraction") { AttractionMain(navController, "영도") } // Navigate to AttractionMain
                             // 로그인 페이지
                             composable("auth") { LoginScreen(navController) }
                             // 회원가입 페이지
@@ -77,7 +85,10 @@ class MainActivity : ComponentActivity() {
                             // 기프트 상세 페이지
                             addGiftPageDetailRoute() // 모듈화된 GiftPageDetailRoute 추가
                             // 마이 페이지
-                            composable("mypage") { ContributorScreen() }
+                            composable("mypage") { ContributorScreen(navController) }
+                            composable("announcement") {
+                                AnnouncementScreen(navController = navController)
+                            }
                             composable("locationSelection") {
                                 LocationSelect(navController)
                             }
@@ -85,11 +96,26 @@ class MainActivity : ComponentActivity() {
                                 val city = backStackEntry.arguments?.getString("city") ?: "도 선택"
                                 AttractionMain(navController, city)
                             }
+<<<<<<< frontend/android/app/src/main/java/com/project/givuandtake/MainActivity.kt
+                            composable(
+                                route = "trippage?city={city}", // Define the route with a city argument
+                                arguments = listOf(navArgument("city") { type = NavType.StringType }) // Declare argument type
+                            ) { backStackEntry ->
+                                // Retrieve the city from the arguments
+                                val city = backStackEntry.arguments?.getString("city")
+                                TripPage(navController, city) // Pass the city to TripPage
+                            }
+
+                            composable("payment") {
+                                PaymentScreen(navController)
+                            }
                         }
 
                         // 하단 네비게이션 바
-                        BottomNavBar(navController, selectedItem) { newIndex ->
-                            selectedItem = newIndex
+                        if (currentDestination != "trippage?city={city}") {
+                            BottomNavBar(navController, selectedItem) { newIndex ->
+                                selectedItem = newIndex
+                            }
                         }
                     }
                 }
