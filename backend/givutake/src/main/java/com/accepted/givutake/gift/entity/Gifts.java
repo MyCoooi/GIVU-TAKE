@@ -41,4 +41,9 @@ public class Gifts extends BaseTimeEntity{
 
     @Column(name = "price", nullable = false)
     private int price;
+
+    @Builder.Default
+    @Column(name = "isDelete")
+    private boolean isDelete = false;
+
 }
