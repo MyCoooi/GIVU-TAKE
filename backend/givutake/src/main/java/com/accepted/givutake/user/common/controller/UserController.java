@@ -6,6 +6,7 @@ import com.accepted.givutake.global.model.ResponseDto;
 import com.accepted.givutake.user.client.model.AddressDto;
 import com.accepted.givutake.user.common.model.*;
 import com.accepted.givutake.user.common.service.UserService;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -104,6 +105,56 @@ public class  UserController {
         String email = userDetails.getUsername();
 
         userService.withdrawUserByEmail(email);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(null)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // JWT 토큰으로 비밀번호 확인
+    @PostMapping("/password/verification")
+    public ResponseEntity<ResponseDto> verifyPassword(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody PasswordDto passwordDto) {
+        String email = userDetails.getUsername();
+
+        userService.verifyPassword(email, passwordDto);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(null)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // 비밀번호 인증 코드 발송
+    @PostMapping("/password/code")
+    public ResponseEntity<ResponseDto> sendCodeForPasswordReset(@Valid @RequestBody EmailDto emailDto) throws MessagingException {
+        userService.sendCodeForPasswordReset(emailDto);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(null)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // 비밀번호 인증 코드 검증
+    @PostMapping("/password/code/verification")
+    public ResponseEntity<ResponseDto> verifyCodeForPasswordReset(@Valid @RequestBody EmailCodeDto emailCodeDto) {
+        userService.verifyCodeForPasswordReset(emailCodeDto);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(null)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // 비밀번호 재설정
+    @PatchMapping("/password")
+    public ResponseEntity<ResponseDto> resetPassword(@Valid @RequestBody PasswordResetDto passwordResetDto) {
+        userService.resetPassword(passwordResetDto);
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)

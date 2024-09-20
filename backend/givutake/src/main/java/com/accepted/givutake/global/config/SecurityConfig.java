@@ -36,8 +36,12 @@ public class SecurityConfig {
                 // 경로별 인가 작업
                 .authorizeHttpRequests(authorize -> authorize
                                 .requestMatchers("/",
-                                        "/api/auth").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+                                        "/api/auth",
+                                        "/test/**").permitAll()
+                                .requestMatchers(HttpMethod.POST,"/api/users",
+                                        "/api/users/password/code",
+                                        "/api/users/password/code/verification").permitAll()
+                                .requestMatchers(HttpMethod.PATCH,"/api/users/password").permitAll()
                                 // 이 밖에 모든 요청에 대해서 인증을 필요로 한다는 설정
                                 .anyRequest().authenticated()
                 )

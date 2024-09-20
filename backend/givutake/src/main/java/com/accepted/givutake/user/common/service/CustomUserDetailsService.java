@@ -4,7 +4,7 @@ import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.model.UserDto;
-import com.accepted.givutake.user.common.repository.UserRepository;
+import com.accepted.givutake.user.common.repository.UsersRepository;
 import com.accepted.givutake.user.common.model.CustomUserDetailsDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final UsersRepository userRepository;
 
     // email로 사용자 엔티티 조회
     @Override

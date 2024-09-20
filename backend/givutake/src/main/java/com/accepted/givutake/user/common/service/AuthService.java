@@ -2,9 +2,8 @@ package com.accepted.givutake.user.common.service;
 
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
-import com.accepted.givutake.user.common.entity.RefreshTokenEntity;
+import com.accepted.givutake.user.common.entity.RefreshToken;
 import com.accepted.givutake.user.common.model.*;
-import com.accepted.givutake.user.common.repository.UserRepository;
 import com.accepted.givutake.user.common.JwtTokenProvider;
 import com.accepted.givutake.user.common.repository.RefreshTokenRepository;
 import io.jsonwebtoken.Claims;
@@ -14,10 +13,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 
@@ -27,9 +24,8 @@ import java.util.Optional;
 public class AuthService {
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
     public JwtTokenDto login(LoginDto loginDto) {
@@ -48,20 +44,6 @@ public class AuthService {
         JwtTokenDto jwtToken = jwtTokenProvider.generateToken(authentication);
 
         return jwtToken;
-    }
-
-    // 해당 이메일을 가진 회원의 비밀번호 검증
-    public void verifyPassword(String email, PasswordDto passwordDto) {
-        String password = passwordDto.getPassword();
-
-        // 1. userId 기반으로 비밀번호를 가져온다
-        UserDto savedUserDto = userService.getUserByEmail(email);
-        String savedPassword = savedUserDto.getPassword();
-
-        boolean isValid = passwordEncoder.matches(password, savedPassword);
-        if (!isValid) {
-            throw new ApiException(ExceptionEnum.PASSWORD_MISMATCH_EXCEPTION);
-        }
     }
 
     // refresh 토큰으로 acccess token, refresh token 재발급
@@ -87,7 +69,7 @@ public class AuthService {
     // redis에 저장된 refresh 토큰과 맞는지 검증
     public void verifyRefreshToken(String refreshToken, String email) {
         // 2. redis에 있는 refresh 토큰 꺼내오기
-        Optional<RefreshTokenEntity> existingRefreshTokenOptional = refreshTokenRepository.findByEmail(email);
+        Optional<RefreshToken> existingRefreshTokenOptional = refreshTokenRepository.findByEmail(email);
 
         // redis에 refresh 토큰이 존재하는 경우
         if (existingRefreshTokenOptional.isPresent()) {
@@ -103,7 +85,6 @@ public class AuthService {
         else {
             throw new ApiException(ExceptionEnum.NOT_FOUND_REFRESHTOKEN_EXCEPTION);
         }
-
     }
 
 }

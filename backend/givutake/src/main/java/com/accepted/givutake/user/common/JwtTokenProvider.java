@@ -1,9 +1,8 @@
 package com.accepted.givutake.user.common;
 
 import com.accepted.givutake.global.enumType.ExceptionEnum;
-import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.exception.JwtAuthenticationException;
-import com.accepted.givutake.user.common.entity.RefreshTokenEntity;
+import com.accepted.givutake.user.common.entity.RefreshToken;
 import com.accepted.givutake.user.common.model.JwtTokenDto;
 import com.accepted.givutake.user.common.repository.RefreshTokenRepository;
 import io.jsonwebtoken.*;
@@ -40,10 +39,10 @@ public class JwtTokenProvider {
     private final Key key;
     private final RefreshTokenRepository refreshTokenRepository;
 
-    // 900000 == 15분
-    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 900000;
-    // 604800000 == 7일
-    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 604800000;
+    // 3개월 == 90일(밀리초로 변환)
+    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 90 * 24 * 60 * 60 * 1000;
+    // 1년 == 365일((밀리초로 변환))
+    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 365 * 24 * 60 * 60 * 1000;
 
     // application.yml에서 secret 값 가져와서 key에 저장
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey, RefreshTokenRepository refreshTokenRepository) {
@@ -78,7 +77,7 @@ public class JwtTokenProvider {
     // Refresh Token을 Redis에 저장
     public void saveRefreshToken(String email, String refreshToken, long expirationTime) {
         long seconds = expirationTime / 1000; // 초 단위로 바꿈
-        RefreshTokenEntity refreshTokenEntity = RefreshTokenEntity.builder()
+        RefreshToken refreshTokenEntity = RefreshToken.builder()
                                                         .email(email)
                                                         .refreshToken(refreshToken)
                                                         .ttl(seconds)
