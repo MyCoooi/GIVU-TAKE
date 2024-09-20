@@ -101,6 +101,7 @@ fun AttractionMain(navController: NavController, city: String?) {
     val scrollState = rememberScrollState()
 
     val displayedCity = city ?: "도 선택"
+    Log.d("CitySelection", displayedCity)
     val displayedText = when (displayedCity) {
         "영도" -> "부산광역시 영도구"
         "군위" -> "대구광역시 군위군"
