@@ -27,6 +27,7 @@ import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.gift.mainpage.GiftPage
 import com.project.givuandtake.feature.mainpage.MainPage
 import com.project.givuandtake.feature.mypage.ContributorScreen
+import com.project.givuandtake.feature.mypage.sections.AnnouncementScreen
 import com.project.givuandtake.feature.navigation.addGiftPageDetailRoute
 import com.project.givuandtake.ui.navbar.BottomNavBar
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
@@ -79,7 +80,10 @@ class MainActivity : ComponentActivity() {
                             // 기프트 상세 페이지
                             addGiftPageDetailRoute() // 모듈화된 GiftPageDetailRoute 추가
                             // 마이 페이지
-                            composable("mypage") { ContributorScreen() }
+                            composable("mypage") { ContributorScreen(navController) }
+                            composable("announcement") {
+                                AnnouncementScreen(navController = navController)
+                            }
                             composable("locationSelection") {
                                 LocationSelect(navController)
                             }

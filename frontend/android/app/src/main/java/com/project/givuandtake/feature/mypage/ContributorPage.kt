@@ -1,8 +1,5 @@
 package com.project.givuandtake.feature.mypage
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.project.givuandtake.feature.mypage.sections.AnnouncementSection
 import com.project.givuandtake.feature.mypage.sections.CustomerServiceSection
 import com.project.givuandtake.feature.mypage.sections.CustomerServiceTitle
@@ -26,17 +24,8 @@ import com.project.givuandtake.feature.mypage.sections.SectionWithBackground
 import com.project.givuandtake.feature.mypage.sections.Shortcut
 
 
-class ContributorPage : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            ContributorScreen()
-        }
-    }
-}
-
 @Composable
-fun ContributorScreen() {
+fun ContributorScreen(navController: NavController) {
     Surface(
         modifier = Modifier
             .fillMaxSize(),
@@ -53,13 +42,10 @@ fun ContributorScreen() {
 
             // 프로필 섹션
             ProfileSection()
-
             Spacer(modifier = Modifier.height(24.dp))
-
 
             // 공지사항 섹션
             AnnouncementSection()
-
             Spacer(modifier = Modifier.height(24.dp))
 
             // 바로가기(Shortcut) 섹션 추가
@@ -68,27 +54,22 @@ fun ContributorScreen() {
 
             // 나의 기부 섹션
             SectionWithBackground("나의 기부", listOf("기부내역", "찜 목록", "펀딩내역", "기부 영수증"))
-
             Spacer(modifier = Modifier.height(24.dp))
 
             // 활동 내역 섹션
             SectionWithBackground("활동 내역", listOf("나의 댓글", "나의 배지"))
-
             Spacer(modifier = Modifier.height(24.dp))
 
             // 관리 섹션
             SectionWithBackground("관리", listOf("주소록", "카드", "회원정보"))
-
             Spacer(modifier = Modifier.height(24.dp))
 
             // 고객센터 섹션
             CustomerServiceTitle("고객센터")
-            CustomerServiceSection()
-
+            CustomerServiceSection(navController = navController)
             Spacer(modifier = Modifier.height(12.dp))
 
             Logout()
-
             Spacer(modifier = Modifier.height(24.dp))
 
         }
