@@ -30,6 +30,7 @@ import com.project.givuandtake.feature.mypage.ContributorScreen
 import com.project.givuandtake.feature.navigation.addGiftPageDetailRoute
 import com.project.givuandtake.ui.navbar.BottomNavBar
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
+import com.project.payment.PaymentScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,6 +63,7 @@ class MainActivity : ComponentActivity() {
                                 val fundingCard = MainFundingCard(backStackEntry)
                                 FundingDetailPage(
                                     fundingCard = fundingCard,
+                                    navController = navController,
                                     onBackClick = { navController.popBackStack() }
                                 )
                             }
@@ -85,6 +87,10 @@ class MainActivity : ComponentActivity() {
                                 val city = backStackEntry.arguments?.getString("city") ?: "도 선택"
                                 AttractionMain(navController, city)
                             }
+                            composable("payment") {
+                                PaymentScreen(navController)
+                            }
+
                         }
 
                         // 하단 네비게이션 바
