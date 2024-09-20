@@ -27,9 +27,11 @@ import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.gift.mainpage.GiftPage
 import com.project.givuandtake.feature.mainpage.MainPage
 import com.project.givuandtake.feature.mypage.ContributorScreen
+import com.project.givuandtake.feature.mypage.sections.AnnouncementScreen
 import com.project.givuandtake.feature.navigation.addGiftPageDetailRoute
 import com.project.givuandtake.ui.navbar.BottomNavBar
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
+import com.project.payment.PaymentScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,6 +64,7 @@ class MainActivity : ComponentActivity() {
                                 val fundingCard = MainFundingCard(backStackEntry)
                                 FundingDetailPage(
                                     fundingCard = fundingCard,
+                                    navController = navController,
                                     onBackClick = { navController.popBackStack() }
                                 )
                             }
@@ -77,7 +80,10 @@ class MainActivity : ComponentActivity() {
                             // 기프트 상세 페이지
                             addGiftPageDetailRoute() // 모듈화된 GiftPageDetailRoute 추가
                             // 마이 페이지
-                            composable("mypage") { ContributorScreen() }
+                            composable("mypage") { ContributorScreen(navController) }
+                            composable("announcement") {
+                                AnnouncementScreen(navController = navController)
+                            }
                             composable("locationSelection") {
                                 LocationSelect(navController)
                             }
@@ -85,6 +91,10 @@ class MainActivity : ComponentActivity() {
                                 val city = backStackEntry.arguments?.getString("city") ?: "도 선택"
                                 AttractionMain(navController, city)
                             }
+                            composable("payment") {
+                                PaymentScreen(navController)
+                            }
+
                         }
 
                         // 하단 네비게이션 바
