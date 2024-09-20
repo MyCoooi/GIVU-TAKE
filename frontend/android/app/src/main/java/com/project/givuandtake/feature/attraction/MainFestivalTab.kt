@@ -34,11 +34,45 @@ data class FestivalItemData(
     val fstvlCo: String,
 )
 
-fun fetchFestivalDataWithOkHttp(onDataFetched: (List<FestivalItemData>) -> Unit) {
+fun fetchFestivalDataWithOkHttp(displayedCity:String, onDataFetched: (List<FestivalItemData>) -> Unit) {
     val client = OkHttpClient()
+    val insttCode = when(displayedCity) {
+        "영도" -> 3280000
+        "군위" -> 5141000
+        "남원" -> 4701000
+        "무주" -> 4741000
+        "순창" -> "B551011"
+        "임실" -> 4761000
+        "고흥" -> 4880000
+        "보성" -> 4890000
+        "신안" -> 5010000
+        "함평" -> "B551011"
+        "고성" -> 4341000
+        "남해" -> 5430000
+        "하동" -> 5440000
+        "합천" -> 5480000
+        "문경" -> 5120000
+        "상주" -> 5110000
+        "안동" -> "B551011"
+        "영천" -> 5100000
+        "평창" -> 4281000
+        "횡성" -> 4261000
+        "태백" -> 4221000
+        "정선" -> 4291000
+        "괴산" -> "B551011"
+        "보은" -> 6430000
+        "영동" -> 6430000
+        "제천" -> 4400000
+        "보령" -> 4510000
+        "부여" -> 4570000
+        "공주" -> 4500000
+        "태안" -> 4620000
+        else -> 4181000  // 기본값
+    }
+
 
     // API URL
-    val url = "http://api.data.go.kr/openapi/tn_pubr_public_cltur_fstvl_api?serviceKey=ClEl7z%2F9nNW%2Fg0NNpuJsf6wBBPJV5UWiVxKC6SzME5GsWrUpQ85zpxv1aJY4Ockw3%2Bm03%2FeCIYyg60sfOqIOxg%3D%3D&pageNo=1&numOfRows=150&type=json"
+    val url = "http://api.data.go.kr/openapi/tn_pubr_public_cltur_fstvl_api?serviceKey=ClEl7z%2F9nNW%2Fg0NNpuJsf6wBBPJV5UWiVxKC6SzME5GsWrUpQ85zpxv1aJY4Ockw3%2Bm03%2FeCIYyg60sfOqIOxg%3D%3D&pageNo=1&numOfRows=150&type=json&insttCode=$insttCode"
 
     // API 요청 생성
     val request = Request.Builder()
@@ -135,13 +169,13 @@ fun formatDateWithoutYear(startDate: String, endDate: String): String {
 }
 
 @Composable
-fun MainFestivalTab() {
+fun MainFestivalTab(displayedCity:String) {
     // 상태 변수로 축제 데이터를 관리
     var festivalData by remember { mutableStateOf<List<FestivalItemData>>(emptyList()) }
 
     // API 호출
-    LaunchedEffect(Unit) {
-        fetchFestivalDataWithOkHttp { data ->
+    LaunchedEffect(displayedCity) {
+        fetchFestivalDataWithOkHttp(displayedCity) { data ->
             festivalData = data
         }
     }
@@ -173,7 +207,7 @@ fun MainFestivalTab() {
         } else {
             Column {
                 // 상위 3개 데이터만 출력
-                festivalData.take(3).forEach { festival ->
+                festivalData.forEach { festival ->
                     FestivalItem(
                         location = festival.rdnmadr ?: "주소 없음",
                         description = festival.fstvlCo ?: "설명 없음",

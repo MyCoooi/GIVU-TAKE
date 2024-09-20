@@ -21,7 +21,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Tab
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -31,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
@@ -209,13 +209,13 @@ fun AttractionMain(navController: NavController, city: String?) {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row (
+        Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start, // Align items to the left
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
-        ){
+        ) {
 
             Text(
                 text = displayedText,
@@ -300,7 +300,7 @@ fun AttractionMain(navController: NavController, city: String?) {
                         text = tabs[index],
                         color = if (selectedTabIndex == index) Color.Black else Color.White, // 선택 여부에 따라 글씨 색상 변경
                         fontSize = 20.sp,
-                        style = androidx.compose.ui.text.TextStyle(
+                        style = TextStyle(
                             textDecoration = if (selectedTabIndex == index) {
                                 TextDecoration.Underline // 선택된 탭에 밑줄 적용
                             } else {
@@ -332,14 +332,17 @@ fun AttractionMain(navController: NavController, city: String?) {
             Column {
                 when (selectedTabIndex) {
                     0 -> {
-                        MainMarketTab()
+                        MainMarketTab(displayedCity)
                     }
+
                     1 -> {
-                        MainFestivalTab()
+                        MainFestivalTab(displayedCity)
                     }
+
                     2 -> {
-                        MainTripTab()
+                        MainTripTab(navController = navController, displayedCity = displayedCity)
                     }
+
                     3 -> {
                         MainVillageTab()
                     }
