@@ -1,6 +1,7 @@
 package com.project.givuandtake.feature.gift.mainpage
 
 import GiftPageDetail
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,7 +26,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 
@@ -42,6 +47,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import coil.compose.AsyncImage
 import com.project.givuandtake.core.data.Product
+import com.project.givuandtake.core.datastore.dataStore
+import com.project.givuandtake.feature.gift.addToFavorites
+import com.project.givuandtake.feature.gift.getFavoriteProducts
+import kotlinx.coroutines.runBlocking
 
 @Composable
 fun GiftPage(navController: NavController) {
@@ -54,6 +63,15 @@ fun GiftPage(navController: NavController) {
         Product(6, "상품 6", 60000, "url6", "울산")
 
     )
+    val context = LocalContext.current
+    // DataStore에서 찜한 상품 목록 불러오기
+    val favoriteProductsFlow = getFavoriteProducts(context.dataStore)
+    val favoriteProductsSet by favoriteProductsFlow.collectAsState(initial = emptySet())
+    // favoriteProductsSet을 사용하여 favoriteProducts를 필터링한 List<Product>로 변환
+    val favoriteProducts = products.filter { product ->
+        favoriteProductsSet.contains(product.id.toString()) // id와 매칭되는 Product만 필터링
+    }
+
 
     var searchText by remember { mutableStateOf("") }
 
@@ -112,14 +130,25 @@ fun GiftPage(navController: NavController) {
 //            }
             item {
                 Text(text = "맞춤 추천상품", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                ProductGrid(navController, products)
+                ProductGrid(
+                    navController = navController,
+                    products = products,
+                    favoriteProducts = favoriteProducts,
+                    onFavoriteToggle = { product ->
+                        runBlocking { // suspend 함수를 호출하기 위해 runBlocking 사용
+                            addToFavorites(context.dataStore, product)
+                        }
+                    }
+                )
                 Spacer(modifier = Modifier.height(16.dp))
             }
-            item {
-                Text(text = "최고 인기 상품", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                ProductGrid(navController, products)
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+//            item {
+//                Text(text = "최고 인기 상품", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+//                ProductGrid(navController, products, favoriteProducts.value, onFavoriteToggle = { product ->
+//                    addToFavorites(favoriteProducts, product) // 찜 상태 토글 함수 호출
+//                })
+//                Spacer(modifier = Modifier.height(16.dp))
+//            }
         }
     }
 }
@@ -205,10 +234,13 @@ fun CategoryButton(text: String, icon: Painter) {
 //    }
 //}
 
-
-
 @Composable
-fun ProductGrid(navController: NavController, products: List<Product>) {
+fun ProductGrid(
+    navController: NavController,
+    products: List<Product>,
+    favoriteProducts: List<Product>,
+    onFavoriteToggle: (Product) -> Unit
+) {
     // LazyRow를 감싸는 Box에 테두리 추가
     Box(
         modifier = Modifier
@@ -217,7 +249,6 @@ fun ProductGrid(navController: NavController, products: List<Product>) {
             .border(0.5.dp, Color.Black.copy(alpha = 0.3f)) // 테두리 추가
             .padding(vertical = 8.dp)
             .background(Color(0xFFDAEBFD))
-
     ) {
         LazyRow(
             modifier = Modifier
@@ -225,32 +256,30 @@ fun ProductGrid(navController: NavController, products: List<Product>) {
                 .padding(horizontal = 8.dp), // 내부 여백 추가
             horizontalArrangement = Arrangement.spacedBy(16.dp) // 카드 간격 설정
         ) {
-            // 2개씩 묶어서 2개의 Column에 배치
-            items(products.chunked(2)) { chunkedProducts ->
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(16.dp) // 각 아이템 간의 간격 설정
-                ) {
-                    chunkedProducts.forEach { product ->
-                        ProductCard(product = product, navController = navController)
-                    }
-                }
+            items(products) { product ->
+                // favoriteProducts 목록에서 동일한 id를 가진 상품이 있는지 확인
+                val isFavorite = favoriteProducts.any { it.id == product.id }
+
+                ProductCard(
+                    product = product,
+                    navController = navController,
+                    isFavorite = isFavorite,
+                    onFavoriteToggle = onFavoriteToggle
+                )
             }
         }
     }
 }
 
-//            // 상품 이미지
-//            AsyncImage(
-//                model = product.imageUrl, // product 객체의 이미지 URL 사용
-//                contentDescription = "Product Image",
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(150.dp), // 이미지 크기 설정
-//                contentScale = ContentScale.Crop // 이미지 비율 맞춤
-//            )
+
 
 @Composable
-fun ProductCard(product: Product, navController: NavController) {
+fun ProductCard(
+    product: Product,
+    navController: NavController,
+    isFavorite: Boolean, // 찜 상태
+    onFavoriteToggle: (Product) -> Unit // 찜 토글 콜백
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -296,56 +325,59 @@ fun ProductCard(product: Product, navController: NavController) {
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(text = product.location, fontSize = 14.sp) // 지역 정보
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // 찜(좋아요) 버튼
+            IconButton(onClick = { onFavoriteToggle(product) }) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                    contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                    tint = if (isFavorite) Color.Red else Color.Gray, // 색상 설정
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun FavoriteProductList(navController: NavController, favoriteProducts: List<Product>) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(16.dp)
+    ) {
+        items(favoriteProducts) { product ->
+            ProductCard(
+                product = product,
+                navController = navController,
+                isFavorite = true, // 찜한 목록이므로 모두 찜 상태
+                onFavoriteToggle = { /* TODO: 구현: 찜 목록에서 제거 */ }
+            )
         }
     }
 }
 
 
-//@Composable
-//fun BottomNavBar() {
-//    BottomAppBar(
-//        backgroundColor = Color.White,
-//        contentColor = Color.Black
-//    ) {
-//        Text(text = "홈", modifier = Modifier.padding(16.dp))
-//        Text(text = "기부", modifier = Modifier.padding(16.dp))
-//        Text(text = "마이페이지", modifier = Modifier.padding(16.dp))
-//    }
-//}
-
-//@Composable
-//fun MainNavigation() {
-//    val navController = rememberNavController()
-//
-//    NavHost(navController = navController, startDestination = "gift_page") {
-//        composable("gift_page") { GiftPage(navController) }
-//        composable(
-//            "gift_page_detail/{id}/{name}/{price}/{imageUrl}/{address}",
-//            arguments = listOf(
-//                navArgument("id") { type = NavType.IntType },
-//                navArgument("name") { type = NavType.StringType },
-//                navArgument("price") { type = NavType.IntType },
-//                navArgument("imageUrl") { type = NavType.StringType },
-//                navArgument("address") { type = NavType.StringType }
-//            )
-//        ) { backStackEntry ->
-//            val id = backStackEntry.arguments?.getInt("id") ?: 0
-//            val name = backStackEntry.arguments?.getString("name") ?: ""
-//            val price = backStackEntry.arguments?.getInt("price") ?: 0
-//            val imageUrl = backStackEntry.arguments?.getString("imageUrl") ?: ""
-//            val location = backStackEntry.arguments?.getString("address") ?: ""
-//
-////            GiftPageDetail(id, name, price, imageUrl, location)
-//        }
-//    }
-//}
-
-
-
 
 @Preview
 @Composable
-fun preview() {
-    val navController = rememberNavController() // Preview를 위한 NavController 생성
-    GiftPage(navController) // DonationPage에 NavController 전달
+fun PreviewProductCard() {
+    val navController = rememberNavController()
+
+    var favoriteProducts by remember { mutableStateOf(emptyList<Product>()) }
+
+    val product = Product(id = 1, name = "상품 1", price = 10000, imageUrl = "", location = "서울")
+
+    ProductCard(
+        product = product,
+        navController = navController,
+        isFavorite = favoriteProducts.contains(product),
+        onFavoriteToggle = { toggledProduct ->
+            favoriteProducts = if (favoriteProducts.contains(toggledProduct)) {
+                favoriteProducts - toggledProduct // 찜 목록에서 제거
+            } else {
+                favoriteProducts + toggledProduct // 찜 목록에 추가
+            }
+        }
+    )
 }

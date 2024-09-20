@@ -2,6 +2,8 @@ package com.project.givuandtake.feature.navigation
 
 import GiftPageDetail
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -10,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.project.givuandtake.core.data.CartItem
 import com.project.givuandtake.feature.gift.addToCart
+import kotlinx.coroutines.launch
 
 
 fun NavGraphBuilder.addGiftPageDetailRoute(navController: NavController, cartItems: MutableState<List<CartItem>>) {
@@ -29,6 +32,10 @@ fun NavGraphBuilder.addGiftPageDetailRoute(navController: NavController, cartIte
         val imageUrl = backStackEntry.arguments?.getString("imageUrl") ?: ""
         val location = backStackEntry.arguments?.getString("location") ?: ""
 
+        // Composable에서 필요한 Context 및 CoroutineScope 가져오기
+        val context = LocalContext.current
+        val scope = rememberCoroutineScope()
+
         GiftPageDetail(
             id = id,
             name = name,
@@ -39,7 +46,9 @@ fun NavGraphBuilder.addGiftPageDetailRoute(navController: NavController, cartIte
             onAddToCart = {
                 // currentItem을 CartItem으로 생성하여 추가
                 val newItem = CartItem(name = name, price = price, quantity = 1, location = location)
-                addToCart(cartItems, newItem) // addToCart 함수를 사용하여 장바구니에 아이템 추가
+                scope.launch {
+                    addToCart(context, newItem) // DataStore를 사용하여 장바구니에 아이템 추가
+                }
             },
             navController = navController
         )

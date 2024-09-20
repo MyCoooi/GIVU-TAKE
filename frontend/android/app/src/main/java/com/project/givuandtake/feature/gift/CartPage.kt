@@ -1,5 +1,6 @@
 package com.project.givuandtake.feature.gift
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,15 +19,22 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.project.givuandtake.R
 import com.project.givuandtake.core.data.CartItem
+import com.project.givuandtake.core.datastore.getCartItems
+import com.project.givuandtake.core.datastore.saveCartItems
+import kotlinx.coroutines.runBlocking
 
 @Composable
-fun CartPage(navController: NavController, cartItems: MutableState<List<CartItem>>) {
+fun CartPage(navController: NavController, context: Context) {
+    // DataStore에서 장바구니 항목 불러오기
+    val cartItemsFlow = getCartItems(context)
+    val cartItems by cartItemsFlow.collectAsState(initial = emptyList())
+
     Scaffold(
         topBar = {
             CartTopBar()
         },
         bottomBar = {
-            CartBottomBar(totalAmount = cartItems.value.sumOf { it.price * it.quantity })
+            CartBottomBar(totalAmount = cartItems.sumOf { it.price * it.quantity })
         }
     ) { innerPadding ->
         LazyColumn(
@@ -35,19 +43,34 @@ fun CartPage(navController: NavController, cartItems: MutableState<List<CartItem
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
-            items(cartItems.value) { cartItem ->
-                CartItemView(cartItem = cartItem, onQuantityChange = { item, newQuantity ->
-                    // 수량 변경 시 처리 로직
-                    val updatedItems = cartItems.value.map {
-                        if (it == item) it.copy(quantity = newQuantity) else it
+            items(cartItems) { cartItem ->
+                CartItemView(
+                    cartItem = cartItem,
+                    onQuantityChange = { item, newQuantity ->
+                        // 수량 변경 시 처리 로직
+                        val updatedItems = cartItems.map {
+                            if (it == item) it.copy(quantity = newQuantity) else it
+                        }
+                        // DataStore에 업데이트된 리스트 저장
+                        runBlocking {
+                            saveCartItems(context, updatedItems)
+                        }
+                    },
+                    onDeleteItem = { item ->
+                        // 삭제 시 처리 로직
+                        val updatedItems = cartItems.filter { it != item }
+                        // DataStore에 업데이트된 리스트 저장
+                        runBlocking {
+                            saveCartItems(context, updatedItems)
+                        }
                     }
-                    cartItems.value = updatedItems // 업데이트된 리스트로 상태 업데이트
-                })
+                )
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
 }
+
 
 @Composable
 fun CartTopBar() {
@@ -82,7 +105,8 @@ fun CartBottomBar(totalAmount: Int) {
 @Composable
 fun CartItemView(
     cartItem: CartItem,
-    onQuantityChange: (CartItem, Int) -> Unit // 수량 변경을 처리하는 콜백 함수
+    onQuantityChange: (CartItem, Int) -> Unit, // 수량 변경을 처리하는 콜백 함수
+    onDeleteItem: (CartItem) -> Unit // 삭제를 처리하는 콜백 함수
 ) {
     Card(
         modifier = Modifier
@@ -106,6 +130,19 @@ fun CartItemView(
                     Text(text = "수량: ${cartItem.quantity}", fontSize = 14.sp)
                     Text(text = "${cartItem.location}", fontSize = 14.sp, color = Color.Gray)
                 }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                // 삭제 버튼
+                IconButton(onClick = { onDeleteItem(cartItem) }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_delete_24), // 삭제 아이콘
+                        contentDescription = "Delete Item",
+                        tint = Color.Black,
+                        modifier = Modifier.size(24.dp) // 아이콘 크기 설정
+                    )
+                }
+
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -151,19 +188,5 @@ fun CartItemView(
     }
 }
 
-@Preview
-@Composable
-fun PreviewCartPage() {
-    val navController = rememberNavController()
 
-    // MutableState를 사용하여 상태를 관리
-    val cartItems = remember { mutableStateOf(
-        listOf(
-            CartItem(name = "상품 1", price = 50000, quantity = 1, location = "원주시"),
-            CartItem(name = "상품 2", price = 50000, quantity = 1, location = "원주시"),
-            CartItem(name = "상품 3", price = 50000, quantity = 1, location = "원주시")
-        )
-    ) }
 
-    CartPage(navController = navController, cartItems = cartItems)
-}
