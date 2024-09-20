@@ -31,9 +31,11 @@ import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.gift.mainpage.GiftPage
 import com.project.givuandtake.feature.mainpage.MainPage
 import com.project.givuandtake.feature.mypage.ContributorScreen
+import com.project.givuandtake.feature.mypage.sections.AnnouncementScreen
 import com.project.givuandtake.feature.navigation.addGiftPageDetailRoute
 import com.project.givuandtake.ui.navbar.BottomNavBar
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
+import com.project.payment.PaymentScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,6 +69,7 @@ class MainActivity : ComponentActivity() {
                                 val fundingCard = MainFundingCard(backStackEntry)
                                 FundingDetailPage(
                                     fundingCard = fundingCard,
+                                    navController = navController,
                                     onBackClick = { navController.popBackStack() }
                                 )
                             }
@@ -82,7 +85,10 @@ class MainActivity : ComponentActivity() {
                             // 기프트 상세 페이지
                             addGiftPageDetailRoute() // 모듈화된 GiftPageDetailRoute 추가
                             // 마이 페이지
-                            composable("mypage") { ContributorScreen() }
+                            composable("mypage") { ContributorScreen(navController) }
+                            composable("announcement") {
+                                AnnouncementScreen(navController = navController)
+                            }
                             composable("locationSelection") {
                                 LocationSelect(navController)
                             }
@@ -90,6 +96,7 @@ class MainActivity : ComponentActivity() {
                                 val city = backStackEntry.arguments?.getString("city") ?: "도 선택"
                                 AttractionMain(navController, city)
                             }
+<<<<<<< frontend/android/app/src/main/java/com/project/givuandtake/MainActivity.kt
                             composable(
                                 route = "trippage?city={city}", // Define the route with a city argument
                                 arguments = listOf(navArgument("city") { type = NavType.StringType }) // Declare argument type
@@ -97,6 +104,10 @@ class MainActivity : ComponentActivity() {
                                 // Retrieve the city from the arguments
                                 val city = backStackEntry.arguments?.getString("city")
                                 TripPage(navController, city) // Pass the city to TripPage
+                            }
+
+                            composable("payment") {
+                                PaymentScreen(navController)
                             }
                         }
 
