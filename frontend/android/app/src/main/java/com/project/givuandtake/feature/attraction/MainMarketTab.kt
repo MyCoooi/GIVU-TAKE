@@ -111,11 +111,7 @@ fun MarketItem(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .shadow(
-                elevation = 4.dp,
-                clip = false,
-                ambientColor = Color.LightGray
-            )
+            .shadow(elevation = 4.dp, shape = RoundedCornerShape(12.dp))
             .background(Color.White, shape = RoundedCornerShape(12.dp))
             .padding(19.dp)
     ) {
@@ -170,14 +166,15 @@ fun MarketItem(
             }
         }
     }
+    Spacer(modifier = Modifier.height(16.dp))
 }
 
-fun getMarketData(onResult: (List<MarketProperties>) -> Unit) {
-    val apiKey = "F5ED5493-0442-3CE8-81F3-0B307BFF22B4" // vworld API 키를 입력
+fun getMarketData(displayedCity:String, onResult: (List<MarketProperties>) -> Unit) {
+    val apiKey = "F5ED5493-0442-3CE8-81F3-0B307BFF22B4"
     val request = "GetFeature"
     val data = "LT_P_TRADSIJANG"
     val geomFilter = "BOX(124.60,33.00,131.87,38.63)"
-    val attrFilter = "adr_road:like:동해"
+    val attrFilter = "adr_road:like:$displayedCity"
 
     MarketRetrofitInstance.api.getMarketData(request, apiKey, data, geomFilter, attrFilter).enqueue(object : Callback<TraditionalMarketData> {
         override fun onResponse(call: Call<TraditionalMarketData>, response: Response<TraditionalMarketData>) {
@@ -199,11 +196,11 @@ fun getMarketData(onResult: (List<MarketProperties>) -> Unit) {
     })
 }
 @Composable
-fun MainMarketTab() {
+fun MainMarketTab(displayedCity: String) {
     var marketProperties by remember { mutableStateOf(listOf<MarketProperties>()) }
 
     LaunchedEffect(Unit) {
-        getMarketData { properties ->
+        getMarketData(displayedCity) { properties ->
             marketProperties = properties
         }
     }
@@ -211,7 +208,9 @@ fun MainMarketTab() {
     Text(
         text = "우리 고향 정기 전통시장",
         fontSize = 20.sp,
-        modifier = Modifier.fillMaxWidth().padding(start = 8.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 8.dp)
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -244,7 +243,9 @@ fun MainMarketTab() {
     Text(
         text = "우리 고향 상설 전통시장",
         fontSize = 20.sp,
-        modifier = Modifier.fillMaxWidth().padding(start = 8.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 8.dp)
     )
 
     Spacer(modifier = Modifier.height(16.dp))
