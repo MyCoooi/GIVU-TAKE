@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.givuandtake.FundingCard
 import kotlinx.coroutines.launch
@@ -45,7 +46,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FundingDetailPage(fundingCard: FundingCard, onBackClick: () -> Unit) {
+fun FundingDetailPage(fundingCard: FundingCard, onBackClick: () -> Unit, navController: NavController) {
     val formattedAmount = NumberFormat.getNumberInstance(Locale.KOREA).format(fundingCard.amounts.first)
     val formattedGoalAmount = NumberFormat.getNumberInstance(Locale.KOREA).format(fundingCard.amounts.second)
     val scrollState = rememberScrollState()
@@ -67,7 +68,7 @@ fun FundingDetailPage(fundingCard: FundingCard, onBackClick: () -> Unit) {
         },
         bottomBar = {
             Button(
-                onClick = { /* TODO: 기부하기 액션 */ },
+                onClick = { navController.navigate("payment") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
