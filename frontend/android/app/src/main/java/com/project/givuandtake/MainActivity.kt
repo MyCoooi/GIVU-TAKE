@@ -13,11 +13,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.givuandtake.FundingMainPage
-import com.naver.maps.map.NaverMapSdk
 import com.project.givuandtake.auth.LoginScreen
 import com.project.givuandtake.auth.SignupStep1
 import com.project.givuandtake.auth.SignupStep2
@@ -36,13 +38,12 @@ import com.project.givuandtake.ui.theme.GivuAndTakeTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        NaverMapSdk.getInstance(this).client =
-//            NaverMapSdk.NaverCloudPlatformClient("wlvq2as1zo")
         setContent {
             GivuAndTakeTheme {
                 val navController = rememberNavController() // NavController 생성
                 var selectedItem by remember { mutableStateOf(0) } // 선택된 항목 상태 추가
-
+                val currentBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentDestination = currentBackStackEntry?.destination?.route
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -89,12 +90,21 @@ class MainActivity : ComponentActivity() {
                                 val city = backStackEntry.arguments?.getString("city") ?: "도 선택"
                                 AttractionMain(navController, city)
                             }
-                            composable("trippage") { TripPage(navController) }
+                            composable(
+                                route = "trippage?city={city}", // Define the route with a city argument
+                                arguments = listOf(navArgument("city") { type = NavType.StringType }) // Declare argument type
+                            ) { backStackEntry ->
+                                // Retrieve the city from the arguments
+                                val city = backStackEntry.arguments?.getString("city")
+                                TripPage(navController, city) // Pass the city to TripPage
+                            }
                         }
 
                         // 하단 네비게이션 바
-                        BottomNavBar(navController, selectedItem) { newIndex ->
-                            selectedItem = newIndex
+                        if (currentDestination != "trippage?city={city}") {
+                            BottomNavBar(navController, selectedItem) { newIndex ->
+                                selectedItem = newIndex
+                            }
                         }
                     }
                 }
