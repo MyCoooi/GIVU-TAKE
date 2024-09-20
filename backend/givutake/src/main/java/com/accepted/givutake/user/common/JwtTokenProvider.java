@@ -39,10 +39,10 @@ public class JwtTokenProvider {
     private final Key key;
     private final RefreshTokenRepository refreshTokenRepository;
 
-    // 3개월 == 90일(밀리초로 변환)
-    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 90 * 24 * 60 * 60 * 1000;
-    // 1년 == 365일((밀리초로 변환))
-    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 365 * 24 * 60 * 60 * 1000;
+    // 3개월 == 90일(밀리초)
+    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 7452000000L;
+    // 1년 == 365일(밀리초)
+    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 31536000000L;
 
     // application.yml에서 secret 값 가져와서 key에 저장
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey, RefreshTokenRepository refreshTokenRepository) {
