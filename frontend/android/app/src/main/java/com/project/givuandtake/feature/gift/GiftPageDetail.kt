@@ -1,11 +1,16 @@
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,7 +31,17 @@ import com.project.givuandtake.core.data.Review
 import kotlinx.coroutines.launch
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.IconButton
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextDecoration
+import com.project.givuandtake.core.datastore.getCartItems
+import com.project.givuandtake.core.datastore.saveCartItems
 import com.project.givuandtake.feature.gift.addToCart
+import kotlinx.coroutines.runBlocking
+
+
+object TabState {
+    var selectedTabIndex by mutableStateOf(0) // Compose가 상태 변화를 감지할 수 있도록 mutableStateOf 사용
+}
 
 
 @Composable
@@ -43,6 +58,17 @@ fun GiftPageDetail(
     var selectedTabIndex by remember { mutableStateOf(0) } // 선택된 탭의 인덱스
     var searchText by remember { mutableStateOf("") } // 검색창 입력값
     val currentItem = CartItem(name = name, price = price, quantity = 1, location = location) // 현재 선택된 상품 정보
+    val scope = rememberCoroutineScope() // CoroutineScope for async operations
+
+    // LocalContext.current는 Composable 함수 내부에서만 사용 가능
+    val context = LocalContext.current
+
+    // 장바구니 아이템 불러오기
+    LaunchedEffect(Unit) {
+        getCartItems(context).collect { savedItems ->
+            cartItems.value = savedItems // DataStore에서 불러온 항목들을 cartItems에 반영
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -58,7 +84,14 @@ fun GiftPageDetail(
         bottomBar = {
             GiftBottomBar(
                 onAddToCart = {
-                    addToCart(cartItems, currentItem) // cartItems와 currentItem을 직접 전달
+                    scope.launch {
+                        // DataStore에 currentItem 추가
+                        val updatedCartItems = cartItems.value.toMutableList().apply {
+                            add(currentItem)
+                        }
+                        saveCartItems(context, updatedCartItems)
+                        cartItems.value = updatedCartItems // UI에 반영
+                    }
                 }
             )
         }
@@ -77,12 +110,12 @@ fun GiftPageDetail(
 
             // 탭 섹션
             item {
-                GiftTabs(selectedTabIndex = selectedTabIndex, onTabSelected = { selectedTabIndex = it })
+                GiftTabs(selectedTabIndex = TabState.selectedTabIndex, onTabSelected = { TabState.selectedTabIndex = it })
             }
 
             // 선택된 탭에 따라 다른 내용을 표시
             item {
-                when (selectedTabIndex) {
+                when (TabState.selectedTabIndex) {
                     0 -> ProductIntroduction() // 상품 소개 탭
                     1 -> ProductReview(reviews = dummyReviews) // 상품 리뷰 탭
                     2 -> RelatedRecommendations(navController = navController, location = location) // 연관 추천 탭
@@ -168,7 +201,19 @@ fun GiftTopBar(
         TextField(
             value = searchText,
             onValueChange = { newText -> onSearchTextChanged(newText) },
-            label = { Text("상품 이름 검색") },
+            label = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically // 아이콘과 텍스트를 수평으로 정렬
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search, // 돋보기 아이콘
+                        contentDescription = "Search Icon",
+                        modifier = Modifier.size(20.dp) // 아이콘 크기 조절
+                    )
+                    Spacer(modifier = Modifier.width(8.dp)) // 아이콘과 텍스트 사이의 간격
+                    Text("상품 이름 검색")
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(40.dp) // 검색창 높이 조절
@@ -231,6 +276,27 @@ fun GiftBottomBar(onAddToCart: () -> Unit) {
 
 
 
+
+//fun GiftInformation(name: String, price: Int, location: String) {
+//    Image(
+//        painter = painterResource(id = R.drawable.placeholder), // 실제 이미지 경로 사용
+//        contentDescription = "상품 이미지",
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .height(250.dp),
+//        contentScale = ContentScale.Crop
+//    )
+//
+//    Spacer(modifier = Modifier.height(16.dp))
+//
+//    // 상품 정보
+//    Text(text = "주소: $location", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+//    Spacer(modifier = Modifier.height(8.dp))
+//    Text(text = "상품 이름: $name", fontWeight = FontWeight.Bold, fontSize = 22.sp)
+//    Spacer(modifier = Modifier.height(8.dp))
+//    Text(text = "가격: $price 원", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+//    Spacer(modifier = Modifier.height(16.dp))
+//}
 @Composable
 fun GiftInformation(name: String, price: Int, location: String) {
     Image(
@@ -244,13 +310,72 @@ fun GiftInformation(name: String, price: Int, location: String) {
 
     Spacer(modifier = Modifier.height(16.dp))
 
+    // 주소 정보
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.Place,
+            contentDescription = "Location icon",
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = location, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+    }
+
+    Spacer(modifier = Modifier.height(8.dp))
+
     // 상품 정보
-    Text(text = "주소: $location", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+    Text(text = "$name", fontWeight = FontWeight.Bold, fontSize = 20.sp)
     Spacer(modifier = Modifier.height(8.dp))
-    Text(text = "상품 이름: $name", fontWeight = FontWeight.Bold, fontSize = 22.sp)
-    Spacer(modifier = Modifier.height(8.dp))
-    Text(text = "가격: $price 원", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+
+    // 가느다란 실선 추가
+    Divider(
+        color = Color.Gray,  // 실선 색상 설정 (흰색으로 설정)
+        thickness = 1.dp,  // 실선 두께 설정
+        modifier = Modifier.fillMaxWidth()  // 실선의 길이를 박스 전체에 맞춤
+    )
+
     Spacer(modifier = Modifier.height(16.dp))
+
+    // 후기 버튼과 보기 링크
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .width(200.dp)
+                .height(50.dp)  // 사각형 박스의 높이 설정
+                .clip(RoundedCornerShape(16.dp))  // 모서리를 둥글게 설정
+                .background(Color(0xFFA093DE))  // 배경 색상 설정 (사진에 맞는 보라색)
+                .padding(8.dp),  // 텍스트 주변 여백
+            contentAlignment = Alignment.Center  // 텍스트 중앙 정렬
+        ) {
+            Text(text = "₩$price 원", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)  // 텍스트 색상을 흰색으로 설정
+        }
+
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically // 텍스트와 아이콘을 수평으로 중앙 정렬
+        ) {
+            Text(
+                text = "후기 ${dummyReviews.size}개 보기",
+                fontSize = 16.sp,
+                textDecoration = TextDecoration.Underline,
+                color = Color(0xFFB3C3F4),
+                modifier = Modifier.clickable {
+                    TabState.selectedTabIndex = 1  // 리뷰 탭으로 전환
+                }
+            )
+            Icon(
+                imageVector = Icons.Default.ArrowForward, // > 아이콘
+                contentDescription = "Arrow Icon",
+                modifier = Modifier.size(16.dp) // 아이콘 크기 조정
+            )
+        }
+    }
 }
 
 @Composable
@@ -419,7 +544,8 @@ fun RelatedRecommendations(navController: NavController, location: String) {
         // Related places button
         Button(onClick = {
             // 주변 관광지 버튼 클릭 시 지역 정보를 전달하며 관광 페이지로 이동
-            navController.navigate("attraction?city=${location}")
+            val shortLocation = location.takeLast(2)
+            navController.navigate("attraction?city=$shortLocation")
         }) {
             Text(text = "+ 주변 관광지")
         }

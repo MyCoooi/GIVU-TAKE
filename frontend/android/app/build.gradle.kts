@@ -71,6 +71,10 @@ dependencies {
     //Coil 추가
     implementation("io.coil-kt:coil-compose:2.4.0")
 
+    // datastore 추가
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+
+
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.5")
     implementation("androidx.activity:activity-compose:1.9.2")

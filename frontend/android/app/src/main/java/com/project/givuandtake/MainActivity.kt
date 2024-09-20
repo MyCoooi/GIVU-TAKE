@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -85,8 +86,10 @@ class MainActivity : ComponentActivity() {
 
                             // 장바구니 페이지
                             composable("cart_page") {
-                                CartPage(navController, cartItems) // cartItems.value로 리스트 전달
+                                val context = LocalContext.current // LocalContext를 사용하여 Context 가져오기
+                                CartPage(navController = navController, context = context) // context 전달
                             }
+
                             // 마이 페이지
                             composable("mypage") { ContributorScreen() }
                             composable("locationSelection") {

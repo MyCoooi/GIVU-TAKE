@@ -1,10 +1,22 @@
 package com.project.givuandtake.feature.gift
 
-import androidx.compose.runtime.MutableState
+import android.content.Context
 import com.project.givuandtake.core.data.CartItem
+import com.project.givuandtake.core.datastore.getCartItems
+import com.project.givuandtake.core.datastore.saveCartItems
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 
-fun addToCart(cartItems: MutableState<List<CartItem>>, newItem: CartItem) {
-    cartItems.value = cartItems.value.toMutableList().apply {
+// DataStore에서 cartItems를 관리하는 함수
+suspend fun addToCart(context: Context, newItem: CartItem) {
+    // 현재 장바구니 항목을 DataStore에서 불러옴
+    val currentCartItems = withContext(Dispatchers.IO) {
+        getCartItems(context).first()
+    }
+
+    // 장바구니 업데이트 로직
+    val updatedCartItems = currentCartItems.toMutableList().apply {
         val existingItemIndex = indexOfFirst { it.name == newItem.name && it.location == newItem.location }
 
         if (existingItemIndex != -1) {
@@ -16,6 +28,10 @@ fun addToCart(cartItems: MutableState<List<CartItem>>, newItem: CartItem) {
             add(newItem)
         }
     }
+
+    // DataStore에 업데이트된 장바구니 저장
+    saveCartItems(context, updatedCartItems)
 }
+
 
 
