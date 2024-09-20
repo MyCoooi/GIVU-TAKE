@@ -260,8 +260,7 @@ fun TripPage(navController: NavController, city: String?) {
         }
     }
 
-    Log.d("TourismData", "$tripContentIds")
-    Log.d("TourismData", "$tripMainData")
+
 
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -310,6 +309,8 @@ fun TripPage(navController: NavController, city: String?) {
 
         else -> Pair(37.5665, 126.9780) // Default to Seoul if no match
     }
+    Log.d("TourismData", "$tripContentIds")
+    Log.d("TourismData", "$tripMainData")
 
     val options = NaverMapOptions()
         .camera(CameraPosition(LatLng(lat, lon), 11.0))
