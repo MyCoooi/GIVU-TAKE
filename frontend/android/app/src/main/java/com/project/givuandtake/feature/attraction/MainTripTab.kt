@@ -144,7 +144,6 @@ fun TripItem(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
             .shadow(
                 elevation = 4.dp,
                 shape = RoundedCornerShape(12.dp)
@@ -209,7 +208,9 @@ fun MainTripTab(displayedCity: String = "영도", navController: NavController) 
         }
     }
 
-    Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -232,6 +233,8 @@ fun MainTripTab(displayedCity: String = "영도", navController: NavController) 
                     }
             )
         }
+
+        Spacer(modifier = Modifier.height(20.dp))
 
         if (tourismData.isEmpty()) {
             Text(text = "데이터를 불러오는 중입니다...", modifier = Modifier.align(Alignment.CenterHorizontally))
