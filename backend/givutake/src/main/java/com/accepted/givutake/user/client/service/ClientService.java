@@ -2,6 +2,7 @@ package com.accepted.givutake.user.client.service;
 
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
+import com.accepted.givutake.global.repository.RegionRepository;
 import com.accepted.givutake.user.client.entity.Addresses;
 import com.accepted.givutake.user.client.model.AddressAddDto;
 import com.accepted.givutake.user.client.model.AddressDetailViewDto;
@@ -24,6 +25,7 @@ public class ClientService {
 
     private final AddressService addressService;
     private final UserService userService;
+    private final RegionRepository regionRepository;
 
     // 아이디가 email인 사용자의 모든 주소 조회
     public List<AddressViewDto> getAddressesByEmail(String email) {
@@ -54,36 +56,48 @@ public class ClientService {
 
     // 아이디가 email인 사용자의 주소 추가
     public void addAddressByEmail(String email, AddressAddDto addressAddDto) {
-        // TODO: 1. 지역 코드 유효성 검사
-
-        // 2. email로 부터 userIdx값 가져오기
+        // 1. email로 부터 userIdx값 가져오기
         UserDto savedUserDto = userService.getUserByEmail(email);
         int userIdx = savedUserDto.getUserIdx();
 
+        // 2. 지역 코드 넣기
+        String sido = addressAddDto.getSido();
+        Integer regionIdx = regionRepository.findRegionIdxBySido(sido);
+
+        if (regionIdx == null) {
+            throw new ApiException(ExceptionEnum.RUNTIME_EXCEPTION);
+        }
+
         // 3. DB에 주소 추가
-        Addresses addresses = addressAddDto.toEntity(userIdx);
+        Addresses addresses = addressAddDto.toEntity(userIdx, regionIdx);
         addressService.saveAddress(addresses);
     }
 
     // 아이디가 email인 사용자의 주소 수정
     public AddressDetailViewDto modifyAddressByEmail(String email, AddressUpdateDto addressUpdateDto) {
-        // TODO: 1. 지역 코드 유효성 검사
-
-        // 2. email로 부터 userIdx값 가져오기
+        // 1. email로 부터 userIdx값 가져오기
         UserDto savedUserDto = userService.getUserByEmail(email);
         int userIdx = savedUserDto.getUserIdx();
 
-        // 3. DB에서 주소 조회
+        // 2. DB에서 주소 조회
         int addressIdx = addressUpdateDto.getAddressIdx();
         Addresses savedAddresses = addressService.getAddressByAddressIdx(addressIdx);
 
-        // 4. userIdx값이 일치하지 않는 경우 수정 불가
+        // 3. userIdx값이 일치하지 않는 경우 수정 불가
         if (userIdx != savedAddresses.getUserIdx()) {
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
 
+        // 4. 지역 코드 넣기
+        String sido = addressUpdateDto.getSido();
+        Integer regionIdx = regionRepository.findRegionIdxBySido(sido);
+
+        if (regionIdx == null) {
+            throw new ApiException(ExceptionEnum.RUNTIME_EXCEPTION);
+        }
+
         // 5. 수정
-        savedAddresses.setRegionIdx(addressUpdateDto.getRegionIdx());
+        savedAddresses.setRegionIdx(regionIdx);
         savedAddresses.setAddressName(addressUpdateDto.getAddressName());
         savedAddresses.setZoneCode(addressUpdateDto.getZoneCode());
         savedAddresses.setAddress(addressUpdateDto.getAddress());

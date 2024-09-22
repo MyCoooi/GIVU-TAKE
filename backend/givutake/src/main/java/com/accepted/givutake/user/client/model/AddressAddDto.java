@@ -15,9 +15,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class AddressAddDto {
 
-    @NotNull(message = "지역 코드는 필수 입력 값 입니다.")
-    protected Integer regionIdx;
-
     @NotBlank(message = "배송지명은 필수 입력 값 입니다.")
     @Size(max = 8, message = "배송지명은 최대 8자 이하여야 합니다.")
     protected String addressName;
@@ -103,10 +100,10 @@ public class AddressAddDto {
 //    private BigDecimal latitude;
 //    private BigDecimal longitude;
 
-    public Addresses toEntity(int userIdx) {
+    public Addresses toEntity(int userIdx, int regionIdx) {
         return Addresses.builder()
                 .userIdx(userIdx)
-                .regionIdx(this.regionIdx)
+                .regionIdx(regionIdx)
                 .addressName(this.addressName)
                 .zoneCode(this.zoneCode)
                 .address(this.address)

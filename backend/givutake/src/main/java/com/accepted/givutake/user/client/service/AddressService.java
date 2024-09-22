@@ -29,7 +29,8 @@ public class AddressService {
         // 대표 주소일 때, 기존의 대표 주소가 있으면 비활성화
         if (addresses.isRepresentative()) {
             // JPA의 영속성 문제로 이미 addresses가 db에서 대표주소로 설정되어 있다면, isRepresentative값이 true로 변경되지 않는 문제가 있어 아래 과정 추가
-            if (!addressRepository.findIsRepresentativeByAddressIdx(addresses.getAddressIdx())) {
+            Boolean isRepresentative = addressRepository.findIsRepresentativeByAddressIdx(addresses.getAddressIdx());
+            if (isRepresentative == null || !isRepresentative) {
                 addressRepository.updateRepresentativeStatusFalse(addresses.getUserIdx());
             }
         }

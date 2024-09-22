@@ -1,5 +1,6 @@
 package com.accepted.givutake.user.common.service;
 
+import com.accepted.givutake.global.entity.Region;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.repository.RegionRepository;
@@ -98,7 +99,15 @@ public class UserService {
 
             // DB에 저장
             Users savedUser = userRepository.save(signUpDto.toEntity());
-            addressService.saveAddress(addressAddDto.toEntity(savedUser.getUserIdx()));
+            // 지역 코드 넣기
+            String sido = addressAddDto.getSido();
+            Integer regionIdx = regionRepository.findRegionIdxBySido(sido);
+
+            if (regionIdx == null) {
+                throw new ApiException(ExceptionEnum.RUNTIME_EXCEPTION);
+            }
+
+            addressService.saveAddress(addressAddDto.toEntity(savedUser.getUserIdx(), regionIdx));
         }
     }
 
