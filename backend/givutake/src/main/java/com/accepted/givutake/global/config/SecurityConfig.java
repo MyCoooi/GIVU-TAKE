@@ -1,8 +1,8 @@
 package com.accepted.givutake.global.config;
 
+import com.accepted.givutake.global.handler.CustomAccessDeniedHandler;
 import com.accepted.givutake.user.common.JwtTokenProvider;
 import com.accepted.givutake.user.common.filiter.JwtAuthenticationFilter;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +24,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -35,6 +36,7 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 // 경로별 인가 작업
                 .authorizeHttpRequests(authorize -> authorize
+                                .requestMatchers("/api/users/client/**").hasRole("CLIENT")
                                 .requestMatchers("/",
                                         "/api/auth",
                                         "/test/**").permitAll()
@@ -51,8 +53,10 @@ public class SecurityConfig {
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 // 예외 처리 설정
                 .exceptionHandling(exceptionHandling -> exceptionHandling
+                        // 인증되지 않은 사용자에 대한 처리
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-//                        .accessDeniedHandler(customAccessDeniedHandler)
+                        // 인가되지 않은 사용자에 대한 처리
+                        .accessDeniedHandler(customAccessDeniedHandler)
                 );
 
         return http.build();
