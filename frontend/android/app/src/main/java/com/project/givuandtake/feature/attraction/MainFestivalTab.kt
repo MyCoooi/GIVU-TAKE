@@ -2,6 +2,7 @@ package com.project.givuandtake.feature.attraction
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.google.gson.Gson
 import com.project.givuandtake.core.data.FestivalMainData
 import okhttp3.Call
@@ -178,7 +180,7 @@ fun formatDateWithoutYear(startDate: String, endDate: String): String {
 }
 
 @Composable
-fun MainFestivalTab(displayedCity:String) {
+fun MainFestivalTab(displayedCity:String, navController: NavController) {
     // 상태 변수로 축제 데이터를 관리
     var festivalData by remember { mutableStateOf<List<FestivalItemData>>(emptyList()) }
 
@@ -204,7 +206,12 @@ fun MainFestivalTab(displayedCity:String) {
                 text = "전체보기",
                 fontSize = 14.sp,
                 color = Color.Gray,
-                modifier = Modifier.padding(end = 8.dp)
+                modifier = Modifier
+                    .padding(end = 8.dp)
+                    .clickable {
+                        val city = displayedCity
+                        navController.navigate("festivalpage?city=$city")
+                    }
             )
         }
 
@@ -216,7 +223,7 @@ fun MainFestivalTab(displayedCity:String) {
         } else {
             Column {
                 // 상위 3개 데이터만 출력
-                festivalData.forEach { festival ->
+                festivalData.take(3).forEach { festival ->
                     FestivalItem(
                         location = festival.rdnmadr ?: "주소 없음",
                         description = festival.fstvlCo ?: "설명 없음",

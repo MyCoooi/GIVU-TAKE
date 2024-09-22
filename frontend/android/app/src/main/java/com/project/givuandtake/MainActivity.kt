@@ -26,6 +26,7 @@ import com.project.givuandtake.auth.SignupStep1
 import com.project.givuandtake.auth.SignupStep2
 import com.project.givuandtake.auth.SignupStep3
 import com.project.givuandtake.core.data.CartItem
+import com.project.givuandtake.feature.attraction.FestivalPage
 import com.project.givuandtake.feature.attraction.LocationSelect
 import com.project.givuandtake.feature.attraction.TripPage
 import com.project.givuandtake.feature.funding.navigation.MainFundingCard
@@ -113,10 +114,18 @@ class MainActivity : ComponentActivity() {
                                 val city = backStackEntry.arguments?.getString("city")
                                 TripPage(navController, city) // Pass the city to TripPage
                             }
+                            composable(
+                                route = "festivalpage?city={city}", // Define the route with a city argument
+                                arguments = listOf(navArgument("city") { type = NavType.StringType }) // Declare argument type
+                            ) { backStackEntry ->
+                                // Retrieve the city from the arguments
+                                val city = backStackEntry.arguments?.getString("city")
+                                FestivalPage(navController, city) // Pass the city to TripPage
+                            }
                         }
 
                         // 하단 네비게이션 바
-                        if (currentDestination != "trippage?city={city}") {
+                        if (currentDestination != "trippage?city={city}" && currentDestination != "festivalpage?city={city}") {
                             BottomNavBar(navController, selectedItem) { newIndex ->
                                 selectedItem = newIndex
                             }
