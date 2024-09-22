@@ -21,7 +21,6 @@ public class UserDto {
     private String landlinePhone;
     private Boolean isMale;
     private LocalDateTime birth;
-    private Integer addressIdx;
     private Integer regionIdx;
     private Integer cardIdx;
     private String profileImageUrl;
@@ -42,7 +41,6 @@ public class UserDto {
                 .landlinePhone(user.getLandlinePhone())
                 .isMale(user.getIsMale())
                 .birth(user.getBirth())
-                .addressIdx(user.getAddressIdx())
                 .regionIdx(user.getRegionIdx())
                 .cardIdx(user.getCardIdx())
                 .profileImageUrl(user.getProfileImageUrl())
@@ -65,7 +63,6 @@ public class UserDto {
                 .landlinePhone(this.landlinePhone)
                 .isMale(this.isMale)
                 .birth(this.birth)
-                .addressIdx(this.addressIdx)
                 .regionIdx(this.regionIdx)
                 .cardIdx(this.cardIdx)
                 .profileImageUrl(this.profileImageUrl)

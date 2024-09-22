@@ -4,7 +4,10 @@ import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.repository.RegionRepository;
 import com.accepted.givutake.user.client.entity.Addresses;
+import com.accepted.givutake.user.client.model.AddressAddDto;
 import com.accepted.givutake.user.client.model.AddressDto;
+import com.accepted.givutake.user.client.service.AddressService;
+import com.accepted.givutake.user.client.service.ClientService;
 import com.accepted.givutake.user.common.entity.EmailCode;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.enumType.Roles;
@@ -33,21 +36,21 @@ public class UserService {
 
     private final UsersRepository userRepository;
     private final RegionRepository regionRepository;
-    private final AddressRepository addressRepository;
     private final EmailCodeRepository emailCodeRepository;
     private final MailService mailService;
+    private final AddressService addressService;
     private final PasswordEncoder passwordEncoder;
     private final Validator validator;
 
     // 1800(초) == 30분
     private static final long EMAIL_CODE_EXPIRATION_TIME = 1800;
 
-    public UserService(UsersRepository userRepository, RegionRepository regionRepository, AddressRepository addressRepository, PasswordEncoder passwordEncoder, EmailCodeRepository emailCodeRepository, MailService mailService) {
+    public UserService(UsersRepository userRepository, RegionRepository regionRepository, PasswordEncoder passwordEncoder, EmailCodeRepository emailCodeRepository, MailService mailService, AddressService addressService) {
         this.userRepository = userRepository;
         this.regionRepository = regionRepository;
-        this.addressRepository = addressRepository;
         this.emailCodeRepository = emailCodeRepository;
         this.mailService = mailService;
+        this.addressService = addressService;
         this.passwordEncoder = passwordEncoder;
 
         // ValidatorFactory와 Validator 초기화
@@ -56,8 +59,7 @@ public class UserService {
     }
 
     // 이메일 사용자 회원가입
-    @Transactional
-    public void emailSignUp(SignUpDto signUpDto, AddressDto addressDto) {
+    public void emailSignUp(SignUpDto signUpDto, AddressAddDto addressAddDto) {
         Roles role = signUpDto.getRoles();
 
         // 유효하지 않은 권한정보가 들어온 경우
@@ -75,7 +77,7 @@ public class UserService {
         // 1. 수혜자 회원가입 관련 입력값 검증 및 처리
         if (role == Roles.ROLE_CORPORATION) {
             // 주소값은 들어오면 안된다
-            if (addressDto != null) {
+            if (addressAddDto != null) {
                 throw new ApiException(ExceptionEnum.UNEXPECTED_REPRESENTATIVE_ADDRESS_EXCEPTION);
             }
             // 수혜자 회원가입 유효성 검증
@@ -86,20 +88,17 @@ public class UserService {
         // 2. 사용자 회원가입 관련 입력값 검증 및 처리
         else {
             // 대표 주소는 필수 입력 값
-            if (addressDto == null) {
+            if (addressAddDto == null) {
                 throw new ApiException(ExceptionEnum.MISSING_REPRESENTATIVE_ADDRESS_EXCEPTION);
             }
             // 사용자 회원가입 유효성 검증
             checkArgumentValidityForClientSignUp(signUpDto);
             // 대표 주소 DTO의 유효성을 수동으로 검증
-            validateAddressDto(addressDto);
+            validateAddressAddDto(addressAddDto);
 
-            // DB에 회원 정보 저장
+            // DB에 저장
             Users savedUser = userRepository.save(signUpDto.toEntity());
-            // DB에 주소 정보 저장
-            Addresses savedAddress = addressRepository.save(addressDto.toEntity(savedUser.getUserIdx()));
-            // 대표 주소로 지정
-            userRepository.updateAddressIdxByUserIdx(savedUser.getUserIdx(), savedAddress.getAddressIdx());
+            addressService.saveAddress(addressAddDto.toEntity(savedUser.getUserIdx()));
         }
     }
 
@@ -140,9 +139,9 @@ public class UserService {
     }
 
     // 대표 주소 DTO의 유효성을 수동으로 검증
-    public void validateAddressDto(AddressDto addressDto) {
+    public void validateAddressAddDto(AddressAddDto addressAddDto) {
         // 1. AddressDto 객체의 유효성 검사 수행
-        Set<ConstraintViolation<AddressDto>> violations = validator.validate(addressDto);
+        Set<ConstraintViolation<AddressAddDto>> violations = validator.validate(addressAddDto);
 
         // 2. 유효성 검증 결과에서 오류가 있는지 확인
         if (!violations.isEmpty()) {
@@ -239,7 +238,8 @@ public class UserService {
             if (savedUser.getRoles() == Roles.ROLE_ADMIN) {
                 throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
             }
-
+            
+            // TODO: 회원과 관련된 다른 모든 데이터도 삭제 처리
             userRepository.updateIsWithdrawByEmail(email, true);
         }
         else {

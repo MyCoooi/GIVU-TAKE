@@ -3,6 +3,7 @@ package com.accepted.givutake.user.common.controller;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.model.ResponseDto;
+import com.accepted.givutake.user.client.model.AddressAddDto;
 import com.accepted.givutake.user.client.model.AddressDto;
 import com.accepted.givutake.user.common.model.*;
 import com.accepted.givutake.user.common.service.UserService;
@@ -32,9 +33,9 @@ public class  UserController {
     public ResponseEntity<ResponseDto> emailSignUp(@Valid @RequestBody CompositionSignUpDto compositionSignUpDto) {
 
         SignUpDto signUpDto = compositionSignUpDto.getSignUpDto();
-        AddressDto addressDto = compositionSignUpDto.getAddressDto();
+        AddressAddDto addressAddDto = compositionSignUpDto.getAddressAddDto();
 
-        userService.emailSignUp(signUpDto, addressDto);
+        userService.emailSignUp(signUpDto, addressAddDto);
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
