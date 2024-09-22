@@ -3,3 +3,4 @@ uvicorn
 PyJWT
 python-multipart
 pydantic
+python-dotenv
