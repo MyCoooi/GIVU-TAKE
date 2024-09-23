@@ -38,19 +38,21 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 // 경로별 인가 작업
                 .authorizeHttpRequests(authorize -> authorize
-                                .requestMatchers("/api/users/client/**").hasRole("CLIENT")
-                                .requestMatchers(HttpMethod.POST, "/api/government-fundings/reviews").hasRole("CORPORATION")
-                                .requestMatchers(HttpMethod.PATCH, "/api/government-fundings/reviews").hasRole("CORPORATION")
-                                .requestMatchers("/",
-                                        "/api/auth",
-                                        "/test/**").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/government-fundings/reviews").permitAll()
-                                .requestMatchers(HttpMethod.POST,"/api/users",
-                                        "/api/users/password/code",
-                                        "/api/users/password/code/verification").permitAll()
-                                .requestMatchers(HttpMethod.PATCH,"/api/users/password").permitAll()
-                                // 이 밖에 모든 요청에 대해서 인증을 필요로 한다는 설정
-                                .anyRequest().authenticated()
+                        .requestMatchers("/api/users/client/**").hasRole("CLIENT")
+                        .requestMatchers(HttpMethod.POST, "/api/government-fundings/reviews").hasRole("CORPORATION")
+                        .requestMatchers(HttpMethod.PATCH, "/api/government-fundings/reviews").hasRole("CORPORATION")
+                        .requestMatchers("/",
+                                "/api/auth",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/government-fundings/reviews").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/users",
+                                "/api/users/password/code",
+                                "/api/users/password/code/verification").permitAll()
+                        .requestMatchers(HttpMethod.PATCH,"/api/users/password").permitAll()
+                        // 이 밖에 모든 요청에 대해서 인증을 필요로 한다는 설정
+                        .anyRequest().authenticated()
                 )
                 // JWT를 사용하기 때문에 세션을 사용하지 않음
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

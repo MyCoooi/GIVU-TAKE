@@ -20,9 +20,6 @@ public class GiftReviews extends BaseTimeEntity {
     @Column(name = "review_idx")
     private int reviewIdx;
 
-    @Column(name = "review_title", nullable = false, length = 50) // 후기 제목
-    private String reviewTitle;
-
     @Column(name = "review_content", nullable = false, length = 6000) // 후기 내용
     private String reviewContent;
 
@@ -33,4 +30,8 @@ public class GiftReviews extends BaseTimeEntity {
     @ManyToOne(targetEntity = Users.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_idx", referencedColumnName = "user_idx")// 회원 ID 외래키 설정
     private Users users;
+
+    @Builder.Default
+    @Column(name = "isDelete")
+    private boolean isDelete = false;
 }

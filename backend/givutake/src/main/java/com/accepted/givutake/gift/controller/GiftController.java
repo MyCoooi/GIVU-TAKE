@@ -1,14 +1,20 @@
 package com.accepted.givutake.gift.controller;
 
-import com.accepted.givutake.gift.entity.GiftReviews;
 import com.accepted.givutake.gift.entity.Gifts;
 import com.accepted.givutake.gift.model.*;
 import com.accepted.givutake.gift.service.GiftService;
+import com.accepted.givutake.global.enumType.ActEnum;
+import com.accepted.givutake.global.enumType.ContentTypeEnum;
+import com.accepted.givutake.global.enumType.ExceptionEnum;
+import com.accepted.givutake.global.exception.ApiException;
+import com.accepted.givutake.global.model.CreateLogDto;
 import com.accepted.givutake.global.model.ResponseDto;
+import com.accepted.givutake.global.service.UserViewLogService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +28,7 @@ import java.util.List;
 public class GiftController {
 
     private final GiftService giftService;
+    private final UserViewLogService userViewLogService;
 
     @GetMapping // 답례품 조회
     public ResponseEntity<ResponseDto> getGifts(
@@ -38,8 +45,17 @@ public class GiftController {
     }
 
     @GetMapping("/{giftIdx}") // 특정 답례품 조회
-    public ResponseEntity<ResponseDto> getGift(@PathVariable int giftIdx) {
+    public ResponseEntity<ResponseDto> getGift(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable int giftIdx) {
         GiftDto gift = giftService.getGift(giftIdx);
+        if(userDetails != null) {
+            CreateLogDto logDto = CreateLogDto.builder()
+                    .contentType(ContentTypeEnum.GIFT)
+                    .act(ActEnum.READ)
+                    .build();
+            userViewLogService.createLog(userDetails.getUsername(), logDto);
+        }
         ResponseDto responseDto = ResponseDto.builder()
                 .data(gift)
                 .build();
@@ -50,7 +66,13 @@ public class GiftController {
     public ResponseEntity<ResponseDto> createGift(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody CreateGiftDto request) {
-        giftService.createGift(userDetails.getUsername(), request);
+        Gifts gift = giftService.createGift(userDetails.getUsername(), request);
+        CreateLogDto logDto = CreateLogDto.builder()
+                .contentType(ContentTypeEnum.GIFT)
+                .act(ActEnum.CREATE)
+                .contentIdx(gift.getGiftIdx())
+                .build();
+        userViewLogService.createLog(userDetails.getUsername(), logDto);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
                 .build();
@@ -62,7 +84,13 @@ public class GiftController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int giftsIdx,
             @Valid @RequestBody UpdateGiftDto request) {
-        giftService.updateGift(userDetails.getUsername(), giftsIdx, request);
+        Gifts gift = giftService.updateGift(userDetails.getUsername(), giftsIdx, request);
+        CreateLogDto logDto = CreateLogDto.builder()
+                .contentType(ContentTypeEnum.GIFT)
+                .act(ActEnum.UPDATE)
+                .contentIdx(gift.getGiftIdx())
+                .build();
+        userViewLogService.createLog(userDetails.getUsername(), logDto);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
                 .build();
@@ -72,8 +100,16 @@ public class GiftController {
     @DeleteMapping("/{giftsIdx}") // 답례품 삭제
     public ResponseEntity<ResponseDto> deleteGift(
             @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable int giftsIdx) {
-        giftService.deleteGift(userDetails.getUsername(), giftsIdx);
+            @PathVariable int giftsIdx)
+    {
+        GrantedAuthority firstAuthority = userDetails.getAuthorities().stream().findFirst().orElseThrow(() -> new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION));
+        Gifts gift = giftService.deleteGift(firstAuthority.getAuthority(), userDetails.getUsername(), giftsIdx);
+        CreateLogDto logDto = CreateLogDto.builder()
+                .contentType(ContentTypeEnum.GIFT)
+                .act(ActEnum.DELETE)
+                .contentIdx(gift.getGiftIdx())
+                .build();
+        userViewLogService.createLog(userDetails.getUsername(), logDto);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
                 .build();
@@ -131,7 +167,8 @@ public class GiftController {
     public ResponseEntity<ResponseDto> deleteGiftReview(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int reviewIdx) {
-        giftService.deleteGiftReviews(userDetails.getUsername(), reviewIdx);
+        GrantedAuthority firstAuthority = userDetails.getAuthorities().stream().findFirst().orElseThrow(() -> new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION));
+        giftService.deleteGiftReviews(firstAuthority.getAuthority(), userDetails.getUsername(), reviewIdx);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
                 .build();

@@ -74,6 +74,8 @@ public enum ExceptionEnum {
     NOT_FOUND_WISH_EXCEPTION(HttpStatus.NOT_FOUND,"EW0001", "해당 찜을 찾을 수 없습니다."),
     NOT_FOUND_SHOPPING_CART_EXCEPTION(HttpStatus.NOT_FOUND,"EP0001", "해당 장바구니를 찾을 수 없습니다."),
     NOT_FOUND_ORDER_EXCEPTION(HttpStatus.NOT_FOUND, "EO0001", "해당 주문을 찾을 수 없습니다."),
+    NOT_FOUND_QNA_EXCEPTION(HttpStatus.NOT_FOUND,"EN0001", "해당 Q&A를 찾을 수 없습니다."),
+    NOT_FOUND_QNA_ANSWER_EXCEPTION(HttpStatus.NOT_FOUND,"EN0002", "해당 Q&A의 답변을 찾을 수 없습니다"),
 
     UNEXPECTED_DATA_EXCEPTION(HttpStatus.FORBIDDEN, "EQ0001", "예상치 못한 값이 들어왔습니다.");
 

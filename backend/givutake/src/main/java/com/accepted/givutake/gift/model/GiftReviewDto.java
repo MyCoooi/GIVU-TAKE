@@ -11,10 +11,11 @@ import java.time.LocalDateTime;
 @Builder
 public class GiftReviewDto {
     private Integer reviewIdx;
-    private String reviewTitle;
     private String reviewContent;
     private Integer giftIdx;
     private Integer userIdx;
+    private String userName;
+    private String userProfileImage;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
 }
