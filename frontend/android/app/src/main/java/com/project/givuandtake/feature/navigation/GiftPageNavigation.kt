@@ -11,6 +11,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.project.givuandtake.core.data.CartItem
+import com.project.givuandtake.core.data.GiftDetail
 import com.project.givuandtake.feature.gift.addToCart
 import kotlinx.coroutines.launch
 
@@ -26,34 +27,33 @@ fun NavGraphBuilder.addGiftPageDetailRoute(navController: NavController, cartIte
             navArgument("location") { type = NavType.StringType }
         )
     ) { backStackEntry ->
-        val id = backStackEntry.arguments?.getInt("id") ?: 0
-        val name = backStackEntry.arguments?.getString("name") ?: ""
-        val price = backStackEntry.arguments?.getInt("price") ?: 0
-        val imageUrl = backStackEntry.arguments?.getString("imageUrl") ?: ""
-        val location = backStackEntry.arguments?.getString("location") ?: ""
+        // 전달된 인자를 바탕으로 GiftDetail 객체 생성
+        val giftDetail = GiftDetail(
+            id = backStackEntry.arguments?.getInt("id") ?: 0,
+            name = backStackEntry.arguments?.getString("name") ?: "",
+            price = backStackEntry.arguments?.getInt("price") ?: 0,
+            imageUrl = backStackEntry.arguments?.getString("imageUrl") ?: "",
+            location = backStackEntry.arguments?.getString("location") ?: ""
+        )
 
         // Composable에서 필요한 Context 및 CoroutineScope 가져오기
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
 
         GiftPageDetail(
-            id = id,
-            name = name,
-            price = price,
-            imageUrl = imageUrl,
-            location = location,
-            cartItems = cartItems, // MutableState<List<CartItem>>를 직접 전달
+            giftDetail = giftDetail, // GiftDetail 객체 전달
+            cartItems = cartItems,   // MutableState<List<CartItem>>를 직접 전달
             onAddToCart = {
-                // currentItem을 CartItem으로 생성하여 추가
-                val newItem = CartItem(name = name, price = price, quantity = 1, location = location)
                 scope.launch {
-                    addToCart(context, newItem) // DataStore를 사용하여 장바구니에 아이템 추가
+                    // addToCart 함수를 호출하여 장바구니에 추가
+                    addToCart(context, giftDetail, 1) // 수량 1로 설정하여 장바구니에 추가
                 }
             },
             navController = navController
         )
     }
 }
+
 
 
 

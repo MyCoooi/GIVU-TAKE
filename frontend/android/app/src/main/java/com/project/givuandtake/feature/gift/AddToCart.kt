@@ -8,12 +8,22 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
-// DataStore에서 cartItems를 관리하는 함수
-suspend fun addToCart(context: Context, newItem: CartItem) {
+import com.project.givuandtake.core.data.GiftDetail
+
+// DataStore에서 cartItems를 관리하는 함수 (GiftDetail을 추가할 수 있도록 수정)
+suspend fun addToCart(context: Context, giftDetail: GiftDetail, quantity: Int) {
     // 현재 장바구니 항목을 DataStore에서 불러옴
     val currentCartItems = withContext(Dispatchers.IO) {
         getCartItems(context).first()
     }
+
+    // GiftDetail을 CartItem으로 변환
+    val newItem = CartItem(
+        name = giftDetail.name,
+        price = giftDetail.price,
+        quantity = quantity,
+        location = giftDetail.location
+    )
 
     // 장바구니 업데이트 로직
     val updatedCartItems = currentCartItems.toMutableList().apply {
@@ -32,6 +42,7 @@ suspend fun addToCart(context: Context, newItem: CartItem) {
     // DataStore에 업데이트된 장바구니 저장
     saveCartItems(context, updatedCartItems)
 }
+
 
 
 
