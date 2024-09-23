@@ -3,23 +3,33 @@ package com.accepted.givutake.global.config;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration // 스프링 실행시 설정파일 읽어드리기 위한 어노테이션
+@Configuration
 public class SwaggerConfig {
 
     @Bean
     public OpenAPI openAPI() {
+        final String securitySchemeName = "BearerAuth";
         return new OpenAPI()
-                .components(new Components())
-                .info(apiInfo());
+                .components(new Components()
+                        .addSecuritySchemes(securitySchemeName,
+                                new SecurityScheme()
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("Bearer")
+                                        .bearerFormat("JWT")
+                        ))
+                .info(apiInfo())
+                .addSecurityItem(new SecurityRequirement().addList(securitySchemeName));
     }
 
     private Info apiInfo() {
         return new Info()
-                .title("Test")
-                .description("Swagger Test")
-                .version("1.0.0");
+                .title("givutake api 목록")
+                .description("givutake api 목록")
+                .version("0.0.1");
     }
 }
