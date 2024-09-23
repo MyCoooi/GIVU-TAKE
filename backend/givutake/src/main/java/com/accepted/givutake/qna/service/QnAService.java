@@ -7,7 +7,7 @@ import com.accepted.givutake.qna.model.CreateQnADto;
 import com.accepted.givutake.qna.model.QnADto;
 import com.accepted.givutake.qna.repository.QnARepository;
 import com.accepted.givutake.user.common.entity.Users;
-import com.accepted.givutake.user.common.repository.UserRepository;
+import com.accepted.givutake.user.common.repository.UsersRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,10 +24,10 @@ import java.util.List;
 public class QnAService {
 
     private final QnARepository qnARepository;
-    private final UserRepository userRepository;
+    private final UsersRepository usersRepository;
 
     public void createQnA(String email, CreateQnADto request){
-        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        Users user = usersRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
         QnA newQnA = QnA.builder()
                 .users(user)
                 .qnaTitle(request.getQnaTitle())
@@ -39,7 +39,7 @@ public class QnAService {
     public List<QnADto> getQnAList(String email,int pageNo, int pageSize){
         Pageable pageable = PageRequest.of(pageNo-1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
 
-        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        Users user = usersRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
 
         Page<QnA> qnaList = qnARepository.findByUsers(user, pageable);
 
