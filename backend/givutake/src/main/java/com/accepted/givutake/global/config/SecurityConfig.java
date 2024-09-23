@@ -18,6 +18,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import javax.imageio.plugins.jpeg.JPEGHuffmanTable;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -37,9 +39,12 @@ public class SecurityConfig {
                 // 경로별 인가 작업
                 .authorizeHttpRequests(authorize -> authorize
                                 .requestMatchers("/api/users/client/**").hasRole("CLIENT")
+                                .requestMatchers(HttpMethod.POST, "/api/government-fundings/reviews").hasRole("CORPORATION")
+                                .requestMatchers(HttpMethod.PATCH, "/api/government-fundings/reviews").hasRole("CORPORATION")
                                 .requestMatchers("/",
                                         "/api/auth",
                                         "/test/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/government-fundings/reviews").permitAll()
                                 .requestMatchers(HttpMethod.POST,"/api/users",
                                         "/api/users/password/code",
                                         "/api/users/password/code/verification").permitAll()
