@@ -77,6 +77,7 @@ public class UserDto {
 
     public ResponseUserDto toResponseUserDto() {
         return ResponseUserDto.builder()
+                .email(this.email)
                 .name(this.name)
                 .mobilePhone(this.mobilePhone)
                 .landlinePhone(this.landlinePhone)

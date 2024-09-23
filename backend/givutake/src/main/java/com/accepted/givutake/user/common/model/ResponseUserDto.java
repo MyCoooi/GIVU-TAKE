@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 public class ResponseUserDto {
 
+    private String email;
     private String name;
     private String mobilePhone;
     private String landlinePhone;
@@ -25,6 +26,7 @@ public class ResponseUserDto {
 
     public static ResponseUserDto toDto(Users users) {
         return ResponseUserDto.builder()
+                .email(users.getEmail())
                 .name(users.getName())
                 .mobilePhone(users.getMobilePhone())
                 .landlinePhone(users.getLandlinePhone())
