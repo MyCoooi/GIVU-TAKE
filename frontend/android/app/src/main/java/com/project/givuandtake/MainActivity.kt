@@ -38,6 +38,9 @@ import com.project.givuandtake.feature.mypage.ContributorScreen
 import com.project.givuandtake.feature.navigation.addGiftPageDetailRoute
 import com.project.givuandtake.ui.navbar.BottomNavBar
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
+import com.project.payment.PaymentScreen
+import com.project.payment.PaymentScreen_gift
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,6 +99,25 @@ class MainActivity : ComponentActivity() {
                                 val context = LocalContext.current // LocalContext를 사용하여 Context 가져오기
                                 CartPage(navController = navController, context = context) // context 전달
                             }
+
+                            // 결제 페이지_답례품
+                            composable(
+                                route = "payment_page_gift?name={name}&location={location}&price={price}&quantity={quantity}",
+                                arguments = listOf(
+                                    navArgument("name") { type = NavType.StringType },
+                                    navArgument("location") { type = NavType.StringType },
+                                    navArgument("price") { type = NavType.IntType },
+                                    navArgument("quantity") { type = NavType.IntType }
+                                )
+                            ) { backStackEntry ->
+                                val name = backStackEntry.arguments?.getString("name") ?: ""
+                                val location = backStackEntry.arguments?.getString("location") ?: ""
+                                val price = backStackEntry.arguments?.getInt("price") ?: 0
+                                val quantity = backStackEntry.arguments?.getInt("quantity") ?: 1
+                                PaymentScreen_gift(navController, name, location, price, quantity)
+                            }
+
+
 
                             // 마이 페이지
                             composable("mypage") { ContributorScreen(navController) }
