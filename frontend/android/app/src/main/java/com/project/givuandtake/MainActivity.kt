@@ -21,6 +21,7 @@ import com.project.givuandtake.auth.LoginScreen
 import com.project.givuandtake.auth.SignupStep1
 import com.project.givuandtake.auth.SignupStep2
 import com.project.givuandtake.auth.SignupStep3
+import com.project.givuandtake.auth.SignupViewModel
 import com.project.givuandtake.feature.attraction.LocationSelect
 import com.project.givuandtake.feature.funding.navigation.MainFundingCard
 import com.project.givuandtake.feature.fundinig.FundingDetailPage
@@ -72,7 +73,7 @@ class MainActivity : ComponentActivity() {
                             // 로그인 페이지
                             composable("auth") { LoginScreen(navController) }
                             // 회원가입 페이지
-                            composable("signup_step1") { SignupStep1(navController) }
+                            composable("signup_step1") { SignupStep1(navController, signupViewModel = SignupViewModel()) }
                             composable("signup_step2") { SignupStep2(navController) }
                             composable("signup_step3") { SignupStep3(navController) }
                             // 기프트 페이지

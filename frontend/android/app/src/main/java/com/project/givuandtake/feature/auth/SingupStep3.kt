@@ -5,19 +5,23 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
+import com.project.givuandtake.R
 
 @Composable
-fun SignupStep3(navController: NavController) {
+fun SignupStep3(navController: NavController, signupViewModel: SignupViewModel) {
 
     // 전체를 감싸는 외부 박스
     Box(
@@ -38,15 +42,34 @@ fun SignupStep3(navController: NavController) {
                     .fillMaxWidth()
                     .height(80.dp)
                     .background(Color(0xFFFFD7C4)),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.CenterStart
             ) {
-                // 타이틀 텍스트
-                Text(
-                    text = "GIVU & TAKE",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Color(0xFFFFFFFF)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    // 뒤로가기 버튼
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_back), // 뒤로가기 아이콘 추가
+                            contentDescription = "뒤로가기",
+                            tint = Color.White
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.weight(0.7f))
+
+                    // 타이틀 텍스트
+                    Text(
+                        text = "GIVU & TAKE",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFFFFFFFF)
+                    )
+
+                    Spacer(modifier = Modifier.weight(1f)) // 텍스트와 아이콘을 양쪽으로 정렬
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -94,6 +117,8 @@ fun SignupStep3(navController: NavController) {
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
+
+                    // 맞춤설정 텍스트
                     Text(
                         text = "맞춤설정",
                         fontSize = 28.sp,
@@ -116,9 +141,27 @@ fun SignupStep3(navController: NavController) {
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    // 건너뛰기 버튼
+                    // 건너뛰기 버튼 (데이터 전송 포함)
                     TextButton(
-                        onClick = { navController.navigate("mainpage") }, // 건너뛰기 클릭 시 메인페이지로 이동
+                        onClick = {
+                            // 모든 입력된 데이터를 ViewModel에서 가져와서 API로 전송
+                            val signupData = mapOf(
+                                "name" to signupViewModel.name,
+                                "email" to signupViewModel.email,
+                                "password" to signupViewModel.password,
+                                "phoneNumber" to signupViewModel.phoneNumber,
+                                "postalCode" to signupViewModel.postalCode,
+                                "address" to signupViewModel.address,
+                                "addressDetail" to signupViewModel.addressDetail,
+                                "birthDate" to signupViewModel.birthDate,
+                                "gender" to signupViewModel.gender
+                            )
+
+                            // API 호출 예시
+                            // sendSignupDataToApi(signupData)
+
+                            navController.navigate("mainpage")
+                        }, // 건너뛰기 클릭 시 메인페이지로 이동
                         modifier = Modifier.align(Alignment.End) // 오른쪽에 배치
                     ) {
                         Text(
@@ -129,11 +172,29 @@ fun SignupStep3(navController: NavController) {
                         )
                     }
 
+
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    // 시작하기 버튼
+                    // 모든 입력된 데이터를 ViewModel에서 가져와서 API로 전송
                     Button(
-                        onClick = { navController.navigate("mainpage") },
+                        onClick = {
+                            val signupData = mapOf(
+                                "name" to signupViewModel.name,
+                                "email" to signupViewModel.email,
+                                "password" to signupViewModel.password,
+                                "phoneNumber" to signupViewModel.phoneNumber,
+                                "postalCode" to signupViewModel.postalCode,
+                                "address" to signupViewModel.address,
+                                "addressDetail" to signupViewModel.addressDetail,
+                                "birthDate" to signupViewModel.birthDate,
+                                "gender" to signupViewModel.gender
+                            )
+
+                            // API 호출 예시
+                            // sendSignupDataToApi(signupData)
+
+                            navController.navigate("mainpage")
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp)
