@@ -23,12 +23,6 @@ public class FundingReviews extends BaseTimeEntity {
     @JoinColumn(name = "funding_idx", nullable = false)
     private Fundings fundings;
 
-    @Column(name = "review_title", nullable = false, length = 50)
-    private String reviewTitle;
-
     @Column(name = "review_content", nullable = false, length = 6000)
     private String reviewContent;
-
-    @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted;
 }

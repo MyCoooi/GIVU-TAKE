@@ -31,7 +31,4 @@ public class FundingParticipants extends BaseTimeEntity {
 
     @Column(name = "funding_fee", nullable = false)
     private int fundingFee;
-
-    @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted;
 }
