@@ -13,7 +13,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     # 실제 애플리케이션에서는 비밀번호 확인 등의 추가 인증 단계가 필요합니다.
     user_email = form_data.username  # OAuth2PasswordRequestForm에서는 username 필드를 이메일로 사용
     
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(seconds=settings.JWT_ACCESS_TOKEN_EXPIRATION_TIME)
     access_token = create_access_token(
         data={"sub": user_email}, expires_delta=access_token_expires
     )
