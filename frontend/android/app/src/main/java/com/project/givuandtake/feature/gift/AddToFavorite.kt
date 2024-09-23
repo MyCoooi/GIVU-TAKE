@@ -1,34 +1,36 @@
 package com.project.givuandtake.feature.gift
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
+import android.content.Context
 import androidx.datastore.preferences.core.edit
-import com.project.givuandtake.core.data.Product
+import com.project.givuandtake.core.data.GiftDetail
 import com.project.givuandtake.core.datastore.FavoriteKeys
+import com.project.givuandtake.core.datastore.dataStore
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
 
-suspend fun addToFavorites(dataStore: DataStore<Preferences>, product: Product) {
-    dataStore.edit { preferences ->
+// DataStore에서 찜 관리 함수 (GiftDetail 사용)
+suspend fun addToFavorites(context: Context, giftDetail: GiftDetail) {
+    context.dataStore.edit { preferences ->
+        // 기존 찜 목록을 불러와 MutableSet으로 변환
         val favorites = preferences[FavoriteKeys.FAVORITES]?.toMutableSet() ?: mutableSetOf()
 
-        if (favorites.contains(product.id.toString())) {
+        if (favorites.contains(giftDetail.id.toString())) {
             // 이미 찜한 상품이면 제거
-            favorites.remove(product.id.toString())
+            favorites.remove(giftDetail.id.toString())
         } else {
             // 찜한 상품 추가
-            favorites.add(product.id.toString())
+            favorites.add(giftDetail.id.toString())
         }
 
+        // 수정된 찜 목록을 다시 저장
         preferences[FavoriteKeys.FAVORITES] = favorites
     }
 }
 
-
-fun getFavoriteProducts(dataStore: DataStore<Preferences>): Flow<Set<String>> {
-    return dataStore.data.map { preferences ->
+// 찜한 상품 목록을 불러오는 함수
+fun getFavoriteProducts(context: Context): Flow<Set<String>> {
+    return context.dataStore.data.map { preferences ->
+        // 찜 목록이 없을 경우 빈 집합 반환
         preferences[FavoriteKeys.FAVORITES] ?: emptySet()
     }
 }
