@@ -11,13 +11,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<Users, Integer> {
+public interface UsersRepository extends JpaRepository<Users, Integer> {
     Optional<Users> findByEmail(String email);
-    boolean existsByEmail(String email);
 
     @Modifying
     @Transactional
-    @Query("UPDATE Users u SET u.addressIdx = :addressIdx WHERE u.userIdx = :userIdx")
-    int updateAddressIdx(@Param("userIdx") int userIdx, @Param("addressIdx") int addressIdx);
+    @Query("UPDATE Users u SET u.isWithdraw = :isWithdraw WHERE u.email = :email")
+    void updateIsWithdrawByEmail(@Param("email") String email, @Param("isWithdraw") boolean isWithdraw);
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE Users u SET u.password = :password WHERE u.email = :email")
+    void updatePasswordByEmail(@Param("email") String email, @Param("password") String password);
 }

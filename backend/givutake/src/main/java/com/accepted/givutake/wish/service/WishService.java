@@ -9,7 +9,7 @@ import com.accepted.givutake.wish.model.CreateWishDto;
 import com.accepted.givutake.wish.model.WishDto;
 import com.accepted.givutake.wish.repository.WishRepository;
 import com.accepted.givutake.user.common.entity.Users;
-import com.accepted.givutake.user.common.repository.UserRepository;
+import com.accepted.givutake.user.common.repository.UsersRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,7 +28,7 @@ public class WishService {
 
     private final WishRepository wishRepository;
     private final GiftRepository giftRepository;
-    private final UserRepository userRepository;
+    private final UsersRepository userRepository;
 
     public void createWish(String email , CreateWishDto request) { // 찜 추가
         Gifts gift = giftRepository.findById(request.getGiftIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));

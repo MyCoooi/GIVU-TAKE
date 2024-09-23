@@ -1,5 +1,8 @@
 package com.accepted.givutake.user.common;
-import com.accepted.givutake.user.common.entity.RefreshTokenEntity;
+
+import com.accepted.givutake.global.enumType.ExceptionEnum;
+import com.accepted.givutake.global.exception.JwtAuthenticationException;
+import com.accepted.givutake.user.common.entity.RefreshToken;
 import com.accepted.givutake.user.common.model.JwtTokenDto;
 import com.accepted.givutake.user.common.repository.RefreshTokenRepository;
 import io.jsonwebtoken.*;
@@ -36,10 +39,10 @@ public class JwtTokenProvider {
     private final Key key;
     private final RefreshTokenRepository refreshTokenRepository;
 
-    // 900000 == 15분
-    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 900000;
-    // 604800000 == 7일
-    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 604800000;
+    // 3개월 == 90일(밀리초)
+    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 7452000000L;
+    // 1년 == 365일(밀리초)
+    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 31536000000L;
 
     // application.yml에서 secret 값 가져와서 key에 저장
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey, RefreshTokenRepository refreshTokenRepository) {
@@ -61,7 +64,7 @@ public class JwtTokenProvider {
 
         // 3. Refresh Token 생성 후 저장
         String email = authentication.getName();
-        String refreshToken = generateRefreshToken(email, nowMillis, REFRESH_TOKEN_EXPIRATION_TIME);
+        String refreshToken = generateRefreshToken(authentication, nowMillis, REFRESH_TOKEN_EXPIRATION_TIME);
         saveRefreshToken(email, refreshToken, REFRESH_TOKEN_EXPIRATION_TIME);
 
         return JwtTokenDto.builder()
@@ -74,7 +77,7 @@ public class JwtTokenProvider {
     // Refresh Token을 Redis에 저장
     public void saveRefreshToken(String email, String refreshToken, long expirationTime) {
         long seconds = expirationTime / 1000; // 초 단위로 바꿈
-        RefreshTokenEntity refreshTokenEntity = RefreshTokenEntity.builder()
+        RefreshToken refreshTokenEntity = RefreshToken.builder()
                                                         .email(email)
                                                         .refreshToken(refreshToken)
                                                         .ttl(seconds)
@@ -96,9 +99,16 @@ public class JwtTokenProvider {
     }
 
     // Refresh Token 생성
-    public String generateRefreshToken(String email, long nowMillis, long expirationTime) {
+    public String generateRefreshToken(Authentication authentication, long nowMillis, long expirationTime) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, email, nowMillis, expirationTime);
+
+        // 권한들 가져오기
+        String authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+
+        claims.put("auth", authorities);
+        return createToken(claims, authentication.getName(), nowMillis, expirationTime);
     }
 
     // 전달받은 파라미터로부터 토큰 생성
@@ -148,19 +158,27 @@ public class JwtTokenProvider {
                     .parseClaimsJws(token);
             return true;
         } catch (SecurityException e) {
-            log.error("Not expected JWT Token format", e);
-        } catch (MalformedJwtException e) {
-            log.error("Invalid JWT Token", e);
+            log.error("보안 관련 예외 발생: {}", e.getMessage());
+            throw new JwtAuthenticationException(ExceptionEnum.SECURITY_EXCEPTION);
         } catch (ExpiredJwtException e) {
-            log.error("Expired JWT Token", e);
+            log.error("토큰이 만료되었습니다: {}", e.getMessage());
+            throw new JwtAuthenticationException(ExceptionEnum.EXPIRED_TOKEN_EXCEPTION);
         } catch (UnsupportedJwtException e) {
-            log.error("Unsupported JWT Token", e);
+            log.error("지원하지 않는 JWT 토큰입니다: {}", e.getMessage());
+            throw new JwtAuthenticationException(ExceptionEnum.UNSUPPORTED_TOKEN_EXCEPTION);
+        } catch (MalformedJwtException e) {
+            log.error("잘못된 JWT 토큰 형식입니다: {}", e.getMessage());
+            throw new JwtAuthenticationException(ExceptionEnum.MALFORMED_TOKEN_EXCEPTION);
+        } catch (SignatureException e) {
+            log.error("JWT 서명 검증 실패: {}", e.getMessage());
+            throw new JwtAuthenticationException(ExceptionEnum.INVALID_SIGNATURE_EXCEPTION);
         } catch (IllegalArgumentException e) {
-            log.error("JWT claims string is empty.", e);
+            log.error("JWT 토큰이 빈 값이거나 null입니다: {}", e.getMessage());
+            throw new JwtAuthenticationException(ExceptionEnum.INVALID_TOKEN_EXCEPTION);
         } catch (Exception e) {
-            log.error("Internal server error.", e);
+            log.error("서버에 문제가 발생했습니다. {}", e.getMessage());
+            throw new JwtAuthenticationException(ExceptionEnum.INTERNAL_SERVER_ERROR);
         }
-        return false;
     }
 
     // jwt 토큰 복호화

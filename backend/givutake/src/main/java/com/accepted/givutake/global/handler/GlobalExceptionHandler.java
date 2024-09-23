@@ -3,10 +3,14 @@ package com.accepted.givutake.global.handler;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.model.ExceptionDto;
+import jakarta.mail.MessagingException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -36,7 +40,7 @@ public class GlobalExceptionHandler {
         log.error("RuntimeException 발생: message = {}", exp.getMessage());
         ExceptionDto exceptionDto = ExceptionDto.builder()
                 .code(ExceptionEnum.RUNTIME_EXCEPTION.getCode())
-                .message(exp.getMessage())
+                .message(ExceptionEnum.RUNTIME_EXCEPTION.getMessage())
                 .build();
 
         return new ResponseEntity<>(exceptionDto, ExceptionEnum.RUNTIME_EXCEPTION.getStatus());
@@ -101,5 +105,53 @@ public class GlobalExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(exceptionDto, ExceptionEnum.METHOD_ARGUMENT_TYPE_MISMATCH_EXCEPTION.getStatus());
+    }
+
+    @ExceptionHandler(MessagingException.class)
+    public ResponseEntity<ExceptionDto> handleMessagingException(MessagingException exp) {
+        log.error("MessagingException 발생: message = {}", exp.getMessage());
+
+        ExceptionDto exceptionDto = ExceptionDto.builder()
+                .code(ExceptionEnum.MESSAGING_EXCEPTION.getCode())
+                .message(ExceptionEnum.MESSAGING_EXCEPTION.getMessage())
+                .build();
+
+        return new ResponseEntity<>(exceptionDto, ExceptionEnum.MESSAGING_EXCEPTION.getStatus());
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ExceptionDto> handleHttpMessageNotReadableException(HttpMessageNotReadableException exp) {
+        log.error("HttpMessageNotReadableException 발생: message = {}", exp.getMessage());
+
+        ExceptionDto exceptionDto = ExceptionDto.builder()
+                .code(ExceptionEnum.HTTP_MESSAGE_NOT_READABLE_EXCEPTION.getCode())
+                .message(ExceptionEnum.HTTP_MESSAGE_NOT_READABLE_EXCEPTION.getMessage())
+                .build();
+
+        return new ResponseEntity<>(exceptionDto, ExceptionEnum.HTTP_MESSAGE_NOT_READABLE_EXCEPTION.getStatus());
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ExceptionDto> handleBadCredentialsException(BadCredentialsException exp) {
+        log.error("BadCredentialsException 발생: message = {}", exp.getMessage());
+
+        ExceptionDto exceptionDto = ExceptionDto.builder()
+                .code(ExceptionEnum.BAD_CREDENTIALS_EXCEPTION.getCode())
+                .message(ExceptionEnum.BAD_CREDENTIALS_EXCEPTION.getMessage())
+                .build();
+
+        return new ResponseEntity<>(exceptionDto, ExceptionEnum.BAD_CREDENTIALS_EXCEPTION.getStatus());
+    }
+
+    @ExceptionHandler(InternalAuthenticationServiceException.class)
+    public ResponseEntity<ExceptionDto> handleInternalAuthenticationServiceException(InternalAuthenticationServiceException exp) {
+        log.error("InternalAuthenticationServiceException 발생: message = {}", exp.getMessage());
+
+        ExceptionDto exceptionDto = ExceptionDto.builder()
+                .code(ExceptionEnum.INTERNAL_AUTHENTICATION_SERVICE_EXCEPTION.getCode())
+                .message(exp.getMessage())
+                .build();
+
+        return new ResponseEntity<>(exceptionDto, ExceptionEnum.INTERNAL_AUTHENTICATION_SERVICE_EXCEPTION.getStatus());
     }
 }

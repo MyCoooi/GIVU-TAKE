@@ -1,18 +1,24 @@
 package com.accepted.givutake.user.common.controller;
 
-import ch.qos.logback.core.CoreConstants;
+import com.accepted.givutake.global.enumType.ExceptionEnum;
+import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.model.ResponseDto;
+import com.accepted.givutake.user.client.model.AddressAddDto;
 import com.accepted.givutake.user.client.model.AddressDto;
-import com.accepted.givutake.user.common.model.CompositionSignUpDto;
-import com.accepted.givutake.user.common.model.LoginDto;
-import com.accepted.givutake.user.common.model.SignUpDto;
+import com.accepted.givutake.user.common.model.*;
 import com.accepted.givutake.user.common.service.UserService;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collection;
 
 @Slf4j
 @RestController
@@ -27,14 +33,134 @@ public class  UserController {
     public ResponseEntity<ResponseDto> emailSignUp(@Valid @RequestBody CompositionSignUpDto compositionSignUpDto) {
 
         SignUpDto signUpDto = compositionSignUpDto.getSignUpDto();
-        AddressDto addressDto = compositionSignUpDto.getAddressDto();
+        AddressAddDto addressAddDto = compositionSignUpDto.getAddressAddDto();
 
-        userService.emailSignUp(signUpDto, addressDto);
+        userService.emailSignUp(signUpDto, addressAddDto);
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+    }
+
+    // JWT 토큰으로 회원 정보 조회
+    @GetMapping
+    public ResponseEntity<ResponseDto> getUserByToken(@AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        ResponseUserDto savedResponseUserDto = savedUserDto.toResponseUserDto();
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(savedResponseUserDto)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // JWT 토큰으로 회원 정보 수정
+    @PatchMapping
+    public ResponseEntity<ResponseDto> modifyUserByToken(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody ModifyUserDto modifyUserDto) {
+        String email = userDetails.getUsername();
+        Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+
+        // 첫번 째 권한 추출
+        GrantedAuthority authority = authorities.stream().findFirst()
+                .orElseThrow(() -> new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION));
+        String role = authority.getAuthority();
+
+        // 입력값 유효성 검사
+        // 수혜자는 isMale, birth 값을 가질 수 없다
+        if ("ROLE_CORPORATION".equals(role)) {
+            if (modifyUserDto.getIsMale() != null) {
+                throw new ApiException(ExceptionEnum.UNEXPECTED_ISMALE_EXCEPTION);
+            }
+            if (modifyUserDto.getBirth() != null) {
+                throw new ApiException(ExceptionEnum.UNEXPECTED_BIRTH_EXCEPTION);
+            }
+        }
+
+        // 사용자는 isMale, birth 값이 필수로 있어야 한다
+        if ("ROLE_CLIENT".equals(role)) {
+            if (modifyUserDto.getIsMale() == null) {
+                throw new ApiException(ExceptionEnum.MISSING_ISMALE_EXCEPTION);
+            }
+            if (modifyUserDto.getBirth() == null) {
+                throw new ApiException(ExceptionEnum.MISSING_BIRTH_EXCEPTION);
+            }
+        }
+
+        UserDto savedUserDto = userService.modifyUserByEmail(email, modifyUserDto);
+        ResponseUserDto savedResponseUserDto = savedUserDto.toResponseUserDto();
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(savedResponseUserDto)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // JWT 토큰으로 회원 탈퇴
+    @DeleteMapping
+    public ResponseEntity<ResponseDto> deleteUserByToken(@AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+
+        userService.withdrawUserByEmail(email);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(null)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // JWT 토큰으로 비밀번호 확인
+    @PostMapping("/password/verification")
+    public ResponseEntity<ResponseDto> verifyPassword(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody PasswordDto passwordDto) {
+        String email = userDetails.getUsername();
+
+        userService.verifyPassword(email, passwordDto);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(null)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // 비밀번호 인증 코드 발송
+    @PostMapping("/password/code")
+    public ResponseEntity<ResponseDto> sendCodeForPasswordReset(@Valid @RequestBody EmailDto emailDto) throws MessagingException {
+        userService.sendCodeForPasswordReset(emailDto);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(null)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // 비밀번호 인증 코드 검증
+    @PostMapping("/password/code/verification")
+    public ResponseEntity<ResponseDto> verifyCodeForPasswordReset(@Valid @RequestBody EmailCodeDto emailCodeDto) {
+        userService.verifyCodeForPasswordReset(emailCodeDto);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(null)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // 비밀번호 재설정
+    @PatchMapping("/password")
+    public ResponseEntity<ResponseDto> resetPassword(@Valid @RequestBody PasswordResetDto passwordResetDto) {
+        userService.resetPassword(passwordResetDto);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(null)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 }

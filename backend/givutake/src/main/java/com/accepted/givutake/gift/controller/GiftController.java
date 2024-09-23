@@ -156,6 +156,7 @@ public class GiftController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int reviewIdx,
             @Valid @RequestBody UpdateGiftReviewDto request) {
+        System.out.println(request.getReviewContent());
         giftService.updateGiftReviews(userDetails.getUsername(), reviewIdx, request);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)

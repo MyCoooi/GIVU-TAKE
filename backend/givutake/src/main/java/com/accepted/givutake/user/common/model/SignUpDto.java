@@ -55,7 +55,6 @@ public class SignUpDto extends LoginDto {
                 .landlinePhone(this.landlinePhone)
                 .isMale(this.isMale)
                 .birth(this.birth)
-                .addressIdx(null)
                 .regionIdx(this.regionIdx)
                 .cardIdx(null)
                 .profileImageUrl(this.profileImageUrl)
