@@ -1,0 +1,30 @@
+package com.accepted.givutake.funding.model;
+
+import com.accepted.givutake.funding.entity.FundingReviews;
+import com.accepted.givutake.funding.entity.Fundings;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+
+@Getter
+@Setter
+@ToString
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class FundingReviewAddDto {
+
+    @NotNull(message = "펀딩 코드는 필수 입력 값 입니다.")
+    private Integer fundingIdx;
+
+    @Size(max = 6000)
+    @NotNull(message = "내용은 필수 입력 값 입니다.")
+    private String reviewContent;
+
+    public FundingReviews toEntity(Fundings fundings) {
+        return FundingReviews.builder()
+                .reviewContent(this.reviewContent)
+                .fundings(fundings)
+                .build();
+    }
+}

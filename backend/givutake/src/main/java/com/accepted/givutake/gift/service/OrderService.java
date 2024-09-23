@@ -11,7 +11,7 @@ import com.accepted.givutake.gift.repository.OrderRepository;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.user.common.entity.Users;
-import com.accepted.givutake.user.common.repository.UserRepository;
+import com.accepted.givutake.user.common.repository.UsersRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,7 +28,7 @@ import java.util.List;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final UserRepository userRepository;
+    private final UsersRepository userRepository;
     private final GiftRepository giftRepository;
 
     public void createOrder(String email, CreateOrderDto request){

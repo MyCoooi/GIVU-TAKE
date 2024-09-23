@@ -46,10 +46,6 @@ public class Users extends BaseTimeEntity {
     @Column(name = "birth", nullable = true)
     private LocalDateTime birth;
 
-    // 사용자만 해당
-    @Column(name = "address_idx", nullable = true)
-    private Integer addressIdx;
-
     // 수혜자만 해당
     @Column(name = "region_idx", nullable = true)
     private Integer regionIdx;

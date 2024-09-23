@@ -1,13 +1,13 @@
 package com.accepted.givutake.gift.model;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Getter
 @Setter
 @ToString
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class UpdateGiftReviewDto {
 
