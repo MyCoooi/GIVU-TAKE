@@ -57,10 +57,12 @@ public class OrderService {
                 .userIdx(user.getUserIdx())
                 .giftIdx(order.getGift().getGiftIdx())
                 .giftName(order.getGift().getGiftName())
+                .giftThumbnail(order.getGift().getGiftThumbnail())
                 .paymentMethod(order.getPaymentMethod())
                 .amount(order.getAmount())
                 .price(order.getPrice())
                 .status(order.getStatus())
+                .createdDate(order.getCreatedDate())
                 .build()
         ).toList();
     }
@@ -77,10 +79,12 @@ public class OrderService {
                 .userIdx(order.getUsers().getUserIdx())
                 .giftIdx(order.getGift().getGiftIdx())
                 .giftName(order.getGift().getGiftName())
+                .giftThumbnail(order.getGift().getGiftThumbnail())
                 .paymentMethod(order.getPaymentMethod())
                 .amount(order.getAmount())
                 .price(order.getPrice())
                 .status(order.getStatus())
+                .createdDate(order.getCreatedDate())
                 .build();
     }
 

@@ -140,6 +140,17 @@ public class GiftController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
+    @GetMapping("/review/{reviewIdx}") // 특정 후기 조회
+    public ResponseEntity<ResponseDto> getUserReview(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable int reviewIdx){
+        GiftReviewDto review = giftService.getUserReview(userDetails.getUsername(), reviewIdx);
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(review)
+                .build();
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
     @PostMapping("/review") // 리뷰 작성
     public ResponseEntity<ResponseDto> createGiftReview(
             @AuthenticationPrincipal UserDetails userDetails ,
