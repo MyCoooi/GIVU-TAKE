@@ -40,10 +40,6 @@ public class Fundings extends BaseTimeEntity {
     private FundingReviews fundingReviews;
 
     @Builder.Default
-    @OneToMany(mappedBy = "fundings", orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<CheerComments> cheerCommentsList = new ArrayList<>();
-
-    @Builder.Default
     @OneToMany(mappedBy = "fundings", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<FundingParticipants> fundingParticipantsList = new ArrayList<>();
 

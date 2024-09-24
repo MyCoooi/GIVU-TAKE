@@ -25,7 +25,7 @@ public class FundingService {
         if (!optionalExistingFundings.isEmpty()) {
             Fundings savedFundings = optionalExistingFundings.get();
 
-            // 이미 탈퇴한 회원일 경우 회원 정보 조회 불가
+            // 이미 삭제된 펀딩일 경우 조회 불가
             if (savedFundings.isDeleted()) {
                 throw new ApiException(ExceptionEnum.FUNDING_ALREADY_DELETED_EXCEPTION);
             }
@@ -36,4 +36,5 @@ public class FundingService {
             throw new ApiException(ExceptionEnum.NOT_FOUND_FUNDING_WITH_IDX_EXCEPTION);
         }
     }
+
 }

@@ -52,13 +52,12 @@ public class FundingReviewService {
     }
     
     // jwt 토큰으로 펀딩 후기 추가
-    public FundingReviewViewDto addFundingReviewByEmail(String email, FundingReviewAddDto fundingReviewAddDto) {
+    public FundingReviewViewDto addFundingReviewByEmail(String email, int fundingIdx, FundingReviewAddDto fundingReviewAddDto) {
         // 1. email로 부터 userIdx값 가져오기
         UserDto savedUserDto = userService.getUserByEmail(email);
         int userIdx = savedUserDto.getUserIdx();
 
         // 2. fundingIdx에 해당하는 펀딩이 존재하는지 확인
-        int fundingIdx = fundingReviewAddDto.getFundingIdx();
         Fundings fundings = fundingService.getFundingByFundingIdx(fundingIdx);
 
         // 3. 존재한다면, 펀딩 후기를 추가하는 수혜자의 userIdx가 펀딩을 작성한 수혜자의 userIdx와 같은지 확인
@@ -77,14 +76,14 @@ public class FundingReviewService {
     }
 
     // jwt 토큰으로 펀딩 후기 수정
-    public FundingReviewViewDto modifyFundingReviewByEmail(String email, FundingReviewUpdateDto fundingReviewUpdateDto) {
+    public FundingReviewViewDto modifyFundingReviewByEmail(String email, int fundingIdx, FundingReviewUpdateDto fundingReviewUpdateDto) {
         // 1. email로 부터 userIdx값 가져오기
         UserDto savedUserDto = userService.getUserByEmail(email);
         int userIdx = savedUserDto.getUserIdx();
 
         // 2. DB에서 펀딩 후기 조회
-        int fundingReviewIdx = fundingReviewUpdateDto.getReviewIdx();
-        FundingReviews savedFundingReviews = this.getFundingReviewsByFundingReviewIdx(fundingReviewIdx);
+        Fundings savedFudings = fundingService.getFundingByFundingIdx(fundingIdx);
+        FundingReviews savedFundingReviews = savedFudings.getFundingReviews();
 
         // 3. userIdx값이 일치하지 않는 경우 수정 불가
         if (userIdx != savedFundingReviews.getFundings().getCorporation().getUserIdx()) {
