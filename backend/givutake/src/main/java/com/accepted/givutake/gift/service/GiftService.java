@@ -150,6 +150,8 @@ public class GiftService {
                 .reviewIdx(review.getReviewIdx())
                 .reviewContent(review.getReviewContent())
                 .giftIdx(review.getGifts().getGiftIdx())
+                .giftName(review.getGifts().getGiftName())
+                .giftThumbnail(review.getGifts().getGiftThumbnail())
                 .userIdx(review.getUsers().getUserIdx())
                 .userName(review.getUsers().getName())
                 .userProfileImage(review.getUsers().getProfileImageUrl())
@@ -177,6 +179,8 @@ public class GiftService {
                 .reviewIdx(review.getReviewIdx())
                 .reviewContent(review.getReviewContent())
                 .giftIdx(review.getGifts().getGiftIdx())
+                .giftName(review.getGifts().getGiftName())
+                .giftThumbnail(review.getGifts().getGiftThumbnail())
                 .userIdx(review.getUsers().getUserIdx())
                 .userName(review.getUsers().getName())
                 .userProfileImage(review.getUsers().getProfileImageUrl())
@@ -184,6 +188,25 @@ public class GiftService {
                 .modifiedDate(review.getModifiedDate())
                 .build()
         ).toList();
+    }
+
+    public GiftReviewDto getUserReview(String email, int reviewIdx){
+        GiftReviews review = giftReviewRepository.findById(reviewIdx).orElseThrow(()->new ApiException(ExceptionEnum.NOT_FOUND_GIFT_REVIEW_EXCEPTION));
+        if(!review.getUsers().getEmail().equals(email)){
+            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
+        }
+        return GiftReviewDto.builder()
+                .reviewIdx(reviewIdx)
+                .reviewContent(review.getReviewContent())
+                .giftIdx(review.getGifts().getGiftIdx())
+                .giftName(review.getGifts().getGiftName())
+                .giftThumbnail(review.getGifts().getGiftThumbnail())
+                .userIdx(review.getUsers().getUserIdx())
+                .userName(review.getUsers().getName())
+                .userProfileImage(review.getUsers().getProfileImageUrl())
+                .createdDate(review.getCreatedDate())
+                .modifiedDate(review.getModifiedDate())
+                .build();
     }
 
     public void updateGiftReviews(String email, int reviewIdx, UpdateGiftReviewDto request) {
