@@ -1,9 +1,11 @@
 package com.accepted.givutake.funding.controller;
 
 import com.accepted.givutake.funding.entity.CheerComments;
+import com.accepted.givutake.funding.entity.Fundings;
 import com.accepted.givutake.funding.model.*;
 import com.accepted.givutake.funding.service.CheerCommentService;
 import com.accepted.givutake.funding.service.FundingReviewService;
+import com.accepted.givutake.funding.service.FundingService;
 import com.accepted.givutake.global.model.ResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +26,33 @@ import java.util.stream.Collectors;
 public class FundingController {
 
     private final CheerCommentService cheerCommentService;
+    private final FundingService fundingService;
     private final FundingReviewService fundingReviewService;
+
+    // ========= 펀딩 관련 ===========
+    // fundingIdx에 해당하는 펀딩 조회
+    @GetMapping("/{fundingIdx}")
+
+    // jwt 토큰으로 펀딩 등록
+    @PostMapping
+    public ResponseEntity<ResponseDto> addFundingByJwt(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody FundingAddDto fundingAddDto) {
+        String email = userDetails.getUsername();
+
+        Fundings savedFundings = fundingService.addFundingByEmail(email, fundingAddDto);
+        FundingViewDto fundingViewDto = FundingViewDto.toDto(savedFundings);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(fundingViewDto)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // jwt 토큰으로 펀딩 수정
+    @PatchMapping("/{fundingIdx}")
+
+    // jwt 토큰으로 펀딩 삭제
+    @DeleteMapping("/{fundingIdx}")
 
     // ========= 댓글 관련 ===========
     // jwt 토큰에 해당하는 사용자가 작성한 모든 응원 댓글 조회
