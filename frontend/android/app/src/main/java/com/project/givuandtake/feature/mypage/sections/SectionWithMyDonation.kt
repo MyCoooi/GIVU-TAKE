@@ -1,5 +1,6 @@
 package com.project.givuandtake.feature.mypage.sections
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,13 +18,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 
 @Composable
-fun SectionWithBackground(title: String, actions: List<String>) {
+fun SectionWithMyDonation(title: String, actions: List<String>, navController: NavController) {
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = Color(0xFFECECEC).copy(alpha = 0.3f),
-        modifier = Modifier.fillMaxWidth()
+        color = Color(0xFFECECEC).copy(alpha = 0.2f),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
     ) {
         Column(
             modifier = Modifier
@@ -31,13 +33,13 @@ fun SectionWithBackground(title: String, actions: List<String>) {
                 .fillMaxWidth()
         ) {
             // 섹션 제목
-            SectionTitle(title)
+            SectionMyDonationTitle(title)
 
             // 줄 추가 (Divider)
             Divider(
                 color = Color(0XFFB3C3F4), // 줄 색상
-                thickness = 2.dp,  // 줄 두께
-                modifier = Modifier.padding(vertical = 8.dp)  // 줄의 상하 여백
+                thickness = 1.dp,  // 줄 두께
+                modifier = Modifier.padding(bottom=20.dp, top=8.dp)  // 줄의 상하 여백
             )
 
             // 첫 번째 줄
@@ -48,19 +50,23 @@ fun SectionWithBackground(title: String, actions: List<String>) {
                 ) {
                     Text(
                         text = actions.getOrNull(0) ?: "",  // 기부내역
-                        fontSize = 20.sp,
+                        fontSize = 19.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF333333)
+                        color = Color(0xFF333333),
+                        modifier = Modifier
+                            .clickable { navController.navigate("donationdetails") }
                     )
 
                     Spacer(modifier = Modifier.weight(1f))
 
                     Text(
                         text = actions.getOrNull(1) ?: "",  // 찜 목록
-                        fontSize = 20.sp,
+                        fontSize = 19.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF333333),
-                        modifier = Modifier.fillMaxWidth(0.5f)  // 너비의 절반에서 시작
+                        modifier = Modifier
+                            .fillMaxWidth(0.5f)  // 너비의 절반에서 시작
+                            .clickable { navController.navigate("wishlist") }
                     )
                 }
             }
@@ -75,19 +81,23 @@ fun SectionWithBackground(title: String, actions: List<String>) {
                 ) {
                     Text(
                         text = actions.getOrNull(2) ?: "",  // 펀딩내역
-                        fontSize = 20.sp,
+                        fontSize = 19.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF333333)
+                        color = Color(0xFF333333),
+                        modifier = Modifier
+                            .clickable { navController.navigate("fundingdetails") }
                     )
 
                     Spacer(modifier = Modifier.weight(1f))
 
                     Text(
                         text = actions.getOrNull(3) ?: "",  // 기부 영수증
-                        fontSize = 20.sp,
+                        fontSize = 19.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF333333),
-                        modifier = Modifier.fillMaxWidth(0.5f)  // 너비의 절반에서 시작
+                        modifier = Modifier
+                            .fillMaxWidth(0.5f)  // 너비의 절반에서 시작
+                            .clickable { navController.navigate("donationreceipt") }
                     )
                 }
             }
@@ -98,10 +108,10 @@ fun SectionWithBackground(title: String, actions: List<String>) {
 
 
 @Composable
-fun SectionTitle(title: String) {
+fun SectionMyDonationTitle(title: String) {
     Text(
         text = title,
-        fontSize = 24.sp,
+        fontSize = 18.sp,
         fontWeight = FontWeight.ExtraBold,
         modifier = Modifier
             .fillMaxWidth()
