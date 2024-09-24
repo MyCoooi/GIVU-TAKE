@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,7 +19,6 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -46,41 +44,43 @@ import androidx.navigation.NavController
 fun CustomerServiceTitle(title: String) {
     Text(
         text = title,
-        fontSize = 24.sp,
+        fontSize = 18.sp,
         fontWeight = FontWeight.ExtraBold,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp), // 고객센터 제목에만 패딩 적용
+            .padding(start = 16.dp, end=0.dp, top=16.dp), // 고객센터 제목에만 패딩 적용
         color = Color(0XFFA093DE)
     )
 }
 
-
 @Composable
-fun CustomerServiceSection(navController: NavController) {
+fun SectionWithCustomerService(title: String, navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 16.dp)
+            .padding(horizontal = 16.dp)
     ) {
+        CustomerServiceTitle(title)
+
+        Spacer(modifier = Modifier.height(12.dp))
+
         CustomerServiceItem("공지사항", Icons.Default.Info){
             navController.navigate("announcement")
-        }// 공지사항
+        }
         Spacer(modifier = Modifier.height(12.dp))
+
         CustomerServiceItem("1:1 문의", Icons.Default.Email){
-            navController.navigate("announcement")
-        } // 1:1 문의
+            navController.navigate("personalinquiry")
+        }
         Spacer(modifier = Modifier.height(12.dp))
+
         CustomerServiceItem("자주 묻는 질문", Icons.AutoMirrored.Default.ExitToApp){
-            navController.navigate("announcement")
-        } // 자주 묻는 질문
+            navController.navigate("faqpate")
+        }
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // 시간 정보
         Text(
-            text = "운영시간 : 평일 09:00 ~ 18:00\n(점심시간 12:00 ~ 13:00 제외)",
-            fontSize = 14.sp,
+            text = "운영시간 : 평일 09:00 ~ 18:00 (점심시간 12:00 ~ 13:00 제외)",
+            fontSize = 10.sp,
             color = Color(0xFF888888),
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
@@ -95,10 +95,11 @@ fun CustomerServiceItem(title: String, icon: ImageVector, onClick: () -> Unit) {
     Surface(
         shape = RoundedCornerShape(12.dp),
         color = Color.White,  // 배경을 흰색으로 설정
-        border = BorderStroke(3.dp, Color(0xFFB3C3F4)), // 테두리 색상과 두께 설정
+        border = BorderStroke(2.dp, Color(0xFFB3C3F4)), // 테두리 색상과 두께 설정
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick) // 클릭 이벤트 추가
+            .padding(horizontal = 8.dp)
     ) {
         Row(
             modifier = Modifier

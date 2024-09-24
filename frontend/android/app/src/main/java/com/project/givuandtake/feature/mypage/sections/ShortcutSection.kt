@@ -2,6 +2,7 @@ package com.project.givuandtake.feature.mypage.sections
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,49 +22,59 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.project.givuandtake.R
 
 @Composable
-fun Shortcut() {
+fun Shortcut(navController: NavController) {
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = Color(0XFFFFFFFF), // 흰색 배경
+        color = Color(0xFFECECEC).copy(alpha = 0.2f), // 흰색 배경
         modifier = Modifier
             .fillMaxWidth() // 상자 너비 맞춤
-            .padding(horizontal = 8.dp) // 좌우에 약간의 패딩 추가
+            .padding(horizontal = 16.dp) // 좌우에 약간의 패딩 추가
     ) {
         Row(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween, // 아이콘 간 간격
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            ShortcutItem(imageRes = R.drawable.donation, text = "기부내역")
-            ShortcutItem(imageRes = R.drawable.likes, text = "찜 목록")
-            ShortcutItem(imageRes = R.drawable.creditcard, text = "카드")
-            ShortcutItem(imageRes = R.drawable.address, text = "주소록")
+            ShortcutItem(imageRes = R.drawable.donation, text = "기부내역") {
+                navController.navigate("donationdetails")
+            }
+            ShortcutItem(imageRes = R.drawable.likes, text = "찜 목록") {
+                navController.navigate("wishlist")
+            }
+            ShortcutItem(imageRes = R.drawable.creditcard, text = "카드") {
+                navController.navigate("cardbook")
+            }
+            ShortcutItem(imageRes = R.drawable.address, text = "주소록") {
+                navController.navigate("addressbook")
+            }
         }
     }
 }
 
+
 @Composable
-fun ShortcutItem(@DrawableRes imageRes: Int, text: String, modifier: Modifier = Modifier) {
+fun ShortcutItem(@DrawableRes imageRes: Int, text: String, onClick: () -> Unit) {
     Column(
-        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally, // 아이콘과 텍스트를 중앙에 정렬
         verticalArrangement = Arrangement.Center
     ) {
-        // 로컬 리소스 이미지 로드
         Image(
             painter = painterResource(id = imageRes),
             contentDescription = text,
-            modifier = Modifier.size(40.dp) // 이미지 크기 설정
+            modifier = Modifier
+                .size(35.dp)
+                .clickable(onClick = onClick)
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(5.dp))
         Text(
             text = text,
-            fontSize = 16.sp,
+            fontSize = 13.sp,
             fontWeight = FontWeight.Bold,
             color = Color(0xFF333333)
         )

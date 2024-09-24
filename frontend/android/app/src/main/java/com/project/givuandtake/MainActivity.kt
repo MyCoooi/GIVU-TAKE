@@ -34,7 +34,19 @@ import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.gift.CartPage
 import com.project.givuandtake.feature.gift.mainpage.GiftPage
 import com.project.givuandtake.feature.mainpage.MainPage
-import com.project.givuandtake.feature.mypage.ContributorScreen
+import com.project.givuandtake.feature.mypage.MyPageScreen
+import com.project.givuandtake.feature.mypage.CustomerService.FaqPage
+import com.project.givuandtake.feature.mypage.CustomerService.PersonalInquiry
+import com.project.givuandtake.feature.mypage.CustomerService.Announcement
+import com.project.givuandtake.feature.mypage.MyActivities.AddressBook
+import com.project.givuandtake.feature.mypage.MyActivities.CardBook
+import com.project.givuandtake.feature.mypage.MyActivities.UserInfo
+import com.project.givuandtake.feature.mypage.MyDonation.DonationDetails
+import com.project.givuandtake.feature.mypage.MyDonation.DonationReceipt
+import com.project.givuandtake.feature.mypage.MyDonation.FundingDetails
+import com.project.givuandtake.feature.mypage.MyDonation.WishList
+import com.project.givuandtake.feature.mypage.MyManagement.MyComment
+import com.project.givuandtake.feature.mypage.MyManagement.MyReview
 import com.project.givuandtake.feature.navigation.addGiftPageDetailRoute
 import com.project.givuandtake.ui.navbar.BottomNavBar
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
@@ -97,8 +109,6 @@ class MainActivity : ComponentActivity() {
                                 CartPage(navController = navController, context = context) // context 전달
                             }
 
-                            // 마이 페이지
-                            composable("mypage") { ContributorScreen(navController) }
                             composable("locationSelection") {
                                 LocationSelect(navController)
                             }
@@ -122,6 +132,26 @@ class MainActivity : ComponentActivity() {
                                 val city = backStackEntry.arguments?.getString("city")
                                 FestivalPage(navController, city) // Pass the city to TripPage
                             }
+
+                            // 마이 페이지
+                            composable("mypage") { MyPageScreen(navController) }
+
+                            //마이페이지 세부내역
+                            composable("donationdetails") { DonationDetails(navController) }
+                            composable("donationreceipt") { DonationReceipt(navController) }
+                            composable("fundingdetails") { FundingDetails(navController) }
+                            composable("wishlist") { WishList(navController) }
+
+                            composable("mycomment") { MyComment(navController) }
+                            composable("myreview") { MyReview(navController) }
+
+                            composable("addressbook") { AddressBook(navController) }
+                            composable("cardbook") { CardBook(navController) }
+                            composable("userinfo") { UserInfo(navController) }
+
+                            composable("announcement") { Announcement(navController) }
+                            composable("faqpate") { FaqPage(navController) }
+                            composable("personalinquiry") { PersonalInquiry(navController) }
                         }
 
                         // 하단 네비게이션 바
