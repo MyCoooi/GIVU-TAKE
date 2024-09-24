@@ -60,6 +60,7 @@ dependencies {
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     // OkHttp - 네트워크 요청 로깅 (선택 사항)
     implementation ("com.squareup.okhttp3:logging-interceptor:4.9.1")
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0")
 
 
     implementation(platform("com.google.firebase:firebase-bom:33.2.0"))

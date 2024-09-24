@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.project.givuandtake.R
-import kotlinx.coroutines.launch
 
 @Composable
 fun WebViewScreen(onAddressSelected: (String, String) -> Unit, onClose: () -> Unit) {
@@ -70,8 +69,6 @@ fun WebViewScreen(onAddressSelected: (String, String) -> Unit, onClose: () -> Un
     }
 }
 
-
-
 class WebAppInterface(private val onAddressSelected: (String, String) -> Unit) {
     @JavascriptInterface
     fun processAddress(address: String, detailAddress: String) {
@@ -80,14 +77,14 @@ class WebAppInterface(private val onAddressSelected: (String, String) -> Unit) {
     }
 }
 
-
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun SignupStep2(navController: NavController, signupViewModel: SignupViewModel) {
-    var address by remember { mutableStateOf("") } // 주소 선택 결과 저장
-    var addressDetail by remember { mutableStateOf("") }
-    var birthDate by remember { mutableStateOf("") }
-    var isMale by remember { mutableStateOf<Boolean?>(null) }
+
+    var address by remember { mutableStateOf(signupViewModel.addressInfo.value.address) } // ViewModel에서 주소 가져옴
+    var addressDetail by remember { mutableStateOf(signupViewModel.addressInfo.value.detailAddress) }
+    var birthDate by remember { mutableStateOf(signupViewModel.signupInfo.value.birth) }
+    var isMale by remember { mutableStateOf(signupViewModel.signupInfo.value.isMale) }
     var addressName by remember { mutableStateOf("") }
     var customAddressInput by remember { mutableStateOf("") }
     var showWebView by remember { mutableStateOf(false) } // WebView 표시 여부
@@ -109,6 +106,7 @@ fun SignupStep2(navController: NavController, signupViewModel: SignupViewModel) 
                 WebViewScreen(
                     onAddressSelected = { selectedAddress, _ ->
                         address = selectedAddress // WebView에서 선택된 주소 반영
+                        signupViewModel.updateAddress(selectedAddress) // ViewModel에 반영
                         showWebView = false // WebView 닫기
                     },
                     onClose = { showWebView = false } // 닫기 버튼을 눌렀을 때 WebView를 닫음
@@ -229,7 +227,10 @@ fun SignupStep2(navController: NavController, signupViewModel: SignupViewModel) 
                                     ) {
                                         OutlinedTextField(
                                             value = address, // WebView에서 선택된 주소 반영
-                                            onValueChange = { address = it },
+                                            onValueChange = {
+                                                address = it
+                                                signupViewModel.updateAddress(it) // ViewModel에 반영
+                                            },
                                             label = { Text("주소") },
                                             modifier = Modifier
                                                 .weight(1f)
@@ -264,7 +265,10 @@ fun SignupStep2(navController: NavController, signupViewModel: SignupViewModel) 
                                     // 상세 주소 입력 필드
                                     OutlinedTextField(
                                         value = addressDetail,
-                                        onValueChange = { addressDetail = it },
+                                        onValueChange = {
+                                            addressDetail = it
+                                            signupViewModel.updateDetailAddress(it) // ViewModel에 반영
+                                        },
                                         label = { Text("상세 주소") },
                                         modifier = Modifier
                                             .fillMaxWidth(),
@@ -274,154 +278,168 @@ fun SignupStep2(navController: NavController, signupViewModel: SignupViewModel) 
                                             unfocusedBorderColor = Color.Gray
                                         )
                                     )
-                                    // 주소 선택 버튼 (우리집, 회사, 직접입력)
-                                Row(
-                                    horizontalArrangement = Arrangement.SpaceAround,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Button(
-                                        onClick = { addressName = "우리집" },
-                                        colors = ButtonDefaults.buttonColors(
-                                            backgroundColor = if (addressName == "우리집") Color(0xFFFF9874) else Color.White,
-                                            contentColor = if (addressName == "우리집") Color.White else Color(0xFFFF9874)
-                                        ),
-                                        border = BorderStroke(1.dp, Color(0xFFFF9874)),
-                                        modifier = Modifier.weight(1f).padding(8.dp)
-                                    ) {
-                                        Text("우리집")
-                                    }
-                                    Button(
-                                        onClick = { addressName = "회사" },
-                                        colors = ButtonDefaults.buttonColors(
-                                            backgroundColor = if (addressName == "회사") Color(0xFFFF9874) else Color.White,
-                                            contentColor = if (addressName == "회사") Color.White else Color(0xFFFF9874)
-                                        ),
-                                        border = BorderStroke(1.dp, Color(0xFFFF9874)),
-                                        modifier = Modifier.weight(1f).padding(8.dp)
-                                    ) {
-                                        Text("회사")
-                                    }
-                                    Button(
-                                        onClick = { addressName = "직접입력" },
-                                        colors = ButtonDefaults.buttonColors(
-                                            backgroundColor = if (addressName == "직접입력") Color(0xFFFF9874) else Color.White,
-                                            contentColor = if (addressName == "직접입력") Color.White else Color(0xFFFF9874)
-                                        ),
-                                        border = BorderStroke(1.dp, Color(0xFFFF9874)),
-                                        modifier = Modifier.weight(1f).padding(8.dp)
-                                    ) {
-                                        Text("직접입력")
-                                    }
-                                }
 
-                                // 직접입력 선택 시, 추가로 입력할 수 있는 필드 표시
-                                if (addressName == "직접입력") {
+// 주소 선택 버튼 (우리집, 회사, 직접입력)
+                                    Row(
+                                        horizontalArrangement = Arrangement.SpaceAround,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Button(
+                                            onClick = {
+                                                addressName = "우리집"
+                                                signupViewModel.updateAddressName(addressName) // ViewModel에 업데이트
+                                            },
+                                            colors = ButtonDefaults.buttonColors(
+                                                backgroundColor = if (addressName == "우리집") Color(0xFFFF9874) else Color.White,
+                                                contentColor = if (addressName == "우리집") Color.White else Color(0xFFFF9874)
+                                            ),
+                                            border = BorderStroke(1.dp, Color(0xFFFF9874)),
+                                            modifier = Modifier.weight(1f).padding(8.dp)
+                                        ) {
+                                            Text("우리집")
+                                        }
+                                        Button(
+                                            onClick = {
+                                                addressName = "회사"
+                                                signupViewModel.updateAddressName(addressName) // ViewModel에 업데이트
+                                            },
+                                            colors = ButtonDefaults.buttonColors(
+                                                backgroundColor = if (addressName == "회사") Color(0xFFFF9874) else Color.White,
+                                                contentColor = if (addressName == "회사") Color.White else Color(0xFFFF9874)
+                                            ),
+                                            border = BorderStroke(1.dp, Color(0xFFFF9874)),
+                                            modifier = Modifier.weight(1f).padding(8.dp)
+                                        ) {
+                                            Text("회사")
+                                        }
+                                        Button(
+                                            onClick = {
+                                                addressName = "직접입력"
+                                                signupViewModel.updateAddressName(addressName) // ViewModel에 업데이트
+                                            },
+                                            colors = ButtonDefaults.buttonColors(
+                                                backgroundColor = if (addressName == "직접입력") Color(0xFFFF9874) else Color.White,
+                                                contentColor = if (addressName == "직접입력") Color.White else Color(0xFFFF9874)
+                                            ),
+                                            border = BorderStroke(1.dp, Color(0xFFFF9874)),
+                                            modifier = Modifier.weight(1f).padding(8.dp)
+                                        ) {
+                                            Text("직접입력")
+                                        }
+                                    }
+
+// 직접입력 선택 시, 추가로 입력할 수 있는 필드 표시
+                                    if (addressName == "직접입력") {
+                                        OutlinedTextField(
+                                            value = customAddressInput,
+                                            onValueChange = {
+                                                customAddressInput = it
+                                                signupViewModel.updateAddressName(it) // 직접 입력값으로 업데이트
+                                            },
+                                            label = { Text("직접입력 주소") },
+                                            placeholder = { Text("예) 동생집, 이모집") },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 8.dp),
+                                            shape = RoundedCornerShape(12.dp),
+                                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                                focusedBorderColor = Color(0xFFFFA726),
+                                                unfocusedBorderColor = Color.Gray
+                                            )
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    // 생년월일 입력 필드
                                     OutlinedTextField(
-                                        value = customAddressInput,
-                                        onValueChange = { customAddressInput = it },
-                                        label = { Text("직접입력 주소") },
-                                        placeholder = { Text("예) 동생집, 이모집") },
+                                        value = birthDate,
+                                        onValueChange = {
+                                            birthDate = it
+                                            signupViewModel.updateBirth(it) // ViewModel에 반영
+                                        },
+                                        label = { Text("생년월일 (ex: 2020-01-09)") },
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(vertical = 8.dp),
                                         shape = RoundedCornerShape(12.dp),
+                                        trailingIcon = {
+                                            Icon(Icons.Default.DateRange, contentDescription = null)
+                                        },
                                         colors = TextFieldDefaults.outlinedTextFieldColors(
                                             focusedBorderColor = Color(0xFFFFA726),
                                             unfocusedBorderColor = Color.Gray
                                         )
                                     )
-                                }
 
-                                Spacer(modifier = Modifier.height(16.dp))
-
-                                // 생년월일 입력 필드
-                                OutlinedTextField(
-                                    value = birthDate,
-                                    onValueChange = { birthDate = it },
-                                    label = { Text("생년월일 (ex: 2020-01-09)") },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp),
-                                    shape = RoundedCornerShape(12.dp),
-                                    trailingIcon = {
-                                        Icon(Icons.Default.DateRange, contentDescription = null)
-                                    },
-                                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                                        focusedBorderColor = Color(0xFFFFA726),
-                                        unfocusedBorderColor = Color.Gray
-                                    )
-                                )
-
-                                // 성별 선택 버튼
-                                Row(
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Button(
-                                        onClick = { isMale = true },
-                                        colors = if (isMale == true) ButtonDefaults.buttonColors(
-                                            backgroundColor = Color(0xFFFF9874),
-                                            contentColor = Color.White
-                                        ) else ButtonDefaults.buttonColors(
-                                            backgroundColor = Color.White,
-                                            contentColor = Color(0xFFFF9874)
-                                        ),
-                                        border = BorderStroke(1.dp, Color(0xFFFF9874)),
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .padding(8.dp)
+// 성별 선택 버튼
+                                    Row(
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        modifier = Modifier.fillMaxWidth()
                                     ) {
-                                        Text("남성", fontWeight = FontWeight.ExtraBold)
-                                    }
-
-                                    Button(
-                                        onClick = { isMale = false },
-                                        colors = if (isMale == false) ButtonDefaults.buttonColors(
-                                            backgroundColor = Color(0xFFFF9874),
-                                            contentColor = Color.White
-                                        ) else ButtonDefaults.buttonColors(
-                                            backgroundColor = Color.White,
-                                            contentColor = Color(0xFFFF9874)
-                                        ),
-                                        border = BorderStroke(1.dp, Color(0xFFFF9874)),
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .padding(8.dp)
-                                    ) {
-                                        Text("여성", fontWeight = FontWeight.ExtraBold)
-                                    }
-                                }
-
-                                Spacer(modifier = Modifier.height(24.dp))
-
-                                Button(
-                                    onClick = {
-                                        if (isMale == null) {
-                                            scope.launch {
-                                                scaffoldState.snackbarHostState.showSnackbar("성별을 선택해주세요.")
-                                            }
-                                        } else {
-                                            signupViewModel.address = address
-                                            signupViewModel.detailAddress = addressDetail
-                                            signupViewModel.isMale = isMale ?: false
-
-                                            navController.navigate("signup_step3")
+                                        Button(
+                                            onClick = {
+                                                isMale = true // 남성 선택
+                                                signupViewModel.updateGender(true) // ViewModel에 반영
+                                            },
+                                            colors = if (isMale) ButtonDefaults.buttonColors(
+                                                backgroundColor = Color(0xFFFF9874),
+                                                contentColor = Color.White
+                                            ) else ButtonDefaults.buttonColors(
+                                                backgroundColor = Color.White,
+                                                contentColor = Color(0xFFFF9874)
+                                            ),
+                                            border = BorderStroke(1.dp, Color(0xFFFF9874)),
+                                            modifier = Modifier.weight(1f).padding(8.dp)
+                                        ) {
+                                            Text("남성", fontWeight = FontWeight.ExtraBold)
                                         }
-                                    },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(56.dp)
-                                        .clip(RoundedCornerShape(12.dp)),
-                                    colors = ButtonDefaults.buttonColors(
-                                        backgroundColor = Color(0xFFFF9874)
-                                    )
-                                ) {
-                                    Text(
-                                        "다음", fontSize = 18.sp,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        color = Color.White,
-                                        textAlign = TextAlign.Center
-                                    )
+
+                                        Button(
+                                            onClick = {
+                                                isMale = false // 여성 선택
+                                                signupViewModel.updateGender(false) // ViewModel에 반영
+                                            },
+                                            colors = if (!isMale) ButtonDefaults.buttonColors(
+                                                backgroundColor = Color(0xFFFF9874),
+                                                contentColor = Color.White
+                                            ) else ButtonDefaults.buttonColors(
+                                                backgroundColor = Color.White,
+                                                contentColor = Color(0xFFFF9874)
+                                            ),
+                                            border = BorderStroke(1.dp, Color(0xFFFF9874)),
+                                            modifier = Modifier.weight(1f).padding(8.dp)
+                                        ) {
+                                            Text("여성", fontWeight = FontWeight.ExtraBold)
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(24.dp))
+
+                                    Button(
+                                        onClick = {
+                                            // 로그 찍기 - ViewModel에 저장된 값들 확인
+                                            Log.d("SignupStep2", "Name: ${signupViewModel.signupInfo.value.name}")
+                                            Log.d("SignupStep2", "Email: ${signupViewModel.signupInfo.value.email}")
+                                            Log.d("SignupStep2", "Password: ${signupViewModel.signupInfo.value.password}")
+                                            Log.d("SignupStep2", "MobilePhone: ${signupViewModel.signupInfo.value.mobilePhone}")
+                                            Log.d("SignupStep2", "Address: ${signupViewModel.addressInfo.value.address}")
+                                            Log.d("SignupStep2", "Detail Address: ${signupViewModel.addressInfo.value.detailAddress}")
+                                            Log.d("SignupStep2", "AddressName: ${signupViewModel.addressInfo.value.addressName}")
+                                            Log.d("SignupStep2", "Gender (isMale): ${signupViewModel.signupInfo.value.isMale}")
+                                            Log.d("SignupStep2", "Birth Date: ${signupViewModel.signupInfo.value.birth}")
+
+                                            // 다음 스텝으로 이동
+                                            navController.navigate("signup_step3")
+                                        },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(56.dp)
+                                            .clip(RoundedCornerShape(12.dp)),
+                                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFF9874))
+                                    ) {
+                                        Text("다음", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, textAlign = TextAlign.Center)
+                                    }
+
                                 }
                             }
                         }
@@ -431,7 +449,3 @@ fun SignupStep2(navController: NavController, signupViewModel: SignupViewModel) 
         }
     }
 }
-}
-
-
-
