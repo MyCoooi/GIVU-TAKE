@@ -4,6 +4,7 @@ import AttractionMain
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +36,8 @@ import com.project.givuandtake.ui.theme.GivuAndTakeTheme
 import com.project.payment.PaymentScreen
 
 class MainActivity : ComponentActivity() {
+    private val signupViewModel: SignupViewModel by viewModels() // ViewModel 생성
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -73,9 +76,9 @@ class MainActivity : ComponentActivity() {
                             // 로그인 페이지
                             composable("auth") { LoginScreen(navController) }
                             // 회원가입 페이지
-                            composable("signup_step1") { SignupStep1(navController, signupViewModel = SignupViewModel()) }
-                            composable("signup_step2") { SignupStep2(navController, signupViewModel = SignupViewModel()) }
-                            composable("signup_step3") { SignupStep3(navController, signupViewModel = SignupViewModel()) }
+                            composable("signup_step1") { SignupStep1(navController, signupViewModel) }
+                            composable("signup_step2") { SignupStep2(navController, signupViewModel) }
+                            composable("signup_step3") { SignupStep3(navController, signupViewModel) }
                             // 기프트 페이지
                             composable("gift") { GiftPage(navController) }
                             // 기프트 상세 페이지

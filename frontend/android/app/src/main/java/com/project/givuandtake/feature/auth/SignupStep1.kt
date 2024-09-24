@@ -1,5 +1,6 @@
 package com.project.givuandtake.auth
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -22,11 +23,9 @@ import com.project.givuandtake.R
 
 @Composable
 fun SignupStep1(navController: NavController, signupViewModel: SignupViewModel) {
-    var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
-    var mobilePhone by remember { mutableStateOf("") }
+    var passwordErrorMessage by remember { mutableStateOf("") }
+    var passwordErrorColor by remember { mutableStateOf(Color.Transparent) }
 
     // 전체를 감싸는 외부 박스
     Box(
@@ -142,8 +141,8 @@ fun SignupStep1(navController: NavController, signupViewModel: SignupViewModel) 
                         Column {
                             // 성함 입력 필드
                             OutlinedTextField(
-                                value = name,
-                                onValueChange = { name = it },
+                                value = signupViewModel.signupInfo.value.name, // ViewModel의 값 사용
+                                onValueChange = { signupViewModel.updateName(it) }, // 값 변경 시 ViewModel에 반영
                                 label = { Text("성함") },
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -163,8 +162,8 @@ fun SignupStep1(navController: NavController, signupViewModel: SignupViewModel) 
                             ) {
                                 // 이메일 입력 필드
                                 OutlinedTextField(
-                                    value = email,
-                                    onValueChange = { email = it },
+                                    value = signupViewModel.signupInfo.value.email, // ViewModel의 값 사용
+                                    onValueChange = { signupViewModel.updateEmail(it) }, // 값 변경 시 ViewModel에 반영
                                     label = { Text("이메일") },
                                     modifier = Modifier
                                         .weight(1f)
@@ -197,8 +196,8 @@ fun SignupStep1(navController: NavController, signupViewModel: SignupViewModel) 
 
                             // 비밀번호 입력 필드
                             OutlinedTextField(
-                                value = password,
-                                onValueChange = { password = it },
+                                value = signupViewModel.signupInfo.value.password, // ViewModel의 값 사용
+                                onValueChange = { signupViewModel.updatePassword(it) }, // 값 변경 시 ViewModel에 반영
                                 label = { Text("비밀번호") },
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -214,7 +213,17 @@ fun SignupStep1(navController: NavController, signupViewModel: SignupViewModel) 
                             // 비밀번호 확인 입력 필드
                             OutlinedTextField(
                                 value = confirmPassword,
-                                onValueChange = { confirmPassword = it },
+                                onValueChange = {
+                                    confirmPassword = it
+                                    // 비밀번호 확인 로직
+                                    if (signupViewModel.signupInfo.value.password == confirmPassword) {
+                                        passwordErrorMessage = "비밀번호가 일치합니다."
+                                        passwordErrorColor = Color.Green
+                                    } else {
+                                        passwordErrorMessage = "비밀번호가 일치하지 않습니다."
+                                        passwordErrorColor = Color.Red
+                                    }
+                                },
                                 label = { Text("비밀번호 확인") },
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -227,10 +236,19 @@ fun SignupStep1(navController: NavController, signupViewModel: SignupViewModel) 
                                 )
                             )
 
+                            // 비밀번호 확인 메시지
+                            if (passwordErrorMessage.isNotEmpty()) {
+                                Text(
+                                    text = passwordErrorMessage,
+                                    color = passwordErrorColor,
+                                    modifier = Modifier.padding(top = 8.dp)
+                                )
+                            }
+
                             // 전화번호 입력 필드
                             OutlinedTextField(
-                                value = mobilePhone,
-                                onValueChange = { mobilePhone = it },
+                                value = signupViewModel.signupInfo.value.mobilePhone, // ViewModel의 값 사용
+                                onValueChange = { signupViewModel.updateMobilePhone(it) }, // 값 변경 시 ViewModel에 반영
                                 label = { Text("전화번호 (ex: 010-1234-5678)") },
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -248,11 +266,13 @@ fun SignupStep1(navController: NavController, signupViewModel: SignupViewModel) 
                             // 다음 버튼을 입력 필드와 함께 박스 안에 배치
                             Button(
                                 onClick = {
-                                    signupViewModel.name = name
-                                    signupViewModel.email = email
-                                    signupViewModel.password = password
-                                    signupViewModel.mobilePhone = mobilePhone
+                                    // 로그 찍기 - ViewModel에 저장된 값들 확인
+                                    Log.d("SignupStep1", "Name: ${signupViewModel.signupInfo.value.name}")
+                                    Log.d("SignupStep1", "Email: ${signupViewModel.signupInfo.value.email}")
+                                    Log.d("SignupStep1", "Password: ${signupViewModel.signupInfo.value.password}")
+                                    Log.d("SignupStep1", "MobilePhone: ${signupViewModel.signupInfo.value.mobilePhone}")
 
+                                    // 다음 스텝으로 이동
                                     navController.navigate("signup_step2")
                                 },
                                 modifier = Modifier
@@ -261,10 +281,7 @@ fun SignupStep1(navController: NavController, signupViewModel: SignupViewModel) 
                                     .clip(RoundedCornerShape(12.dp)),
                                 colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFF9874))
                             ) {
-                                Text("다음", fontSize = 18.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = Color.White,
-                                    textAlign = TextAlign.Center)
+                                Text("다음", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, textAlign = TextAlign.Center)
                             }
                         }
                     }
