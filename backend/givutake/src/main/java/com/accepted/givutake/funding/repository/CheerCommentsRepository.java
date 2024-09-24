@@ -2,6 +2,7 @@ package com.accepted.givutake.funding.repository;
 
 import com.accepted.givutake.funding.entity.CheerComments;
 import com.accepted.givutake.funding.entity.Fundings;
+import com.accepted.givutake.user.common.entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -15,6 +16,7 @@ public interface CheerCommentsRepository extends JpaRepository<CheerComments, In
 
     Optional<CheerComments> findByCommentIdxAndFundings_FundingIdx(int commentIdx, int fundingIdx);
     List<CheerComments> findByFundingsAndIsDeletedFalseOrderByCommentIdxDesc(Fundings fundings);
+    List<CheerComments> findByUsersAndIsDeletedFalseOrderByCommentIdxDesc(Users users);
 
     @Modifying
     @Transactional

@@ -7,6 +7,7 @@ import com.accepted.givutake.funding.model.CheerCommentViewDto;
 import com.accepted.givutake.funding.repository.CheerCommentsRepository;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
+import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,17 @@ public class CheerCommentService {
     private final FundingService fundingService;
     private final CheerCommentsRepository cheerCommentsRepository;
 
-    // fundingIdx에 해당하는 펀딩의 모든 댓글 조회(삭제된 댓글은 조회x)
+    // 아이디가 email인 유저가 작성한 모든 댓글 조회
+    public List<CheerComments> getCheerCommentListByEmail(String email) {
+        // 1. DB에서 user 정보 가져오기
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        Users savedUsers = savedUserDto.toEntity();
+
+        // 2. 해당 유저가 작성한 모든 댓글 조회
+        return cheerCommentsRepository.findByUsersAndIsDeletedFalseOrderByCommentIdxDesc(savedUsers);
+    }
+
+    // fundingIdx에 해당하는 펀딩의 모든 댓글 조회
     public List<CheerComments> getCheerCommentListByFundingIdx(int fundingIdx) {
         // 1. fundingIdx에 해당하는 펀딩의 삭제 여부 검사
         Fundings savedFundings = fundingService.getFundingByFundingIdx(fundingIdx);

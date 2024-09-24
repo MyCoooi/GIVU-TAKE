@@ -20,15 +20,33 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/government-fundings/{fundingIdx}")
+@RequestMapping("/api/government-fundings")
 public class FundingController {
 
     private final CheerCommentService cheerCommentService;
     private final FundingReviewService fundingReviewService;
 
     // ========= 댓글 관련 ===========
+    // jwt 토큰에 해당하는 사용자가 작성한 모든 응원 댓글 조회
+    @GetMapping("/my-comments")
+    public ResponseEntity<ResponseDto> getCheerCommentListByJwt(@AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+
+        List<MyCheerCommentViewDto> myCheerCommentViewDtoList =
+                cheerCommentService.getCheerCommentListByEmail(email)
+                        .stream()
+                        .map(MyCheerCommentViewDto::toDto)  // 각 CheerComments 객체를 CheerCommentViewDto로 변환
+                        .collect(Collectors.toList());  // List로 변환
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(myCheerCommentViewDtoList)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
     // fundingIdx에 해당하는 펀딩의 모든 댓글 조회
-    @GetMapping("/comments")
+    @GetMapping("/{fundingIdx}/comments")
     public ResponseEntity<ResponseDto> getCheerCommentListByFundingIdx(@PathVariable int fundingIdx) {
 
         List<CheerCommentViewDto> cheerCommentViewDtoList =
@@ -45,7 +63,7 @@ public class FundingController {
     }
 
     // fundingIdx에 해당하는 펀딩의 commentIdx에 해당하는 댓글 조회
-    @GetMapping("/comments/{commentIdx}")
+    @GetMapping("/{fundingIdx}/comments/{commentIdx}")
     public ResponseEntity<ResponseDto> getCheerCommentByFundingIdxAndCommentIdx(@PathVariable int fundingIdx, @PathVariable int commentIdx) {
         CheerComments savedCheerComments = cheerCommentService.getCheerCommentByFundingIdxAndCommentIdx(fundingIdx, commentIdx);
         CheerCommentViewDto cheerCommentViewDto = CheerCommentViewDto.toDto(savedCheerComments);
@@ -58,7 +76,7 @@ public class FundingController {
     }
 
     // jwt 토큰으로 댓글 작성
-    @PostMapping("/comments")
+    @PostMapping("/{fundingIdx}/comments")
     public ResponseEntity<ResponseDto> addCheerCommentByJwt(@AuthenticationPrincipal UserDetails userDetails, @PathVariable int fundingIdx, @Valid @RequestBody CheerCommentAddDto cheerCommentAddDto) {
         String email = userDetails.getUsername();
 
@@ -73,7 +91,7 @@ public class FundingController {
     }
 
     // jwt 토큰으로 댓글 삭제
-    @DeleteMapping("/comments/{commentIdx}")
+    @DeleteMapping("/{fundingIdx}/comments/{commentIdx}")
     public ResponseEntity<ResponseDto> deleteCheerCommentByJwt(@AuthenticationPrincipal UserDetails userDetails, @PathVariable int commentIdx, @PathVariable int fundingIdx) {
         String email = userDetails.getUsername();
 
@@ -89,7 +107,7 @@ public class FundingController {
 
     // ========= 후기 관련 ===========
     // 특정 펀딩의 펀딩 후기 조회
-    @GetMapping("/review")
+    @GetMapping("/{fundingIdx}/review")
     public ResponseEntity<ResponseDto> getFundingReviewListByJwt(@PathVariable int fundingIdx) {
         FundingReviewViewDto savedFundingReviewDto = fundingReviewService.getFundingReviewListByFundingIdx(fundingIdx);
 
@@ -101,7 +119,7 @@ public class FundingController {
     }
 
     // jwt 토큰으로 펀딩 후기 추가
-    @PostMapping("/review")
+    @PostMapping("/{fundingIdx}/review")
     public ResponseEntity<ResponseDto> addFundingReviewByJwt(@AuthenticationPrincipal UserDetails userDetails, @PathVariable int fundingIdx, @Valid @RequestBody FundingReviewAddDto fundingReviewAddDto) {
         String email = userDetails.getUsername();
 
@@ -115,7 +133,7 @@ public class FundingController {
     }
 
     // jwt 토큰으로 펀딩 후기 수정
-    @PatchMapping("/review")
+    @PatchMapping("/{fundingIdx}/review")
     public ResponseEntity<ResponseDto> modifyFundingReviewByJwt(@AuthenticationPrincipal UserDetails userDetails, @PathVariable int fundingIdx, @Valid @RequestBody FundingReviewUpdateDto fundingReviewUpdateDto) {
         String email = userDetails.getUsername();
 
