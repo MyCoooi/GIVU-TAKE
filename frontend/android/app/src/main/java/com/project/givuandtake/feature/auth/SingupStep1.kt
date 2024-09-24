@@ -6,18 +6,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
 import com.project.givuandtake.R
 
@@ -27,7 +26,7 @@ fun SignupStep1(navController: NavController, signupViewModel: SignupViewModel) 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
-    var phoneNumber by remember { mutableStateOf("") }
+    var mobilePhone by remember { mutableStateOf("") }
 
     // 전체를 감싸는 외부 박스
     Box(
@@ -230,8 +229,8 @@ fun SignupStep1(navController: NavController, signupViewModel: SignupViewModel) 
 
                             // 전화번호 입력 필드
                             OutlinedTextField(
-                                value = phoneNumber,
-                                onValueChange = { phoneNumber = it },
+                                value = mobilePhone,
+                                onValueChange = { mobilePhone = it },
                                 label = { Text("전화번호 (ex: 010-1234-5678)") },
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -252,7 +251,7 @@ fun SignupStep1(navController: NavController, signupViewModel: SignupViewModel) 
                                     signupViewModel.name = name
                                     signupViewModel.email = email
                                     signupViewModel.password = password
-                                    signupViewModel.phoneNumber = phoneNumber
+                                    signupViewModel.mobilePhone = mobilePhone
 
                                     navController.navigate("signup_step2")
                                 },

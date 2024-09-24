@@ -144,24 +144,56 @@ fun SignupStep3(navController: NavController, signupViewModel: SignupViewModel) 
                     // 건너뛰기 버튼 (데이터 전송 포함)
                     TextButton(
                         onClick = {
-                            // 모든 입력된 데이터를 ViewModel에서 가져와서 API로 전송
-                            val signupData = mapOf(
+                            // ViewModel에서 데이터 취합
+                            val signUpDto = mapOf(
                                 "name" to signupViewModel.name,
+                                "isMale" to signupViewModel.isMale,
+                                "birth" to signupViewModel.birth,  // 적절한 날짜 형식으로 변환 필요
                                 "email" to signupViewModel.email,
                                 "password" to signupViewModel.password,
-                                "phoneNumber" to signupViewModel.phoneNumber,
-                                "postalCode" to signupViewModel.postalCode,
+                                "mobilePhone" to signupViewModel.mobilePhone,
+//                                "landlinePhone" to signupViewModel.landlinePhone,
+//                                "profileImageUrl" to signupViewModel.profileImageUrl,
+//                                "roles" to signupViewModel.roles,
+//                                "isSocial" to signupViewModel.isSocial,
+//                                "socialType" to signupViewModel.socialType,
+//                                "socialSerialNum" to signupViewModel.socialSerialNum
+                            )
+
+                            val addressAddDto = mapOf(
+                                "zoneCode" to signupViewModel.zoneCode,
+                                "addressName" to signupViewModel.addressName,
                                 "address" to signupViewModel.address,
-                                "addressDetail" to signupViewModel.addressDetail,
-                                "birthDate" to signupViewModel.birthDate,
-                                "gender" to signupViewModel.gender
+                                "userSelectedType" to signupViewModel.userSelectedType,
+                                "roadAddress" to signupViewModel.roadAddress,
+                                "jibunAddress" to signupViewModel.jibunAddress,
+                                "detailAddress" to signupViewModel.detailAddress,
+                                "autoRoadAddress" to signupViewModel.autoRoadAddress,
+                                "autoJibunAddress" to signupViewModel.autoJibunAddress,
+                                "buildingCode" to signupViewModel.buildingCode,
+                                "buildingName" to signupViewModel.buildingName,
+                                "isApartment" to signupViewModel.isApartment,
+                                "sido" to signupViewModel.sido,
+                                "sigungu" to signupViewModel.sigungu,
+                                "sigunguCode" to signupViewModel.sigunguCode,
+                                "roadNameCode" to signupViewModel.roadNameCode,
+                                "bcode" to signupViewModel.bcode,
+                                "roadName" to signupViewModel.roadName,
+                                "bname" to signupViewModel.bname,
+                                "bname1" to signupViewModel.bname1,
+//                                "isRepresentative" to signupViewModel.isRepresentative
+                            )
+
+                            val requestData = mapOf(
+                                "signUpDto" to signUpDto,
+                                "addressAddDto" to addressAddDto
                             )
 
                             // API 호출 예시
-                            // sendSignupDataToApi(signupData)
+                            // sendSignupDataToApi(requestData)
 
                             navController.navigate("mainpage")
-                        }, // 건너뛰기 클릭 시 메인페이지로 이동
+                        },
                         modifier = Modifier.align(Alignment.End) // 오른쪽에 배치
                     ) {
                         Text(
@@ -178,20 +210,53 @@ fun SignupStep3(navController: NavController, signupViewModel: SignupViewModel) 
                     // 모든 입력된 데이터를 ViewModel에서 가져와서 API로 전송
                     Button(
                         onClick = {
-                            val signupData = mapOf(
+                            // ViewModel에서 데이터 취합
+                            val signUpDto = mapOf(
                                 "name" to signupViewModel.name,
+                                "isMale" to signupViewModel.isMale,
+                                "birth" to signupViewModel.birth,  // 적절한 날짜 형식으로 변환 필요
                                 "email" to signupViewModel.email,
                                 "password" to signupViewModel.password,
-                                "phoneNumber" to signupViewModel.phoneNumber,
-                                "postalCode" to signupViewModel.postalCode,
+                                "mobilePhone" to signupViewModel.mobilePhone,
+                                "landlinePhone" to signupViewModel.landlinePhone,
+                                "profileImageUrl" to signupViewModel.profileImageUrl,
+                                "roles" to signupViewModel.roles,
+                                "isSocial" to signupViewModel.isSocial,
+                                "socialType" to signupViewModel.socialType,
+                                "socialSerialNum" to signupViewModel.socialSerialNum
+                            )
+
+                            val addressAddDto = mapOf(
+                                "zoneCode" to signupViewModel.zoneCode,
+                                "addressName" to signupViewModel.addressName,
                                 "address" to signupViewModel.address,
-                                "addressDetail" to signupViewModel.addressDetail,
-                                "birthDate" to signupViewModel.birthDate,
-                                "gender" to signupViewModel.gender
+                                "userSelectedType" to signupViewModel.userSelectedType,
+                                "roadAddress" to signupViewModel.roadAddress,
+                                "jibunAddress" to signupViewModel.jibunAddress,
+                                "detailAddress" to signupViewModel.detailAddress,
+                                "autoRoadAddress" to signupViewModel.autoRoadAddress,
+                                "autoJibunAddress" to signupViewModel.autoJibunAddress,
+                                "buildingCode" to signupViewModel.buildingCode,
+                                "buildingName" to signupViewModel.buildingName,
+                                "isApartment" to signupViewModel.isApartment,
+                                "sido" to signupViewModel.sido,
+                                "sigungu" to signupViewModel.sigungu,
+                                "sigunguCode" to signupViewModel.sigunguCode,
+                                "roadNameCode" to signupViewModel.roadNameCode,
+                                "bcode" to signupViewModel.bcode,
+                                "roadName" to signupViewModel.roadName,
+                                "bname" to signupViewModel.bname,
+                                "bname1" to signupViewModel.bname1,
+                                "isRepresentative" to signupViewModel.isRepresentative
+                            )
+
+                            val requestData = mapOf(
+                                "signUpDto" to signUpDto,
+                                "addressAddDto" to addressAddDto
                             )
 
                             // API 호출 예시
-                            // sendSignupDataToApi(signupData)
+                            // sendSignupDataToApi(requestData)
 
                             navController.navigate("mainpage")
                         },
