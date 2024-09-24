@@ -74,8 +74,8 @@ class MainActivity : ComponentActivity() {
                             composable("auth") { LoginScreen(navController) }
                             // 회원가입 페이지
                             composable("signup_step1") { SignupStep1(navController, signupViewModel = SignupViewModel()) }
-                            composable("signup_step2") { SignupStep2(navController) }
-                            composable("signup_step3") { SignupStep3(navController) }
+                            composable("signup_step2") { SignupStep2(navController, signupViewModel = SignupViewModel()) }
+                            composable("signup_step3") { SignupStep3(navController, signupViewModel = SignupViewModel()) }
                             // 기프트 페이지
                             composable("gift") { GiftPage(navController) }
                             // 기프트 상세 페이지
