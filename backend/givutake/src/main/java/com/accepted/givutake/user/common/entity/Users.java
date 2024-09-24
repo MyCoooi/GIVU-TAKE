@@ -6,7 +6,7 @@ import com.accepted.givutake.user.common.enumType.SocialType;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Table(name="Users")
 @Entity
@@ -44,7 +44,7 @@ public class Users extends BaseTimeEntity {
 
     // 사용자만 해당
     @Column(name = "birth", nullable = true)
-    private LocalDateTime birth;
+    private LocalDate birth;
 
     // 수혜자만 해당
     @Column(name = "region_idx", nullable = true)
