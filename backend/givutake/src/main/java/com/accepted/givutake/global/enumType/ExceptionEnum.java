@@ -55,11 +55,13 @@ public enum ExceptionEnum {
     NOT_FOUND_ADDRESSES_EXCEPTION(HttpStatus.NOT_FOUND, "EU4020", "주소 정보를 찾을 수 없습니다."),
     NOT_FOUND_FUNDING_REVIEW_EXCEPTION(HttpStatus.NOT_FOUND, "EU4030", "펀딩 후기 정보를 찾을 수 없습니다."),
     NOT_FOUND_FUNDING_WITH_IDX_EXCEPTION(HttpStatus.NOT_FOUND, "EU4031", "펀딩 정보를 찾을 수 없습니다."),
+    NOT_FOUND_CHEER_COMMENT_EXCEPTION(HttpStatus.NOT_FOUND, "EU4040", "댓글 정보를 찾을 수 없습니다."),
 
     USER_ALREADY_WITHDRAWN_EXCEPTION(HttpStatus.NOT_FOUND, "EU5001", "이미 탈퇴한 회원입니다."),
     ADDRESSES_ALREADY_DELETED_EXCEPTION(HttpStatus.NOT_FOUND, "EU5020", "이미 삭제된 주소입니다."),
     FUNDING_REVIEWS_ALREADY_DELETED_EXCEPTION(HttpStatus.NOT_FOUND, "EU5030", "이미 삭제된 펀딩 후기 입니다."),
     FUNDING_ALREADY_DELETED_EXCEPTION(HttpStatus.NOT_FOUND, "EU5031", "이미 삭제된 펀딩 입니다."),
+    CHEER_COMMENT_ALREADY_DELETED_EXCEPTION(HttpStatus.NOT_FOUND, "EU5040", "이미 삭제된 댓글 입니다."),
 
     PASSWORD_MISMATCH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU6011", "비밀번호가 일치하지 않습니다."),
     REFRESHTOKEN_MISMATCH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU6012", "토큰 정보가 일치하지 않습니다."),

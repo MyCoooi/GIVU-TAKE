@@ -5,7 +5,7 @@ import com.accepted.givutake.user.common.enumType.Roles;
 import com.accepted.givutake.user.common.enumType.SocialType;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -20,7 +20,7 @@ public class UserDto {
     private String mobilePhone;
     private String landlinePhone;
     private Boolean isMale;
-    private LocalDateTime birth;
+    private LocalDate birth;
     private Integer regionIdx;
     private Integer cardIdx;
     private String profileImageUrl;
@@ -77,6 +77,7 @@ public class UserDto {
 
     public ResponseUserDto toResponseUserDto() {
         return ResponseUserDto.builder()
+                .email(this.email)
                 .name(this.name)
                 .mobilePhone(this.mobilePhone)
                 .landlinePhone(this.landlinePhone)
