@@ -91,8 +91,12 @@ fun SignupStep3(navController: NavController, signupViewModel: SignupViewModel) 
                     Row(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp) // 중간 박스의 윗부분에 맞춰지도록 패딩 조정
+
                     ) {
+
                         // ooo 단계
                         Box(
                             modifier = Modifier
@@ -116,7 +120,7 @@ fun SignupStep3(navController: NavController, signupViewModel: SignupViewModel) 
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     // 맞춤설정 텍스트
                     Text(
