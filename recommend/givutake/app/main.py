@@ -7,7 +7,7 @@ import os
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
-app.include_router(recommendations.router, prefix="/recommend/v1")
+app.include_router(recommendations.router, prefix="/recommend")
 
 is_ec2 = os.getenv('IS_EC2', 'false').lower() == 'true'
 

@@ -13,9 +13,9 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        print(token)
-        print(settings.JWT_SECRET_ALGORITHM)
-        print(settings.JWT_SECRET_KEY)
+        # print(token)
+        # print(settings.JWT_SECRET_ALGORITHM)
+        # print(settings.JWT_SECRET_KEY)
         payload = jwt.decode(token, base64.b64decode(settings.JWT_SECRET_KEY).decode('utf-8'), algorithms=[settings.JWT_SECRET_ALGORITHM])
         email: str = payload.get("sub")
         if email is None:
@@ -23,8 +23,3 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     except jwt.PyJWTError:
         raise credentials_exception
     return email
-
-def create_access_token(data: dict):
-    to_encode = data.copy()
-    encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_SECRET_ALGORITHM)
-    return encoded_jwt
