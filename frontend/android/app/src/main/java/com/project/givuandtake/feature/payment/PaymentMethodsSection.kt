@@ -112,6 +112,7 @@ fun PaymentMethods() {
     }
 }
 
+
 @Composable
 fun PaymentMethodButtonWithIcon(
     methodName: String,
@@ -200,6 +201,84 @@ fun CardSelectionDropdown() {
                 expanded = false
             }) {
                 Text("신한카드")
+            }
+        }
+    }
+}
+
+
+
+
+// 답례품 관련
+@Composable
+fun PaymentMethods_gift(selectedMethod: String, onMethodSelected: (String) -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = Color.White,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        shadowElevation = 4.dp
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "결제 수단",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 결제 수단을 두 개씩 나란히 배치
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    PaymentMethodButtonWithIcon(
+                        "신용 / 체크 카드",
+                        R.drawable.logo,
+                        Modifier.weight(1f),
+                        selected = selectedMethod == "신용 / 체크 카드",
+                        onClick = { onMethodSelected("신용 / 체크 카드") }
+                    )
+                    PaymentMethodButtonWithIcon(
+                        "카카오 페이",
+                        R.drawable.kakao,
+                        Modifier.weight(1f),
+                        selected = selectedMethod == "카카오 페이",
+                        onClick = { onMethodSelected("카카오 페이") }
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    PaymentMethodButtonWithIcon(
+                        "네이버 페이",
+                        R.drawable.naver,
+                        Modifier.weight(1f),
+                        selected = selectedMethod == "네이버 페이",
+                        onClick = { onMethodSelected("네이버 페이") }
+                    )
+                    PaymentMethodButtonWithIcon(
+                        "토스 페이",
+                        R.drawable.toss_logo,
+                        Modifier.weight(1f),
+                        selected = selectedMethod == "토스 페이",
+                        onClick = { onMethodSelected("토스 페이") }
+                    )
+                }
+
+                // 신용/체크 카드나 카카오 페이가 선택된 경우에만 카드사 선택 표시
+                if (selectedMethod == "신용 / 체크 카드") {
+                    CardSelectionDropdown()
+                }
             }
         }
     }

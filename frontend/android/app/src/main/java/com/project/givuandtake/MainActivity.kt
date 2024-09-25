@@ -4,6 +4,7 @@ import AttractionMain
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +26,7 @@ import com.project.givuandtake.auth.LoginScreen
 import com.project.givuandtake.auth.SignupStep1
 import com.project.givuandtake.auth.SignupStep2
 import com.project.givuandtake.auth.SignupStep3
+import com.project.givuandtake.auth.SignupViewModel
 import com.project.givuandtake.core.data.CartItem
 import com.project.givuandtake.feature.attraction.FestivalPage
 import com.project.givuandtake.feature.attraction.LocationSelect
@@ -52,8 +54,13 @@ import com.project.givuandtake.feature.mypage.MyManagement.MyReview
 import com.project.givuandtake.feature.navigation.addGiftPageDetailRoute
 import com.project.givuandtake.ui.navbar.BottomNavBar
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
+import com.project.payment.PaymentScreen
+import com.project.payment.PaymentScreen_gift
+
 
 class MainActivity : ComponentActivity() {
+    private val signupViewModel: SignupViewModel by viewModels() // ViewModel 생성
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -94,9 +101,9 @@ class MainActivity : ComponentActivity() {
                             // 로그인 페이지
                             composable("auth") { LoginScreen(navController) }
                             // 회원가입 페이지
-                            composable("signup_step1") { SignupStep1(navController) }
-                            composable("signup_step2") { SignupStep2(navController) }
-                            composable("signup_step3") { SignupStep3(navController) }
+                            composable("signup_step1") { SignupStep1(navController, signupViewModel) }
+                            composable("signup_step2") { SignupStep2(navController, signupViewModel) }
+                            composable("signup_step3") { SignupStep3(navController, signupViewModel) }
                             // 기프트 페이지
                             composable("gift") {
                                 GiftPage(navController = navController) // cartItems는 MutableState로 전달
@@ -111,6 +118,27 @@ class MainActivity : ComponentActivity() {
                                 CartPage(navController = navController, context = context) // context 전달
                             }
 
+                            // 결제 페이지_답례품
+                            composable(
+                                route = "payment_page_gift?name={name}&location={location}&price={price}&quantity={quantity}",
+                                arguments = listOf(
+                                    navArgument("name") { type = NavType.StringType },
+                                    navArgument("location") { type = NavType.StringType },
+                                    navArgument("price") { type = NavType.IntType },
+                                    navArgument("quantity") { type = NavType.IntType }
+                                )
+                            ) { backStackEntry ->
+                                val name = backStackEntry.arguments?.getString("name") ?: ""
+                                val location = backStackEntry.arguments?.getString("location") ?: ""
+                                val price = backStackEntry.arguments?.getInt("price") ?: 0
+                                val quantity = backStackEntry.arguments?.getInt("quantity") ?: 1
+                                PaymentScreen_gift(navController, name, location, price, quantity)
+                            }
+
+
+
+                            // 마이 페이지
+                            composable("mypage") { ContributorScreen(navController) }
                             composable("locationSelection") {
                                 LocationSelect(navController)
                             }
