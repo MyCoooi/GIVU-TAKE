@@ -49,7 +49,19 @@ public class FundingController {
     }
 
     // jwt 토큰으로 펀딩 수정
-//    @PatchMapping("/{fundingIdx}")
+    @PatchMapping("/{fundingIdx}")
+    public ResponseEntity<ResponseDto> modifyFundingByJwt(@AuthenticationPrincipal UserDetails userDetails, @PathVariable int fundingIdx, @Valid @RequestBody FundingAddDto fundingAddDto) {
+        String email = userDetails.getUsername();
+
+        Fundings modifiedFundings = fundingService.modifyFundingByFundingIdx(email, fundingIdx, fundingAddDto);
+        FundingViewDto fundingViewDto = FundingViewDto.toDto(modifiedFundings);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(fundingViewDto)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
 
     // jwt 토큰으로 펀딩 삭제
     @DeleteMapping("/{fundingIdx}")

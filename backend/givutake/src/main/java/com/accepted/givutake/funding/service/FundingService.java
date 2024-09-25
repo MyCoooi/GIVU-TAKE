@@ -9,6 +9,10 @@ import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.service.UserService;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.User;
@@ -64,6 +68,42 @@ public class FundingService {
             return 0; // 대기 상태
         }
         return 1; // 모금 진행 중 상태
+    }
+
+    // fundingIdx에 해당하는 펀딩 수정
+    public Fundings modifyFundingByFundingIdx(String email, int fundingIdx, FundingAddDto fundingAddDto) {
+        // 1. user 정보 조회
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        Users savedUsers = savedUserDto.toEntity();
+
+        // 2. 펀딩 정보 조회
+        Fundings savedFundings = this.getFundingByFundingIdx(fundingIdx);
+
+        // 3. 펀딩을 등록한 사람과 펀딩을 수정하려는 사람이 일치하는지 확인
+        if (savedUsers.getUserIdx() != savedFundings.getCorporation().getUserIdx()) {
+            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
+        }
+
+        // 4. 수정하려는 펀딩이 모금 종료되었거나 진행 중이라면 수정 불가
+        if (savedFundings.getState() == (byte) 2) {
+            throw new ApiException(ExceptionEnum.NOT_ALLOWED_DONE_FUNDING_MODIFICATION_EXCEPTION);
+        }
+
+        if (savedFundings.getState() == (byte) 1) {
+            throw new ApiException(ExceptionEnum.NOT_ALLOWED_FUNDING_IN_PROGRESS_MODIFICATION_EXCEPTION);
+        }
+
+        // 5. 수정
+        savedFundings.setFundingTitle(fundingAddDto.getFundingTitle());
+        savedFundings.setFundingContent(fundingAddDto.getFundingContent());
+        savedFundings.setGoalMoney(fundingAddDto.getGoalMoney());
+        savedFundings.setStartDate(fundingAddDto.getStartDate());
+        savedFundings.setEndDate(fundingAddDto.getEndDate());
+        savedFundings.setFundingThumbnail(fundingAddDto.getFundingThumbnail());
+        savedFundings.setFundingType(fundingAddDto.getFundingType());
+
+        // 6. DB에 저장
+        return fundingRepository.save(savedFundings);
     }
 
     // fundingIdx에 해당하는 펀딩 삭제
