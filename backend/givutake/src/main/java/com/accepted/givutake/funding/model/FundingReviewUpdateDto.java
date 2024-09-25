@@ -1,7 +1,5 @@
 package com.accepted.givutake.funding.model;
 
-import com.accepted.givutake.funding.entity.FundingReviews;
-import com.accepted.givutake.funding.entity.Fundings;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -13,9 +11,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FundingReviewUpdateDto {
-
-    @NotNull(message = "후기 코드는 필수 입력 값 입니다.")
-    private Integer reviewIdx;
 
     @Size(max = 6000)
     @NotNull(message = "내용은 필수 입력 값 입니다.")

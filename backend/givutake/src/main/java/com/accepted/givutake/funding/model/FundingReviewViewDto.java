@@ -13,12 +13,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class FundingReviewViewDto {
 
-    private int reviewIdx;
     private String reviewContent;
 
     public static FundingReviewViewDto toDto(FundingReviews fundingReviews) {
         return FundingReviewViewDto.builder()
-                .reviewIdx(fundingReviews.getReviewIdx())
                 .reviewContent(fundingReviews.getReviewContent())
                 .build();
     }

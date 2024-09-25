@@ -14,9 +14,6 @@ import lombok.*;
 @AllArgsConstructor
 public class FundingReviewAddDto {
 
-    @NotNull(message = "펀딩 코드는 필수 입력 값 입니다.")
-    private Integer fundingIdx;
-
     @Size(max = 6000)
     @NotNull(message = "내용은 필수 입력 값 입니다.")
     private String reviewContent;

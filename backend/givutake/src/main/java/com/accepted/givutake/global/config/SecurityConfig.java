@@ -39,14 +39,16 @@ public class SecurityConfig {
                 // 경로별 인가 작업
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/users/client/**").hasRole("CLIENT")
-                        .requestMatchers(HttpMethod.POST, "/api/government-fundings/reviews").hasRole("CORPORATION")
-                        .requestMatchers(HttpMethod.PATCH, "/api/government-fundings/reviews").hasRole("CORPORATION")
+                        .requestMatchers(HttpMethod.POST, "/api/government-fundings/*/review").hasRole("CORPORATION")
+                        .requestMatchers(HttpMethod.PATCH, "/api/government-fundings/*/review").hasRole("CORPORATION")
                         .requestMatchers("/",
                                 "/api/auth",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/government-fundings/reviews").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/government-fundings/*/review",
+                                "/api/government-fundings/*/comments",
+                                "/api/government-fundings/*/comments/*").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/users",
                                 "/api/users/password/code",
                                 "/api/users/password/code/verification").permitAll()

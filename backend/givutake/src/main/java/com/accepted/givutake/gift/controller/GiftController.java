@@ -120,8 +120,9 @@ public class GiftController {
     public ResponseEntity<ResponseDto> getGiftReviews(
             @PathVariable int giftIdx,
             @RequestParam(value = "pageNo", defaultValue = "1")int pageNo,
-            @RequestParam(value = "pageSize", defaultValue = "10")int pageSize) {
-        List<GiftReviewDto> reviews = giftService.getGiftReviews(giftIdx, pageNo, pageSize);
+            @RequestParam(value = "pageSize", defaultValue = "10")int pageSize,
+            @RequestParam(value = "isOrderLiked", defaultValue = "false")boolean isOrderLiked) {
+        List<GiftReviewDto> reviews = giftService.getGiftReviews(giftIdx, isOrderLiked, pageNo, pageSize);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(reviews)
                 .build();
@@ -132,10 +133,22 @@ public class GiftController {
     public ResponseEntity<ResponseDto> getUserReviews(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(value = "pageNo", defaultValue = "1")int pageNo,
-            @RequestParam(value = "pageSize", defaultValue = "10")int pageSize){
-        List<GiftReviewDto> reviews = giftService.getUserReviews(userDetails.getUsername(), pageNo, pageSize);
+            @RequestParam(value = "pageSize", defaultValue = "10")int pageSize,
+            @RequestParam(value = "isOrderLiked", defaultValue = "false")boolean isOrderLiked){
+        List<GiftReviewDto> reviews = giftService.getUserReviews(userDetails.getUsername(), isOrderLiked, pageNo, pageSize);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(reviews)
+                .build();
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    @GetMapping("/review/{reviewIdx}") // 특정 후기 조회
+    public ResponseEntity<ResponseDto> getUserReview(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable int reviewIdx){
+        GiftReviewDto review = giftService.getUserReview(userDetails.getUsername(), reviewIdx);
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(review)
                 .build();
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
@@ -175,6 +188,40 @@ public class GiftController {
                 .build();
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
+
+    @GetMapping("/review/{reviewIdx}/isLiked") // 리뷰 좋아요 추가
+    public ResponseEntity<ResponseDto> isLiked(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable int reviewIdx) {
+        boolean data = giftService.isLiked(userDetails.getUsername(), reviewIdx);
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(data)
+                .build();
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    @PostMapping("/review/{reviewIdx}/insertLiked") // 리뷰 좋아요 추가
+    public ResponseEntity<ResponseDto> insertLiked(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable int reviewIdx) {
+        giftService.createLiked(userDetails.getUsername(), reviewIdx);
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(null)
+                .build();
+        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/review/{reviewIdx}/deleteLiked") // 리뷰 좋아요 추가
+    public ResponseEntity<ResponseDto> deleteLiked(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable int reviewIdx) {
+        giftService.deleteLiked(userDetails.getUsername(), reviewIdx);
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(null)
+                .build();
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
 }
 
 

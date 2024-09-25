@@ -68,4 +68,13 @@ public class OrderController {
                 .build();
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
+
+    @GetMapping("/statistics/{giftIdx}")
+    public ResponseEntity<ResponseDto> getOrderStatistics(@PathVariable int giftIdx){
+        int data = orderService.countGift(giftIdx);
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(data)
+                .build();
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
 }

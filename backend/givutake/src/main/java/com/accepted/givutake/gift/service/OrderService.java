@@ -57,10 +57,12 @@ public class OrderService {
                 .userIdx(user.getUserIdx())
                 .giftIdx(order.getGift().getGiftIdx())
                 .giftName(order.getGift().getGiftName())
+                .giftThumbnail(order.getGift().getGiftThumbnail())
                 .paymentMethod(order.getPaymentMethod())
                 .amount(order.getAmount())
                 .price(order.getPrice())
                 .status(order.getStatus())
+                .createdDate(order.getCreatedDate())
                 .build()
         ).toList();
     }
@@ -77,10 +79,12 @@ public class OrderService {
                 .userIdx(order.getUsers().getUserIdx())
                 .giftIdx(order.getGift().getGiftIdx())
                 .giftName(order.getGift().getGiftName())
+                .giftThumbnail(order.getGift().getGiftThumbnail())
                 .paymentMethod(order.getPaymentMethod())
                 .amount(order.getAmount())
                 .price(order.getPrice())
                 .status(order.getStatus())
+                .createdDate(order.getCreatedDate())
                 .build();
     }
 
@@ -93,6 +97,11 @@ public class OrderService {
 
         order.setStatus(request.getStatus());
         orderRepository.save(order);
+    }
+
+    public int countGift(int giftIdx){
+        Gifts gift = giftRepository.findById(giftIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
+        return orderRepository.countByGift(gift);
     }
 
 }

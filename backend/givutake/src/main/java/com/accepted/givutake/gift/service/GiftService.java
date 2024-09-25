@@ -1,15 +1,16 @@
 package com.accepted.givutake.gift.service;
 
+import com.accepted.givutake.gift.entity.GiftReviewLiked;
 import com.accepted.givutake.gift.entity.GiftReviews;
 import com.accepted.givutake.gift.entity.Gifts;
 import com.accepted.givutake.gift.model.*;
 import com.accepted.givutake.gift.repository.GiftRepository;
+import com.accepted.givutake.gift.repository.GiftReviewLikedRepository;
 import com.accepted.givutake.gift.repository.GiftReviewRepository;
 import com.accepted.givutake.global.entity.Categories;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.repository.CategoryRepository;
-import com.accepted.givutake.global.repository.UserViewLogRepository;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.repository.UsersRepository;
 import jakarta.transaction.Transactional;
@@ -28,6 +29,7 @@ public class GiftService {
 
     private final GiftRepository giftRepository;
     private final GiftReviewRepository giftReviewRepository;
+    private final GiftReviewLikedRepository giftReviewLikedRepository;
     private final CategoryRepository categoryRepository;
     private final UsersRepository userRepository;
 
@@ -132,9 +134,15 @@ public class GiftService {
     }
 
 
-    public List<GiftReviewDto> getGiftReviews(int giftIdx, int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo-1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+    public List<GiftReviewDto> getGiftReviews(int giftIdx, boolean isOrderLiked, int pageNo, int pageSize) {
 
+        Pageable pageable = null;
+
+        if(isOrderLiked){
+            pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "likedCount"));
+        }else {
+            pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+        }
         Gifts gifts = giftRepository.findById(giftIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
 
         Specification<GiftReviews> spec = (root, query, cb) -> {
@@ -150,17 +158,26 @@ public class GiftService {
                 .reviewIdx(review.getReviewIdx())
                 .reviewContent(review.getReviewContent())
                 .giftIdx(review.getGifts().getGiftIdx())
+                .giftName(review.getGifts().getGiftName())
+                .giftThumbnail(review.getGifts().getGiftThumbnail())
                 .userIdx(review.getUsers().getUserIdx())
                 .userName(review.getUsers().getName())
                 .userProfileImage(review.getUsers().getProfileImageUrl())
+                .likedCount(review.getLikedCount())
                 .createdDate(review.getCreatedDate())
                 .modifiedDate(review.getModifiedDate())
                 .build()
         ).toList();
     }
 
-    public List<GiftReviewDto> getUserReviews(String email, int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo-1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+    public List<GiftReviewDto> getUserReviews(String email, boolean isOrderLiked, int pageNo, int pageSize) {
+        Pageable pageable = null;
+
+        if(isOrderLiked){
+            pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "likedCount"));
+        }else {
+            pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+        }
 
         Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
 
@@ -177,13 +194,35 @@ public class GiftService {
                 .reviewIdx(review.getReviewIdx())
                 .reviewContent(review.getReviewContent())
                 .giftIdx(review.getGifts().getGiftIdx())
+                .giftName(review.getGifts().getGiftName())
+                .giftThumbnail(review.getGifts().getGiftThumbnail())
+                .userIdx(review.getUsers().getUserIdx())
+                .userName(review.getUsers().getName())
+                .userProfileImage(review.getUsers().getProfileImageUrl())
+                .likedCount(review.getLikedCount())
+                .createdDate(review.getCreatedDate())
+                .modifiedDate(review.getModifiedDate())
+                .build()
+        ).toList();
+    }
+
+    public GiftReviewDto getUserReview(String email, int reviewIdx){
+        GiftReviews review = giftReviewRepository.findById(reviewIdx).orElseThrow(()->new ApiException(ExceptionEnum.NOT_FOUND_GIFT_REVIEW_EXCEPTION));
+        if(!review.getUsers().getEmail().equals(email)){
+            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
+        }
+        return GiftReviewDto.builder()
+                .reviewIdx(reviewIdx)
+                .reviewContent(review.getReviewContent())
+                .giftIdx(review.getGifts().getGiftIdx())
+                .giftName(review.getGifts().getGiftName())
+                .giftThumbnail(review.getGifts().getGiftThumbnail())
                 .userIdx(review.getUsers().getUserIdx())
                 .userName(review.getUsers().getName())
                 .userProfileImage(review.getUsers().getProfileImageUrl())
                 .createdDate(review.getCreatedDate())
                 .modifiedDate(review.getModifiedDate())
-                .build()
-        ).toList();
+                .build();
     }
 
     public void updateGiftReviews(String email, int reviewIdx, UpdateGiftReviewDto request) {
@@ -203,4 +242,47 @@ public class GiftService {
         giftReviewRepository.save(review);
     }
 
+    public boolean isLiked(String email, int reviewIdx) {
+        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        return giftReviewLikedRepository.existsByUserAndGiftReviews_ReviewIdx(user, reviewIdx);
+    }
+
+
+    public void createLiked(String email, int reviewIdx) {
+        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        GiftReviews review = giftReviewRepository.findById(reviewIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_REVIEW_EXCEPTION));
+
+        if(review.isDelete()){
+            throw new ApiException(ExceptionEnum.NOT_ALLOWED_OPERATION_ON_DELETED_REVIEW_EXCEPTION);
+        }
+
+        if(isLiked(email,reviewIdx)){
+            throw new ApiException(ExceptionEnum.NOT_ALLOWED_LIKED_INSERTION_EXCEPTION);
+        }
+        GiftReviewLiked newLiked = GiftReviewLiked.builder()
+                .user(user)
+                .giftReviews(review)
+                .build();
+        giftReviewLikedRepository.save(newLiked);
+        review.setLikedCount(review.getLikedCount()+1);
+        giftReviewRepository.save(review);
+    }
+
+    public void deleteLiked(String email, int reviewIdx) {
+        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        GiftReviews review = giftReviewRepository.findById(reviewIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_REVIEW_EXCEPTION));
+
+        if(review.isDelete()){
+            throw new ApiException(ExceptionEnum.NOT_ALLOWED_OPERATION_ON_DELETED_REVIEW_EXCEPTION);
+        }
+
+        if(!isLiked(email,reviewIdx)){
+            throw new ApiException(ExceptionEnum.NOT_ALLOWED_LIKED_DELETION_EXCEPTION);
+        }
+        GiftReviewLiked liked = giftReviewLikedRepository.findByUserAndGiftReviews(user, review)
+                .orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_REVIEW_LIKED_EXCEPTION));
+        giftReviewLikedRepository.delete(liked);
+        review.setLikedCount(review.getLikedCount()-1);
+        giftReviewRepository.save(review);
+    }
 }
