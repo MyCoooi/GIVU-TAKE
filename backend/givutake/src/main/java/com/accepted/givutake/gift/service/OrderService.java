@@ -7,6 +7,7 @@ import com.accepted.givutake.gift.model.CreateOrderDto;
 import com.accepted.givutake.gift.model.OrderDto;
 import com.accepted.givutake.gift.model.UpdateOrderDto;
 import com.accepted.givutake.gift.repository.GiftRepository;
+import com.accepted.givutake.gift.repository.GiftReviewRepository;
 import com.accepted.givutake.gift.repository.OrderRepository;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
@@ -30,6 +31,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UsersRepository userRepository;
     private final GiftRepository giftRepository;
+    private final GiftReviewRepository giftReviewRepository;
 
     public void createOrder(String email, CreateOrderDto request){
         Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
