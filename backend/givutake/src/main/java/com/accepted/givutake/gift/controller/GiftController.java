@@ -153,6 +153,17 @@ public class GiftController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
+    @GetMapping("/review/order/{orderIdx}")
+    public ResponseEntity<ResponseDto> getUserReviewOrder(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable int orderIdx){
+        boolean data = giftService.IsWriteGiftReview(userDetails.getUsername(), orderIdx);
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(data)
+                .build();
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
     @PostMapping("/review") // 리뷰 작성
     public ResponseEntity<ResponseDto> createGiftReview(
             @AuthenticationPrincipal UserDetails userDetails ,
@@ -188,6 +199,40 @@ public class GiftController {
                 .build();
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
+
+    @GetMapping("/review/{reviewIdx}/isLiked") // 리뷰 좋아요 추가
+    public ResponseEntity<ResponseDto> isLiked(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable int reviewIdx) {
+        boolean data = giftService.isLiked(userDetails.getUsername(), reviewIdx);
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(data)
+                .build();
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    @PostMapping("/review/{reviewIdx}/insertLiked") // 리뷰 좋아요 추가
+    public ResponseEntity<ResponseDto> insertLiked(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable int reviewIdx) {
+        giftService.createLiked(userDetails.getUsername(), reviewIdx);
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(null)
+                .build();
+        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/review/{reviewIdx}/deleteLiked") // 리뷰 좋아요 추가
+    public ResponseEntity<ResponseDto> deleteLiked(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable int reviewIdx) {
+        giftService.deleteLiked(userDetails.getUsername(), reviewIdx);
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(null)
+                .build();
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
 }
 
 
