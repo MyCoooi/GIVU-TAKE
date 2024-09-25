@@ -120,8 +120,9 @@ public class GiftController {
     public ResponseEntity<ResponseDto> getGiftReviews(
             @PathVariable int giftIdx,
             @RequestParam(value = "pageNo", defaultValue = "1")int pageNo,
-            @RequestParam(value = "pageSize", defaultValue = "10")int pageSize) {
-        List<GiftReviewDto> reviews = giftService.getGiftReviews(giftIdx, pageNo, pageSize);
+            @RequestParam(value = "pageSize", defaultValue = "10")int pageSize,
+            @RequestParam(value = "isOrderLiked", defaultValue = "false")boolean isOrderLiked) {
+        List<GiftReviewDto> reviews = giftService.getGiftReviews(giftIdx, isOrderLiked, pageNo, pageSize);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(reviews)
                 .build();
@@ -132,8 +133,9 @@ public class GiftController {
     public ResponseEntity<ResponseDto> getUserReviews(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(value = "pageNo", defaultValue = "1")int pageNo,
-            @RequestParam(value = "pageSize", defaultValue = "10")int pageSize){
-        List<GiftReviewDto> reviews = giftService.getUserReviews(userDetails.getUsername(), pageNo, pageSize);
+            @RequestParam(value = "pageSize", defaultValue = "10")int pageSize,
+            @RequestParam(value = "isOrderLiked", defaultValue = "false")boolean isOrderLiked){
+        List<GiftReviewDto> reviews = giftService.getUserReviews(userDetails.getUsername(), isOrderLiked, pageNo, pageSize);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(reviews)
                 .build();
