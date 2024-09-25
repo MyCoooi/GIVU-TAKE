@@ -188,6 +188,40 @@ public class GiftController {
                 .build();
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
+
+    @GetMapping("/review/{reviewIdx}/isLiked") // 리뷰 좋아요 추가
+    public ResponseEntity<ResponseDto> isLiked(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable int reviewIdx) {
+        boolean data = giftService.isLiked(userDetails.getUsername(), reviewIdx);
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(data)
+                .build();
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    @PostMapping("/review/{reviewIdx}/insertLiked") // 리뷰 좋아요 추가
+    public ResponseEntity<ResponseDto> insertLiked(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable int reviewIdx) {
+        giftService.createLiked(userDetails.getUsername(), reviewIdx);
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(null)
+                .build();
+        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/review/{reviewIdx}/deleteLiked") // 리뷰 좋아요 추가
+    public ResponseEntity<ResponseDto> deleteLiked(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable int reviewIdx) {
+        giftService.deleteLiked(userDetails.getUsername(), reviewIdx);
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(null)
+                .build();
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
 }
 
 
