@@ -13,6 +13,7 @@ import androidx.navigation.navArgument
 import com.project.givuandtake.core.data.CartItem
 import com.project.givuandtake.core.data.GiftDetail
 import com.project.givuandtake.feature.gift.addToCart
+import com.project.givuandtake.feature.payment.PaymentSuccessPage
 import kotlinx.coroutines.launch
 
 
@@ -53,6 +54,12 @@ fun NavGraphBuilder.addGiftPageDetailRoute(navController: NavController, cartIte
         )
     }
 }
+
+//fun NavGraphBuilder.addPaymentSuccessPage(navController: NavController) {
+//    composable("payment_success") {
+//        PaymentSuccessPage(navController = navController)
+//    }
+//}
 
 
 

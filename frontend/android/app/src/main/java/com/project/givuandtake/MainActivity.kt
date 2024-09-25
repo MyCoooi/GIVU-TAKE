@@ -1,19 +1,24 @@
 package com.project.givuandtake
 
 import AttractionMain
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -36,15 +41,23 @@ import com.project.givuandtake.feature.gift.mainpage.GiftPage
 import com.project.givuandtake.feature.mainpage.MainPage
 import com.project.givuandtake.feature.mypage.ContributorScreen
 import com.project.givuandtake.feature.navigation.addGiftPageDetailRoute
+import com.project.givuandtake.feature.payment.KakaoPayManager
+import com.project.givuandtake.feature.payment.PaymentResultPage
+import com.project.givuandtake.feature.payment.PaymentSuccessPage
 import com.project.givuandtake.ui.navbar.BottomNavBar
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
 import com.project.payment.PaymentScreen
 import com.project.payment.PaymentScreen_gift
 
-
 class MainActivity : ComponentActivity() {
+
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        handleIntent(intent) // 기존 Intent 처리
+
         setContent {
             GivuAndTakeTheme {
                 val navController = rememberNavController() // NavController 생성
@@ -53,6 +66,8 @@ class MainActivity : ComponentActivity() {
                 val currentBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = currentBackStackEntry?.destination?.route
                 // A surface container using the 'background' color from the theme
+
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -117,7 +132,16 @@ class MainActivity : ComponentActivity() {
                                 PaymentScreen_gift(navController, name, location, price, quantity)
                             }
 
+                            // 결제 대기 페이지
+                            composable("payment_result") {
+                                PaymentResultPage(navController = navController, kakaoPayManager = KakaoPayManager())
+                            }
 
+
+                            // 결제 성공 페이지
+                            composable("payment_success") {
+                                PaymentSuccessPage(navController)
+                            }
 
                             // 마이 페이지
                             composable("mypage") { ContributorScreen(navController) }
@@ -157,4 +181,27 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    // 새로운 Intent를 처리
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent) // 새로운 Intent가 올 때마다 처리
+    }
+
+    // Intent에서 PG Token을 추출하여 처리
+    private fun handleIntent(intent: Intent?) {
+        val uri = intent?.data // 리다이렉트된 URL에서 Uri 추출
+        if (uri != null && uri.getQueryParameter("pg_token") != null) {
+            // 결제 결과를 처리하는 페이지로 이동
+            Log.d("KakaoPayApi", "PG Token 확인됨: ${uri.getQueryParameter("pg_token")}")
+        } else {
+            Log.e("KakaoPayApi", "PG Token이 없습니다.")
+        }
+    }
+
+
 }
+
+
+
+

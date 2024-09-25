@@ -76,11 +76,12 @@ fun PaymentScreen_gift(navController: NavController, name: String, location: Str
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 결제 총 금액 및 버튼 섹션
-            PaymentTotalAndButton_gift(paymentInfo = paymentInfo)
+            // 결제 총 금액 및 버튼 섹션, NavController 전달
+            PaymentTotalAndButton_gift(paymentInfo = paymentInfo, navController = navController)
         }
     }
 }
+
 
 
 
