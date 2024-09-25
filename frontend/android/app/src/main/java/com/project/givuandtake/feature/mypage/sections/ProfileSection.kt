@@ -20,10 +20,11 @@ import androidx.compose.ui.unit.sp
 fun ProfileSection() {
     // 프로필과 기부 정보를 포함하는 박스
     Surface(
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(25.dp),
         color = Color(0xFFB3C3F4), // 연한 파란색 배경
         modifier = Modifier
             .fillMaxWidth()
+            .padding(15.dp)
     ) {
         Column(
             modifier = Modifier
@@ -70,28 +71,27 @@ fun ProfileSection() {
 fun DonationSummaryCard() {
     // 기부 요약 정보 카드
     Surface(
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(20.dp),
         color = Color(0XFFFBFAFF), // 흰색 배경
         modifier = Modifier
-            .fillMaxWidth() // 상자 너비 맞춤
+            .fillMaxWidth()
+            .padding(5.dp)
     ) {
         Column(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally // 중앙 정렬
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // "나의 기부액"과 "999,999원" 가로로 나란히 정렬하면서 세로 중앙 맞춤
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically, // 세로 중앙 정렬
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween // 좌우 끝으로 정렬
             ) {
                 Text(
                     text = "나의 기부액",
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
                     color = Color(0xFF333333),
                     modifier = Modifier.align(Alignment.CenterVertically) // 세로 중앙 맞춤
                 )
@@ -115,7 +115,6 @@ fun DonationSummaryCard() {
                 Text(
                     text = "참여한 펀딩 수",
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
                     color = Color(0xFF333333),
                     modifier = Modifier.align(Alignment.CenterVertically) // 세로 중앙 맞춤
                 )

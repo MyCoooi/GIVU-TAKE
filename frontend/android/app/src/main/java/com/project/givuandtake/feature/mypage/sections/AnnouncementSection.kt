@@ -31,6 +31,7 @@ fun AnnouncementSection() {
         border = BorderStroke(3.dp, Color(0xFFB3C3F4)), // 테두리 추가
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = 16.dp)
     ) {
         Row(
             modifier = Modifier
