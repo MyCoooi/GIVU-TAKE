@@ -10,4 +10,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface OrderRepository extends JpaRepository<Orders, Integer> {
     Page<Orders> findByUsers(Users user, Pageable pageable);
     int countByGift(Gifts gift);
+
 }

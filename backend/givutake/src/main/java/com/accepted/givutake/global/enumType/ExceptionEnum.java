@@ -62,6 +62,7 @@ public enum ExceptionEnum {
     FUNDING_REVIEWS_ALREADY_DELETED_EXCEPTION(HttpStatus.NOT_FOUND, "EU5030", "이미 삭제된 펀딩 후기 입니다."),
     FUNDING_ALREADY_DELETED_EXCEPTION(HttpStatus.NOT_FOUND, "EU5031", "이미 삭제된 펀딩 입니다."),
     CHEER_COMMENT_ALREADY_DELETED_EXCEPTION(HttpStatus.NOT_FOUND, "EU5040", "이미 삭제된 댓글 입니다."),
+    GIFT_REVIEW_ALREADY_DELETED_EXCEPTION(HttpStatus.NOT_FOUND,"EG5001","이미 삭제된 후기 입니다."),
 
     PASSWORD_MISMATCH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU6011", "비밀번호가 일치하지 않습니다."),
     REFRESHTOKEN_MISMATCH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU6012", "토큰 정보가 일치하지 않습니다."),
@@ -73,6 +74,7 @@ public enum ExceptionEnum {
     NOT_ALLOWED_LIKED_INSERTION_EXCEPTION(HttpStatus.BAD_REQUEST,"EG7010","이미 좋아요를 추가하였습니다."),
     NOT_ALLOWED_LIKED_DELETION_EXCEPTION(HttpStatus.BAD_REQUEST,"EG7020","해당 좋아요를 삭제할 수 없습니다."),
     NOT_ALLOWED_OPERATION_ON_DELETED_REVIEW_EXCEPTION(HttpStatus.BAD_REQUEST,"EG7030", "해당 리뷰는 삭제된 리뷰입니다."),
+    NOT_ALLOWED_GIFT_REVIEW_INSERTION_EXCEPTION(HttpStatus.BAD_REQUEST,"EG7040","해당 주문의 리뷰는 이미 작성하셨습니다."),
 
     NOT_FOUND_CATEGORY_EXCEPTION(HttpStatus.NOT_FOUND, "EC0001", "해당 카테고리를 찾을 수 없습니다."),
     NOT_FOUND_GIFT_EXCEPTION(HttpStatus.NOT_FOUND,"EG0001", "해당 답례품을 찾을 수 없습니다."),

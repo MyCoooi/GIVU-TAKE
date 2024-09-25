@@ -16,4 +16,7 @@ public class CreateGiftReviewDto {
 
     @NotNull
     private int giftIdx;
+
+    @NotNull
+    private int orderIdx;
 }
