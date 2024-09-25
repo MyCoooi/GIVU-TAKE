@@ -14,26 +14,35 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.givuandtake.FundingMainPage
 import com.project.givuandtake.auth.LoginScreen
 import com.project.givuandtake.auth.SignupStep1
 import com.project.givuandtake.auth.SignupStep2
 import com.project.givuandtake.auth.SignupStep3
 import com.project.givuandtake.auth.SignupViewModel
+import com.project.givuandtake.core.data.CartItem
+import com.project.givuandtake.feature.attraction.FestivalPage
 import com.project.givuandtake.feature.attraction.LocationSelect
+import com.project.givuandtake.feature.attraction.TripPage
 import com.project.givuandtake.feature.funding.navigation.MainFundingCard
 import com.project.givuandtake.feature.fundinig.FundingDetailPage
+import com.project.givuandtake.feature.gift.CartPage
 import com.project.givuandtake.feature.gift.mainpage.GiftPage
 import com.project.givuandtake.feature.mainpage.MainPage
 import com.project.givuandtake.feature.mypage.ContributorScreen
-import com.project.givuandtake.feature.mypage.sections.AnnouncementScreen
 import com.project.givuandtake.feature.navigation.addGiftPageDetailRoute
 import com.project.givuandtake.ui.navbar.BottomNavBar
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
 import com.project.payment.PaymentScreen
+import com.project.payment.PaymentScreen_gift
+
 
 class MainActivity : ComponentActivity() {
     private val signupViewModel: SignupViewModel by viewModels() // ViewModel 생성
@@ -44,7 +53,9 @@ class MainActivity : ComponentActivity() {
             GivuAndTakeTheme {
                 val navController = rememberNavController() // NavController 생성
                 var selectedItem by remember { mutableStateOf(0) } // 선택된 항목 상태 추가
-
+                val cartItems = remember { mutableStateOf(listOf<CartItem>()) } // 장바구니 상태
+                val currentBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentDestination = currentBackStackEntry?.destination?.route
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -72,7 +83,7 @@ class MainActivity : ComponentActivity() {
                                     onBackClick = { navController.popBackStack() }
                                 )
                             }
-                            composable("attraction") { AttractionMain(navController, "") } // Navigate to AttractionMain
+                            composable("attraction") { AttractionMain(navController, "영도") } // Navigate to AttractionMain
                             // 로그인 페이지
                             composable("auth") { LoginScreen(navController) }
                             // 회원가입 페이지
@@ -80,14 +91,40 @@ class MainActivity : ComponentActivity() {
                             composable("signup_step2") { SignupStep2(navController, signupViewModel) }
                             composable("signup_step3") { SignupStep3(navController, signupViewModel) }
                             // 기프트 페이지
-                            composable("gift") { GiftPage(navController) }
+                            composable("gift") {
+                                GiftPage(navController = navController) // cartItems는 MutableState로 전달
+                            }
+
                             // 기프트 상세 페이지
-                            addGiftPageDetailRoute() // 모듈화된 GiftPageDetailRoute 추가
+                            addGiftPageDetailRoute(navController, cartItems) // cartItems는 MutableState로 전달
+
+                            // 장바구니 페이지
+                            composable("cart_page") {
+                                val context = LocalContext.current // LocalContext를 사용하여 Context 가져오기
+                                CartPage(navController = navController, context = context) // context 전달
+                            }
+
+                            // 결제 페이지_답례품
+                            composable(
+                                route = "payment_page_gift?name={name}&location={location}&price={price}&quantity={quantity}",
+                                arguments = listOf(
+                                    navArgument("name") { type = NavType.StringType },
+                                    navArgument("location") { type = NavType.StringType },
+                                    navArgument("price") { type = NavType.IntType },
+                                    navArgument("quantity") { type = NavType.IntType }
+                                )
+                            ) { backStackEntry ->
+                                val name = backStackEntry.arguments?.getString("name") ?: ""
+                                val location = backStackEntry.arguments?.getString("location") ?: ""
+                                val price = backStackEntry.arguments?.getInt("price") ?: 0
+                                val quantity = backStackEntry.arguments?.getInt("quantity") ?: 1
+                                PaymentScreen_gift(navController, name, location, price, quantity)
+                            }
+
+
+
                             // 마이 페이지
                             composable("mypage") { ContributorScreen(navController) }
-                            composable("announcement") {
-                                AnnouncementScreen(navController = navController)
-                            }
                             composable("locationSelection") {
                                 LocationSelect(navController)
                             }
@@ -95,15 +132,29 @@ class MainActivity : ComponentActivity() {
                                 val city = backStackEntry.arguments?.getString("city") ?: "도 선택"
                                 AttractionMain(navController, city)
                             }
-                            composable("payment") {
-                                PaymentScreen(navController)
+                            composable(
+                                route = "trippage?city={city}", // Define the route with a city argument
+                                arguments = listOf(navArgument("city") { type = NavType.StringType }) // Declare argument type
+                            ) { backStackEntry ->
+                                // Retrieve the city from the arguments
+                                val city = backStackEntry.arguments?.getString("city")
+                                TripPage(navController, city) // Pass the city to TripPage
                             }
-
+                            composable(
+                                route = "festivalpage?city={city}", // Define the route with a city argument
+                                arguments = listOf(navArgument("city") { type = NavType.StringType }) // Declare argument type
+                            ) { backStackEntry ->
+                                // Retrieve the city from the arguments
+                                val city = backStackEntry.arguments?.getString("city")
+                                FestivalPage(navController, city) // Pass the city to TripPage
+                            }
                         }
 
                         // 하단 네비게이션 바
-                        BottomNavBar(navController, selectedItem) { newIndex ->
-                            selectedItem = newIndex
+                        if (currentDestination != "trippage?city={city}" && currentDestination != "festivalpage?city={city}") {
+                            BottomNavBar(navController, selectedItem) { newIndex ->
+                                selectedItem = newIndex
+                            }
                         }
                     }
                 }
