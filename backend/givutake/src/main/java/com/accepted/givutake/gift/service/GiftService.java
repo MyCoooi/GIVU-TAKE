@@ -1,9 +1,11 @@
 package com.accepted.givutake.gift.service;
 
+import com.accepted.givutake.gift.entity.GiftReviewLiked;
 import com.accepted.givutake.gift.entity.GiftReviews;
 import com.accepted.givutake.gift.entity.Gifts;
 import com.accepted.givutake.gift.model.*;
 import com.accepted.givutake.gift.repository.GiftRepository;
+import com.accepted.givutake.gift.repository.GiftReviewLikedRepository;
 import com.accepted.givutake.gift.repository.GiftReviewRepository;
 import com.accepted.givutake.global.entity.Categories;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
@@ -28,6 +30,7 @@ public class GiftService {
 
     private final GiftRepository giftRepository;
     private final GiftReviewRepository giftReviewRepository;
+    private final GiftReviewLikedRepository giftReviewLikedRepository;
     private final CategoryRepository categoryRepository;
     private final UsersRepository userRepository;
 
@@ -198,7 +201,7 @@ public class GiftService {
                 .userName(review.getUsers().getName())
                 .userProfileImage(review.getUsers().getProfileImageUrl())
                 .likedCount(review.getLikedCount())
-                .createdDate(review.getCreatedDate())   
+                .createdDate(review.getCreatedDate())
                 .modifiedDate(review.getModifiedDate())
                 .build()
         ).toList();
@@ -240,4 +243,47 @@ public class GiftService {
         giftReviewRepository.save(review);
     }
 
+    public boolean isLiked(String email, int reviewIdx) {
+        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        return giftReviewLikedRepository.existsByUserAndGiftReviews_ReviewIdx(user, reviewIdx);
+    }
+
+
+    public void createLiked(String email, int reviewIdx) {
+        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        GiftReviews review = giftReviewRepository.findById(reviewIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_REVIEW_EXCEPTION));
+
+        if(review.isDelete()){
+            throw new ApiException(ExceptionEnum.NOT_ALLOWED_OPERATION_ON_DELETED_REVIEW_EXCEPTION);
+        }
+
+        if(isLiked(email,reviewIdx)){
+            throw new ApiException(ExceptionEnum.NOT_ALLOWED_LIKED_INSERTION_EXCEPTION);
+        }
+        GiftReviewLiked newLiked = GiftReviewLiked.builder()
+                .user(user)
+                .giftReviews(review)
+                .build();
+        giftReviewLikedRepository.save(newLiked);
+        review.setLikedCount(review.getLikedCount()+1);
+        giftReviewRepository.save(review);
+    }
+
+    public void deleteLiked(String email, int reviewIdx) {
+        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        GiftReviews review = giftReviewRepository.findById(reviewIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_REVIEW_EXCEPTION));
+
+        if(review.isDelete()){
+            throw new ApiException(ExceptionEnum.NOT_ALLOWED_OPERATION_ON_DELETED_REVIEW_EXCEPTION);
+        }
+
+        if(!isLiked(email,reviewIdx)){
+            throw new ApiException(ExceptionEnum.NOT_ALLOWED_LIKED_DELETION_EXCEPTION);
+        }
+        GiftReviewLiked liked = giftReviewLikedRepository.findByUserAndGiftReviews(user, review)
+                .orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_REVIEW_LIKED_EXCEPTION));
+        giftReviewLikedRepository.delete(liked);
+        review.setLikedCount(review.getLikedCount()-1);
+        giftReviewRepository.save(review);
+    }
 }
