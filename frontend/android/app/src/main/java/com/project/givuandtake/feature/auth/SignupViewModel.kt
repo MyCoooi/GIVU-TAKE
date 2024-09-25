@@ -59,6 +59,10 @@ class SignupViewModel : ViewModel() {
         addressInfo.value = addressInfo.value.copy(detailAddress = newDetailAddress)
     }
 
+    fun updateJibunAddress(newjibunAddress: String) {
+        addressInfo.value = addressInfo.value.copy(jibunAddress = newjibunAddress)
+    }
+
     // 주소 이름 업데이트 함수
     fun updateAddressName(newAddressName: String) {
         addressInfo.value = addressInfo.value.copy(addressName = newAddressName)
@@ -69,10 +73,6 @@ class SignupViewModel : ViewModel() {
         addressInfo.value = addressInfo.value.copy(zoneCode = newZoneCode)
     }
 
-    fun updateUserSelectedType(newType: String) {
-        addressInfo.value = addressInfo.value.copy(userSelectedType = newType)
-    }
-
     fun updateAutoRoadAddress(newAutoRoadAddress: String) {
         addressInfo.value = addressInfo.value.copy(autoRoadAddress = newAutoRoadAddress)
     }
@@ -81,63 +81,30 @@ class SignupViewModel : ViewModel() {
         addressInfo.value = addressInfo.value.copy(autoJibunAddress = newAutoJibunAddress)
     }
 
-    fun updateBuildingCode(newBuildingCode: String) {
-        addressInfo.value = addressInfo.value.copy(buildingCode = newBuildingCode)
+    fun updateRoadAddress(newRoadAddress: String){
+        addressInfo.value = addressInfo.value.copy(roadAddress = newRoadAddress)
     }
 
-    fun updateBuildingName(newBuildingName: String) {
-        addressInfo.value = addressInfo.value.copy(buildingName = newBuildingName)
-    }
-
-    fun updateIsApartment(isApartment: Boolean) {
-        addressInfo.value = addressInfo.value.copy(isApartment = isApartment)
-    }
-
-    fun updateSido(newSido: String) {
-        addressInfo.value = addressInfo.value.copy(sido = newSido)
-    }
-
-    fun updateSigungu(newSigungu: String) {
-        addressInfo.value = addressInfo.value.copy(sigungu = newSigungu)
-    }
-
-    fun updateSigunguCode(newSigunguCode: String) {
-        addressInfo.value = addressInfo.value.copy(sigunguCode = newSigunguCode)
-    }
-
-    fun updateRoadNameCode(newRoadNameCode: String) {
-        addressInfo.value = addressInfo.value.copy(roadNameCode = newRoadNameCode)
-    }
-
-    fun updateBcode(newBcode: String) {
-        addressInfo.value = addressInfo.value.copy(bcode = newBcode)
-    }
-
-    fun updateRoadName(newRoadName: String) {
-        addressInfo.value = addressInfo.value.copy(roadName = newRoadName)
-    }
-
-    fun updateBname(newBname: String) {
-        addressInfo.value = addressInfo.value.copy(bname = newBname)
-    }
-
-    fun updateBname1(newBname1: String) {
-        addressInfo.value = addressInfo.value.copy(bname1 = newBname1)
-    }
-
-
-    // 생년월일을 T00:00:00 형식으로 변환하는 함수
-    fun getFormattedBirth(): String {
-        return try {
-            val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
-            val birthDate: java.util.Date? = dateFormat.parse(signupInfo.value.birth)
-
-            val outputFormat =
-                java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault())
-            birthDate?.let { outputFormat.format(it) } ?: ""
-        } catch (e: Exception) {
-            e.printStackTrace()
-            ""
-        }
+    fun updateOtherFields(
+        buildingCode: String,
+        buildingName: String,
+        sido: String,
+        sigungu: String,
+        sigunguCode: String,
+        roadNameCode: String,
+        bcode: String,
+        roadName: String,
+    ) {
+        // Update the additional fields in AddressInfo or however you're storing them
+        addressInfo.value = addressInfo.value.copy(
+            buildingCode = buildingCode,
+            buildingName = buildingName,
+            sido = sido,
+            sigungu = sigungu,
+            sigunguCode = sigunguCode,
+            roadNameCode = roadNameCode,
+            bcode = bcode,
+            roadName = roadName,
+        )
     }
 }
