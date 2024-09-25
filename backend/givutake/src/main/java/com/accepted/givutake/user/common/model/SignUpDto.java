@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -23,7 +23,7 @@ public class SignUpDto extends LoginDto {
     
     private Boolean isMale; // 사용자만 입력
 
-    private LocalDateTime birth; // 사용자만 입력
+    private LocalDate birth; // 사용자만 입력
 
     private Integer regionIdx; // 수혜자만 입력
 

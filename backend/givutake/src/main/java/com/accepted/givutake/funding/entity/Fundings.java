@@ -1,14 +1,12 @@
 package com.accepted.givutake.funding.entity;
 
 import com.accepted.givutake.global.entity.BaseTimeEntity;
-import com.accepted.givutake.global.entity.Categories;
 import com.accepted.givutake.user.common.entity.Users;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.List;
 
 @Table(name="Fundings")
@@ -40,18 +38,17 @@ public class Fundings extends BaseTimeEntity {
     private FundingReviews fundingReviews;
 
     @Builder.Default
-    @OneToMany(mappedBy = "fundings", orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<CheerComments> cheerCommentsList = new ArrayList<>();
-
-    @Builder.Default
     @OneToMany(mappedBy = "fundings", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<FundingParticipants> fundingParticipantsList = new ArrayList<>();
 
     @Column(name = "goal_money", nullable = false)
     private int goalMoney;
 
-    @Column(name = "deadline", nullable = false)
-    private LocalDateTime deadline;
+    @Column(name = "start_date", nullable = false)
+    private LocalDate startDate;
+
+    @Column(name = "end_date", nullable = false)
+    private LocalDate endDate;
 
     @Column(name = "funding_thumbnail", nullable = true, length = 2048)
     private String fundingThumbnail;
