@@ -10,12 +10,14 @@ import com.accepted.givutake.wish.model.WishDto;
 import com.accepted.givutake.wish.repository.WishRepository;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.repository.UsersRepository;
+import jakarta.persistence.criteria.Join;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,6 +35,9 @@ public class WishService {
     public void createWish(String email , CreateWishDto request) { // 찜 추가
         Gifts gift = giftRepository.findById(request.getGiftIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
         Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        if(isWish(email,gift.getGiftIdx())){
+            throw new ApiException(ExceptionEnum.NOT_ALLOWED_WISH_INSERTION_EXCEPTION);
+        }
         Wish newWish = Wish.builder()
                 .gift(gift)
                 .users(user)
@@ -45,12 +50,21 @@ public class WishService {
 
         Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
 
-        Page<Wish> wishList = wishRepository.findByUsers(user, pageable);
+        Specification<Wish> spec = (root, query, cb) -> {
+            Join<Wish, Gifts> giftJoin = root.join("gift");
+            return cb.and(
+                    cb.equal(root.get("users"), user),
+                    cb.equal(giftJoin.get("isDelete"), false)
+            );
+        };
+
+        Page<Wish> wishList = wishRepository.findAll(spec, pageable);
 
         return wishList.map(wish -> WishDto.builder()
                 .wishIdx(wish.getWishIdx())
                 .giftIdx(wish.getGift().getGiftIdx())
                 .giftName(wish.getGift().getGiftName())
+                .giftThumbnail(wish.getGift().getGiftThumbnail())
                 .userIdx(wish.getUsers().getUserIdx())
                 .build()
         ).toList();
