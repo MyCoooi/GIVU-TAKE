@@ -4,6 +4,7 @@ import com.accepted.givutake.global.entity.Region;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.repository.RegionRepository;
+import com.accepted.givutake.global.service.RegionService;
 import com.accepted.givutake.user.client.entity.Addresses;
 import com.accepted.givutake.user.client.model.AddressAddDto;
 import com.accepted.givutake.user.client.model.AddressDto;
@@ -36,7 +37,7 @@ import java.util.Set;
 public class UserService {
 
     private final UsersRepository userRepository;
-    private final RegionRepository regionRepository;
+    private final RegionService regionService;
     private final EmailCodeRepository emailCodeRepository;
     private final MailService mailService;
     private final AddressService addressService;
@@ -46,9 +47,9 @@ public class UserService {
     // 1800(초) == 30분
     private static final long EMAIL_CODE_EXPIRATION_TIME = 1800;
 
-    public UserService(UsersRepository userRepository, RegionRepository regionRepository, PasswordEncoder passwordEncoder, EmailCodeRepository emailCodeRepository, MailService mailService, AddressService addressService) {
+    public UserService(UsersRepository userRepository, RegionService regionService, PasswordEncoder passwordEncoder, EmailCodeRepository emailCodeRepository, MailService mailService, AddressService addressService) {
         this.userRepository = userRepository;
-        this.regionRepository = regionRepository;
+        this.regionService = regionService;
         this.emailCodeRepository = emailCodeRepository;
         this.mailService = mailService;
         this.addressService = addressService;
@@ -97,15 +98,13 @@ public class UserService {
             // 대표 주소 DTO의 유효성을 수동으로 검증
             validateAddressAddDto(addressAddDto);
 
+            log.info("유효성 검증 완료");
             // DB에 저장
             Users savedUser = userRepository.save(signUpDto.toEntity());
             // 지역 코드 넣기
             String sido = addressAddDto.getSido();
-            Integer regionIdx = regionRepository.findRegionIdxBySido(sido);
-
-            if (regionIdx == null) {
-                throw new ApiException(ExceptionEnum.RUNTIME_EXCEPTION);
-            }
+            String sigungu = addressAddDto.getSigungu();
+            Integer regionIdx = regionService.getRegionIdxBySidoAndSigungu(sido, sigungu);
 
             addressService.saveAddress(addressAddDto.toEntity(savedUser.getUserIdx(), regionIdx));
         }
@@ -125,7 +124,7 @@ public class UserService {
         if (signUpDto.getRegionIdx() == null) {
             throw new ApiException(ExceptionEnum.MISSING_REGION_EXCEPTION);
         }
-        else if (!regionRepository.existsByRegionIdx(signUpDto.getRegionIdx())) {
+        else if (!regionService.existsByRegionIdx(signUpDto.getRegionIdx())) {
             throw new ApiException(ExceptionEnum.ILLEGAL_REGION_EXCEPTION);
         }
     }

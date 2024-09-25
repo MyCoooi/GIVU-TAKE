@@ -18,6 +18,9 @@ public class Region extends BaseTimeEntity {
     @Column(name = "region_idx", nullable = false)
     private int regionIdx;
 
-    @Column(name = "region_name", nullable = false)
-    private String regionName;
+    @Column(name = "sido", nullable = false, length = 10)
+    private String sido;
+
+    @Column(name = "sigungu", nullable = false, length = 10)
+    private String sigungu;
 }

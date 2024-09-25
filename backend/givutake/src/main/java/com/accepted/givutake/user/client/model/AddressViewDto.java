@@ -14,7 +14,8 @@ public class AddressViewDto {
 
     protected int addressIdx;
     protected String addressName;
-    protected String address;
+    protected String roadAddress;
+    protected String jibunAddress;
     protected String detailAddress;
     protected boolean isRepresentative;
 
@@ -22,7 +23,8 @@ public class AddressViewDto {
         return AddressViewDto.builder()
                 .addressIdx(addresses.getAddressIdx())
                 .addressName(addresses.getAddressName())
-                .address(addresses.getAddress())
+                .roadAddress(addresses.getRoadAddress())
+                .jibunAddress(addresses.getJibunAddress())
                 .detailAddress(addresses.getDetailAddress())
                 .isRepresentative(addresses.isRepresentative())
                 .build();

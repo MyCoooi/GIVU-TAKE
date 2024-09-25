@@ -2,11 +2,10 @@ package com.accepted.givutake.user.client.service;
 
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
-import com.accepted.givutake.global.repository.RegionRepository;
+import com.accepted.givutake.global.service.RegionService;
 import com.accepted.givutake.user.client.entity.Addresses;
 import com.accepted.givutake.user.client.model.AddressAddDto;
 import com.accepted.givutake.user.client.model.AddressDetailViewDto;
-import com.accepted.givutake.user.client.model.AddressUpdateDto;
 import com.accepted.givutake.user.client.model.AddressViewDto;
 import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.service.UserService;
@@ -25,10 +24,10 @@ public class ClientService {
 
     private final AddressService addressService;
     private final UserService userService;
-    private final RegionRepository regionRepository;
+    private final RegionService regionService;
 
     // 아이디가 email인 사용자의 모든 주소 조회
-    public List<AddressViewDto> getAddressesByEmail(String email) {
+    public List<Addresses> getAddressesByEmail(String email) {
         // 1. email로 부터 userIdx값 가져오기
         UserDto savedUserDto = userService.getUserByEmail(email);
         int userIdx = savedUserDto.getUserIdx();
@@ -55,32 +54,28 @@ public class ClientService {
     }
 
     // 아이디가 email인 사용자의 주소 추가
-    public void addAddressByEmail(String email, AddressAddDto addressAddDto) {
+    public Addresses addAddressByEmail(String email, AddressAddDto addressAddDto) {
         // 1. email로 부터 userIdx값 가져오기
         UserDto savedUserDto = userService.getUserByEmail(email);
         int userIdx = savedUserDto.getUserIdx();
 
         // 2. 지역 코드 넣기
         String sido = addressAddDto.getSido();
-        Integer regionIdx = regionRepository.findRegionIdxBySido(sido);
-
-        if (regionIdx == null) {
-            throw new ApiException(ExceptionEnum.RUNTIME_EXCEPTION);
-        }
+        String sigungu = addressAddDto.getSigungu();
+        int regionIdx = regionService.getRegionIdxBySidoAndSigungu(sido, sigungu);
 
         // 3. DB에 주소 추가
         Addresses addresses = addressAddDto.toEntity(userIdx, regionIdx);
-        addressService.saveAddress(addresses);
+        return addressService.saveAddress(addresses);
     }
 
     // 아이디가 email인 사용자의 주소 수정
-    public AddressDetailViewDto modifyAddressByEmail(String email, AddressUpdateDto addressUpdateDto) {
+    public AddressDetailViewDto modifyAddressByEmail(String email, int addressIdx, AddressAddDto addressAddDto) {
         // 1. email로 부터 userIdx값 가져오기
         UserDto savedUserDto = userService.getUserByEmail(email);
         int userIdx = savedUserDto.getUserIdx();
 
         // 2. DB에서 주소 조회
-        int addressIdx = addressUpdateDto.getAddressIdx();
         Addresses savedAddresses = addressService.getAddressByAddressIdx(addressIdx);
 
         // 3. userIdx값이 일치하지 않는 경우 수정 불가
@@ -89,34 +84,21 @@ public class ClientService {
         }
 
         // 4. 지역 코드 넣기
-        String sido = addressUpdateDto.getSido();
-        Integer regionIdx = regionRepository.findRegionIdxBySido(sido);
-
-        if (regionIdx == null) {
-            throw new ApiException(ExceptionEnum.RUNTIME_EXCEPTION);
-        }
+        String sido = addressAddDto.getSido();
+        String sigungu = addressAddDto.getSigungu();
+        int regionIdx = regionService.getRegionIdxBySidoAndSigungu(sido, sigungu);
 
         // 5. 수정
         savedAddresses.setRegionIdx(regionIdx);
-        savedAddresses.setAddressName(addressUpdateDto.getAddressName());
-        savedAddresses.setZoneCode(addressUpdateDto.getZoneCode());
-        savedAddresses.setAddress(addressUpdateDto.getAddress());
-        savedAddresses.setUserSelectedType(addressUpdateDto.getUserSelectedType());
-        savedAddresses.setJibunAddress(addressUpdateDto.getJibunAddress());
-        savedAddresses.setDetailAddress(addressUpdateDto.getDetailAddress());
-        savedAddresses.setAutoRoadAddress(addressUpdateDto.getAutoRoadAddress());
-        savedAddresses.setAutoJibunAddress(addressUpdateDto.getAutoJibunAddress());
-        savedAddresses.setBuildingCode(addressUpdateDto.getBuildingCode());
-        savedAddresses.setBuildingName(addressUpdateDto.getBuildingName());
-        savedAddresses.setApartment(addressUpdateDto.getIsApartment());
-        savedAddresses.setSido(addressUpdateDto.getSido());
-        savedAddresses.setSigungu(addressUpdateDto.getSigungu());
-        savedAddresses.setSigunguCode(addressUpdateDto.getSigunguCode());
-        savedAddresses.setRoadNameCode(addressUpdateDto.getRoadNameCode());
-        savedAddresses.setRoadName(addressUpdateDto.getRoadName());
-        savedAddresses.setBname(addressUpdateDto.getBname());
-        savedAddresses.setBname1(addressUpdateDto.getBname1());
-        savedAddresses.setRepresentative(addressUpdateDto.getIsRepresentative());
+        savedAddresses.setAddressName(addressAddDto.getAddressName());
+        savedAddresses.setZoneCode(addressAddDto.getZoneCode());
+        savedAddresses.setJibunAddress(addressAddDto.getJibunAddress());
+        savedAddresses.setDetailAddress(addressAddDto.getDetailAddress());
+        savedAddresses.setBuildingName(addressAddDto.getBuildingName());
+        savedAddresses.setApartment(addressAddDto.getIsApartment());
+        savedAddresses.setBname(addressAddDto.getBname());
+        savedAddresses.setBname1(addressAddDto.getBname1());
+        savedAddresses.setRepresentative(addressAddDto.getIsRepresentative());
 //        savedAddresses.setLatitude(addressUpdateDto.getLatitude());
 //        savedAddresses.setLongitude(addressUpdateDto.getLongitude());
 
@@ -125,7 +107,7 @@ public class ClientService {
     }
 
     // 아이디가 email인 사용자의 특정 주소 삭제
-    public void deleteAddressByEmail(String email, int addressIdx) {
+    public Addresses deleteAddressByEmail(String email, int addressIdx) {
         // 1. email로 부터 userIdx값 가져오기
         UserDto savedUserDto = userService.getUserByEmail(email);
         int userIdx = savedUserDto.getUserIdx();
@@ -145,6 +127,6 @@ public class ClientService {
         }
 
         // 4. 삭제
-        addressService.deleteAddressByAddressIdx(savedAddresses);
+        return addressService.deleteAddressByAddressIdx(savedAddresses);
     }
 }

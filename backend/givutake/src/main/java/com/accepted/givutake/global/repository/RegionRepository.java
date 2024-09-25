@@ -10,6 +10,6 @@ import org.springframework.data.repository.query.Param;
 public interface RegionRepository extends JpaRepository<Region, Integer> {
     boolean existsByRegionIdx(int regionIdx);
 
-    @Query("SELECT r.regionIdx FROM Region r WHERE r.regionName LIKE CONCAT(:sido, '%')")
-    Integer findRegionIdxBySido(@Param("sido") String sido);
+    @Query("SELECT r.regionIdx FROM Region r WHERE r.sido LIKE CONCAT(:sido, '%') AND r.sigungu = :sigungu")
+    Integer findRegionIdxBySidoAndSigungu(@Param("sido") String sido, @Param("sigungu") String sigungu);
 }

@@ -56,6 +56,7 @@ public enum ExceptionEnum {
     NOT_FOUND_FUNDING_REVIEW_EXCEPTION(HttpStatus.NOT_FOUND, "EU4030", "펀딩 후기 정보를 찾을 수 없습니다."),
     NOT_FOUND_FUNDING_WITH_IDX_EXCEPTION(HttpStatus.NOT_FOUND, "EU4031", "펀딩 정보를 찾을 수 없습니다."),
     NOT_FOUND_CHEER_COMMENT_EXCEPTION(HttpStatus.NOT_FOUND, "EU4040", "댓글 정보를 찾을 수 없습니다."),
+    NOT_FOUND_REGION_IDX_EXCEPTION(HttpStatus.NOT_FOUND, "EU4050", "지역 코드 정보를 찾을 수 없습니다."),
 
     USER_ALREADY_WITHDRAWN_EXCEPTION(HttpStatus.NOT_FOUND, "EU5001", "이미 탈퇴한 회원입니다."),
     ADDRESSES_ALREADY_DELETED_EXCEPTION(HttpStatus.NOT_FOUND, "EU5020", "이미 삭제된 주소입니다."),
