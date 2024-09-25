@@ -16,15 +16,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.naver.maps.map.NaverMap
 
 @Composable
-fun CardBook(navController: NavController) {
+fun AddressMapSearch(navController: NavController) {
     Column() {
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -45,22 +46,16 @@ fun CardBook(navController: NavController) {
             Spacer(modifier = Modifier.weight(0.7f))
 
             Text(
-                text = "카드",
+                text = "현재 위치 설정",
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .weight(1f)
-                ,fontSize = 20.sp
+                    .weight(1f), fontSize = 20.sp
             )
 
             Spacer(modifier = Modifier.weight(1f))
+
+
         }
-
-        Text(
-            text = "카드 등록하기",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 25.dp, top=20.dp)
-        )
-
+        Text("22")
     }
 }
