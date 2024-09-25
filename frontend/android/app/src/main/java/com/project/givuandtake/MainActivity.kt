@@ -39,6 +39,8 @@ import com.project.givuandtake.feature.mypage.CustomerService.FaqPage
 import com.project.givuandtake.feature.mypage.CustomerService.PersonalInquiry
 import com.project.givuandtake.feature.mypage.CustomerService.Announcement
 import com.project.givuandtake.feature.mypage.MyActivities.AddressBook
+import com.project.givuandtake.feature.mypage.MyActivities.AddressMapSearch
+import com.project.givuandtake.feature.mypage.MyActivities.AddressSearch
 import com.project.givuandtake.feature.mypage.MyActivities.CardBook
 import com.project.givuandtake.feature.mypage.MyActivities.UserInfo
 import com.project.givuandtake.feature.mypage.MyDonation.DonationDetails
@@ -148,6 +150,8 @@ class MainActivity : ComponentActivity() {
                             composable("addressbook") { AddressBook(navController) }
                             composable("cardbook") { CardBook(navController) }
                             composable("userinfo") { UserInfo(navController) }
+                            composable("addresssearch") { AddressSearch(navController) }
+                            composable("addressmapsearch") { AddressMapSearch(navController)}
 
                             composable("announcement") { Announcement(navController) }
                             composable("faqpate") { FaqPage(navController) }
