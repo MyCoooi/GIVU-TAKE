@@ -1,8 +1,9 @@
 package com.project.givuandtake.feature.payment
 
-import android.content.Intent
-import android.icu.util.CurrencyAmount
 import android.net.Uri
+import android.util.Log
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,15 +18,25 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
-import com.project.givuandtake.R
+import com.project.givuandtake.core.data.KakaoPayReadyRequest
+import com.project.givuandtake.core.data.KakaoPayReadyResponse
 import com.project.givuandtake.core.data.PaymentInfo
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 @Composable
 fun PaymentTotalAndButton() {
@@ -102,7 +113,7 @@ fun PaymentButton() {
 // 답례품 관련 결제 함수
 
 @Composable
-fun PaymentTotalAndButton_gift(paymentInfo: PaymentInfo) {
+fun PaymentTotalAndButton_gift(paymentInfo: PaymentInfo, navController: NavController) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = Color(0XFFFAFAFA),
@@ -120,11 +131,12 @@ fun PaymentTotalAndButton_gift(paymentInfo: PaymentInfo) {
 
             Spacer(modifier = Modifier.width(24.dp))
 
-            // 결제하기 버튼을 배치 (paymentInfo 전달)
-            PaymentButton_gift(paymentInfo = paymentInfo)
+            // 결제하기 버튼을 배치 (paymentInfo와 navController 전달)
+            PaymentButton_gift(paymentInfo = paymentInfo, navController = navController)
         }
     }
 }
+
 
 
 
@@ -155,24 +167,17 @@ fun PaymentTotal_gift(amount: Int) {
 
 
 @Composable
-fun PaymentButton_gift(paymentInfo: PaymentInfo) {
+fun PaymentButton_gift(paymentInfo: PaymentInfo, navController: NavController) {
+    val context = LocalContext.current // 현재 컨텍스트 가져오기
+    val kakaoPayManager = remember { KakaoPayManager() } // KakaoPayManager 객체 생성
+
     Button(
         onClick = {
-            if (paymentInfo.selectedMethod == "카카오 페이") {
-                // 카카오페이 결제 준비 요청 호출
-                requestKakaoPay(
-                    amount = paymentInfo.amount,
-                    itemName = paymentInfo.name,
-                    itemLocation = paymentInfo.location,
-                    onSuccess = { redirectUrl ->
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(redirectUrl))
-                        // 결제 창 열기
-                    },
-                    onError = { error ->
-                        // 에러 처리
-                    }
-                )
-            }
+            // 결제 준비 함수 호출
+            kakaoPayManager.prepareKakaoPay(
+                navController = navController,
+                context = context,
+                paymentInfo = paymentInfo)
         },
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
@@ -188,3 +193,6 @@ fun PaymentButton_gift(paymentInfo: PaymentInfo) {
         )
     }
 }
+
+
+
