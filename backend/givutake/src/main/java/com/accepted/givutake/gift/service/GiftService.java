@@ -132,9 +132,15 @@ public class GiftService {
     }
 
 
-    public List<GiftReviewDto> getGiftReviews(int giftIdx, int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo-1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+    public List<GiftReviewDto> getGiftReviews(int giftIdx, boolean isOrderLiked, int pageNo, int pageSize) {
 
+        Pageable pageable = null;
+
+        if(isOrderLiked){
+            pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "likedCount"));
+        }else {
+            pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+        }
         Gifts gifts = giftRepository.findById(giftIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
 
         Specification<GiftReviews> spec = (root, query, cb) -> {
@@ -155,14 +161,21 @@ public class GiftService {
                 .userIdx(review.getUsers().getUserIdx())
                 .userName(review.getUsers().getName())
                 .userProfileImage(review.getUsers().getProfileImageUrl())
+                .likedCount(review.getLikedCount())
                 .createdDate(review.getCreatedDate())
                 .modifiedDate(review.getModifiedDate())
                 .build()
         ).toList();
     }
 
-    public List<GiftReviewDto> getUserReviews(String email, int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo-1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+    public List<GiftReviewDto> getUserReviews(String email, boolean isOrderLiked, int pageNo, int pageSize) {
+        Pageable pageable = null;
+
+        if(isOrderLiked){
+            pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "likedCount"));
+        }else {
+            pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+        }
 
         Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
 
@@ -184,7 +197,8 @@ public class GiftService {
                 .userIdx(review.getUsers().getUserIdx())
                 .userName(review.getUsers().getName())
                 .userProfileImage(review.getUsers().getProfileImageUrl())
-                .createdDate(review.getCreatedDate())
+                .likedCount(review.getLikedCount())
+                .createdDate(review.getCreatedDate())   
                 .modifiedDate(review.getModifiedDate())
                 .build()
         ).toList();
