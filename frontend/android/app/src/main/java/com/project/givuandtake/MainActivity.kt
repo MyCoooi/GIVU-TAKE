@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +31,7 @@ import com.project.givuandtake.auth.LoginScreen
 import com.project.givuandtake.auth.SignupStep1
 import com.project.givuandtake.auth.SignupStep2
 import com.project.givuandtake.auth.SignupStep3
+import com.project.givuandtake.auth.SignupViewModel
 import com.project.givuandtake.core.data.CartItem
 import com.project.givuandtake.feature.attraction.FestivalPage
 import com.project.givuandtake.feature.attraction.LocationSelect
@@ -39,7 +41,21 @@ import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.gift.CartPage
 import com.project.givuandtake.feature.gift.mainpage.GiftPage
 import com.project.givuandtake.feature.mainpage.MainPage
-import com.project.givuandtake.feature.mypage.ContributorScreen
+import com.project.givuandtake.feature.mypage.MyPageScreen
+import com.project.givuandtake.feature.mypage.CustomerService.FaqPage
+import com.project.givuandtake.feature.mypage.CustomerService.PersonalInquiry
+import com.project.givuandtake.feature.mypage.CustomerService.Announcement
+import com.project.givuandtake.feature.mypage.MyActivities.AddressBook
+import com.project.givuandtake.feature.mypage.MyActivities.AddressMapSearch
+import com.project.givuandtake.feature.mypage.MyActivities.AddressSearch
+import com.project.givuandtake.feature.mypage.MyActivities.CardBook
+import com.project.givuandtake.feature.mypage.MyActivities.UserInfo
+import com.project.givuandtake.feature.mypage.MyDonation.DonationDetails
+import com.project.givuandtake.feature.mypage.MyDonation.DonationReceipt
+import com.project.givuandtake.feature.mypage.MyDonation.FundingDetails
+import com.project.givuandtake.feature.mypage.MyDonation.WishList
+import com.project.givuandtake.feature.mypage.MyManagement.MyComment
+import com.project.givuandtake.feature.mypage.MyManagement.MyReview
 import com.project.givuandtake.feature.navigation.addGiftPageDetailRoute
 import com.project.givuandtake.feature.payment.KakaoPayManager
 import com.project.givuandtake.feature.payment.PaymentResultPage
@@ -50,8 +66,7 @@ import com.project.payment.PaymentScreen
 import com.project.payment.PaymentScreen_gift
 
 class MainActivity : ComponentActivity() {
-
-
+    private val signupViewModel: SignupViewModel by viewModels() // ViewModel 생성
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,9 +113,9 @@ class MainActivity : ComponentActivity() {
                             // 로그인 페이지
                             composable("auth") { LoginScreen(navController) }
                             // 회원가입 페이지
-                            composable("signup_step1") { SignupStep1(navController) }
-                            composable("signup_step2") { SignupStep2(navController) }
-                            composable("signup_step3") { SignupStep3(navController) }
+                            composable("signup_step1") { SignupStep1(navController, signupViewModel) }
+                            composable("signup_step2") { SignupStep2(navController, signupViewModel) }
+                            composable("signup_step3") { SignupStep3(navController, signupViewModel) }
                             // 기프트 페이지
                             composable("gift") {
                                 GiftPage(navController = navController) // cartItems는 MutableState로 전달
@@ -168,6 +183,28 @@ class MainActivity : ComponentActivity() {
                                 val city = backStackEntry.arguments?.getString("city")
                                 FestivalPage(navController, city) // Pass the city to TripPage
                             }
+
+                            // 마이 페이지
+                            composable("mypage") { MyPageScreen(navController) }
+
+                            //마이페이지 세부내역
+                            composable("donationdetails") { DonationDetails(navController) }
+                            composable("donationreceipt") { DonationReceipt(navController) }
+                            composable("fundingdetails") { FundingDetails(navController) }
+                            composable("wishlist") { WishList(navController) }
+
+                            composable("mycomment") { MyComment(navController) }
+                            composable("myreview") { MyReview(navController) }
+
+                            composable("addressbook") { AddressBook(navController) }
+                            composable("cardbook") { CardBook(navController) }
+                            composable("userinfo") { UserInfo(navController) }
+                            composable("addresssearch") { AddressSearch(navController) }
+                            composable("addressmapsearch") { AddressMapSearch(navController)}
+
+                            composable("announcement") { Announcement(navController) }
+                            composable("faqpate") { FaqPage(navController) }
+                            composable("personalinquiry") { PersonalInquiry(navController) }
                         }
 
                         // 하단 네비게이션 바
