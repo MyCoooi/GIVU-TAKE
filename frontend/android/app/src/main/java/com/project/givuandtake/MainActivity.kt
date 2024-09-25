@@ -4,6 +4,7 @@ import AttractionMain
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +26,7 @@ import com.project.givuandtake.auth.LoginScreen
 import com.project.givuandtake.auth.SignupStep1
 import com.project.givuandtake.auth.SignupStep2
 import com.project.givuandtake.auth.SignupStep3
+import com.project.givuandtake.auth.SignupViewModel
 import com.project.givuandtake.core.data.CartItem
 import com.project.givuandtake.feature.attraction.FestivalPage
 import com.project.givuandtake.feature.attraction.LocationSelect
@@ -43,6 +45,8 @@ import com.project.payment.PaymentScreen_gift
 
 
 class MainActivity : ComponentActivity() {
+    private val signupViewModel: SignupViewModel by viewModels() // ViewModel 생성
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -83,9 +87,9 @@ class MainActivity : ComponentActivity() {
                             // 로그인 페이지
                             composable("auth") { LoginScreen(navController) }
                             // 회원가입 페이지
-                            composable("signup_step1") { SignupStep1(navController) }
-                            composable("signup_step2") { SignupStep2(navController) }
-                            composable("signup_step3") { SignupStep3(navController) }
+                            composable("signup_step1") { SignupStep1(navController, signupViewModel) }
+                            composable("signup_step2") { SignupStep2(navController, signupViewModel) }
+                            composable("signup_step3") { SignupStep3(navController, signupViewModel) }
                             // 기프트 페이지
                             composable("gift") {
                                 GiftPage(navController = navController) // cartItems는 MutableState로 전달
