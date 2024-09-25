@@ -1,8 +1,10 @@
 package com.project.givuandtake.auth
 
 import android.annotation.SuppressLint
+import android.location.Address
 import android.util.Log
 import android.webkit.JavascriptInterface
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.BorderStroke
@@ -30,21 +32,17 @@ import androidx.navigation.NavController
 import com.project.givuandtake.R
 
 @Composable
-fun WebViewScreen(onAddressSelected: (String, String) -> Unit, onClose: () -> Unit) {
+fun WebViewScreen(onAddressSelected: (String, String, String, String, String, String, String, String, String, String, String, String, String) -> Unit, onClose: () -> Unit) {
     val context = LocalContext.current
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // 상단 TopBar 추가
         TopAppBar(
             title = {
                 Text(text = "우편번호 찾기", fontSize = 18.sp)
             },
             actions = {
                 IconButton(onClick = { onClose() }) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "닫기"
-                    )
+                    Icon(imageVector = Icons.Default.Close, contentDescription = "닫기")
                 }
             },
             backgroundColor = Color.White,
@@ -52,35 +50,55 @@ fun WebViewScreen(onAddressSelected: (String, String) -> Unit, onClose: () -> Un
             elevation = 4.dp
         )
 
-        // WebView를 표시
         AndroidView(factory = {
             WebView(context).apply {
-                settings.javaScriptEnabled = true  // 자바스크립트 활성화
-                settings.domStorageEnabled = true  // DOM 스토리지 활성화
+                settings.javaScriptEnabled = true
+                settings.domStorageEnabled = true
+                settings.cacheMode = WebSettings.LOAD_NO_CACHE
+                clearCache(true)
+
                 webViewClient = WebViewClient()
 
                 // 자바스크립트 인터페이스 추가
                 addJavascriptInterface(WebAppInterface(onAddressSelected), "Android")
 
-                // 로컬 assets에 있는 daum_address.html 파일 로드
+                // URL 로드
                 loadUrl("https://searchaddress-dfaca.web.app/daum_address.html")
             }
         }, modifier = Modifier.fillMaxSize())
     }
 }
 
-class WebAppInterface(private val onAddressSelected: (String, String) -> Unit) {
+class WebAppInterface(private val onAddressSelected: (String, String, String, String, String, String, String, String, String, String, String, String, String) -> Unit) {
     @JavascriptInterface
-    fun processAddress(address: String, detailAddress: String) {
-        Log.d("WebAppInterface", "Received address: $address")  // 전달된 주소 로그로 확인
-        onAddressSelected(address, detailAddress)
+    fun processAddress(
+        roadAddress: String,
+        autoRoadAddress: String,
+        autoJibunAddress: String,
+        buildingCode: String,
+        buildingName: String,
+        sido: String,
+        sigungu: String,
+        sigunguCode: String,
+        roadNameCode: String,
+        bcode: String,
+        roadName: String,
+        zoneCode: String,   // 추가된 필드
+        jibunAddress: String  // 추가된 필드
+    ) {
+        Log.d("WebAppInterface", "Received roadAddress: $roadAddress, other fields...")
+        onAddressSelected(
+            roadAddress, autoRoadAddress, autoJibunAddress, buildingCode,
+            buildingName, sido, sigungu, sigunguCode, roadNameCode, bcode, roadName, zoneCode, jibunAddress
+        )
     }
 }
+
+
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun SignupStep2(navController: NavController, signupViewModel: SignupViewModel) {
-
     var address by remember { mutableStateOf(signupViewModel.addressInfo.value.address) } // ViewModel에서 주소 가져옴
     var addressDetail by remember { mutableStateOf(signupViewModel.addressInfo.value.detailAddress) }
     var birthDate by remember { mutableStateOf(signupViewModel.signupInfo.value.birth) }
@@ -90,7 +108,6 @@ fun SignupStep2(navController: NavController, signupViewModel: SignupViewModel) 
     var showWebView by remember { mutableStateOf(false) } // WebView 표시 여부
 
     val scaffoldState = rememberScaffoldState()
-    val scope = rememberCoroutineScope()
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -102,14 +119,25 @@ fun SignupStep2(navController: NavController, signupViewModel: SignupViewModel) 
                 .background(Color(0xFFFFD7C4))
         ) {
             if (showWebView) {
-                // WebView가 화면 전체를 차지하도록 설정
                 WebViewScreen(
-                    onAddressSelected = { selectedAddress, _ ->
-                        address = selectedAddress // WebView에서 선택된 주소 반영
-                        signupViewModel.updateAddress(selectedAddress) // ViewModel에 반영
-                        showWebView = false // WebView 닫기
+                    onAddressSelected =
+                    { roadAddress, JibunAddress, zoneCode, autoRoadAddress, autoJibunAddress, buildingCode, buildingName, sido, sigungu, sigunguCode, roadNameCode, bcode, roadName ->
+                        // 선택된 도로명 주소만 화면에 표시
+                        address = roadAddress
+
+                        // ViewModel에 필드 업데이트
+                        signupViewModel.updateAddress(roadAddress)
+                        signupViewModel.updateRoadAddress(roadAddress)
+                        signupViewModel.updateJibunAddress(JibunAddress)
+                        signupViewModel.updateZoneCode(zoneCode)
+                        signupViewModel.updateOtherFields(
+                            buildingCode, buildingName, sido, sigungu, sigunguCode, roadNameCode, bcode, roadName,
+                        )
+
+                        // WebView 닫기
+                        showWebView = false
                     },
-                    onClose = { showWebView = false } // 닫기 버튼을 눌렀을 때 WebView를 닫음
+                    onClose = { showWebView = false }
                 )
             } else {
                 // 기존 화면 구성
@@ -418,6 +446,9 @@ fun SignupStep2(navController: NavController, signupViewModel: SignupViewModel) 
                                     Button(
                                         onClick = {
                                             // 로그 찍기 - ViewModel에 저장된 값들 확인
+                                            Log.d("SignupStep2", "jibunAddress: ${signupViewModel.addressInfo.value.jibunAddress}")
+                                            Log.d("SignupStep2", "Zonecode: ${signupViewModel.addressInfo.value.zoneCode}")
+
                                             Log.d("SignupStep2", "Name: ${signupViewModel.signupInfo.value.name}")
                                             Log.d("SignupStep2", "Email: ${signupViewModel.signupInfo.value.email}")
                                             Log.d("SignupStep2", "Password: ${signupViewModel.signupInfo.value.password}")
