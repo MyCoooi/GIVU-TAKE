@@ -31,7 +31,7 @@ public class FundingController {
 
     // ========= 펀딩 관련 ===========
     // fundingIdx에 해당하는 펀딩 조회
-    @GetMapping("/{fundingIdx}")
+//    @GetMapping("/{fundingIdx}")
 
     // jwt 토큰으로 펀딩 등록
     @PostMapping
@@ -49,10 +49,22 @@ public class FundingController {
     }
 
     // jwt 토큰으로 펀딩 수정
-    @PatchMapping("/{fundingIdx}")
+//    @PatchMapping("/{fundingIdx}")
 
     // jwt 토큰으로 펀딩 삭제
     @DeleteMapping("/{fundingIdx}")
+    public ResponseEntity<ResponseDto> deleteFundingByJwt(@AuthenticationPrincipal UserDetails userDetails, @PathVariable int fundingIdx) {
+        String email = userDetails.getUsername();
+
+        Fundings deletedFundings = fundingService.deleteFundingByFundingIdx(email, fundingIdx);
+        FundingViewDto fundingViewDto = FundingViewDto.toDto(deletedFundings);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(fundingViewDto)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
 
     // ========= 댓글 관련 ===========
     // jwt 토큰에 해당하는 사용자가 작성한 모든 응원 댓글 조회

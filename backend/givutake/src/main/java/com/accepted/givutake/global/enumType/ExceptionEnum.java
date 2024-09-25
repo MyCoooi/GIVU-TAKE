@@ -69,6 +69,8 @@ public enum ExceptionEnum {
 
     NOT_ALLOWED_LAST_ADDRESS_DELETION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU7020", "마지막 주소 정보는 삭제할 수 없습니다."),
     NOT_ALLOWED_FUNDING_REVIEW_INSERTION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU7030", "이미 펀딩 후기가 작성 되어 있습니다."),
+    NOT_ALLOWED_DONE_FUNDING_DELETION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU7032", "모금이 종료된 펀딩은 삭제할 수 없습니다."),
+    NOT_ALLOWED_FUNDING_IN_PROGRESS_DELETION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU7033", "모금이 진행 중인 펀딩은 삭제할 수 없습니다."),
 
     NOT_FOUND_CATEGORY_EXCEPTION(HttpStatus.NOT_FOUND, "EC0001", "해당 카테고리를 찾을 수 없습니다."),
     NOT_FOUND_GIFT_EXCEPTION(HttpStatus.NOT_FOUND,"EG0001", "해당 답례품을 찾을 수 없습니다."),
