@@ -99,4 +99,9 @@ public class OrderService {
         orderRepository.save(order);
     }
 
+    public int countGift(int giftIdx){
+        Gifts gift = giftRepository.findById(giftIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
+        return orderRepository.countByGift(gift);
+    }
+
 }

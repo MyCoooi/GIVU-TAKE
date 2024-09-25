@@ -11,7 +11,6 @@ import com.accepted.givutake.global.entity.Categories;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.repository.CategoryRepository;
-import com.accepted.givutake.global.repository.UserViewLogRepository;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.repository.UsersRepository;
 import jakarta.transaction.Transactional;
