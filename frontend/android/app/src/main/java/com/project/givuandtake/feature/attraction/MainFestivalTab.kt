@@ -1,30 +1,41 @@
 package com.project.givuandtake.feature.attraction
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.project.givuandtake.core.data.FestivalMainData
-import okhttp3.*
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import java.io.IOException
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 data class FestivalItemData(
     val fstvlNm: String,
@@ -34,11 +45,45 @@ data class FestivalItemData(
     val fstvlCo: String,
 )
 
-fun fetchFestivalDataWithOkHttp(onDataFetched: (List<FestivalItemData>) -> Unit) {
+fun fetchFestivalDataWithOkHttp(displayedCity:String, onDataFetched: (List<FestivalItemData>) -> Unit) {
     val client = OkHttpClient()
+    val insttCode = when(displayedCity) {
+        "영도" -> 3280000
+        "군위" -> 5141000
+        "남원" -> 4701000
+        "무주" -> 4741000
+        "순창" -> "B551011"
+        "임실" -> 4761000
+        "고흥" -> 4880000
+        "보성" -> 4890000
+        "신안" -> 5010000
+        "함평" -> "B551011"
+        "고성" -> 4341000
+        "남해" -> 5430000
+        "하동" -> 5440000
+        "합천" -> 5480000
+        "문경" -> 5120000
+        "상주" -> 5110000
+        "안동" -> "B551011"
+        "영천" -> 5100000
+        "평창" -> 4281000
+        "횡성" -> 4261000
+        "태백" -> 4221000
+        "정선" -> 4291000
+        "괴산" -> "B551011"
+        "보은" -> 6430000
+        "영동" -> 6430000
+        "제천" -> 4400000
+        "보령" -> 4510000
+        "부여" -> 4570000
+        "공주" -> 4500000
+        "태안" -> 4620000
+        else -> 4181000  // 기본값
+    }
+
 
     // API URL
-    val url = "http://api.data.go.kr/openapi/tn_pubr_public_cltur_fstvl_api?serviceKey=ClEl7z%2F9nNW%2Fg0NNpuJsf6wBBPJV5UWiVxKC6SzME5GsWrUpQ85zpxv1aJY4Ockw3%2Bm03%2FeCIYyg60sfOqIOxg%3D%3D&pageNo=1&numOfRows=150&type=json"
+    val url = "http://api.data.go.kr/openapi/tn_pubr_public_cltur_fstvl_api?serviceKey=ClEl7z%2F9nNW%2Fg0NNpuJsf6wBBPJV5UWiVxKC6SzME5GsWrUpQ85zpxv1aJY4Ockw3%2Bm03%2FeCIYyg60sfOqIOxg%3D%3D&pageNo=1&numOfRows=150&type=json&insttCode=$insttCode"
 
     // API 요청 생성
     val request = Request.Builder()
@@ -88,7 +133,7 @@ fun FestivalItem(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+
             .shadow(
                 elevation = 4.dp,
                 shape = RoundedCornerShape(12.dp)
@@ -135,13 +180,13 @@ fun formatDateWithoutYear(startDate: String, endDate: String): String {
 }
 
 @Composable
-fun MainFestivalTab() {
+fun MainFestivalTab(displayedCity:String, navController: NavController) {
     // 상태 변수로 축제 데이터를 관리
     var festivalData by remember { mutableStateOf<List<FestivalItemData>>(emptyList()) }
 
     // API 호출
-    LaunchedEffect(Unit) {
-        fetchFestivalDataWithOkHttp { data ->
+    LaunchedEffect(displayedCity) {
+        fetchFestivalDataWithOkHttp(displayedCity) { data ->
             festivalData = data
         }
     }
@@ -161,11 +206,16 @@ fun MainFestivalTab() {
                 text = "전체보기",
                 fontSize = 14.sp,
                 color = Color.Gray,
-                modifier = Modifier.padding(end = 8.dp)
+                modifier = Modifier
+                    .padding(end = 8.dp)
+                    .clickable {
+                        val city = displayedCity
+                        navController.navigate("festivalpage?city=$city")
+                    }
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         // 축제 데이터를 표시하는 Column
         if (festivalData.isEmpty()) {
