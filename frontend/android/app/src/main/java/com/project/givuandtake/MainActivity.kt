@@ -159,7 +159,7 @@ class MainActivity : ComponentActivity() {
                             }
 
                             // 마이 페이지
-                            composable("mypage") { ContributorScreen(navController) }
+                            // composable("mypage") { ContributorScreen(navController) }
                             composable("locationSelection") {
                                 LocationSelect(navController)
                             }
