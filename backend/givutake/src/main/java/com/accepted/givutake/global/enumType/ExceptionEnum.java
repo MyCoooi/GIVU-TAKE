@@ -2,10 +2,7 @@ package com.accepted.givutake.global.enumType;
 
 import lombok.Getter;
 import lombok.ToString;
-import org.hibernate.service.spi.ServiceException;
 import org.springframework.http.HttpStatus;
-
-import javax.imageio.plugins.jpeg.JPEGHuffmanTable;
 
 @Getter
 @ToString
@@ -67,6 +64,7 @@ public enum ExceptionEnum {
     FUNDING_REVIEWS_ALREADY_DELETED_EXCEPTION(HttpStatus.NOT_FOUND, "EU5030", "이미 삭제된 펀딩 후기 입니다."),
     FUNDING_ALREADY_DELETED_EXCEPTION(HttpStatus.NOT_FOUND, "EU5031", "이미 삭제된 펀딩 입니다."),
     CHEER_COMMENT_ALREADY_DELETED_EXCEPTION(HttpStatus.NOT_FOUND, "EU5040", "이미 삭제된 댓글 입니다."),
+    GIFT_REVIEW_ALREADY_DELETED_EXCEPTION(HttpStatus.NOT_FOUND,"EG5001","이미 삭제된 후기 입니다."),
 
     PASSWORD_MISMATCH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU6011", "비밀번호가 일치하지 않습니다."),
     REFRESHTOKEN_MISMATCH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU6012", "토큰 정보가 일치하지 않습니다."),
@@ -78,10 +76,16 @@ public enum ExceptionEnum {
     NOT_ALLOWED_FUNDING_IN_PROGRESS_DELETION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU7033", "모금이 진행 중인 펀딩은 삭제할 수 없습니다."),
     NOT_ALLOWED_DONE_FUNDING_MODIFICATION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU7034", "모금이 종료된 펀딩은 수정할 수 없습니다."),
     NOT_ALLOWED_FUNDING_IN_PROGRESS_MODIFICATION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU7035", "모금이 진행 중인 펀딩은 수정할 수 없습니다."),
+    NOT_ALLOWED_WISH_INSERTION_EXCEPTION(HttpStatus.BAD_REQUEST, "EW7010","이미 찜목록에 추가 되어 있습니다."),
+    NOT_ALLOWED_LIKED_INSERTION_EXCEPTION(HttpStatus.BAD_REQUEST,"EG7010","이미 좋아요를 추가하였습니다."),
+    NOT_ALLOWED_LIKED_DELETION_EXCEPTION(HttpStatus.BAD_REQUEST,"EG7020","해당 좋아요를 삭제할 수 없습니다."),
+    NOT_ALLOWED_OPERATION_ON_DELETED_REVIEW_EXCEPTION(HttpStatus.BAD_REQUEST,"EG7030", "해당 리뷰는 삭제된 리뷰입니다."),
+    NOT_ALLOWED_GIFT_REVIEW_INSERTION_EXCEPTION(HttpStatus.BAD_REQUEST,"EG7040","해당 주문의 리뷰는 이미 작성하셨습니다."),
 
     NOT_FOUND_CATEGORY_EXCEPTION(HttpStatus.NOT_FOUND, "EC0001", "해당 카테고리를 찾을 수 없습니다."),
     NOT_FOUND_GIFT_EXCEPTION(HttpStatus.NOT_FOUND,"EG0001", "해당 답례품을 찾을 수 없습니다."),
     NOT_FOUND_GIFT_REVIEW_EXCEPTION(HttpStatus.NOT_FOUND,"EG1001","해당 답례품 후기를 찾을 수 없습니다."),
+    NOT_FOUND_GIFT_REVIEW_LIKED_EXCEPTION(HttpStatus.NOT_FOUND,"EG2001", "해당 좋아요를 찾을 수 없습니다."),
     NOT_FOUND_WISH_EXCEPTION(HttpStatus.NOT_FOUND,"EW0001", "해당 찜을 찾을 수 없습니다."),
     NOT_FOUND_SHOPPING_CART_EXCEPTION(HttpStatus.NOT_FOUND,"EP0001", "해당 장바구니를 찾을 수 없습니다."),
     NOT_FOUND_ORDER_EXCEPTION(HttpStatus.NOT_FOUND, "EO0001", "해당 주문을 찾을 수 없습니다."),

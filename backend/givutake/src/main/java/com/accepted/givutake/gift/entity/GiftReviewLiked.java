@@ -21,11 +21,11 @@ public class GiftReviewLiked extends BaseTimeEntity {
     @Column(name = "like_idx")
     private Long likeIdx;
 
-    @ManyToOne(targetEntity = GiftReviews.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = GiftReviews.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "review_idx", referencedColumnName = "review_idx")// 후기 ID 외래키 설정
     private GiftReviews giftReviews;
 
-    @OneToOne(targetEntity = Users.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(targetEntity = Users.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_idx", referencedColumnName = "user_idx") // 회원 ID 외래키 설정
     private Users user;
 }

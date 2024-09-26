@@ -31,7 +31,15 @@ public class GiftReviews extends BaseTimeEntity {
     @JoinColumn(name = "user_idx", referencedColumnName = "user_idx")// 회원 ID 외래키 설정
     private Users users;
 
+    @ManyToOne(targetEntity = Orders.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_idx", referencedColumnName = "order_idx")
+    private Orders orders;
+
     @Builder.Default
     @Column(name = "isDelete")
     private boolean isDelete = false;
+
+    @Builder.Default
+    @Column(name = "likedCount")
+    private int likedCount = 0;
 }
