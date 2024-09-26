@@ -14,3 +14,4 @@ val Context.dataStore by preferencesDataStore("favorites")
 object FavoriteKeys {
     val FAVORITES = stringSetPreferencesKey("favorite_products")
 }
+
