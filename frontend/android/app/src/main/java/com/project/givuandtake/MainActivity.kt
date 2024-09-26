@@ -83,8 +83,6 @@ class MainActivity : ComponentActivity() {
                 val cartItems = remember { mutableStateOf(listOf<CartItem>()) } // 장바구니 상태
                 val currentBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = currentBackStackEntry?.destination?.route
-                var userInfo by remember { mutableStateOf<UserInfoResponse?>(null) } // userInfo 상태 추가
-                // A surface container using the 'background' color from the theme
 
 
                 Surface(
