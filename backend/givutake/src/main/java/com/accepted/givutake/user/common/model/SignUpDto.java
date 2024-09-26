@@ -1,5 +1,6 @@
 package com.accepted.givutake.user.common.model;
 
+import com.accepted.givutake.region.entity.Region;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.enumType.Roles;
 import com.accepted.givutake.user.common.enumType.SocialType;
@@ -48,7 +49,7 @@ public class SignUpDto extends LoginDto {
 
     private String socialSerialNum;
 
-    public Users toEntity(Integer regionIdx) {
+    public Users toEntity(Region region) {
         Users ret = Users.builder()
                 .name(this.name)
                 .email(this.email)
@@ -57,7 +58,7 @@ public class SignUpDto extends LoginDto {
                 .landlinePhone(this.landlinePhone)
                 .isMale(this.isMale)
                 .birth(this.birth)
-                .regionIdx(regionIdx)
+                .region(region)
                 .cardIdx(null)
                 .profileImageUrl(this.profileImageUrl)
                 .roles(this.roles)

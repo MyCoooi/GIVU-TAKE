@@ -2,6 +2,7 @@ package com.accepted.givutake.region.service;
 
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
+import com.accepted.givutake.region.entity.Region;
 import com.accepted.givutake.region.repository.RegionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -23,10 +25,20 @@ public class RegionService {
         Integer regionIdx = regionRepository.findRegionIdxBySidoAndSigungu(sido, sigungu);
 
         if (regionIdx == null) {
-            throw new ApiException(ExceptionEnum.NOT_FOUND_REGION_IDX_EXCEPTION);
+            throw new ApiException(ExceptionEnum.NOT_FOUND_REGION_EXCEPTION);
         }
 
         return regionIdx;
+    }
+
+    public Region findRegionBySidoAndSigungu(String sido, String sigungu) {
+        Optional<Region> optionalRegion = regionRepository.findRegionBySidoAndSigungu(sido, sigungu);
+
+        if (optionalRegion.isPresent()) {
+            return optionalRegion.get();
+        }
+
+        throw new ApiException(ExceptionEnum.NOT_FOUND_REGION_EXCEPTION);
     }
 
     // regionIdx에 해당하는 데이터가 있는지 반환

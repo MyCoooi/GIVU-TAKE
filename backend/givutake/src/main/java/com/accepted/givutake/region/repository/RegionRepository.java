@@ -7,10 +7,14 @@ import org.springframework.stereotype.Repository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RegionRepository extends JpaRepository<Region, Integer> {
     boolean existsByRegionIdx(int regionIdx);
+
+    @Query("SELECT r FROM Region r WHERE r.sido LIKE CONCAT(:sido, '%') AND r.sigungu = :sigungu")
+    Optional<Region> findRegionBySidoAndSigungu(@Param("sido") String sido, @Param("sigungu") String sigungu);
 
     @Query("SELECT r.regionIdx FROM Region r WHERE r.sido LIKE CONCAT(:sido, '%') AND r.sigungu = :sigungu")
     Integer findRegionIdxBySidoAndSigungu(@Param("sido") String sido, @Param("sigungu") String sigungu);

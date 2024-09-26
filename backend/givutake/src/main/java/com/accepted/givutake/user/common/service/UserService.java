@@ -2,6 +2,7 @@ package com.accepted.givutake.user.common.service;
 
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
+import com.accepted.givutake.region.entity.Region;
 import com.accepted.givutake.region.service.RegionService;
 import com.accepted.givutake.user.client.model.AddressAddDto;
 import com.accepted.givutake.user.client.service.AddressService;
@@ -78,13 +79,13 @@ public class UserService {
             // 수혜자 회원가입 유효성 검증
             checkArgumentValidityForCorporationSignUp(signUpDto);
 
-            // regionIdx 값 가져오기
+            // region 값 가져오기
             String sido = signUpDto.getSido();
             String sigungu = signUpDto.getSigungu();
-            int regionIdx = regionService.getRegionIdxBySidoAndSigungu(sido, sigungu);
+            Region region = regionService.findRegionBySidoAndSigungu(sido, sigungu);
 
             // DB에 회원 정보 저장
-            userRepository.save(signUpDto.toEntity(regionIdx));
+            userRepository.save(signUpDto.toEntity(region));
         }
         // 2. 사용자 회원가입 관련 입력값 검증 및 처리
         else {
@@ -97,9 +98,9 @@ public class UserService {
             // 대표 주소 DTO의 유효성을 수동으로 검증
             validateAddressAddDto(addressAddDto);
 
-            log.info("유효성 검증 완료");
             // DB에 저장
             Users savedUser = userRepository.save(signUpDto.toEntity(null));
+
             // 지역 코드 넣기
             String sido = addressAddDto.getSido();
             String sigungu = addressAddDto.getSigungu();
