@@ -58,7 +58,8 @@ public class SecurityConfig {
                                 "/api/regions/sido",
                                 "/api/regions/sigungu",
                                 "/api/government-fundings",
-                                "/api/government-fundings/*").permitAll()
+                                "/api/government-fundings/*",
+                                "/api/experience-village").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/users",
                                 "/api/users/password/code",
                                 "/api/users/password/code/verification").permitAll()

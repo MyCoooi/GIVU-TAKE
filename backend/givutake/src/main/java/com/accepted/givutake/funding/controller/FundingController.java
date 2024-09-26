@@ -4,7 +4,6 @@ import com.accepted.givutake.funding.entity.CheerComments;
 import com.accepted.givutake.funding.entity.Fundings;
 import com.accepted.givutake.funding.model.*;
 import com.accepted.givutake.funding.service.CheerCommentService;
-import com.accepted.givutake.funding.service.FundingParticipantService;
 import com.accepted.givutake.funding.service.FundingReviewService;
 import com.accepted.givutake.funding.service.FundingService;
 import com.accepted.givutake.global.model.ResponseDto;
@@ -17,7 +16,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
