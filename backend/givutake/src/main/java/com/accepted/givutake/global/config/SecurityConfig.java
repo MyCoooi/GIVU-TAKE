@@ -44,7 +44,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/government-fundings/*/review",
                                 "/api/government-fundings/*")
                                 .hasRole("CORPORATION")
-                        .requestMatchers(HttpMethod.DELETE, "/api/government-fundings/*").hasRole("CORPORATION")
+                        .requestMatchers(HttpMethod.DELETE, "/api/government-fundings/*",
+                                "/api/users").hasRole("CORPORATION")
+                        .requestMatchers(HttpMethod.GET, "/api/government-fundings/my-fundings").hasRole("CLIENT")
+                        .requestMatchers(HttpMethod.DELETE,"/api/users").hasRole("CLIENT")
                         .requestMatchers("/",
                                 "/api/auth",
                                 "/swagger-ui/**",
@@ -55,7 +58,8 @@ public class SecurityConfig {
                                 "/api/government-fundings/*/comments/*",
                                 "/api/regions/sido",
                                 "/api/regions/sigungu",
-                                "/api/government-fundings").permitAll()
+                                "/api/government-fundings",
+                                "/api/government-fundings/*").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/users",
                                 "/api/users/password/code",
                                 "/api/users/password/code/verification").permitAll()

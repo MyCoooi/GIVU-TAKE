@@ -246,12 +246,6 @@ public class UserService {
             if (savedUser.isWithdraw()) {
                 throw new ApiException(ExceptionEnum.USER_ALREADY_WITHDRAWN_EXCEPTION);
             }
-
-            // 관리자는 탈퇴 불가
-            // ref) 관리자는 DB에 직접 접근해서 탈퇴 요망.
-            if (savedUser.getRoles() == Roles.ROLE_ADMIN) {
-                throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
-            }
             
             // TODO: 회원과 관련된 다른 모든 데이터도 삭제 처리
             userRepository.updateIsWithdrawByEmail(email, true);
