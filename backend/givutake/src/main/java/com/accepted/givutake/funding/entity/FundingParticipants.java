@@ -19,7 +19,7 @@ public class FundingParticipants extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "participant_idx", nullable = false)
-    private int participantIdx;
+    private long participantIdx;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "funding_idx", nullable = false)

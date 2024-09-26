@@ -6,6 +6,7 @@ import com.accepted.givutake.funding.model.*;
 import com.accepted.givutake.funding.service.CheerCommentService;
 import com.accepted.givutake.funding.service.FundingReviewService;
 import com.accepted.givutake.funding.service.FundingService;
+import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.model.ResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,24 @@ public class FundingController {
     private final FundingReviewService fundingReviewService;
 
     // ========= 펀딩 관련 ===========
-    // fundingIdx에 해당하는 펀딩 조회
+    // 조건에 해당하는 모든 펀딩 조회
+    @GetMapping
+    public ResponseEntity<ResponseDto> getFundingList(@RequestParam char type, @RequestParam byte state) {
+
+        List<FundingViewDto> fundingViewDtoList =
+                fundingService.getFundingByTypeAndState(type, state)
+                        .stream()
+                        .map(FundingViewDto::toDto)  // 각 CheerComments 객체를 CheerCommentViewDto로 변환
+                        .collect(Collectors.toList());  // List로 변환
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(fundingViewDtoList)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // fundingIdx에 해당하는 펀딩 상세 조회
 //    @GetMapping("/{fundingIdx}")
 
     // jwt 토큰으로 펀딩 등록

@@ -19,6 +19,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -28,6 +29,11 @@ public class FundingService {
 
     private final FundingRepository fundingRepository;
     private final UserService userService;
+
+    // 조건에 해당하는 모든 펀딩 조회(삭제된 펀딩은 조회 불가)
+    public List<Fundings> getFundingByTypeAndState(char fundingType, byte state) {
+        return fundingRepository.findByFundingTypeAndStateAndIsDeletedFalse(fundingType, state);
+    }
 
     // fundingIdx에 해당하는 펀딩 조회
     public Fundings getFundingByFundingIdx(int fundingIdx) {
@@ -93,7 +99,12 @@ public class FundingService {
             throw new ApiException(ExceptionEnum.NOT_ALLOWED_FUNDING_IN_PROGRESS_MODIFICATION_EXCEPTION);
         }
 
+
         // 5. 수정
+        // state 값 지정
+        byte state = this.calculateState(fundingAddDto.getStartDate());
+
+        savedFundings.setState(state);
         savedFundings.setFundingTitle(fundingAddDto.getFundingTitle());
         savedFundings.setFundingContent(fundingAddDto.getFundingContent());
         savedFundings.setGoalMoney(fundingAddDto.getGoalMoney());

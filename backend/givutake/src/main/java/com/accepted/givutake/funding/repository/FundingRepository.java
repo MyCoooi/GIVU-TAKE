@@ -7,10 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface FundingRepository extends JpaRepository<Fundings, Integer> {
     Optional<Fundings> findByFundingIdx(int fundingIdx);
+
+    List<Fundings> findByFundingTypeAndStateAndIsDeletedFalse(char fundingType, byte state);
 
     @Modifying
     @Transactional
