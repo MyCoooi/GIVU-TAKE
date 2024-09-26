@@ -1,5 +1,6 @@
 package com.project.givuandtake
 
+import AddressMapSearch
 import AttractionMain
 import android.content.Intent
 import android.os.Bundle
@@ -43,7 +44,6 @@ import com.project.givuandtake.feature.mypage.CustomerService.FaqPage
 import com.project.givuandtake.feature.mypage.CustomerService.PersonalInquiry
 import com.project.givuandtake.feature.mypage.CustomerService.Announcement
 import com.project.givuandtake.feature.mypage.MyActivities.AddressBook
-import com.project.givuandtake.feature.mypage.MyActivities.AddressMapSearch
 import com.project.givuandtake.feature.mypage.MyActivities.AddressSearch
 import com.project.givuandtake.feature.mypage.MyActivities.CardBook
 import com.project.givuandtake.feature.mypage.MyActivities.UserInfo
@@ -78,8 +78,6 @@ class MainActivity : ComponentActivity() {
                 val cartItems = remember { mutableStateOf(listOf<CartItem>()) } // 장바구니 상태
                 val currentBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = currentBackStackEntry?.destination?.route
-                // A surface container using the 'background' color from the theme
-
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -214,7 +212,22 @@ class MainActivity : ComponentActivity() {
                         }
 
                         // 하단 네비게이션 바
-                        if (currentDestination != "trippage?city={city}" && currentDestination != "festivalpage?city={city}") {
+                        if (currentDestination != "trippage?city={city}" &&
+                            currentDestination != "festivalpage?city={city}" &&
+                            currentDestination != "donationreceipt" &&
+                            currentDestination != "fundingdetails" &&
+                            currentDestination != "wishlist" &&
+                            currentDestination != "mycomment" &&
+                            currentDestination != "myreview" &&
+                            currentDestination != "addressbook" &&
+                            currentDestination != "cardbook" &&
+                            currentDestination != "userinfo" &&
+                            currentDestination != "addresssearch" &&
+                            currentDestination != "addressmapsearch" &&
+                            currentDestination != "announcement" &&
+                            currentDestination != "faqpate" &&
+                            currentDestination != "personalinquiry"
+                        ) {
                             BottomNavBar(navController, selectedItem) { newIndex ->
                                 selectedItem = newIndex
                             }
@@ -241,8 +254,6 @@ class MainActivity : ComponentActivity() {
             Log.e("KakaoPayApi", "PG Token이 없습니다.")
         }
     }
-
-
 }
 
 

@@ -61,7 +61,7 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
 
     implementation("com.naver.maps:map-sdk:3.19.1")
-    implementation("com.google.android.gms:play-services-location:21.1.0")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
 
     implementation("com.squareup.okhttp3:okhttp:4.9.1")
     implementation("com.google.code.gson:gson:2.8.8")
@@ -72,7 +72,6 @@ dependencies {
     // OkHttp - 네트워크 요청 로깅 (선택 사항)
     implementation ("com.squareup.okhttp3:logging-interceptor:4.9.1")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0")
-
 
     implementation(platform("com.google.firebase:firebase-bom:33.2.0"))
     implementation("com.google.firebase:firebase-analytics")
