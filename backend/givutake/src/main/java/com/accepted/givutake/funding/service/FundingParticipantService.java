@@ -50,4 +50,14 @@ public class FundingParticipantService {
 
         return fundingParticipantsRepository.findByUsersAndCreatedDateBetween(savedUsers, startDateTime, endDateTime);
     }
+
+    // 자신이 참여한 펀딩 수 조회
+    public long getCountByEmail(String email) {
+        // 1. DB에서 user 가져오기
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        Users savedUser = savedUserDto.toEntity();
+
+        // 2. 펀딩 수 조회
+        return fundingParticipantsRepository.countByUsers(savedUser);
+    }
 }

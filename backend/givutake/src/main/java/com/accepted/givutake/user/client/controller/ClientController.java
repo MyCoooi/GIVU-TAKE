@@ -18,7 +18,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -118,6 +120,23 @@ public class ClientController {
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(fundingParticipantViewDtoList)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // 자신이 참여한 펀딩 수 조회
+    @GetMapping("/funding-participants/count")
+    public ResponseEntity<ResponseDto> getFundingParticipantsCountByJwt(@AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+
+        long count = fundingParticipantService.getCountByEmail(email);
+
+        Map<String, Long> map = new HashMap<>();
+        map.put("count",count);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(map)
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);

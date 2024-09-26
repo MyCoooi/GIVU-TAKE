@@ -13,4 +13,5 @@ public interface FundingParticipantsRepository extends JpaRepository<FundingPart
     List<FundingParticipants> findByUsers(Users users);
     List<FundingParticipants> findByCreatedDateAfter(LocalDateTime startDate);
     List<FundingParticipants> findByCreatedDateBefore(LocalDateTime endDate);
+    long countByUsers(Users users);
 }
