@@ -29,7 +29,6 @@ public class FundingController {
 
     private final CheerCommentService cheerCommentService;
     private final FundingService fundingService;
-    private final FundingParticipantService fundingParticipantService;
     private final FundingReviewService fundingReviewService;
 
     // ========= 펀딩 관련 ===========
@@ -224,26 +223,6 @@ public class FundingController {
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(modifiedFundingReviewDetailViewDto)
-                .build();
-
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
-    }
-
-    //  ===== 펀딩 내역 관련 =====
-    // 일정 기간 동안의 자신의 펀딩 내역 조회
-    @GetMapping("/my-fundings")
-    public ResponseEntity<ResponseDto> getFundingParticipantsListByJwt(@AuthenticationPrincipal UserDetails userDetails, @RequestParam(required = false) LocalDate startDate, @RequestParam(required = false) LocalDate endDate) {
-        String email = userDetails.getUsername();
-
-        List<FundingParticipantViewDto> fundingParticipantViewDtoList =
-                fundingParticipantService.getFundingParticipantsListByEmail(email, startDate, endDate)
-                        .stream()
-                        .map(FundingParticipantViewDto::toDto)
-                        .collect(Collectors.toList());
-
-
-        ResponseDto responseDto = ResponseDto.builder()
-                .data(fundingParticipantViewDtoList)
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);

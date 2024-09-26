@@ -1,5 +1,7 @@
 package com.accepted.givutake.user.client.controller;
 
+import com.accepted.givutake.funding.model.FundingParticipantViewDto;
+import com.accepted.givutake.funding.service.FundingParticipantService;
 import com.accepted.givutake.global.model.ResponseDto;
 import com.accepted.givutake.user.client.entity.Addresses;
 import com.accepted.givutake.user.client.model.AddressAddDto;
@@ -15,6 +17,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +28,7 @@ import java.util.stream.Collectors;
 public class ClientController {
 
     private final ClientService clientService;
+    private final FundingParticipantService fundingParticipantService;
 
     // jwt 토큰으로 모든 주소 조회
     @GetMapping("/addresses")
@@ -95,6 +99,25 @@ public class ClientController {
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(addressDetailViewDto)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    //  ===== 펀딩 내역 관련 =====
+    // 일정 기간 동안의 자신의 펀딩 내역 조회
+    @GetMapping("/funding-participants")
+    public ResponseEntity<ResponseDto> getFundingParticipantsListByJwt(@AuthenticationPrincipal UserDetails userDetails, @RequestParam(required = false) LocalDate startDate, @RequestParam(required = false) LocalDate endDate) {
+        String email = userDetails.getUsername();
+
+        List<FundingParticipantViewDto> fundingParticipantViewDtoList =
+                fundingParticipantService.getFundingParticipantsListByEmail(email, startDate, endDate)
+                        .stream()
+                        .map(FundingParticipantViewDto::toDto)
+                        .collect(Collectors.toList());
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(fundingParticipantViewDtoList)
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);

@@ -46,7 +46,6 @@ public class SecurityConfig {
                                 .hasRole("CORPORATION")
                         .requestMatchers(HttpMethod.DELETE, "/api/government-fundings/*",
                                 "/api/users").hasRole("CORPORATION")
-                        .requestMatchers(HttpMethod.GET, "/api/government-fundings/my-fundings").hasRole("CLIENT")
                         .requestMatchers(HttpMethod.DELETE,"/api/users").hasRole("CLIENT")
                         .requestMatchers("/",
                                 "/api/auth",
