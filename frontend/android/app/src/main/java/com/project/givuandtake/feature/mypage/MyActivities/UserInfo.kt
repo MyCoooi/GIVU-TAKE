@@ -1,5 +1,6 @@
 package com.project.givuandtake.feature.mypage.MyActivities
 
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,6 +21,11 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,25 +33,56 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.project.givuandtake.core.apis.UserInfoApi
+import com.project.givuandtake.core.apis.UserInfoResponse
+import com.project.givuandtake.core.datastore.TokenManager
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 @Composable
 fun UserInfo(navController: NavController) {
+    val context = LocalContext.current
+    var userInfo by remember { mutableStateOf<UserInfoResponse?>(null) }
+    val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
+
+    // API 호출
+    LaunchedEffect(Unit) {
+        UserInfoApi.api.getUserInfo(accessToken).enqueue(object : Callback<UserInfoResponse> {
+            override fun onResponse(
+                call: Call<UserInfoResponse>,
+                response: Response<UserInfoResponse>
+            ) {
+                if (response.isSuccessful) {
+                    userInfo = response.body()
+                    Log.d("UserInfo", "User Data: ${response.body()}")
+                } else {
+                    Log.d("UserInfo", "Error: ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: Call<UserInfoResponse>, t: Throwable) {
+                Log.e("UserInfo", "API Call Failed: ${t.message}")
+            }
+        })
+    }
+
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
     ) {
         // 상단 회원 정보 타이틀과 뒤로가기 버튼
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically, // Row 내 수직 정렬
-            horizontalArrangement = Arrangement.SpaceBetween // 좌우 정렬
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
@@ -62,9 +99,8 @@ fun UserInfo(navController: NavController) {
             Text(
                 text = "회원 정보",
                 textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .weight(1f)
-                ,fontSize = 20.sp
+                modifier = Modifier.weight(1f),
+                fontSize = 20.sp
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -76,7 +112,7 @@ fun UserInfo(navController: NavController) {
         Box(
             modifier = Modifier
                 .size(100.dp)
-                .clip(CircleShape) // CircleShape로 전체 박스 모양 설정
+                .clip(CircleShape)
                 .align(Alignment.CenterHorizontally),
             contentAlignment = Alignment.Center
         ) {
@@ -84,40 +120,45 @@ fun UserInfo(navController: NavController) {
                 model = "https://via.placeholder.com/150", // 여기에 실제 사용자 이미지 URL을 넣으세요
                 contentDescription = "User Image",
                 modifier = Modifier
-                    .size(100.dp) // 이미지 크기를 동일하게 설정
-                    .clip(CircleShape) // 이미지에 CircleShape 적용
-                    .background(Color.LightGray, CircleShape), // 배경색 적용
-                contentScale = ContentScale.Crop // 이미지를 꽉 채우도록 설정
+                    .size(100.dp)
+                    .clip(CircleShape)
+                    .background(Color.LightGray, CircleShape),
+                contentScale = ContentScale.Crop
             )
         }
+
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 사용자 정보 (이름, 이메일, 전화번호 등)
-        UserInfoItem(label = "이름", value = "진라면")
-        DrawLine()
-        UserInfoItem(label = "이메일", value = "aisdjlfkaskkdf@naver.com")
-        DrawLine()
-        UserInfoItem(label = "전화번호", value = "010-1234-5321")
-        DrawLine()
-        UserInfoItem(label = "성별", value = "남성")
-        DrawLine()
-        UserInfoItem(label = "생일", value = "2020-01-12")
-        DrawLine()
-
+        // API로부터 받은 사용자 정보 표시
+        userInfo?.let { info ->
+            UserInfoItem(label = "이름", value = info.data.name)
+            DrawLine()
+            UserInfoItem(label = "이메일", value = info.data.email)
+            DrawLine()
+            UserInfoItem(label = "전화번호", value = info.data.mobilePhone)
+            DrawLine()
+            UserInfoItem(
+                label = "성별",
+                value = if (info.data.isMale) "남성" else "여성"
+            )
+            DrawLine()
+            UserInfoItem(label = "생일", value = info.data.birth)
+            DrawLine()
+        }
 
         // 하단 버튼들
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp),
-            horizontalArrangement = Arrangement.End // 버튼을 오른쪽에 정렬
+            horizontalArrangement = Arrangement.End
         ) {
             Box(
                 modifier = Modifier
                     .padding(end = 8.dp)
-                    .clip(RoundedCornerShape(20.dp)) // 둥근 모서리 적용
+                    .clip(RoundedCornerShape(20.dp))
                     .background(Color(0xffFBFAFF))
-                    .border(1.dp, Color(0XFFA093DE), RoundedCornerShape(20.dp)) // 테두리 적용
+                    .border(1.dp, Color(0XFFA093DE), RoundedCornerShape(20.dp))
                     .padding(vertical = 8.dp, horizontal = 16.dp)
                     .clickable { /* 비밀번호 변경 로직 */ }
             ) {
@@ -127,7 +168,7 @@ fun UserInfo(navController: NavController) {
                 modifier = Modifier
                     .clip(RoundedCornerShape(20.dp))
                     .background(Color(0xffFBFAFF))
-                    .border(1.dp, Color(0XFFA093DE), RoundedCornerShape(20.dp)) // 테두리 적용
+                    .border(1.dp, Color(0XFFA093DE), RoundedCornerShape(20.dp))
                     .padding(vertical = 8.dp, horizontal = 16.dp)
                     .clickable { /* 회원 정보 수정 로직 */ }
             ) {
