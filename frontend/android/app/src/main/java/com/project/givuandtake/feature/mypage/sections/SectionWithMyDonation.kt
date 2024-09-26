@@ -66,7 +66,7 @@ fun SectionWithMyDonation(title: String, actions: List<String>, navController: N
                         color = Color(0xFF333333),
                         modifier = Modifier
                             .fillMaxWidth(0.5f)  // 너비의 절반에서 시작
-                            .clickable { navController.navigate("wishlist") }
+                            .clickable { navController.navigate("wishlist_page") }
                     )
                 }
             }
