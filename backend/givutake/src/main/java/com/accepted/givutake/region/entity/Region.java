@@ -1,5 +1,6 @@
-package com.accepted.givutake.global.entity;
+package com.accepted.givutake.region.entity;
 
+import com.accepted.givutake.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +19,9 @@ public class Region extends BaseTimeEntity {
     @Column(name = "region_idx", nullable = false)
     private int regionIdx;
 
-    @Column(name = "region_name", nullable = false)
-    private String regionName;
+    @Column(name = "sido", nullable = false, length = 10)
+    private String sido;
+
+    @Column(name = "sigungu", nullable = false, length = 10)
+    private String sigungu;
 }

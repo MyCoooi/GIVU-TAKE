@@ -1,25 +1,20 @@
 package com.accepted.givutake.user.common.service;
 
-import com.accepted.givutake.global.entity.Region;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
-import com.accepted.givutake.global.repository.RegionRepository;
-import com.accepted.givutake.user.client.entity.Addresses;
+import com.accepted.givutake.region.entity.Region;
+import com.accepted.givutake.region.service.RegionService;
 import com.accepted.givutake.user.client.model.AddressAddDto;
-import com.accepted.givutake.user.client.model.AddressDto;
 import com.accepted.givutake.user.client.service.AddressService;
-import com.accepted.givutake.user.client.service.ClientService;
 import com.accepted.givutake.user.common.entity.EmailCode;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.enumType.Roles;
 import com.accepted.givutake.user.common.model.*;
-import com.accepted.givutake.user.client.repository.AddressRepository;
 import com.accepted.givutake.user.common.repository.EmailCodeRepository;
 import com.accepted.givutake.user.common.repository.UsersRepository;
 
 import jakarta.mail.MessagingException;
 import jakarta.validation.*;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,7 +31,7 @@ import java.util.Set;
 public class UserService {
 
     private final UsersRepository userRepository;
-    private final RegionRepository regionRepository;
+    private final RegionService regionService;
     private final EmailCodeRepository emailCodeRepository;
     private final MailService mailService;
     private final AddressService addressService;
@@ -46,9 +41,9 @@ public class UserService {
     // 1800(초) == 30분
     private static final long EMAIL_CODE_EXPIRATION_TIME = 1800;
 
-    public UserService(UsersRepository userRepository, RegionRepository regionRepository, PasswordEncoder passwordEncoder, EmailCodeRepository emailCodeRepository, MailService mailService, AddressService addressService) {
+    public UserService(UsersRepository userRepository, RegionService regionService, PasswordEncoder passwordEncoder, EmailCodeRepository emailCodeRepository, MailService mailService, AddressService addressService) {
         this.userRepository = userRepository;
-        this.regionRepository = regionRepository;
+        this.regionService = regionService;
         this.emailCodeRepository = emailCodeRepository;
         this.mailService = mailService;
         this.addressService = addressService;
@@ -83,8 +78,14 @@ public class UserService {
             }
             // 수혜자 회원가입 유효성 검증
             checkArgumentValidityForCorporationSignUp(signUpDto);
+
+            // region 값 가져오기
+            String sido = signUpDto.getSido();
+            String sigungu = signUpDto.getSigungu();
+            Region region = regionService.findRegionBySidoAndSigungu(sido, sigungu);
+
             // DB에 회원 정보 저장
-            userRepository.save(signUpDto.toEntity());
+            userRepository.save(signUpDto.toEntity(region));
         }
         // 2. 사용자 회원가입 관련 입력값 검증 및 처리
         else {
@@ -98,14 +99,12 @@ public class UserService {
             validateAddressAddDto(addressAddDto);
 
             // DB에 저장
-            Users savedUser = userRepository.save(signUpDto.toEntity());
+            Users savedUser = userRepository.save(signUpDto.toEntity(null));
+
             // 지역 코드 넣기
             String sido = addressAddDto.getSido();
-            Integer regionIdx = regionRepository.findRegionIdxBySido(sido);
-
-            if (regionIdx == null) {
-                throw new ApiException(ExceptionEnum.RUNTIME_EXCEPTION);
-            }
+            String sigungu = addressAddDto.getSigungu();
+            int regionIdx = regionService.getRegionIdxBySidoAndSigungu(sido, sigungu);
 
             addressService.saveAddress(addressAddDto.toEntity(savedUser.getUserIdx(), regionIdx));
         }
@@ -121,20 +120,26 @@ public class UserService {
             throw new ApiException(ExceptionEnum.UNEXPECTED_BIRTH_EXCEPTION);
         }
 
-        // regionIdx 값은 필수이며, 유효해야 한다.
-        if (signUpDto.getRegionIdx() == null) {
-            throw new ApiException(ExceptionEnum.MISSING_REGION_EXCEPTION);
+        // sido, sigungu 값은 필수!
+        String sido = signUpDto.getSido();
+        String sigungu = signUpDto.getSigungu();
+        if (sido == null || sido.equals("")) {
+            throw new ApiException(ExceptionEnum.MISSING_SIDO_EXCEPTION);
         }
-        else if (!regionRepository.existsByRegionIdx(signUpDto.getRegionIdx())) {
-            throw new ApiException(ExceptionEnum.ILLEGAL_REGION_EXCEPTION);
+        if (sigungu == null || sigungu.equals("")) {
+            throw new ApiException(ExceptionEnum.MISSING_SIGUNGU_EXCEPTION);
         }
+
     }
 
     // 사용자 회원가입 유효성 검증
     public void checkArgumentValidityForClientSignUp(SignUpDto signUpDto) {
-        // 사용자는 regionIdx 값을 가지면 안된다.
-        if (signUpDto.getRegionIdx() != null) {
-            throw new ApiException(ExceptionEnum.UNEXPECTED_REGION_EXCEPTION);
+        // 사용자는 sido, sigungu 값을 가지면 안된다.
+        if (signUpDto.getSido() != null) {
+            throw new ApiException(ExceptionEnum.UNEXPECTED_SIDO_EXCEPTION);
+        }
+        if (signUpDto.getSigungu() != null) {
+            throw new ApiException(ExceptionEnum.UNEXPECTED_SIGUNGU_EXCEPTION);
         }
 
         // isMale, birth 값은 필수이다.

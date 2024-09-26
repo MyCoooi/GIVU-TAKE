@@ -23,13 +23,6 @@ public class AddressAddDto {
     @Size(max = 5, message = "국가기초구역번호는 최대 5자 이하여야 합니다.")
     protected String zoneCode;
 
-    @NotBlank(message = "기본주소는 필수 입력 값 입니다.")
-    @Size(max = 50, message = "기본주소는 최대 50자 이하여야 합니다.")
-    protected String address;
-
-    @NotNull(message = "주소 타입은 필수 입력 값 입니다.")
-    protected Character userSelectedType;
-
     @NotBlank(message = "도로명 주소는 필수 입력 값 입니다.")
     @Size(max = 50, message = "도로명 주소는 최대 50자 이하여야 합니다.")
     protected String roadAddress;
@@ -42,17 +35,13 @@ public class AddressAddDto {
     @Size(max = 50, message = "상세 주소는 최대 50자 이하여야 합니다.")
     protected String detailAddress;
 
-    @NotNull(message = "임의 도로명 주소는 필수 입력 값 입니다.")
-    @Size(max = 50, message = "임의 도로명 주소는 최대 50자 이하여야 합니다.")
-    protected String autoRoadAddress;
+    @NotBlank(message = "시/도명은 필수 입력 값 입니다.")
+    @Size(max = 10, message = "시/도명은 최대 10자 이하여야 합니다.")
+    protected String sido;
 
-    @NotNull(message = "임의 지번 주소는 필수 입력 값 입니다.")
-    @Size(max = 50, message = "임의 지번 주소는 최대 50자 이하여야 합니다.")
-    protected String autoJibunAddress;
-
-    @NotNull(message = "건물관리번호는 필수 입력 값 입니다.")
-    @Size(max = 25, message = "건물관리번호는 최대 25자 이하여야 합니다.")
-    protected String buildingCode;
+    @NotBlank(message = "시/군/구명은 필수 입력 값 입니다.")
+    @Size(max = 10, message = "시/군/구명은 최대 10자 이하여야 합니다.")
+    protected String sigungu;
 
     @NotNull(message = "건물명은 필수 입력 값 입니다.")
     @Size(max = 20, message = "건물명은 최대 20자 이하여야 합니다.")
@@ -60,30 +49,6 @@ public class AddressAddDto {
 
     @NotNull(message = "공통주택 여부는 필수 입력 값 입니다.")
     protected Boolean isApartment;
-
-    @NotBlank(message = "도/시 이름은 필수 입력 값 입니다.")
-    @Size(max = 10, message = "도/시 이름은 최대 10자 이하여야 합니다.")
-    protected String sido;
-
-    @NotBlank(message = "시/군/구 이름은 필수 입력 값 입니다.")
-    @Size(max = 10, message = "시/군/구 이름은 최대 10자 이하여야 합니다.")
-    protected String sigungu;
-
-    @NotBlank(message = "시/군/구 코드는 필수 입력 값 입니다.")
-    @Size(max = 5, message = "배시/군/구 코드는 최대 5자 이하여야 합니다.")
-    protected String sigunguCode;
-
-    @NotBlank(message = "도로명 코드는 필수 입력 값 입니다.")
-    @Size(max = 7, message = "도로명 코드는 최대 7자 이하여야 합니다.")
-    protected String roadNameCode;
-
-    @NotBlank(message = "법정동/법정리 코드는 필수 입력 값 입니다.")
-    @Size(max = 10, message = "법정동/법정리 코드는 최대 10자 이하여야 합니다.")
-    protected String bcode;
-
-    @NotBlank(message = "도로명은 필수 입력 값 입니다.")
-    @Size(max = 10, message = "도로명은 최대 10자 이하여야 합니다.")
-    protected String roadName;
 
     @NotNull(message = "법정동/법정리 이름은 필수 입력 값 입니다.")
     @Size(max = 10, message = "법정동/법정리 이름은 최대 10자 이하여야 합니다.")
@@ -106,22 +71,11 @@ public class AddressAddDto {
                 .regionIdx(regionIdx)
                 .addressName(this.addressName)
                 .zoneCode(this.zoneCode)
-                .address(this.address)
-                .userSelectedType(this.userSelectedType)
                 .roadAddress(this.roadAddress)
                 .jibunAddress(this.jibunAddress)
                 .detailAddress(this.detailAddress)
-                .autoRoadAddress(this.autoRoadAddress)
-                .autoJibunAddress(this.autoJibunAddress)
-                .buildingCode(this.buildingCode)
                 .buildingName(this.buildingName)
                 .isApartment(this.isApartment)
-                .sido(this.sido)
-                .sigungu(this.sigungu)
-                .sigunguCode(this.sigunguCode)
-                .roadNameCode(this.roadNameCode)
-                .bcode(this.bcode)
-                .roadName(this.roadName)
                 .bname(this.bname)
                 .bname1(this.bname1)
                 .isRepresentative(this.isRepresentative)

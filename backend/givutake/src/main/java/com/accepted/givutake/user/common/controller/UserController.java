@@ -5,8 +5,11 @@ import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.model.ResponseDto;
 import com.accepted.givutake.user.client.model.AddressAddDto;
 import com.accepted.givutake.user.client.model.AddressDto;
+import com.accepted.givutake.user.client.model.ClientViewDto;
+import com.accepted.givutake.user.common.enumType.Roles;
 import com.accepted.givutake.user.common.model.*;
 import com.accepted.givutake.user.common.service.UserService;
+import com.accepted.givutake.user.corporation.model.CorporationViewDto;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -49,11 +52,19 @@ public class  UserController {
     public ResponseEntity<ResponseDto> getUserByToken(@AuthenticationPrincipal UserDetails userDetails) {
         String email = userDetails.getUsername();
         UserDto savedUserDto = userService.getUserByEmail(email);
-        ResponseUserDto savedResponseUserDto = savedUserDto.toResponseUserDto();
 
         ResponseDto responseDto = ResponseDto.builder()
-                .data(savedResponseUserDto)
+                .data(null)
                 .build();
+
+        if (savedUserDto.getRoles() == Roles.ROLE_CLIENT) {
+            ClientViewDto clientViewDto = savedUserDto.toClientViewDto();
+            responseDto.setData(clientViewDto);
+        }
+        else if (savedUserDto.getRoles() == Roles.ROLE_CORPORATION) {
+            CorporationViewDto corporationViewDto = savedUserDto.toCorporationViewDto();
+            responseDto.setData(corporationViewDto);
+        }
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
@@ -91,11 +102,19 @@ public class  UserController {
         }
 
         UserDto savedUserDto = userService.modifyUserByEmail(email, modifyUserDto);
-        ResponseUserDto savedResponseUserDto = savedUserDto.toResponseUserDto();
 
         ResponseDto responseDto = ResponseDto.builder()
-                .data(savedResponseUserDto)
+                .data(null)
                 .build();
+
+        if (savedUserDto.getRoles() == Roles.ROLE_CLIENT) {
+            ClientViewDto clientViewDto = savedUserDto.toClientViewDto();
+            responseDto.setData(clientViewDto);
+        }
+        else if (savedUserDto.getRoles() == Roles.ROLE_CORPORATION) {
+            CorporationViewDto corporationViewDto = savedUserDto.toCorporationViewDto();
+            responseDto.setData(corporationViewDto);
+        }
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }

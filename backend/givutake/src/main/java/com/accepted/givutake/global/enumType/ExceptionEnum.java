@@ -2,10 +2,7 @@ package com.accepted.givutake.global.enumType;
 
 import lombok.Getter;
 import lombok.ToString;
-import org.hibernate.service.spi.ServiceException;
 import org.springframework.http.HttpStatus;
-
-import javax.imageio.plugins.jpeg.JPEGHuffmanTable;
 
 @Getter
 @ToString
@@ -28,26 +25,30 @@ public enum ExceptionEnum {
     INTERNAL_AUTHENTICATION_SERVICE_EXCEPTION(HttpStatus.BAD_REQUEST, "ES0015"),
 
     // Custom Exception
-    ILLEGAL_REGION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0001", "지역 정보가 유효하지 않습니다."),
-    ILLEGAL_ISMALE_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0002", "성별 정보가 유효하지 않습니다."),
-    ILLEGAL_BIRTH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0003", "생년월일 정보가 유효하지 않습니다."),
-    ILLEGAL_STATUS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0004", "상태 정보가 유효하지 않습니다"),
-    ILLEGAL_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0005", "대표 주소 정보가 유효하지 않습니다."),
-    ILLEGAL_REPRESENTATIVE_CARD_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0006", "대표 카드 정보가 유효하지 않습니다."),
-    ILLEGAL_EMAIL_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0007", "이메일 형식이 올바르지 않습니다."),
+//    ILLEGAL_REGION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0001", "지역 정보가 유효하지 않습니다."),
+    ILLEGAL_ISMALE_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0003", "성별 정보가 유효하지 않습니다."),
+    ILLEGAL_BIRTH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0004", "생년월일 정보가 유효하지 않습니다."),
+    ILLEGAL_STATUS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0005", "상태 정보가 유효하지 않습니다"),
+    ILLEGAL_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0006", "대표 주소 정보가 유효하지 않습니다."),
+    ILLEGAL_REPRESENTATIVE_CARD_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0007", "대표 카드 정보가 유효하지 않습니다."),
+    ILLEGAL_EMAIL_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0008", "이메일 형식이 올바르지 않습니다."),
 
-    DUPLICATED_EMAIL_EXCEPTION(HttpStatus.BAD_REQUEST, "EU1006", "이미 사용 중인 이메일입니다."),
+    DUPLICATED_EMAIL_EXCEPTION(HttpStatus.BAD_REQUEST, "EU1008", "이미 사용 중인 이메일입니다."),
 
-    UNEXPECTED_REGION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2001", "지역 정보는 포함할 수 없습니다."),
-    UNEXPECTED_ISMALE_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2002", "성별 정보는 포함할 수 없습니다."),
-    UNEXPECTED_BIRTH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2003", "생년월일 정보는 포함할 수 없습니다."),
-    UNEXPECTED_STATUS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2004", "상태 정보는 포함할 수 없습니다."),
-    UNEXPECTED_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2005", "대표 주소 정보는 포함할 수 없습니다."),
+//    UNEXPECTED_REGION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2001", "지역 정보는 포함할 수 없습니다."),
+    UNEXPECTED_SIDO_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2001", "시/도 정보는 포함할 수 없습니다."),
+    UNEXPECTED_SIGUNGU_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2002", "시/군/구 정보는 포함할 수 없습니다."),
+    UNEXPECTED_ISMALE_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2003", "성별 정보는 포함할 수 없습니다."),
+    UNEXPECTED_BIRTH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2004", "생년월일 정보는 포함할 수 없습니다."),
+    UNEXPECTED_STATUS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2005", "상태 정보는 포함할 수 없습니다."),
+    UNEXPECTED_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2006", "대표 주소 정보는 포함할 수 없습니다."),
 
-    MISSING_REGION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3001", "지역 정보는 필수 입력 값 입니다."),
-    MISSING_ISMALE_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3002", "성별은 필수 입력 값 입니다."),
-    MISSING_BIRTH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3003", "생년월일은 필수 입력 값 입니다."),
-    MISSING_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3005", "대표 주소는 필수 입력 값 입니다."),
+//    MISSING_REGION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3001", "지역 정보는 필수 입력 값 입니다."),
+    MISSING_SIDO_EXCEPTION(HttpStatus.BAD_REQUEST,"EU3001", "시/도명은 필수 입력 값 입니다."),
+    MISSING_SIGUNGU_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3002", "시/군/구명은 필수 입력 값 입니다."),
+    MISSING_ISMALE_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3003", "성별은 필수 입력 값 입니다."),
+    MISSING_BIRTH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3004", "생년월일은 필수 입력 값 입니다."),
+    MISSING_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3006", "대표 주소는 필수 입력 값 입니다."),
 
     NOT_FOUND_USER_WITH_EMAIL_EXCEPTION(HttpStatus.NOT_FOUND, "EU4010", "해당 이메일을 가진 사용자를 찾을 수 없습니다."),
     NOT_FOUND_REFRESHTOKEN_EXCEPTION(HttpStatus.NOT_FOUND, "EU4012", "토큰 정보를 찾을 수 없습니다."),
@@ -56,6 +57,7 @@ public enum ExceptionEnum {
     NOT_FOUND_FUNDING_REVIEW_EXCEPTION(HttpStatus.NOT_FOUND, "EU4030", "펀딩 후기 정보를 찾을 수 없습니다."),
     NOT_FOUND_FUNDING_WITH_IDX_EXCEPTION(HttpStatus.NOT_FOUND, "EU4031", "펀딩 정보를 찾을 수 없습니다."),
     NOT_FOUND_CHEER_COMMENT_EXCEPTION(HttpStatus.NOT_FOUND, "EU4040", "댓글 정보를 찾을 수 없습니다."),
+    NOT_FOUND_REGION_EXCEPTION(HttpStatus.NOT_FOUND, "EU4050", "지역 정보를 찾을 수 없습니다."),
 
     USER_ALREADY_WITHDRAWN_EXCEPTION(HttpStatus.NOT_FOUND, "EU5001", "이미 탈퇴한 회원입니다."),
     ADDRESSES_ALREADY_DELETED_EXCEPTION(HttpStatus.NOT_FOUND, "EU5020", "이미 삭제된 주소입니다."),
@@ -70,6 +72,10 @@ public enum ExceptionEnum {
 
     NOT_ALLOWED_LAST_ADDRESS_DELETION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU7020", "마지막 주소 정보는 삭제할 수 없습니다."),
     NOT_ALLOWED_FUNDING_REVIEW_INSERTION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU7030", "이미 펀딩 후기가 작성 되어 있습니다."),
+    NOT_ALLOWED_DONE_FUNDING_DELETION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU7032", "모금이 종료된 펀딩은 삭제할 수 없습니다."),
+    NOT_ALLOWED_FUNDING_IN_PROGRESS_DELETION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU7033", "모금이 진행 중인 펀딩은 삭제할 수 없습니다."),
+    NOT_ALLOWED_DONE_FUNDING_MODIFICATION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU7034", "모금이 종료된 펀딩은 수정할 수 없습니다."),
+    NOT_ALLOWED_FUNDING_IN_PROGRESS_MODIFICATION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU7035", "모금이 진행 중인 펀딩은 수정할 수 없습니다."),
     NOT_ALLOWED_WISH_INSERTION_EXCEPTION(HttpStatus.BAD_REQUEST, "EW7010","이미 찜목록에 추가 되어 있습니다."),
     NOT_ALLOWED_LIKED_INSERTION_EXCEPTION(HttpStatus.BAD_REQUEST,"EG7010","이미 좋아요를 추가하였습니다."),
     NOT_ALLOWED_LIKED_DELETION_EXCEPTION(HttpStatus.BAD_REQUEST,"EG7020","해당 좋아요를 삭제할 수 없습니다."),

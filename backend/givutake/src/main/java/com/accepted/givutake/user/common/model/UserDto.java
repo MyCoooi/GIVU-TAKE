@@ -1,8 +1,11 @@
 package com.accepted.givutake.user.common.model;
 
+import com.accepted.givutake.region.entity.Region;
+import com.accepted.givutake.user.client.model.ClientViewDto;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.enumType.Roles;
 import com.accepted.givutake.user.common.enumType.SocialType;
+import com.accepted.givutake.user.corporation.model.CorporationViewDto;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -21,7 +24,7 @@ public class UserDto {
     private String landlinePhone;
     private Boolean isMale;
     private LocalDate birth;
-    private Integer regionIdx;
+    private Region region;
     private Integer cardIdx;
     private String profileImageUrl;
     private Roles roles;
@@ -41,7 +44,7 @@ public class UserDto {
                 .landlinePhone(user.getLandlinePhone())
                 .isMale(user.getIsMale())
                 .birth(user.getBirth())
-                .regionIdx(user.getRegionIdx())
+                .region(user.getRegion())
                 .cardIdx(user.getCardIdx())
                 .profileImageUrl(user.getProfileImageUrl())
                 .roles(user.getRoles())
@@ -63,7 +66,7 @@ public class UserDto {
                 .landlinePhone(this.landlinePhone)
                 .isMale(this.isMale)
                 .birth(this.birth)
-                .regionIdx(this.regionIdx)
+                .region(this.region)
                 .cardIdx(this.cardIdx)
                 .profileImageUrl(this.profileImageUrl)
                 .roles(this.roles)
@@ -75,14 +78,26 @@ public class UserDto {
                 .build();
     }
 
-    public ResponseUserDto toResponseUserDto() {
-        return ResponseUserDto.builder()
+    public ClientViewDto toClientViewDto() {
+        return ClientViewDto.builder()
                 .email(this.email)
                 .name(this.name)
                 .mobilePhone(this.mobilePhone)
                 .landlinePhone(this.landlinePhone)
                 .isMale(this.isMale)
                 .birth(this.birth)
+                .profileImageUrl(this.profileImageUrl)
+                .build();
+    }
+
+    public CorporationViewDto toCorporationViewDto() {
+        return CorporationViewDto.builder()
+                .email(this.email)
+                .name(this.name)
+                .mobilePhone(this.mobilePhone)
+                .landlinePhone(this.landlinePhone)
+                .sido(this.region.getSido())
+                .sigungu(this.region.getSigungu())
                 .profileImageUrl(this.profileImageUrl)
                 .build();
     }
