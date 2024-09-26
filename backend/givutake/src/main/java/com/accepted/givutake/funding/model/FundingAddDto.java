@@ -1,7 +1,9 @@
 package com.accepted.givutake.funding.model;
 
+import com.accepted.givutake.funding.ValidFundingAddDtoDates;
 import com.accepted.givutake.funding.entity.Fundings;
 import com.accepted.givutake.user.common.entity.Users;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -15,6 +17,7 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ValidFundingAddDtoDates
 public class FundingAddDto {
 
     @Size(max = 30, message = "펀딩 제목은 최대 30자 입니다.")
@@ -29,9 +32,11 @@ public class FundingAddDto {
     private Integer goalMoney;
 
     @NotNull(message = "모금 시작일은 필수 입력 값 입니다.")
+    @FutureOrPresent(message = "모금 시작일은 현재 날짜 이후여야 합니다.")
     private LocalDate startDate;
 
     @NotNull(message = "모금 종료일은 필수 입력 값 입니다.")
+    @FutureOrPresent(message = "모금 종료일은 현재 날짜 이후여야 합니다.")
     private LocalDate endDate;
 
     @Size(max = 2048, message = "썸네일 주소는 최대 2048자 입니다.")
@@ -40,17 +45,19 @@ public class FundingAddDto {
     @NotNull(message = "펀딩 종류는 필수 입력 값 입니다.")
     private Character fundingType;
 
-    public Fundings toEntity(Users users) {
+    public Fundings toEntity(Users users, byte state) {
         return Fundings.builder()
                 .corporation(users)
                 .fundingTitle(this.fundingTitle)
                 .fundingContent(this.fundingContent)
                 .goalMoney(this.goalMoney)
+                .totalMoney(0)
                 .startDate(this.startDate)
                 .endDate(this.endDate)
                 .fundingThumbnail(this.fundingThumbnail)
                 .fundingType(this.fundingType)
                 .isDeleted(false)
+                .state(state)
                 .build();
     }
 }

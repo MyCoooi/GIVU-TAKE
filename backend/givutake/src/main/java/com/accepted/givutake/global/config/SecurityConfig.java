@@ -18,8 +18,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import javax.imageio.plugins.jpeg.JPEGHuffmanTable;
-
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -39,8 +37,14 @@ public class SecurityConfig {
                 // 경로별 인가 작업
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/users/client/**").hasRole("CLIENT")
-                        .requestMatchers(HttpMethod.POST, "/api/government-fundings/*/review").hasRole("CORPORATION")
-                        .requestMatchers(HttpMethod.PATCH, "/api/government-fundings/*/review").hasRole("CORPORATION")
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/government-fundings",
+                                "/api/government-fundings/*/review")
+                                .hasRole("CORPORATION")
+                        .requestMatchers(HttpMethod.PATCH, "/api/government-fundings/*/review",
+                                "/api/government-fundings/*")
+                                .hasRole("CORPORATION")
+                        .requestMatchers(HttpMethod.DELETE, "/api/government-fundings/*").hasRole("CORPORATION")
                         .requestMatchers("/",
                                 "/api/auth",
                                 "/swagger-ui/**",
@@ -48,7 +52,10 @@ public class SecurityConfig {
                                 "/swagger-resources/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/government-fundings/*/review",
                                 "/api/government-fundings/*/comments",
-                                "/api/government-fundings/*/comments/*").permitAll()
+                                "/api/government-fundings/*/comments/*",
+                                "/api/regions/sido",
+                                "/api/regions/sigungu",
+                                "/api/government-fundings").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/users",
                                 "/api/users/password/code",
                                 "/api/users/password/code/verification").permitAll()
