@@ -2,7 +2,6 @@ package com.project.givuandtake
 
 import AttractionMain
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -12,14 +11,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -53,7 +50,9 @@ import com.project.givuandtake.feature.mypage.MyActivities.UserInfo
 import com.project.givuandtake.feature.mypage.MyDonation.DonationDetails
 import com.project.givuandtake.feature.mypage.MyDonation.DonationReceipt
 import com.project.givuandtake.feature.mypage.MyDonation.FundingDetails
-import com.project.givuandtake.feature.mypage.MyDonation.WishList
+import com.project.givuandtake.feature.mypage.MyDonation.WishlistPage
+
+//import com.project.givuandtake.feature.mypage.MyDonation.WishList
 import com.project.givuandtake.feature.mypage.MyManagement.MyComment
 import com.project.givuandtake.feature.mypage.MyManagement.MyReview
 import com.project.givuandtake.feature.navigation.addGiftPageDetailRoute
@@ -62,7 +61,6 @@ import com.project.givuandtake.feature.payment.PaymentResultPage
 import com.project.givuandtake.feature.payment.PaymentSuccessPage
 import com.project.givuandtake.ui.navbar.BottomNavBar
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
-import com.project.payment.PaymentScreen
 import com.project.payment.PaymentScreen_gift
 
 class MainActivity : ComponentActivity() {
@@ -71,7 +69,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        handleIntent(intent) // 기존 Intent 처리
+//        handleIntent(intent) // 기존 Intent 처리
 
         setContent {
             GivuAndTakeTheme {
@@ -130,6 +128,13 @@ class MainActivity : ComponentActivity() {
                                 CartPage(navController = navController, context = context) // context 전달
                             }
 
+                            // 찜목록 페이지
+                            composable("wishlist_page") {
+                                WishlistPage(navController = navController)
+                            }
+
+
+
                             // 결제 페이지_답례품
                             composable(
                                 route = "payment_page_gift?name={name}&location={location}&price={price}&quantity={quantity}",
@@ -159,7 +164,6 @@ class MainActivity : ComponentActivity() {
                             }
 
                             // 마이 페이지
-                            composable("mypage") { ContributorScreen(navController) }
                             composable("locationSelection") {
                                 LocationSelect(navController)
                             }
@@ -191,7 +195,9 @@ class MainActivity : ComponentActivity() {
                             composable("donationdetails") { DonationDetails(navController) }
                             composable("donationreceipt") { DonationReceipt(navController) }
                             composable("fundingdetails") { FundingDetails(navController) }
-                            composable("wishlist") { WishList(navController) }
+
+
+
 
                             composable("mycomment") { MyComment(navController) }
                             composable("myreview") { MyReview(navController) }
