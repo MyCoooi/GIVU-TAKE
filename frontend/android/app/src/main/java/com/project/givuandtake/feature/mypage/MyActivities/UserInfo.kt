@@ -2,6 +2,7 @@ package com.project.givuandtake.feature.mypage.MyActivities
 
 import android.util.Log
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -34,11 +35,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.project.givuandtake.R
 import com.project.givuandtake.core.apis.UserInfoApi
 import com.project.givuandtake.core.apis.UserInfoResponse
 import com.project.givuandtake.core.datastore.TokenManager
@@ -108,24 +111,44 @@ fun UserInfo(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 사용자 이미지 (사용자 아이콘 대신 이미지 사용)
+        // 사용자 이미지 (API에서 받은 프로필 이미지 URL 또는 기본 이미지 사용)
         Box(
             modifier = Modifier
-                .size(100.dp)
-                .clip(CircleShape)
+                .size(130.dp)
+                .clip(CircleShape) // CircleShape로 전체 박스 모양 설정
                 .align(Alignment.CenterHorizontally),
             contentAlignment = Alignment.Center
         ) {
-            AsyncImage(
-                model = "https://via.placeholder.com/150", // 여기에 실제 사용자 이미지 URL을 넣으세요
-                contentDescription = "User Image",
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-                    .background(Color.LightGray, CircleShape),
-                contentScale = ContentScale.Crop
-            )
+            val profileImageUrl = userInfo?.data?.profileImageUrl
+
+            if (profileImageUrl != null) {
+                // URL이 있으면 AsyncImage 사용
+                AsyncImage(
+                    model = profileImageUrl,
+                    contentDescription = "User Profile Image",
+                    modifier = Modifier
+                        .size(130.dp)
+                        .clip(CircleShape) // 이미지를 원으로 잘라줍니다.
+                        .background(Color.LightGray, CircleShape) // 배경색 적용
+                        .border(0.5.dp, Color.LightGray, CircleShape), // 테두리 추가
+                contentScale = ContentScale.Crop // 이미지를 원 안에 꽉 차도록 설정
+                )
+            } else {
+                // URL이 없으면 Image 사용하여 로컬 리소스를 불러옵니다
+                Image(
+                    painter = painterResource(id = R.drawable.hamo),
+                    contentDescription = "Default Profile Image",
+                    modifier = Modifier
+                        .size(130.dp)
+                        .clip(CircleShape) // 이미지를 원으로 자릅니다
+                        .background(Color.LightGray, CircleShape) // 배경색 적용
+                        .border(0.5.dp, Color.LightGray, CircleShape), // 테두리 추가
+                    contentScale = ContentScale.Crop // 이미지를 원 안에 꽉 차도록 설정
+                )
+            }
         }
+
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
