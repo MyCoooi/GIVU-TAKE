@@ -1,5 +1,6 @@
 package com.project.givuandtake.feature.mypage.MyActivities
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.google.gson.Gson
 import com.project.givuandtake.R
 import com.project.givuandtake.core.apis.UserInfoApi
 import com.project.givuandtake.core.apis.UserInfoResponse
@@ -50,7 +52,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 @Composable
-fun UserInfo(navController: NavController) {
+fun UserInfo(navController: NavController, userInfo: UserInfoResponse?, onUserInfoUpdate: (UserInfoResponse) -> Unit) {
     val context = LocalContext.current
     var userInfo by remember { mutableStateOf<UserInfoResponse?>(null) }
     val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
@@ -131,7 +133,7 @@ fun UserInfo(navController: NavController) {
                         .clip(CircleShape) // 이미지를 원으로 잘라줍니다.
                         .background(Color.LightGray, CircleShape) // 배경색 적용
                         .border(0.5.dp, Color.LightGray, CircleShape), // 테두리 추가
-                contentScale = ContentScale.Crop // 이미지를 원 안에 꽉 차도록 설정
+                    contentScale = ContentScale.Crop // 이미지를 원 안에 꽉 차도록 설정
                 )
             } else {
                 // URL이 없으면 Image 사용하여 로컬 리소스를 불러옵니다
@@ -193,7 +195,11 @@ fun UserInfo(navController: NavController) {
                     .background(Color(0xffFBFAFF))
                     .border(1.dp, Color(0XFFA093DE), RoundedCornerShape(20.dp))
                     .padding(vertical = 8.dp, horizontal = 16.dp)
-                    .clickable { /* 회원 정보 수정 로직 */ }
+                    .clickable {
+                        // userInfo 데이터를 JSON으로 변환 후 전달
+                        val userInfoJson = Uri.encode(Gson().toJson(userInfo))
+                        navController.navigate("userInfoUpdate/$userInfoJson")
+                    }
             ) {
                 Text(text = "회원정보 수정", fontSize = 14.sp, color = Color.Black)
             }
@@ -249,3 +255,4 @@ fun DrawLine() {
         )
     }
 }
+
