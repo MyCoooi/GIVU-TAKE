@@ -2,11 +2,10 @@ package com.accepted.givutake.user.client.service;
 
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
-import com.accepted.givutake.global.service.RegionService;
+import com.accepted.givutake.region.service.RegionService;
 import com.accepted.givutake.user.client.entity.Addresses;
 import com.accepted.givutake.user.client.model.AddressAddDto;
 import com.accepted.givutake.user.client.model.AddressDetailViewDto;
-import com.accepted.givutake.user.client.model.AddressViewDto;
 import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.service.UserService;
 import lombok.RequiredArgsConstructor;

@@ -1,10 +1,12 @@
-package com.accepted.givutake.global.repository;
+package com.accepted.givutake.region.repository;
 
-import com.accepted.givutake.global.entity.Region;
+import com.accepted.givutake.region.entity.Region;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
 
 @Repository
 public interface RegionRepository extends JpaRepository<Region, Integer> {
@@ -12,4 +14,10 @@ public interface RegionRepository extends JpaRepository<Region, Integer> {
 
     @Query("SELECT r.regionIdx FROM Region r WHERE r.sido LIKE CONCAT(:sido, '%') AND r.sigungu = :sigungu")
     Integer findRegionIdxBySidoAndSigungu(@Param("sido") String sido, @Param("sigungu") String sigungu);
+
+    @Query("SELECT DISTINCT r.sido FROM Region r")
+    List<String> findDistinctSido();
+
+    @Query("SELECT r.sigungu FROM Region r WHERE r.sido = :sido")
+    List<String> findSigunguBySido(@Param("sido") String sido);
 }

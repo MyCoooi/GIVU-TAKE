@@ -52,7 +52,9 @@ public class SecurityConfig {
                                 "/swagger-resources/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/government-fundings/*/review",
                                 "/api/government-fundings/*/comments",
-                                "/api/government-fundings/*/comments/*").permitAll()
+                                "/api/government-fundings/*/comments/*",
+                                "/api/regions/sido",
+                                "/api/regions/sigungu").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/users",
                                 "/api/users/password/code",
                                 "/api/users/password/code/verification").permitAll()

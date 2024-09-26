@@ -25,7 +25,9 @@ public class SignUpDto extends LoginDto {
 
     private LocalDate birth; // 사용자만 입력
 
-    private Integer regionIdx; // 수혜자만 입력
+    private String sido; // 수혜자만 입력
+    
+    private String sigungu; // 수혜자만 입력
 
     @Pattern(regexp = "^\\d{3}-\\d{3,4}-\\d{4}$", message = "휴대폰 번호 형식이 올바르지 않습니다.")
     private String mobilePhone;
@@ -46,7 +48,7 @@ public class SignUpDto extends LoginDto {
 
     private String socialSerialNum;
 
-    public Users toEntity() {
+    public Users toEntity(Integer regionIdx) {
         Users ret = Users.builder()
                 .name(this.name)
                 .email(this.email)
@@ -55,7 +57,7 @@ public class SignUpDto extends LoginDto {
                 .landlinePhone(this.landlinePhone)
                 .isMale(this.isMale)
                 .birth(this.birth)
-                .regionIdx(this.regionIdx)
+                .regionIdx(regionIdx)
                 .cardIdx(null)
                 .profileImageUrl(this.profileImageUrl)
                 .roles(this.roles)

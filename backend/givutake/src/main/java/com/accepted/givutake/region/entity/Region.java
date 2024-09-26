@@ -1,5 +1,6 @@
-package com.accepted.givutake.global.entity;
+package com.accepted.givutake.region.entity;
 
+import com.accepted.givutake.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
