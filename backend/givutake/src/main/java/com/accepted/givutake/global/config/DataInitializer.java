@@ -10,19 +10,22 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 @Component
 public class DataInitializer {
 
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
+    private final ExperienceVillage experienceVillage;
+    private final Region region;
 
     @Autowired
-    public DataInitializer(JdbcTemplate jdbcTemplate, DataSource dataSource) {
+    public DataInitializer(JdbcTemplate jdbcTemplate, DataSource dataSource, ExperienceVillage experienceVillage, Region region) {
         this.jdbcTemplate = jdbcTemplate;
         this.dataSource = dataSource;
+        this.experienceVillage = experienceVillage;
+        this.region = region;
+
     }
 
     @EventListener(ContextRefreshedEvent.class)
@@ -31,8 +34,11 @@ public class DataInitializer {
         if (!isDataInitialized()) {
             executeDataSql();
             markDataAsInitialized();
+            region.processRegionData();
+            experienceVillage.processExperienceVillageData();
         }
     }
+
 
     private boolean isDataInitialized() {
         try {
