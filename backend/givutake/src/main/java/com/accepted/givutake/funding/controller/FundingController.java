@@ -4,9 +4,9 @@ import com.accepted.givutake.funding.entity.CheerComments;
 import com.accepted.givutake.funding.entity.Fundings;
 import com.accepted.givutake.funding.model.*;
 import com.accepted.givutake.funding.service.CheerCommentService;
+import com.accepted.givutake.funding.service.FundingParticipantService;
 import com.accepted.givutake.funding.service.FundingReviewService;
 import com.accepted.givutake.funding.service.FundingService;
-import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.model.ResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +17,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,6 +29,7 @@ public class FundingController {
 
     private final CheerCommentService cheerCommentService;
     private final FundingService fundingService;
+    private final FundingParticipantService fundingParticipantService;
     private final FundingReviewService fundingReviewService;
 
     // ========= 펀딩 관련 ===========
@@ -49,7 +51,18 @@ public class FundingController {
     }
 
     // fundingIdx에 해당하는 펀딩 상세 조회
-//    @GetMapping("/{fundingIdx}")
+    @GetMapping("/{fundingIdx}")
+    public ResponseEntity<ResponseDto> getFundingByFundingIdx(@PathVariable int fundingIdx) {
+
+        Fundings savedFundings = fundingService.getFundingByFundingIdx(fundingIdx);
+        FundingDetailViewDto fundingDetailViewDto = FundingDetailViewDto.toDto(savedFundings);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(fundingDetailViewDto)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
 
     // jwt 토큰으로 펀딩 등록
     @PostMapping
@@ -211,6 +224,26 @@ public class FundingController {
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(modifiedFundingReviewDetailViewDto)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    //  ===== 펀딩 내역 관련 =====
+    // 일정 기간 동안의 자신의 펀딩 내역 조회
+    @GetMapping("/my-fundings")
+    public ResponseEntity<ResponseDto> getFundingParticipantsListByJwt(@AuthenticationPrincipal UserDetails userDetails, @RequestParam(required = false) LocalDate startDate, @RequestParam(required = false) LocalDate endDate) {
+        String email = userDetails.getUsername();
+
+        List<FundingParticipantViewDto> fundingParticipantViewDtoList =
+                fundingParticipantService.getFundingParticipantsListByEmail(email, startDate, endDate)
+                        .stream()
+                        .map(FundingParticipantViewDto::toDto)
+                        .collect(Collectors.toList());
+
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(fundingParticipantViewDtoList)
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
