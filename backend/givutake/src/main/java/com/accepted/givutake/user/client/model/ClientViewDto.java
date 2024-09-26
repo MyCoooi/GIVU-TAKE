@@ -1,10 +1,7 @@
-package com.accepted.givutake.user.common.model;
+package com.accepted.givutake.user.client.model;
 
 import com.accepted.givutake.user.common.entity.Users;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -12,7 +9,9 @@ import java.time.LocalDate;
 @Setter
 @ToString
 @Builder
-public class ResponseUserDto {
+@NoArgsConstructor
+@AllArgsConstructor
+public class ClientViewDto {
 
     private String email;
     private String name;
@@ -22,8 +21,8 @@ public class ResponseUserDto {
     private LocalDate birth;
     private String profileImageUrl;
 
-    public static ResponseUserDto toDto(Users users) {
-        return ResponseUserDto.builder()
+    public static ClientViewDto toDto(Users users) {
+        return ClientViewDto.builder()
                 .email(users.getEmail())
                 .name(users.getName())
                 .mobilePhone(users.getMobilePhone())

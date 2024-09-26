@@ -1,6 +1,7 @@
 package com.accepted.givutake.user.common.entity;
 
 import com.accepted.givutake.global.entity.BaseTimeEntity;
+import com.accepted.givutake.region.entity.Region;
 import com.accepted.givutake.user.common.enumType.Roles;
 import com.accepted.givutake.user.common.enumType.SocialType;
 import jakarta.persistence.*;
@@ -47,8 +48,9 @@ public class Users extends BaseTimeEntity {
     private LocalDate birth;
 
     // 수혜자만 해당
-    @Column(name = "region_idx", nullable = true)
-    private Integer regionIdx;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "region_idx", nullable = true)
+    private Region region;
 
     // 사용자만 해당
     @Column(name = "card_idx", nullable = true)

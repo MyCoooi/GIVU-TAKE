@@ -4,13 +4,11 @@ import com.accepted.givutake.global.model.ResponseDto;
 import com.accepted.givutake.user.client.entity.Addresses;
 import com.accepted.givutake.user.client.model.AddressAddDto;
 import com.accepted.givutake.user.client.model.AddressDetailViewDto;
-import com.accepted.givutake.user.client.model.AddressUpdateDto;
 import com.accepted.givutake.user.client.model.AddressViewDto;
 import com.accepted.givutake.user.client.service.ClientService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -32,10 +31,13 @@ public class ClientController {
     public ResponseEntity<ResponseDto> getAddressesByJwt(@AuthenticationPrincipal UserDetails userDetails) {
         String email = userDetails.getUsername();
 
-        List<AddressViewDto> savedAddressViewDtoList = clientService.getAddressesByEmail(email);
+        // AddressViewDto로 변환
+        List<AddressViewDto> addressViewDtoList = clientService.getAddressesByEmail(email).stream()
+                .map(AddressViewDto::toDto)
+                .collect(Collectors.toList());
 
         ResponseDto responseDto = ResponseDto.builder()
-                .data(savedAddressViewDtoList)
+                .data(addressViewDtoList)
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
@@ -59,21 +61,22 @@ public class ClientController {
     public ResponseEntity<ResponseDto> addAddressByJwt(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody AddressAddDto addressAddDto) {
         String email = userDetails.getUsername();
 
-        clientService.addAddressByEmail(email, addressAddDto);
+        Addresses savedAddresses = clientService.addAddressByEmail(email, addressAddDto);
+        AddressDetailViewDto addressDetailViewDto = AddressDetailViewDto.toDto(savedAddresses);
 
         ResponseDto responseDto = ResponseDto.builder()
-                .data(null)
+                .data(addressDetailViewDto)
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
     // jwt 토큰으로 주소 수정
-    @PatchMapping("/addresses")
-    public ResponseEntity<ResponseDto> modifyAddressByJwt(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody AddressUpdateDto addressUpdateDto) {
+    @PatchMapping("/addresses/{addressIdx}")
+    public ResponseEntity<ResponseDto> modifyAddressByJwt(@AuthenticationPrincipal UserDetails userDetails, @PathVariable int addressIdx, @Valid @RequestBody AddressAddDto addressAddDto) {
         String email = userDetails.getUsername();
 
-        AddressDetailViewDto addressDetailViewDto = clientService.modifyAddressByEmail(email, addressUpdateDto);
+        AddressDetailViewDto addressDetailViewDto = clientService.modifyAddressByEmail(email, addressIdx, addressAddDto);
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(addressDetailViewDto)
@@ -87,10 +90,11 @@ public class ClientController {
     public ResponseEntity<ResponseDto> deleteAddressByJwt(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("addressIdx") int addressIdx) {
         String email = userDetails.getUsername();
 
-        clientService.deleteAddressByEmail(email, addressIdx);
+        Addresses deletedAddresses = clientService.deleteAddressByEmail(email, addressIdx);
+        AddressDetailViewDto addressDetailViewDto = AddressDetailViewDto.toDto(deletedAddresses);
 
         ResponseDto responseDto = ResponseDto.builder()
-                .data(null)
+                .data(addressDetailViewDto)
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);

@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -60,7 +62,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionDto> handleValidationExceptions(MethodArgumentNotValidException exp) {
         // 여러 필드에서 유효성 검증이 실패했더라도, 첫 번째 오류에 대한 메세지만 반환
-        String message = exp.getBindingResult().getFieldError().getDefaultMessage();
+        String message = "";
+        FieldError fieldError = exp.getBindingResult().getFieldError();
+        if (fieldError == null) {
+            message = exp.getBindingResult().getAllErrors().stream()
+                    .findFirst()
+                    .map(ObjectError::getDefaultMessage)
+                    .orElse("유효성 검사 오류입니다."); // 기본 메시지 설정
+        }
+        else {
+            message = fieldError.getDefaultMessage();
+        }
 
         log.error("MethodArgumentNotValidException 발생: message = {}", message);
 

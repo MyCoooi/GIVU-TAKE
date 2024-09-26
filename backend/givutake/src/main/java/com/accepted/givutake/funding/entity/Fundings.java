@@ -44,6 +44,9 @@ public class Fundings extends BaseTimeEntity {
     @Column(name = "goal_money", nullable = false)
     private int goalMoney;
 
+    @Column(name = "total_money", nullable = false)
+    private int totalMoney;
+
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
@@ -58,4 +61,7 @@ public class Fundings extends BaseTimeEntity {
 
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
+
+    @Column(name = "state", nullable = false)
+    private byte state;
 }
