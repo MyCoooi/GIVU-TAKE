@@ -50,6 +50,8 @@ import com.project.givuandtake.feature.mypage.CustomerService.Announcement
 import com.project.givuandtake.feature.mypage.MyActivities.AddressBook
 import com.project.givuandtake.feature.mypage.MyActivities.AddressSearch
 import com.project.givuandtake.feature.mypage.MyActivities.CardBook
+import com.project.givuandtake.feature.mypage.MyActivities.CardCustomRegistration
+import com.project.givuandtake.feature.mypage.MyActivities.CardRegistration
 import com.project.givuandtake.feature.mypage.MyActivities.UserInfo
 import com.project.givuandtake.feature.mypage.MyActivities.UserInfoUpdate
 import com.project.givuandtake.feature.mypage.MyDonation.DonationDetails
@@ -227,6 +229,8 @@ class MainActivity : ComponentActivity() {
 
                             composable("addresssearch") { AddressSearch(navController) }
                             composable("addressmapsearch") { AddressMapSearch(navController)}
+                            composable("cardregistration") { CardRegistration(navController) }
+                            composable("cardcustomregistration") { CardCustomRegistration(navController) }
 
                             composable("announcement") { Announcement(navController) }
                             composable("faqpate") { FaqPage(navController) }
@@ -248,7 +252,9 @@ class MainActivity : ComponentActivity() {
                             currentDestination != "addressmapsearch" &&
                             currentDestination != "announcement" &&
                             currentDestination != "faqpate" &&
-                            currentDestination != "personalinquiry"
+                            currentDestination != "personalinquiry" &&
+                            currentDestination != "cardregistration" &&
+                            currentDestination != "cardcustomregistration"
                         ) {
                             BottomNavBar(navController, selectedItem) { newIndex ->
                                 selectedItem = newIndex
