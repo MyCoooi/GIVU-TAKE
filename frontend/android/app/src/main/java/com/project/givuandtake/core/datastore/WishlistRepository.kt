@@ -2,10 +2,7 @@ package com.project.givuandtake.core.datastore
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
-import com.project.givuandtake.core.data.WishlistItem
-import com.project.givuandtake.core.datastore.dataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
