@@ -77,4 +77,13 @@ public class OrderController {
                 .build();
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
+
+    @GetMapping("/donation")
+    public ResponseEntity<ResponseDto> getDonation(@AuthenticationPrincipal UserDetails userDetails) {
+        int data = orderService.calculateTotalOrderPrice();
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(data)
+                .build();
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
 }

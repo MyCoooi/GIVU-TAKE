@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.List;
 
 @Service
@@ -104,6 +105,11 @@ public class OrderService {
     public int countGift(int giftIdx){
         Gifts gift = giftRepository.findById(giftIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
         return orderRepository.countByGift(gift);
+    }
+
+    public int calculateTotalOrderPrice(){
+        int totalOrderPrice = Optional.ofNullable(orderRepository.getTotalOrderPrice()).orElse(0);
+        return totalOrderPrice;
     }
 
 }
