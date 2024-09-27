@@ -112,6 +112,8 @@ class MainActivity : ComponentActivity() {
                                     onBackClick = { navController.popBackStack() }
                                 )
                             }
+                            composable("payment") { PaymentScreen(navController) }
+
                             composable("attraction") { AttractionMain(navController, "영도") } // Navigate to AttractionMain
                             // 로그인 페이지
                             composable("auth") { LoginScreen(navController) }
