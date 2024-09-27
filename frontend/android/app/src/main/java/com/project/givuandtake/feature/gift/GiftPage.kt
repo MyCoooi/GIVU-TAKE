@@ -1,5 +1,6 @@
 package com.project.givuandtake.feature.gift.mainpage
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -60,10 +61,14 @@ fun GiftPage(navController: NavController, viewModel: GiftViewModel = viewModel(
     val cartItemCount by viewModel.cartItemCount.collectAsState()
     val wishlistItems by viewModel.wishlistItemsIds.collectAsState()
 
-    // 초기 데이터 삽입 (필요 시)
+    // API에서 데이터를 불러오는 로직 추가
     LaunchedEffect(Unit) {
-        viewModel.insertInitialGiftDetails()
+        val Bearer_Token = "eyJhbGciOiJIUzUxMiJ9.eyJhdXRoIjoiUk9MRV9DT1JQT1JBVElPTiIsInN1YiI6ImJ1c2FuQGJ1c2FuLmNvbSIsImlzcyI6ImNvbS5hY2NlcHRlZC5naXZ1dGFrZSIsIm5iZiI6MTcyNzMzMjk1NCwiaWF0IjoxNzI3MzMyOTU0LCJleHAiOjE3MzQ3ODQ5NTQsImp0aSI6ImQ2ZDMyYzI4LTg1NzMtNGZkNC04OWUxLWMxNjIzNDY4YzEzOCJ9.-hyiFcVfR7IXUwiybtECAlwPfnMI14d7EjYRgUaJkaT94QITm1iIO-_nMrWoKTMDwFsGHjsZXB1eTzGqhshcaQ"
+        val token = "Bearer $Bearer_Token" // 실제 Bearer 토큰
+        Log.d("ApiCall", "Authorization 토큰:  $token")
+        viewModel.fetchGiftsFromApi(token) // API 호출
     }
+    Log.d("giftlist","${allProducts}")
 
     // 장바구니 아이템을 상태로 저장
     val cartItemsFlow = getCartItems(context) // getCartItems는 DataStore나 DB에서 장바구니 정보를 불러오는 함수
@@ -397,7 +402,7 @@ fun ProductGrid(
                     verticalArrangement = Arrangement.spacedBy(16.dp) // 세로 간격 설정
                 ) {
                     rowProducts.forEach { product ->
-                        val isFavorite =  wishlistItems.contains(product.id.toString()) // 찜 상태 확인
+                        val isFavorite =  wishlistItems.contains(product.giftIdx.toString()) // 찜 상태 확인
                         ProductCard(
                             product = product,
                             isFavorite = isFavorite,
@@ -420,15 +425,14 @@ fun ProductCard(
     onFavoriteToggle: (GiftDetail) -> Unit,
     modifier: Modifier = Modifier // modifier 추가
 ) {
+    val location = "${product.corporationSido} ${product.corporationSigungu}"
     Card(
         shape = RoundedCornerShape(16.dp), // 카드 모서리를 둥글게 설정
         modifier = modifier
             .padding(8.dp)
             .fillMaxWidth()
             .clickable {
-                navController.navigate(
-                    "gift_page_detail/${product.id}/${product.name}/${product.price}/${product.imageUrl}/${product.location}"
-                )
+                navController.navigate("gift_page_detail/${product.giftIdx}")
             },
         elevation = 4.dp
     ) {
@@ -467,7 +471,7 @@ fun ProductCard(
 
             // 상품명과 가격
             Text(
-                text = product.name,
+                text = product.giftName,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp, // 텍스트 크기를 조금 줄임
                 modifier = Modifier.padding(bottom = 4.dp)
@@ -490,7 +494,7 @@ fun ProductCard(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = product.location,
+                    text = location,
                     fontSize = 12.sp,
                     color = Color.Gray
                 )
