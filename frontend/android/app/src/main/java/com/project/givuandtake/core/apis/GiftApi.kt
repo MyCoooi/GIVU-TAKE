@@ -1,6 +1,7 @@
 package com.project.givuandtake.core.apis
 
 import com.project.givuandtake.core.data.GiftDetail
+import com.project.givuandtake.core.data.GiftDetailResponse
 import com.project.givuandtake.core.data.GiftResponse
 import retrofit2.Call
 import retrofit2.Response
@@ -15,9 +16,9 @@ interface GiftApiService {
     ): Call<GiftResponse> // API 응답으로 받을 데이터 타입
 
 
-//    @GET("/api/gifts/{giftIdx}")
-//    suspend fun getGiftDetail(
-//        @Header("Authorization") token: String,
-//        @Path("giftIdx") giftIdx: Int
-//    ): Response<GiftDetailResponse> // GiftDetailResponse는 응답 데이터를 위한 데이터 클래스
+    @GET("/api/gifts/{giftIdx}")
+    suspend fun getGiftDetail(
+        @Header("Authorization") token: String,
+        @Path("giftIdx") giftIdx: Int
+    ): Response<GiftDetailResponse> // GiftDetailResponse는 응답 데이터를 위한 데이터 클래스
 }

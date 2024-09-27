@@ -1,4 +1,4 @@
-package com.project.givuandtake.feature.gift.mainpage
+package com.project.givuandtake.feature.gift
 
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
@@ -44,8 +44,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
 
 import com.project.givuandtake.core.data.GiftDetail
+import com.project.givuandtake.core.datastore.TokenDataStore
 import com.project.givuandtake.core.datastore.getCartItems
 import com.project.givuandtake.feature.gift.GiftViewModel
 import com.project.givuandtake.feature.gift.addToFavorites
@@ -61,10 +63,15 @@ fun GiftPage(navController: NavController, viewModel: GiftViewModel = viewModel(
     val cartItemCount by viewModel.cartItemCount.collectAsState()
     val wishlistItems by viewModel.wishlistItemsIds.collectAsState()
 
+    val tokenDataStore = TokenDataStore(context)
+    val Bearer_Token = "eyJhbGciOiJIUzUxMiJ9.eyJhdXRoIjoiUk9MRV9DT1JQT1JBVElPTiIsInN1YiI6ImJ1c2FuQGJ1c2FuLmNvbSIsImlzcyI6ImNvbS5hY2NlcHRlZC5naXZ1dGFrZSIsIm5iZiI6MTcyNzMzMjk1NCwiaWF0IjoxNzI3MzMyOTU0LCJleHAiOjE3MzQ3ODQ5NTQsImp0aSI6ImQ2ZDMyYzI4LTg1NzMtNGZkNC04OWUxLWMxNjIzNDY4YzEzOCJ9.-hyiFcVfR7IXUwiybtECAlwPfnMI14d7EjYRgUaJkaT94QITm1iIO-_nMrWoKTMDwFsGHjsZXB1eTzGqhshcaQ"
+    val token = "Bearer $Bearer_Token" // 실제 Bearer 토큰
+
     // API에서 데이터를 불러오는 로직 추가
     LaunchedEffect(Unit) {
-        val Bearer_Token = "eyJhbGciOiJIUzUxMiJ9.eyJhdXRoIjoiUk9MRV9DT1JQT1JBVElPTiIsInN1YiI6ImJ1c2FuQGJ1c2FuLmNvbSIsImlzcyI6ImNvbS5hY2NlcHRlZC5naXZ1dGFrZSIsIm5iZiI6MTcyNzMzMjk1NCwiaWF0IjoxNzI3MzMyOTU0LCJleHAiOjE3MzQ3ODQ5NTQsImp0aSI6ImQ2ZDMyYzI4LTg1NzMtNGZkNC04OWUxLWMxNjIzNDY4YzEzOCJ9.-hyiFcVfR7IXUwiybtECAlwPfnMI14d7EjYRgUaJkaT94QITm1iIO-_nMrWoKTMDwFsGHjsZXB1eTzGqhshcaQ"
-        val token = "Bearer $Bearer_Token" // 실제 Bearer 토큰
+        // 토큰 저장
+        tokenDataStore.saveToken(token)
+        // 로그로 토큰 확인
         Log.d("ApiCall", "Authorization 토큰:  $token")
         viewModel.fetchGiftsFromApi(token) // API 호출
     }
@@ -443,10 +450,12 @@ fun ProductCard(
                 .padding(8.dp), // 패딩을 조금 더 좁게 설정
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            // 상품 설명
+            val thumbnailUrl = "${product.giftThumbnail}"  // 썸네일 URL과 설명 파싱
             // 상품 이미지와 찜 아이콘을 같은 Box에 배치
             Box(modifier = Modifier.fillMaxWidth()) {
                 Image(
-                    painter = painterResource(id = R.drawable.blank), // 상품 이미지
+                    painter = painterResource(R.drawable.placeholder), // 상품 이미지
                     contentDescription = "Product Image",
                     modifier = Modifier
                         .fillMaxWidth()

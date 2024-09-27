@@ -32,8 +32,9 @@ import com.project.givuandtake.core.data.CartItem
 import com.project.givuandtake.core.data.GiftDetail
 import com.project.givuandtake.core.datastore.getCartItems
 import com.project.givuandtake.core.datastore.saveCartItems
+import com.project.givuandtake.feature.gift.CartIcon
 import com.project.givuandtake.feature.gift.GiftViewModel
-import com.project.givuandtake.feature.gift.mainpage.CartIcon
+
 import com.project.givuandtake.feature.mypage.MyDonation.WishlistViewModel
 import kotlinx.coroutines.launch
 

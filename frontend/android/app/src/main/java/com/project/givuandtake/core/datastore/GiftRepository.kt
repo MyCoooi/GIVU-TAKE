@@ -1,9 +1,12 @@
 package com.project.givuandtake.core.datastore
 
 import android.content.Context
+import android.util.Log
 import com.project.givuandtake.core.apis.RetrofitClient
 import com.project.givuandtake.core.data.DatabaseProvider
 import com.project.givuandtake.core.data.GiftDetail
+import com.project.givuandtake.core.data.GiftDetailData
+import com.project.givuandtake.core.data.GiftDetailResponse
 import com.project.givuandtake.core.data.GiftResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -61,6 +64,26 @@ class GiftRepository(private val context: Context) {
             }
         }
     }
+
+    // 상품 상세 정보 API에서 가져오기
+    suspend fun fetchGiftDetailFromApi(token: String, giftIdx: Int): GiftDetailData? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = RetrofitClient.giftApiService.getGiftDetail(token, giftIdx)
+                if (response.isSuccessful) {
+                    response.body()?.data
+                } else {
+                    Log.e("GiftRepository", "API 호출 실패: ${response.code()}")
+                    null
+                }
+            } catch (e: Exception) {
+                Log.e("GiftRepository", "API 호출 오류: ${e.message}", e)
+                null
+            }
+        }
+    }
+
+
 
     // Room에 데이터를 저장
     private suspend fun insertGiftDetails(giftDetails: List<GiftDetail>) {
