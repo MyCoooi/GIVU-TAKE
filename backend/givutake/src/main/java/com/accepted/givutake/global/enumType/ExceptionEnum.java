@@ -69,6 +69,7 @@ public enum ExceptionEnum {
     PASSWORD_MISMATCH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU6011", "비밀번호가 일치하지 않습니다."),
     REFRESHTOKEN_MISMATCH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU6012", "토큰 정보가 일치하지 않습니다."),
     EMAILCODE_MISMATCH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU6013", "인증 코드가 일치하지 않습니다."),
+    ADMING_SIGNUP_CODE_MISMATCH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU6014", "관리자 회원가입을 위한 확인 코드가 일치하지 않습니다."),
 
     NOT_ALLOWED_LAST_ADDRESS_DELETION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU7020", "마지막 주소 정보는 삭제할 수 없습니다."),
     NOT_ALLOWED_FUNDING_REVIEW_INSERTION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU7030", "이미 펀딩 후기가 작성 되어 있습니다."),

@@ -45,7 +45,8 @@ public class SecurityConfig {
                                 "/api/government-fundings/*")
                                 .hasRole("CORPORATION")
                         .requestMatchers(HttpMethod.DELETE, "/api/government-fundings/*",
-                                "/api/users").hasRole("CORPORATION")
+                                "/api/users").hasRole("CORPORATIONYET")
+                        .requestMatchers(HttpMethod.DELETE, "api/users").hasRole("CORPORATION_YET")
                         .requestMatchers(HttpMethod.DELETE,"/api/users").hasRole("CLIENT")
                         .requestMatchers("/",
                                 "/api/auth",
@@ -61,6 +62,7 @@ public class SecurityConfig {
                                 "/api/government-fundings/*",
                                 "/api/experience-village").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/users",
+                                "/api/admin",
                                 "/api/users/password/code",
                                 "/api/users/password/code/verification").permitAll()
                         .requestMatchers(HttpMethod.PATCH,"/api/users/password").permitAll()
