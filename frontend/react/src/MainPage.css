@@ -1,6 +1,6 @@
 .main-page {
   background-image: url('/background.jpg'); /* public 폴더에 있는 배경 이미지 */
-  background-size: cover; /* 이미지를 화면에 맞게 */
+  background-size:cover;
   background-position: center; /* 중앙에 정렬 */
   background-repeat: no-repeat; /* 이미지 반복을 방지 */
   height: 100vh; /* 전체 화면 높이를 차지 */
@@ -13,7 +13,7 @@
 
 .content {
   color: white;
-  max-width: 1000px; /* 텍스트 영역의 최대 너비 제한 */
+  max-width: 900px; /* 텍스트 영역의 최대 너비 제한 */
 }
 
 .brand {
