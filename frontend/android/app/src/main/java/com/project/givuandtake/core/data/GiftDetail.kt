@@ -78,3 +78,36 @@ object DatabaseProvider {
         }
     }
 }
+
+
+data class GiftDetailResponse(
+    val success: Boolean,
+    val data: GiftDetailData
+)
+
+data class GiftDetailData(
+    val giftIdx: Int,               // 상품 ID
+    val giftName: String,           // 상품 이름
+    val corporationIdx: Int,        // 회사 ID
+    val corporationName: String,    // 회사 이름
+    val corporationSido: String,    // 회사 소재 시/도
+    val corporationSigungu: String, // 회사 소재 시/군/구
+    val categoryIdx: Int,           // 카테고리 ID
+    val categoryName: String,       // 카테고리 이름
+    val giftThumbnail: String?,     // 상품 썸네일 URL
+    val giftContent: String?,       // 상품 설명
+    val price: Int,                 // 상품 가격
+    val createdDate: String?,       // 생성 날짜
+    val modifiedDate: String?       // 수정 날짜
+) {
+    // 커스텀 getter로 상품의 전체 주소를 반환
+    val location: String
+        get() = "$corporationSido $corporationSigungu"
+
+    // 커스텀 getter로 상품 설명을 파싱하여 반환 (이미지 URL, 텍스트 분리)
+    val giftContentDetails: Pair<String?, String?>
+        get() {
+            val parts = giftContent?.split(",") ?: listOf(null, null)
+            return Pair(parts.getOrNull(0), parts.getOrNull(1))
+        }
+}
