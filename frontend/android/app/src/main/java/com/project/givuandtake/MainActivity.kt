@@ -25,11 +25,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.givuandtake.FundingMainPage
+import com.google.gson.Gson
 import com.project.givuandtake.auth.LoginScreen
 import com.project.givuandtake.auth.SignupStep1
 import com.project.givuandtake.auth.SignupStep2
 import com.project.givuandtake.auth.SignupStep3
 import com.project.givuandtake.auth.SignupViewModel
+import com.project.givuandtake.core.apis.UserInfoResponse
 import com.project.givuandtake.core.data.CartItem
 import com.project.givuandtake.feature.attraction.FestivalPage
 import com.project.givuandtake.feature.attraction.LocationSelect
@@ -47,6 +49,7 @@ import com.project.givuandtake.feature.mypage.MyActivities.AddressBook
 import com.project.givuandtake.feature.mypage.MyActivities.AddressSearch
 import com.project.givuandtake.feature.mypage.MyActivities.CardBook
 import com.project.givuandtake.feature.mypage.MyActivities.UserInfo
+import com.project.givuandtake.feature.mypage.MyActivities.UserInfoUpdate
 import com.project.givuandtake.feature.mypage.MyDonation.DonationDetails
 import com.project.givuandtake.feature.mypage.MyDonation.DonationReceipt
 import com.project.givuandtake.feature.mypage.MyDonation.FundingDetails
@@ -78,6 +81,7 @@ class MainActivity : ComponentActivity() {
                 val cartItems = remember { mutableStateOf(listOf<CartItem>()) } // 장바구니 상태
                 val currentBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = currentBackStackEntry?.destination?.route
+
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -202,7 +206,11 @@ class MainActivity : ComponentActivity() {
 
                             composable("addressbook") { AddressBook(navController) }
                             composable("cardbook") { CardBook(navController) }
+
                             composable("userinfo") { UserInfo(navController) }
+                            composable("userinfoupdate") { UserInfoUpdate(navController) }
+
+
                             composable("addresssearch") { AddressSearch(navController) }
                             composable("addressmapsearch") { AddressMapSearch(navController)}
 
