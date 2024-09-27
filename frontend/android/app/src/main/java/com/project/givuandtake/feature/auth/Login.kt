@@ -219,6 +219,7 @@ fun LoginScreen(navController: NavController) {
                         text = "비밀번호 찾기",
                         color = Color.Gray,
                         modifier = Modifier.clickable {
+                            navController.navigate("find_password")
                         }
                     )
                     Text(
