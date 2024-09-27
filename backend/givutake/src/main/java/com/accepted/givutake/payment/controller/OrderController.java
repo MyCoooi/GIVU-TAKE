@@ -54,30 +54,32 @@ public class OrderController {
     public String payCompleted(
             @RequestParam("email") String email,
             @RequestParam("pg_token") String pgToken,
-            @RequestParam("orderIdx") int orderIdx
+            @RequestParam("orderIdx") int orderIdx,
+            @RequestParam("type") String type
             ) {
-        System.out.println("asdfawsdfasdfasdfasdfasdfasdfasdfasdfasdfasdf");
 
         String tid = SessionUtils.getStringAttributeValue("tid");
         log.info("결제승인 요청을 인증하는 토큰: " + pgToken);
         log.info("결제 고유번호: " + tid);
 
-        ApproveResponse approveResponse = kaKaoPayService.payApprove(email, orderIdx,tid, pgToken);
+        ApproveResponse approveResponse = kaKaoPayService.payApprove(email, orderIdx,tid, pgToken, type);
 
         return "성공";
     }
 
     @GetMapping("/cancel")
     public String payCancel(@RequestParam("email") String email,
-                            @RequestParam("orderIdx") int orderIdx) {
-        orderService.deleteOrder(email, orderIdx);
+                            @RequestParam("orderIdx") int orderIdx,
+                            @RequestParam("type") String type) {
+        if(type.equals("Gift"))orderService.deleteOrder(email, orderIdx);
         return "취소";
     }
 
     @GetMapping("/fail")
     public String payFail(@RequestParam("email") String email,
-                          @RequestParam("orderIdx") int orderIdx) {
-        orderService.deleteOrder(email, orderIdx);
+                          @RequestParam("orderIdx") int orderIdx,
+                          @RequestParam("type") String type) {
+        if(type.equals("Gift"))orderService.deleteOrder(email, orderIdx);
         return "실패";
     }
 
@@ -86,9 +88,8 @@ public class OrderController {
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody CreateOrderDto request) {
         Orders order = orderService.createOrder(userDetails.getUsername(), request);
-        ReadyResponse readyResponse = kaKaoPayService.payReady(userDetails.getUsername(), order.getOrderIdx(), request);
+        ReadyResponse readyResponse = kaKaoPayService.payReady(userDetails.getUsername(), order.getOrderIdx(), "Gift",request);
         SessionUtils.addAttribute("tid", readyResponse.getTid());
-        System.out.println(readyResponse);
         return readyResponse;
     }
 
