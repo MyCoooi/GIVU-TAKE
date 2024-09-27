@@ -39,6 +39,7 @@ import com.project.givuandtake.core.data.CartItem
 import com.project.givuandtake.feature.attraction.FestivalPage
 import com.project.givuandtake.feature.attraction.LocationSelect
 import com.project.givuandtake.feature.attraction.TripPage
+import com.project.givuandtake.feature.auth.FindPassword
 import com.project.givuandtake.feature.funding.navigation.MainFundingCard
 import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.gift.CartPage
@@ -114,6 +115,7 @@ class MainActivity : ComponentActivity() {
                             composable("attraction") { AttractionMain(navController, "영도") } // Navigate to AttractionMain
                             // 로그인 페이지
                             composable("auth") { LoginScreen(navController) }
+                            composable("find_password") { FindPassword(navController) }
                             // 회원가입 페이지
                             composable("signup_step1") { SignupStep1(navController, signupViewModel) }
                             composable("signup_step2") { SignupStep2(navController, signupViewModel) }
