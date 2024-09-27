@@ -40,7 +40,8 @@ import com.project.givuandtake.feature.auth.FindPassword
 import com.project.givuandtake.feature.funding.navigation.MainFundingCard
 import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.gift.CartPage
-import com.project.givuandtake.feature.gift.mainpage.GiftPage
+import com.project.givuandtake.feature.gift.GiftPage
+import com.project.givuandtake.feature.gift.GiftPageDetail
 import com.project.givuandtake.feature.mainpage.MainPage
 import com.project.givuandtake.feature.mypage.MyPageScreen
 import com.project.givuandtake.feature.mypage.CustomerService.FaqPage
@@ -59,7 +60,6 @@ import com.project.givuandtake.feature.mypage.MyDonation.WishlistPage
 //import com.project.givuandtake.feature.mypage.MyDonation.WishList
 import com.project.givuandtake.feature.mypage.MyManagement.MyComment
 import com.project.givuandtake.feature.mypage.MyManagement.MyReview
-import com.project.givuandtake.feature.navigation.addGiftPageDetailRoute
 import com.project.givuandtake.feature.payment.KakaoPayManager
 import com.project.givuandtake.feature.payment.PaymentResultPage
 import com.project.givuandtake.feature.payment.PaymentSuccessPage
@@ -123,8 +123,20 @@ class MainActivity : ComponentActivity() {
                                 GiftPage(navController = navController) // cartItems는 MutableState로 전달
                             }
 
-                            // 기프트 상세 페이지
-                            addGiftPageDetailRoute(navController, cartItems) // cartItems는 MutableState로 전달
+                            composable(
+                                route = "gift_page_detail/{giftIdx}",
+                                arguments = listOf(navArgument("giftIdx") { type = NavType.IntType })
+                            ) { backStackEntry ->
+                                val giftIdx = backStackEntry.arguments?.getInt("giftIdx") ?: 0
+                                val cartItems = remember { mutableStateOf(emptyList<CartItem>()) }
+
+                                // GiftPageDetail 호출, 필요한 파라미터를 넘김
+                                GiftPageDetail(
+                                    giftIdx = giftIdx,
+                                    cartItems = cartItems,
+                                    navController = navController,
+                                )
+                            }
 
                             // 장바구니 페이지
                             composable("cart_page") {

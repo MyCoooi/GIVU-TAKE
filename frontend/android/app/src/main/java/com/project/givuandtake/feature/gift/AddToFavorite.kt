@@ -16,12 +16,12 @@ suspend fun addToFavorites(context: Context, giftDetail: GiftDetail) {
         // 기존 찜 목록을 불러와 MutableSet으로 변환
         val favorites = preferences[FavoriteKeys.FAVORITES]?.toMutableSet() ?: mutableSetOf()
 
-        if (favorites.contains(giftDetail.id.toString())) {
+        if (favorites.contains(giftDetail.giftIdx.toString())) {
             // 이미 찜한 상품이면 제거
-            favorites.remove(giftDetail.id.toString())
+            favorites.remove(giftDetail.giftIdx.toString())
         } else {
             // 찜한 상품 추가
-            favorites.add(giftDetail.id.toString())
+            favorites.add(giftDetail.giftIdx.toString())
         }
 
         // 수정된 찜 목록을 다시 저장
