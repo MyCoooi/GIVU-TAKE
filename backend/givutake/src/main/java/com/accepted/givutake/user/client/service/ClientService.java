@@ -1,5 +1,9 @@
 package com.accepted.givutake.user.client.service;
 
+import com.accepted.givutake.funding.entity.FundingParticipants;
+import com.accepted.givutake.funding.service.FundingParticipantService;
+import com.accepted.givutake.gift.model.OrderDto;
+import com.accepted.givutake.gift.service.OrderService;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.region.service.RegionService;
@@ -13,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -24,6 +29,8 @@ public class ClientService {
     private final AddressService addressService;
     private final UserService userService;
     private final RegionService regionService;
+    private final OrderService orderService;
+    private final FundingParticipantService fundingParticipantService;
 
     // 아이디가 email인 사용자의 모든 주소 조회
     public List<Addresses> getAddressesByEmail(String email) {
@@ -127,5 +134,19 @@ public class ClientService {
 
         // 4. 삭제
         return addressService.deleteAddressByAddressIdx(savedAddresses);
+    }
+
+    // ===== 기부금 영수증 관련 ===========
+    // 이메일로 기부금 영수증 보내기
+    public void sendEmailDonationReceipt(String email) {
+        // 1. DB에서 유저 조회
+        UserDto savedUserDto = userService.getUserByEmail(email);
+
+        // 2. 사용자의 펀딩 내역 가져오기(현재 연도 기록만)
+        int nowYear = LocalDate.now().getYear();
+        List<FundingParticipants> fundingParticipantsList = fundingParticipantService.getFundingParticipantsListByEmail(email, LocalDate.of(nowYear, 1, 1), LocalDate.of(nowYear, 12, 31));
+
+        // 3. 답례품 구매 내역 가져오기
+//        List<>
     }
 }

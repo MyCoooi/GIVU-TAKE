@@ -3,6 +3,9 @@ package com.accepted.givutake.user.client.controller;
 import com.accepted.givutake.funding.model.FundingParticipantViewDto;
 import com.accepted.givutake.funding.service.FundingParticipantService;
 import com.accepted.givutake.global.model.ResponseDto;
+import com.accepted.givutake.pdf.DonationParticipantsDto;
+import com.accepted.givutake.pdf.DonationReceiptFormDto;
+import com.accepted.givutake.pdf.PdfService;
 import com.accepted.givutake.user.client.entity.Addresses;
 import com.accepted.givutake.user.client.model.AddressAddDto;
 import com.accepted.givutake.user.client.model.AddressDetailViewDto;
@@ -137,6 +140,21 @@ public class ClientController {
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(map)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // === 기부금 영수증 관련 =====
+    // 이메일로 기부금 영수증 보내기
+    @GetMapping("/donation-receipt")
+    public ResponseEntity<ResponseDto> sendEmailDonationReceipt(@AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+        
+        clientService.sendEmailDonationReceipt(email);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(null)
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
