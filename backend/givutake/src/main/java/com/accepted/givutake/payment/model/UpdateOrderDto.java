@@ -1,4 +1,4 @@
-package com.accepted.givutake.gift.model;
+package com.accepted.givutake.payment.model;
 
 import com.accepted.givutake.gift.enumType.DeliveryStatus;
 import jakarta.validation.constraints.NotNull;

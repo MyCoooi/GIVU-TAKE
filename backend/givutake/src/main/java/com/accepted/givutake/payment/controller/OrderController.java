@@ -1,12 +1,14 @@
-package com.accepted.givutake.gift.controller;
+package com.accepted.givutake.payment.controller;
 
-import com.accepted.givutake.gift.model.CreateOrderDto;
-import com.accepted.givutake.gift.model.OrderDto;
-import com.accepted.givutake.gift.model.UpdateOrderDto;
-import com.accepted.givutake.gift.service.OrderService;
+import com.accepted.givutake.payment.entity.Orders;
+import com.accepted.givutake.payment.model.*;
+import com.accepted.givutake.payment.service.KaKaoPayService;
+import com.accepted.givutake.payment.service.OrderService;
 import com.accepted.givutake.global.model.ResponseDto;
+import com.accepted.givutake.payment.utils.SessionUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,9 +21,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/purchases")
 @CrossOrigin
+@Slf4j
 public class OrderController {
 
     private final OrderService orderService;
+    private final KaKaoPayService kaKaoPayService;
 
     @GetMapping
     public ResponseEntity<ResponseDto> getOrders(
@@ -46,15 +50,46 @@ public class OrderController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
+    @GetMapping("/completed")
+    public String payCompleted(
+            @RequestParam("email") String email,
+            @RequestParam("pg_token") String pgToken,
+            @RequestParam("orderIdx") int orderIdx
+            ) {
+        System.out.println("asdfawsdfasdfasdfasdfasdfasdfasdfasdfasdfasdf");
+
+        String tid = SessionUtils.getStringAttributeValue("tid");
+        log.info("결제승인 요청을 인증하는 토큰: " + pgToken);
+        log.info("결제 고유번호: " + tid);
+
+        ApproveResponse approveResponse = kaKaoPayService.payApprove(email, orderIdx,tid, pgToken);
+
+        return "성공";
+    }
+
+    @GetMapping("/cancel")
+    public String payCancel(@RequestParam("email") String email,
+                            @RequestParam("orderIdx") int orderIdx) {
+        orderService.deleteOrder(email, orderIdx);
+        return "취소";
+    }
+
+    @GetMapping("/fail")
+    public String payFail(@RequestParam("email") String email,
+                          @RequestParam("orderIdx") int orderIdx) {
+        orderService.deleteOrder(email, orderIdx);
+        return "실패";
+    }
+
     @PostMapping
-    public ResponseEntity<ResponseDto> createOrder(
+    public @ResponseBody ReadyResponse createOrder(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody CreateOrderDto request) {
-        orderService.createOrder(userDetails.getUsername(), request);
-        ResponseDto responseDto = ResponseDto.builder()
-                .data(null)
-                .build();
-        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+        Orders order = orderService.createOrder(userDetails.getUsername(), request);
+        ReadyResponse readyResponse = kaKaoPayService.payReady(userDetails.getUsername(), order.getOrderIdx(), request);
+        SessionUtils.addAttribute("tid", readyResponse.getTid());
+        System.out.println(readyResponse);
+        return readyResponse;
     }
 
     @PatchMapping("/{orderIdx}")

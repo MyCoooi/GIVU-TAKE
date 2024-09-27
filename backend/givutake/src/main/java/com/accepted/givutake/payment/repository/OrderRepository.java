@@ -1,7 +1,7 @@
-package com.accepted.givutake.gift.repository;
+package com.accepted.givutake.payment.repository;
 
 import com.accepted.givutake.gift.entity.Gifts;
-import com.accepted.givutake.gift.entity.Orders;
+import com.accepted.givutake.payment.entity.Orders;
 import com.accepted.givutake.user.common.entity.Users;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
