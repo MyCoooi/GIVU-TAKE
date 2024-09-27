@@ -5,14 +5,16 @@ import com.accepted.givutake.user.admin.model.AdminSignUpDto;
 import com.accepted.givutake.user.admin.model.AdminUserViewDto;
 import com.accepted.givutake.user.admin.service.AdminService;
 import com.accepted.givutake.user.common.entity.Users;
+import com.accepted.givutake.user.corporation.model.CorporationViewDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -33,6 +35,24 @@ public class AdminController {
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+    }
+
+    // 조건에 맞는 수혜자 정보 조회
+    @GetMapping("/corporations")
+    public ResponseEntity<ResponseDto> getCorporations(@RequestParam(required = false) Character isApproved,
+                                                       @RequestParam(required = false, defaultValue = "0") int pageNo,
+                                                       @RequestParam(required = false, defaultValue = "10") int pageSize) {
+
+        List<CorporationViewDto> corporationViewDtoList = adminService.getCorporation(isApproved, pageNo, pageSize)
+                .stream()
+                .map(CorporationViewDto::toDto)
+                .collect(Collectors.toList());
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(corporationViewDtoList)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
 }

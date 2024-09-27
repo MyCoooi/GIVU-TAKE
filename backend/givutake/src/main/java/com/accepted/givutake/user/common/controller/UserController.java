@@ -8,7 +8,7 @@ import com.accepted.givutake.user.client.model.ClientViewDto;
 import com.accepted.givutake.user.common.enumType.Roles;
 import com.accepted.givutake.user.common.model.*;
 import com.accepted.givutake.user.common.service.UserService;
-import com.accepted.givutake.user.corporation.model.CorporationViewDto;
+import com.accepted.givutake.user.corporation.model.CorporationDetailViewDto;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -61,7 +61,7 @@ public class  UserController {
             responseDto.setData(clientViewDto);
         }
         else if (savedUserDto.getRoles() == Roles.ROLE_CORPORATION || savedUserDto.getRoles() == Roles.ROLE_CORPORATIONYET) {
-            CorporationViewDto corporationViewDto = savedUserDto.toCorporationViewDto();
+            CorporationDetailViewDto corporationViewDto = savedUserDto.toCorporationViewDto();
             responseDto.setData(corporationViewDto);
         }
 
@@ -111,7 +111,7 @@ public class  UserController {
             responseDto.setData(clientViewDto);
         }
         else if (savedUserDto.getRoles() == Roles.ROLE_CORPORATION || savedUserDto.getRoles() == Roles.ROLE_CORPORATIONYET) {
-            CorporationViewDto corporationViewDto = savedUserDto.toCorporationViewDto();
+            CorporationDetailViewDto corporationViewDto = savedUserDto.toCorporationViewDto();
             responseDto.setData(corporationViewDto);
         }
 

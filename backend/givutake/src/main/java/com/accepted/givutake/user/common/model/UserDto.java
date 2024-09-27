@@ -5,7 +5,7 @@ import com.accepted.givutake.user.client.model.ClientViewDto;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.enumType.Roles;
 import com.accepted.givutake.user.common.enumType.SocialType;
-import com.accepted.givutake.user.corporation.model.CorporationViewDto;
+import com.accepted.givutake.user.corporation.model.CorporationDetailViewDto;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -87,8 +87,8 @@ public class UserDto {
                 .build();
     }
 
-    public CorporationViewDto toCorporationViewDto() {
-        return CorporationViewDto.builder()
+    public CorporationDetailViewDto toCorporationViewDto() {
+        return CorporationDetailViewDto.builder()
                 .email(this.email)
                 .name(this.name)
                 .mobilePhone(this.mobilePhone)

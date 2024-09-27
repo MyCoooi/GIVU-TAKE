@@ -36,7 +36,7 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 // 경로별 인가 작업
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/users/client/**").hasRole("CLIENT")
+                        .requestMatchers(HttpMethod.GET, "/api/corporations").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST,
                                 "/api/government-fundings",
                                 "/api/government-fundings/*/review")
@@ -47,6 +47,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/government-fundings/*",
                                 "/api/users").hasRole("CORPORATIONYET")
                         .requestMatchers(HttpMethod.DELETE, "api/users").hasRole("CORPORATION_YET")
+                        .requestMatchers("/api/users/client/**").hasRole("CLIENT")
                         .requestMatchers(HttpMethod.DELETE,"/api/users").hasRole("CLIENT")
                         .requestMatchers("/",
                                 "/api/auth",

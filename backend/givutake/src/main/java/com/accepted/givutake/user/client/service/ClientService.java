@@ -137,7 +137,7 @@ public class ClientService {
     }
 
     // ===== 기부금 영수증 관련 ===========
-    // 이메일로 기부금 영수증 보내기
+    // TODO: 이메일로 기부금 영수증 보내기
     public void sendEmailDonationReceipt(String email) {
         // 1. DB에서 유저 조회
         UserDto savedUserDto = userService.getUserByEmail(email);
