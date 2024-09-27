@@ -1,4 +1,4 @@
-package com.accepted.givutake.gift.model;
+package com.accepted.givutake.payment.model;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
