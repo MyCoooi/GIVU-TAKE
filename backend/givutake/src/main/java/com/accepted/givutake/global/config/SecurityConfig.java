@@ -49,13 +49,17 @@ public class SecurityConfig {
                                 "/api/auth",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/swagger-resources/**").permitAll()
+                                "/swagger-resources/**"
+                        ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/government-fundings/*/review",
                                 "/api/government-fundings/*/comments",
                                 "/api/government-fundings/*/comments/*",
                                 "/api/regions/sido",
                                 "/api/regions/sigungu",
-                                "/api/government-fundings").permitAll()
+                                "/api/government-fundings",
+                                "/api/purchases/completed",
+                                "/api/purchases/cancel",
+                                "/api/purchases/fail").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/users",
                                 "/api/users/password/code",
                                 "/api/users/password/code/verification").permitAll()

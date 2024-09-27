@@ -1,5 +1,6 @@
-package com.accepted.givutake.gift.entity;
+package com.accepted.givutake.payment.entity;
 
+import com.accepted.givutake.gift.entity.Gifts;
 import com.accepted.givutake.gift.enumType.DeliveryStatus;
 import com.accepted.givutake.global.entity.BaseTimeEntity;
 import com.accepted.givutake.user.common.entity.Users;
@@ -14,7 +15,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Orders  extends BaseTimeEntity {
+public class Orders extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 주문 ID
