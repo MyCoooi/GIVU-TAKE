@@ -1,7 +1,9 @@
 package com.project.givuandtake.feature.gift
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.edit
+import androidx.navigation.NavController
 import com.project.givuandtake.core.data.GiftDetail
 import com.project.givuandtake.core.datastore.FavoriteKeys
 import com.project.givuandtake.core.datastore.dataStore
@@ -32,5 +34,6 @@ fun getFavoriteProducts(context: Context): Flow<Set<String>> {
     return context.dataStore.data.map { preferences ->
         // 찜 목록이 없을 경우 빈 집합 반환
         preferences[FavoriteKeys.FAVORITES] ?: emptySet()
+
     }
 }

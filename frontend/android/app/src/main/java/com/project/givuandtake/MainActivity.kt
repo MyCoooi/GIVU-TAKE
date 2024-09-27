@@ -3,7 +3,6 @@ package com.project.givuandtake
 import AddressMapSearch
 import AttractionMain
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -13,14 +12,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -28,11 +25,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.givuandtake.FundingMainPage
+import com.google.gson.Gson
 import com.project.givuandtake.auth.LoginScreen
 import com.project.givuandtake.auth.SignupStep1
 import com.project.givuandtake.auth.SignupStep2
 import com.project.givuandtake.auth.SignupStep3
 import com.project.givuandtake.auth.SignupViewModel
+import com.project.givuandtake.core.apis.UserInfoResponse
 import com.project.givuandtake.core.data.CartItem
 import com.project.givuandtake.feature.attraction.FestivalPage
 import com.project.givuandtake.feature.attraction.LocationSelect
@@ -52,10 +51,13 @@ import com.project.givuandtake.feature.mypage.MyActivities.CardBook
 import com.project.givuandtake.feature.mypage.MyActivities.CardCustomRegistration
 import com.project.givuandtake.feature.mypage.MyActivities.CardRegistration
 import com.project.givuandtake.feature.mypage.MyActivities.UserInfo
+import com.project.givuandtake.feature.mypage.MyActivities.UserInfoUpdate
 import com.project.givuandtake.feature.mypage.MyDonation.DonationDetails
 import com.project.givuandtake.feature.mypage.MyDonation.DonationReceipt
 import com.project.givuandtake.feature.mypage.MyDonation.FundingDetails
-import com.project.givuandtake.feature.mypage.MyDonation.WishList
+import com.project.givuandtake.feature.mypage.MyDonation.WishlistPage
+
+//import com.project.givuandtake.feature.mypage.MyDonation.WishList
 import com.project.givuandtake.feature.mypage.MyManagement.MyComment
 import com.project.givuandtake.feature.mypage.MyManagement.MyReview
 import com.project.givuandtake.feature.navigation.addGiftPageDetailRoute
@@ -64,7 +66,6 @@ import com.project.givuandtake.feature.payment.PaymentResultPage
 import com.project.givuandtake.feature.payment.PaymentSuccessPage
 import com.project.givuandtake.ui.navbar.BottomNavBar
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
-import com.project.payment.PaymentScreen
 import com.project.payment.PaymentScreen_gift
 
 class MainActivity : ComponentActivity() {
@@ -73,7 +74,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        handleIntent(intent) // 기존 Intent 처리
+//        handleIntent(intent) // 기존 Intent 처리
 
         setContent {
             GivuAndTakeTheme {
@@ -82,6 +83,7 @@ class MainActivity : ComponentActivity() {
                 val cartItems = remember { mutableStateOf(listOf<CartItem>()) } // 장바구니 상태
                 val currentBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = currentBackStackEntry?.destination?.route
+
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -130,6 +132,13 @@ class MainActivity : ComponentActivity() {
                                 CartPage(navController = navController, context = context) // context 전달
                             }
 
+                            // 찜목록 페이지
+                            composable("wishlist_page") {
+                                WishlistPage(navController = navController)
+                            }
+
+
+
                             // 결제 페이지_답례품
                             composable(
                                 route = "payment_page_gift?name={name}&location={location}&price={price}&quantity={quantity}",
@@ -158,6 +167,7 @@ class MainActivity : ComponentActivity() {
                                 PaymentSuccessPage(navController)
                             }
 
+                            // 마이 페이지
                             composable("locationSelection") {
                                 LocationSelect(navController)
                             }
@@ -189,14 +199,20 @@ class MainActivity : ComponentActivity() {
                             composable("donationdetails") { DonationDetails(navController) }
                             composable("donationreceipt") { DonationReceipt(navController) }
                             composable("fundingdetails") { FundingDetails(navController) }
-                            composable("wishlist") { WishList(navController) }
+
+
+
 
                             composable("mycomment") { MyComment(navController) }
                             composable("myreview") { MyReview(navController) }
 
                             composable("addressbook") { AddressBook(navController) }
                             composable("cardbook") { CardBook(navController) }
+
                             composable("userinfo") { UserInfo(navController) }
+                            composable("userinfoupdate") { UserInfoUpdate(navController) }
+
+
                             composable("addresssearch") { AddressSearch(navController) }
                             composable("addressmapsearch") { AddressMapSearch(navController)}
                             composable("cardregistration") { CardRegistration(navController) }
