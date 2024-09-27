@@ -31,7 +31,6 @@ public class UserDto {
     private boolean isSocial;
     private SocialType socialType;
     private String socialSerialNum;
-    private Byte status;
     private boolean isWithdraw;
 
     public static UserDto toDto(Users user) {
@@ -51,7 +50,6 @@ public class UserDto {
                 .isSocial(user.isSocial())
                 .socialType(user.getSocialType())
                 .socialSerialNum(user.getSocialSerialNum())
-                .status(user.getStatus())
                 .isWithdraw(user.isWithdraw())
                 .build();
     }
@@ -73,7 +71,6 @@ public class UserDto {
                 .isSocial(this.isSocial)
                 .socialType(this.socialType)
                 .socialSerialNum(this.socialSerialNum)
-                .status(this.status)
                 .isWithdraw(this.isWithdraw)
                 .build();
     }

@@ -59,7 +59,7 @@ public class UserService {
         Roles role = signUpDto.getRoles();
 
         // 유효하지 않은 권한정보가 들어온 경우
-        if (!(role == Roles.ROLE_CLIENT || role == Roles.ROLE_CORPORATION)) {
+        if (!(role == Roles.ROLE_CLIENT || role == Roles.ROLE_CORPORATIONYET)) {
             throw new AccessDeniedException("권한 정보가 유효하지 않습니다.");
         }
 
@@ -71,7 +71,7 @@ public class UserService {
 
         // ref) 관리자는 회원가입할 수 없다. DB를 통해 직접 데이터 추가 요망.
         // 1. 수혜자 회원가입 관련 입력값 검증 및 처리
-        if (role == Roles.ROLE_CORPORATION) {
+        if (role == Roles.ROLE_CORPORATIONYET) {
             // 주소값은 들어오면 안된다
             if (addressAddDto != null) {
                 throw new ApiException(ExceptionEnum.UNEXPECTED_REPRESENTATIVE_ADDRESS_EXCEPTION);
@@ -247,7 +247,7 @@ public class UserService {
                 throw new ApiException(ExceptionEnum.USER_ALREADY_WITHDRAWN_EXCEPTION);
             }
             
-            // TODO: 회원과 관련된 다른 모든 데이터도 삭제 처리
+            // TODO: 회원과 관련된 다른 모든 데이터도 삭제 처리(refresh 토큰 등등..)
             userRepository.updateIsWithdrawByEmail(email, true);
         }
         else {

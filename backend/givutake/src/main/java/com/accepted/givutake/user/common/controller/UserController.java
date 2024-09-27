@@ -4,7 +4,6 @@ import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.model.ResponseDto;
 import com.accepted.givutake.user.client.model.AddressAddDto;
-import com.accepted.givutake.user.client.model.AddressDto;
 import com.accepted.givutake.user.client.model.ClientViewDto;
 import com.accepted.givutake.user.common.enumType.Roles;
 import com.accepted.givutake.user.common.model.*;
@@ -61,7 +60,7 @@ public class  UserController {
             ClientViewDto clientViewDto = savedUserDto.toClientViewDto();
             responseDto.setData(clientViewDto);
         }
-        else if (savedUserDto.getRoles() == Roles.ROLE_CORPORATION) {
+        else if (savedUserDto.getRoles() == Roles.ROLE_CORPORATION || savedUserDto.getRoles() == Roles.ROLE_CORPORATIONYET) {
             CorporationViewDto corporationViewDto = savedUserDto.toCorporationViewDto();
             responseDto.setData(corporationViewDto);
         }
@@ -82,7 +81,7 @@ public class  UserController {
 
         // 입력값 유효성 검사
         // 수혜자는 isMale, birth 값을 가질 수 없다
-        if ("ROLE_CORPORATION".equals(role)) {
+        if ("ROLE_CORPORATION".equals(role) || "ROLE_CORPORATION_YET".equals(role)) {
             if (modifyUserDto.getIsMale() != null) {
                 throw new ApiException(ExceptionEnum.UNEXPECTED_ISMALE_EXCEPTION);
             }
@@ -111,7 +110,7 @@ public class  UserController {
             ClientViewDto clientViewDto = savedUserDto.toClientViewDto();
             responseDto.setData(clientViewDto);
         }
-        else if (savedUserDto.getRoles() == Roles.ROLE_CORPORATION) {
+        else if (savedUserDto.getRoles() == Roles.ROLE_CORPORATION || savedUserDto.getRoles() == Roles.ROLE_CORPORATIONYET) {
             CorporationViewDto corporationViewDto = savedUserDto.toCorporationViewDto();
             responseDto.setData(corporationViewDto);
         }
