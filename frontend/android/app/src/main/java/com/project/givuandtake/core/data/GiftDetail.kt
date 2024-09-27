@@ -12,17 +12,31 @@ import androidx.room.RoomDatabase
 import android.content.Context
 import androidx.room.Room
 
-
-
+data class GiftResponse(
+    val success: Boolean,
+    val data: List<GiftDetail>
+)
 
 @Entity(tableName = "gift_details")
 data class GiftDetail(
-    @PrimaryKey val id: Int,
-    val name: String,
-    val price: Int,
-    val imageUrl: String,
+    @PrimaryKey val giftIdx: Int,          // API의 giftIdx를 id로 사용
+    val giftName: String,                  // 상품 이름
+    val corporationIdx: Int,               // 회사 ID
+    val corporationName: String,           // 회사 이름
+    val corporationSido: String,           // 회사 소재 시도
+    val corporationSigungu: String,        // 회사 소재 시군구
+    val categoryIdx: Int,                  // 카테고리 ID
+    val categoryName: String,              // 카테고리 이름
+    val giftThumbnail: String?,            // 상품 썸네일 (nullable)
+    val giftContent: String?,              // 상품 설명 (nullable)
+    val price: Int,                        // 상품 가격
+    val createdDate: String?,              // 생성 날짜 (nullable)
+    val modifiedDate: String?              // 수정 날짜 (nullable)
+){
+    // 커스텀 getter로 location 값을 계산
     val location: String
-)
+        get() = "$corporationSido $corporationSigungu"
+}
 
 
 @Dao
@@ -31,7 +45,7 @@ interface GiftDetailDao {
     @Query("SELECT * FROM gift_details")
     fun getAllGiftDetails(): Flow<List<GiftDetail>>
 
-    @Query("SELECT * FROM gift_details WHERE id IN (:ids)")
+    @Query("SELECT * FROM gift_details WHERE giftIdx IN (:ids)")
     fun getGiftDetailsByIds(ids: List<Int>): Flow<List<GiftDetail>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
