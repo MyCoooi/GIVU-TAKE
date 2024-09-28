@@ -1,6 +1,12 @@
 package com.project.givuandtake.feature.mypage.MyActivities
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
+import android.provider.MediaStore
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -49,8 +55,31 @@ fun UserInfoUpdate(navController: NavController) {
     var birthState by remember { mutableStateOf(("")) }
     var isMaleState by remember { mutableStateOf("") }
 
+    // 프로필 이미지 URI 상태
+    var profileImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    // 사진첩에서 이미지 선택을 처리하는 launcher
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val uri: Uri? = result.data?.data
+            profileImageUri = uri // 선택한 이미지를 프로필 이미지로 설정
+            Log.d("UserInfoUpdate", "선택된 이미지 URI: $profileImageUri") // 디버그 로그 추가
+        }
+    }
+
     val context = LocalContext.current
     val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
+
+    // 프로필 이미지 업데이트 여부 확인
+    LaunchedEffect(profileImageUri) {
+        if (profileImageUri != null) {
+            Log.d("UserInfoUpdate", "프로필 이미지 업데이트 됨: $profileImageUri")
+        }
+    }
+
+
 
     // 모달 상태 관리
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -100,7 +129,7 @@ fun UserInfoUpdate(navController: NavController) {
             birth = birthState,
             mobilePhone = phoneState,
             landlinePhone = null,  // 필요한 경우 사용자에게 입력받도록 수정 가능
-            profileImageUrl = userInfo?.data?.profileImageUrl // 프로필 이미지 URL 유지
+            profileImageUrl = profileImageUri?.toString() // 프로필 이미지 URI를 요청에 포함
         )
 
         val call = UserUpdateApi.api.updateUserInfo(accessToken, updateRequest)
@@ -159,13 +188,65 @@ fun UserInfoUpdate(navController: NavController) {
         // 사용자 프로필 이미지 표시
         Box(
             modifier = Modifier
+                .size(130.dp)
+                .clip(CircleShape)
+                .align(Alignment.CenterHorizontally),
+            contentAlignment = Alignment.Center
+        ) {
+            if (profileImageUri != null) {
+                // 선택된 사진을 AsyncImage로 표시
+                AsyncImage(
+                    model = profileImageUri,
+                    contentDescription = "User Profile Image",
+                    modifier = Modifier
+                        .size(130.dp)
+                        .clip(CircleShape)
+                        .background(Color.LightGray, CircleShape)
+                        .border(0.5.dp, Color.LightGray, CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                // 기본 프로필 이미지 표시
+                val profileImageUrl = userInfo?.data?.profileImageUrl
+                if (profileImageUrl != null) {
+                    AsyncImage(
+                        model = profileImageUrl,
+                        contentDescription = "User Profile Image",
+                        modifier = Modifier
+                            .size(130.dp)
+                            .clip(CircleShape)
+                            .background(Color.LightGray, CircleShape)
+                            .border(0.5.dp, Color.LightGray, CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(id = R.drawable.hamo),
+                        contentDescription = "Default Profile Image",
+                        modifier = Modifier
+                            .size(130.dp)
+                            .clip(CircleShape)
+                            .background(Color.LightGray, CircleShape)
+                            .border(0.5.dp, Color.LightGray, CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
+        }
+
+        // 프로필 사진 변경 버튼
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Box(
+            modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .clip(RoundedCornerShape(20.dp))
-                .border(1.dp, Color(0XFFA093DE), RoundedCornerShape(20.dp)) // border 추가
+                .border(1.dp, Color(0XFFA093DE), RoundedCornerShape(20.dp))
                 .clickable {
-                    // 프로필 사진 변경 로직
+                    val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                    launcher.launch(intent)
                 }
-                .padding(vertical = 8.dp, horizontal = 16.dp) // 패딩을 추가하여 여백을 만듭니다.
+                .padding(vertical = 8.dp, horizontal = 16.dp)
         ) {
             Text(
                 text = "프로필사진 변경",
@@ -260,6 +341,5 @@ fun UserInfoUpdate(navController: NavController) {
                     ) {
                         Text("확인")
                     }
-
     })
 }}}
