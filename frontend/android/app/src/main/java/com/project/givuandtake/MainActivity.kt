@@ -232,7 +232,15 @@ class MainActivity : ComponentActivity() {
                             composable("addresssearch") { AddressSearch(navController) }
                             composable("addressmapsearch") { AddressMapSearch(navController)}
                             composable("cardregistration") { CardRegistration(navController) }
-                            composable("cardcustomregistration") { CardCustomRegistration(navController) }
+                            composable("cardcustomregistration/{cardNumber}/{validThru}", arguments = listOf(
+                                navArgument("cardNumber") { defaultValue = "" },
+                                navArgument("validThru") { defaultValue = "" }
+                            )) { backStackEntry ->
+                                val cardNumber = backStackEntry.arguments?.getString("cardNumber") ?: ""
+                                val validThru = backStackEntry.arguments?.getString("validThru") ?: ""
+
+                                CardCustomRegistration(cardNumber = cardNumber, validThru = validThru, navController)
+                            }
 
                             composable("announcement") { Announcement(navController) }
                             composable("faqpate") { FaqPage(navController) }
@@ -256,7 +264,7 @@ class MainActivity : ComponentActivity() {
                             currentDestination != "faqpate" &&
                             currentDestination != "personalinquiry" &&
                             currentDestination != "cardregistration" &&
-                            currentDestination != "cardcustomregistration"
+                            currentDestination != "cardcustomregistration/{cardNumber}/{validThru}"
                         ) {
                             BottomNavBar(navController, selectedItem) { newIndex ->
                                 selectedItem = newIndex
