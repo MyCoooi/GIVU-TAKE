@@ -1,7 +1,9 @@
 package com.project.givuandtake.feature.gift
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.edit
+import androidx.navigation.NavController
 import com.project.givuandtake.core.data.GiftDetail
 import com.project.givuandtake.core.datastore.FavoriteKeys
 import com.project.givuandtake.core.datastore.dataStore
@@ -14,12 +16,12 @@ suspend fun addToFavorites(context: Context, giftDetail: GiftDetail) {
         // 기존 찜 목록을 불러와 MutableSet으로 변환
         val favorites = preferences[FavoriteKeys.FAVORITES]?.toMutableSet() ?: mutableSetOf()
 
-        if (favorites.contains(giftDetail.id.toString())) {
+        if (favorites.contains(giftDetail.giftIdx.toString())) {
             // 이미 찜한 상품이면 제거
-            favorites.remove(giftDetail.id.toString())
+            favorites.remove(giftDetail.giftIdx.toString())
         } else {
             // 찜한 상품 추가
-            favorites.add(giftDetail.id.toString())
+            favorites.add(giftDetail.giftIdx.toString())
         }
 
         // 수정된 찜 목록을 다시 저장
@@ -32,5 +34,6 @@ fun getFavoriteProducts(context: Context): Flow<Set<String>> {
     return context.dataStore.data.map { preferences ->
         // 찜 목록이 없을 경우 빈 집합 반환
         preferences[FavoriteKeys.FAVORITES] ?: emptySet()
+
     }
 }

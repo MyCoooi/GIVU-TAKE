@@ -3,6 +3,9 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
     id ("com.google.firebase.crashlytics")
+    id("kotlin-parcelize")
+    id("kotlin-kapt")
+
 }
 
 android {
@@ -52,7 +55,16 @@ android {
 }
 
 dependencies {
-    implementation ("com.google.android.gms:play-services-maps:18.0.0")
+    implementation ("androidx.camera:camera-core:1.1.0")
+    implementation ("androidx.camera:camera-camera2:1.1.0")
+    implementation ("androidx.camera:camera-lifecycle:1.1.0")
+    implementation ("androidx.camera:camera-view:1.1.0")
+
+    // Room 추가
+    implementation("androidx.room:room-runtime:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+
     implementation("com.naver.maps:map-sdk:3.19.1")
     implementation("com.google.android.gms:play-services-location:21.3.0")
 
