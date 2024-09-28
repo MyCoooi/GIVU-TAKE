@@ -74,9 +74,10 @@ fun UserAccountDeleteDialog(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(horizontal = 8.dp, vertical = 16.dp),
                     horizontalArrangement = Arrangement.End
                 ) {
+                    // 확인 버튼 (순서를 먼저 변경)
                     Button(
                         onClick = {
                             deleteUserAccount(
@@ -92,15 +93,19 @@ fun UserAccountDeleteDialog(
                                 }
                             )
                             onDismiss()
-                        }
+                        },
+                        modifier = Modifier.padding(end = 8.dp) // 버튼 간격 추가
                     ) {
                         Text("확인")
                     }
+
+                    // 취소 버튼 (뒤로 배치)
                     Button(onClick = { onDismiss() }) {
                         Text("취소")
                     }
                 }
-            }
+            },
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp) // 다이얼로그 모서리 둥글게
         )
     }
 
@@ -121,7 +126,30 @@ fun UserAccountDeleteDialog(
                 ) {
                     Text("확인")
                 }
-            }
+            },
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp) // 다이얼로그 모서리 둥글게
+        )
+    }
+
+    // 회원 탈퇴 성공 메시지 다이얼로그
+    if (showSuccessDialog) {
+        AlertDialog(
+            onDismissRequest = { /* 다이얼로그가 자동으로 닫히지 않도록 설정 */ },
+            title = { Text(text = "알림", fontSize = 18.sp) },
+            text = { Text(text = dialogMessage, fontSize = 16.sp) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showSuccessDialog = false
+                        navController.navigate("auth") {
+                            popUpTo(0) // 네비게이션 스택을 모두 제거하고 auth 페이지로 이동
+                        }
+                    }
+                ) {
+                    Text("확인")
+                }
+            },
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp) // 다이얼로그 모서리 둥글게
         )
     }
 }
