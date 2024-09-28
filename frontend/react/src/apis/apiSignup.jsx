@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// const apiUrl = "https://j11e202.p.ssafy.io/api";
-const apiUrl = "/dev/api";
+const apiUrl = "https://j11e202.p.ssafy.io/api";
+// const apiUrl = "/dev/api";
 
 // 시도 데이터를 가져오는 함수
 export const getSido = async () => {
