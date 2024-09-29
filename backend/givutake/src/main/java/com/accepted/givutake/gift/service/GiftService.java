@@ -3,16 +3,17 @@ package com.accepted.givutake.gift.service;
 import com.accepted.givutake.gift.entity.GiftReviewLiked;
 import com.accepted.givutake.gift.entity.GiftReviews;
 import com.accepted.givutake.gift.entity.Gifts;
-import com.accepted.givutake.gift.entity.Orders;
 import com.accepted.givutake.gift.model.*;
 import com.accepted.givutake.gift.repository.GiftRepository;
 import com.accepted.givutake.gift.repository.GiftReviewLikedRepository;
 import com.accepted.givutake.gift.repository.GiftReviewRepository;
-import com.accepted.givutake.gift.repository.OrderRepository;
+import com.accepted.givutake.payment.entity.Orders;
+import com.accepted.givutake.payment.repository.OrderRepository;
 import com.accepted.givutake.global.entity.Categories;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.repository.CategoryRepository;
+import com.accepted.givutake.payment.service.OrderService;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.repository.UsersRepository;
 import jakarta.transaction.Transactional;
@@ -81,7 +82,9 @@ public class GiftService {
                 .giftThumbnail(gift.getGiftThumbnail())
                 .corporationIdx(gift.getCorporations().getUserIdx())
                 .corporationName(gift.getCorporations().getName())
-                .cartegoryIdx(gift.getCategory().getCategoryIdx())
+                .corporationSido(gift.getCorporations().getRegion().getSido())
+                .corporationSigungu(gift.getCorporations().getRegion().getSigungu())
+                .categoryIdx(gift.getCategory().getCategoryIdx())
                 .categoryName(gift.getCategory().getCategoryName())
                 .price(gift.getPrice())
                 .build()
@@ -97,7 +100,9 @@ public class GiftService {
                 .giftContent(gift.getGiftContent())
                 .corporationIdx(gift.getCorporations().getUserIdx())
                 .corporationName(gift.getCorporations().getName())
-                .cartegoryIdx(gift.getCategory().getCategoryIdx())
+                .corporationSido(gift.getCorporations().getRegion().getSido())
+                .corporationSigungu(gift.getCorporations().getRegion().getSigungu())
+                .categoryIdx(gift.getCategory().getCategoryIdx())
                 .categoryName(gift.getCategory().getCategoryName())
                 .price(gift.getPrice())
                 .createdDate(gift.getCreatedDate())

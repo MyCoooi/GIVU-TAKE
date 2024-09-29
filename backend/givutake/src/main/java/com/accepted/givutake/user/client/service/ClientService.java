@@ -2,10 +2,9 @@ package com.accepted.givutake.user.client.service;
 
 import com.accepted.givutake.funding.entity.FundingParticipants;
 import com.accepted.givutake.funding.service.FundingParticipantService;
-import com.accepted.givutake.gift.model.OrderDto;
-import com.accepted.givutake.gift.service.OrderService;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
+import com.accepted.givutake.payment.service.OrderService;
 import com.accepted.givutake.region.service.RegionService;
 import com.accepted.givutake.user.client.entity.Addresses;
 import com.accepted.givutake.user.client.model.AddressAddDto;

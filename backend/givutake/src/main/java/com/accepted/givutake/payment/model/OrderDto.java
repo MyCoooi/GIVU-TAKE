@@ -1,8 +1,7 @@
-package com.accepted.givutake.gift.model;
+package com.accepted.givutake.payment.model;
 
 import com.accepted.givutake.gift.enumType.DeliveryStatus;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 

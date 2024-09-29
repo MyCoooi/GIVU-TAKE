@@ -1,14 +1,14 @@
-package com.accepted.givutake.gift.service;
+package com.accepted.givutake.payment.service;
 
 import com.accepted.givutake.gift.entity.Gifts;
-import com.accepted.givutake.gift.entity.Orders;
 import com.accepted.givutake.gift.enumType.DeliveryStatus;
-import com.accepted.givutake.gift.model.CreateOrderDto;
-import com.accepted.givutake.gift.model.OrderDto;
-import com.accepted.givutake.gift.model.UpdateOrderDto;
+import com.accepted.givutake.payment.entity.Orders;
+import com.accepted.givutake.payment.model.CreateOrderDto;
+import com.accepted.givutake.payment.model.OrderDto;
+import com.accepted.givutake.payment.model.UpdateOrderDto;
 import com.accepted.givutake.gift.repository.GiftRepository;
 import com.accepted.givutake.gift.repository.GiftReviewRepository;
-import com.accepted.givutake.gift.repository.OrderRepository;
+import com.accepted.givutake.payment.repository.OrderRepository;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.user.common.entity.Users;
@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.List;
 
 @Service
@@ -33,7 +34,7 @@ public class OrderService {
     private final GiftRepository giftRepository;
     private final GiftReviewRepository giftReviewRepository;
 
-    public void createOrder(String email, CreateOrderDto request){
+    public Orders createOrder(String email, CreateOrderDto request){
         Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
         Gifts gift = giftRepository.findById(request.getGiftIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
         Orders newOrder = Orders.builder()
@@ -44,7 +45,7 @@ public class OrderService {
                 .price(request.getAmount()*gift.getPrice())
                 .status(DeliveryStatus.PROCESSED)
                 .build();
-        orderRepository.save(newOrder);
+        return orderRepository.save(newOrder);
     }
 
     public List<OrderDto> getOrdres(String email, int pageNo, int pageSize){
@@ -101,9 +102,24 @@ public class OrderService {
         orderRepository.save(order);
     }
 
+    public void deleteOrder(String email, int orderIdx){
+        Orders order = orderRepository.findById(orderIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_ORDER_EXCEPTION));
+
+        if(!order.getUsers().getEmail().equals(email)){
+            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
+        }
+
+        orderRepository.delete(order);
+    }
+
     public int countGift(int giftIdx){
         Gifts gift = giftRepository.findById(giftIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
         return orderRepository.countByGift(gift);
+    }
+
+    public int calculateTotalOrderPrice(){
+        int totalOrderPrice = Optional.ofNullable(orderRepository.getTotalOrderPrice()).orElse(0);
+        return totalOrderPrice;
     }
 
 }

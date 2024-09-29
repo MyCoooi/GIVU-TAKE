@@ -17,6 +17,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -34,6 +40,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 // form 로그인 방식 disable
                 .formLogin(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 // 경로별 인가 작업
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.GET, "/api/corporations").hasRole("ADMIN")
@@ -53,7 +60,8 @@ public class SecurityConfig {
                                 "/api/auth",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/swagger-resources/**").permitAll()
+                                "/swagger-resources/**"
+                        ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/government-fundings/*/review",
                                 "/api/government-fundings/*/comments",
                                 "/api/government-fundings/*/comments/*",
@@ -61,7 +69,10 @@ public class SecurityConfig {
                                 "/api/regions/sigungu",
                                 "/api/government-fundings",
                                 "/api/government-fundings/*",
-                                "/api/experience-village").permitAll()
+                                "/api/experience-village",
+                                "/api/purchases/completed",
+                                "/api/purchases/cancel",
+                                "/api/purchases/fail").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/users",
                                 "/api/admin",
                                 "/api/users/password/code",
@@ -89,6 +100,20 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         // BCrypt Encoder 사용
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowCredentials(true);
+        configuration.addAllowedHeader("*");
+        configuration.addAllowedMethod("*");
+//        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        configuration.setAllowedOriginPatterns(List.of("*"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
 }
