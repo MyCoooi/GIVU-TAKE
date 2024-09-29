@@ -1,6 +1,7 @@
 package com.accepted.givutake.user.admin.model;
 
 import com.accepted.givutake.user.common.entity.Users;
+import com.accepted.givutake.user.common.enumType.Roles;
 import lombok.*;
 
 @Getter

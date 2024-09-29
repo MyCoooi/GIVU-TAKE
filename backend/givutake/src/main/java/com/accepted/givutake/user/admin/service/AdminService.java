@@ -8,14 +8,12 @@ import com.accepted.givutake.user.common.enumType.Roles;
 import com.accepted.givutake.user.common.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.management.relation.Role;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +27,25 @@ public class AdminService {
 
     private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
+
+    // 이메일로 회원 정보 조회
+    public Users getUserByEmail(String email) {
+        Optional<Users> optionalExistingUsers =  usersRepository.findByEmail(email);
+
+        if (!optionalExistingUsers.isEmpty()) {
+            Users savedUser = optionalExistingUsers.get();
+
+            // 이미 탈퇴한 회원일 경우 회원 정보 조회 불가
+            if (savedUser.isWithdraw()) {
+                throw new ApiException(ExceptionEnum.USER_ALREADY_WITHDRAWN_EXCEPTION);
+            }
+
+            return optionalExistingUsers.get();
+        }
+        else {
+            throw new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION);
+        }
+    }
 
     public Users signUp(AdminSignUpDto adminSignUpDto) {
         // 1. 관리자 회원가입을 위한 확인 코드가 맞는지 확인
@@ -82,7 +99,40 @@ public class AdminService {
         else {
             return new ArrayList<>();
         }
+    }
 
+    // 수혜자 자격 변경
+    public Users updateCorporationRole(String email, Character isApproved) {
+        // 1. user 정보 조회
+        Users savedUsers = this.getUserByEmail(email);
 
+        // 2. 자격을 변경하려는 사용자가 수혜자 혹은 수혜자 미승인 상태가 맞는지 확인
+        if (!(savedUsers.getRoles() == Roles.ROLE_CORPORATION || savedUsers.getRoles() == Roles.ROLE_CORPORATIONYET)) {
+            throw new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION);
+        }
+
+        // 3. 맞다면 자격 변경
+        if (isApproved == 'Y') {
+            // 이미 수혜자라면 자격 변경 불가
+            if (savedUsers.getRoles() == Roles.ROLE_CORPORATION) {
+                throw new ApiException(ExceptionEnum.NOT_ALLOWED_UPDATE_CORPORATION_EXCEPTION);
+            }
+
+            savedUsers.setRoles(Roles.ROLE_CORPORATION);
+            usersRepository.save(savedUsers);
+        }
+        else if (isApproved == 'N') {
+            // 이미 수혜자가 아니라면 자격 변경 불가
+            if (savedUsers.getRoles() == Roles.ROLE_CORPORATIONYET) {
+                throw new ApiException(ExceptionEnum.NOT_ALLOWED_UPDATE_CORPORATIONYET_EXCEPTION);
+            }
+            savedUsers.setRoles(Roles.ROLE_CORPORATIONYET);
+            usersRepository.save(savedUsers);
+        }
+        else {
+            throw new ApiException(ExceptionEnum.ILLEGAL_ISAPPROVED_EXCEPTION);
+        }
+
+        return savedUsers;
     }
 }

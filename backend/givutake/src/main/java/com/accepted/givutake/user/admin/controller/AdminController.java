@@ -1,11 +1,11 @@
 package com.accepted.givutake.user.admin.controller;
 
 import com.accepted.givutake.global.model.ResponseDto;
+import com.accepted.givutake.user.admin.model.AdminCorporationViewDto;
 import com.accepted.givutake.user.admin.model.AdminSignUpDto;
 import com.accepted.givutake.user.admin.model.AdminUserViewDto;
 import com.accepted.givutake.user.admin.service.AdminService;
 import com.accepted.givutake.user.common.entity.Users;
-import com.accepted.givutake.user.corporation.model.CorporationViewDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,16 +43,28 @@ public class AdminController {
                                                        @RequestParam(required = false, defaultValue = "0") int pageNo,
                                                        @RequestParam(required = false, defaultValue = "10") int pageSize) {
 
-        List<CorporationViewDto> corporationViewDtoList = adminService.getCorporation(isApproved, pageNo, pageSize)
+        List<AdminCorporationViewDto> adminCorporationViewDtoList = adminService.getCorporation(isApproved, pageNo, pageSize)
                 .stream()
-                .map(CorporationViewDto::toDto)
+                .map(AdminCorporationViewDto::toDto)
                 .collect(Collectors.toList());
 
         ResponseDto responseDto = ResponseDto.builder()
-                .data(corporationViewDtoList)
+                .data(adminCorporationViewDtoList)
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
+    // 수혜자 자격 변경
+    @PatchMapping("/corporations/{email}/roles")
+    public ResponseEntity<ResponseDto> updateCorporationRole(@PathVariable String email, @RequestParam Character isApproved) {
+        Users savedUsers = adminService.updateCorporationRole(email, isApproved);
+        AdminCorporationViewDto adminCorporationViewDto = AdminCorporationViewDto.toDto(savedUsers);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(adminCorporationViewDto)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
 }

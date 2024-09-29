@@ -186,7 +186,7 @@ public class UserService {
         return passwordEncoder.encode(password);
     }
 
-    // JWT 토큰으로 회원 정보 조회
+    // 이메일로 회원 정보 조회
     public UserDto getUserByEmail(String email) {
         Optional<Users> optionalExistingUsers =  userRepository.findByEmail(email);
 
