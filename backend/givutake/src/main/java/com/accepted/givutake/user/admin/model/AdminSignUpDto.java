@@ -32,7 +32,7 @@ public class AdminSignUpDto extends LoginDto {
                 .email(this.email)
                 .password(this.password)
                 .profileImageUrl(this.profileImageUrl)
-                .roles(Roles.ROLE_CLIENT)
+                .roles(Roles.ROLE_ADMIN)
                 .isSocial(false)
                 .isWithdraw(false)
                 .build();
