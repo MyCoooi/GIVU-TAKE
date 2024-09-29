@@ -61,4 +61,20 @@ public class FundingParticipantService {
         // 2. 펀딩 수 조회
         return fundingParticipantsRepository.countByUsers(savedUser);
     }
+
+    // 자신이 참여한 모든 펀딩의 기부금 조회
+    public int calculateTotalFundingFeeByEmail(String email) {
+        // 1. DB에서 user 가져오기
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        Users savedUser = savedUserDto.toEntity();
+
+        // 2. 펀딩 기부금 조회
+        Integer sum = fundingParticipantsRepository.sumFundingFeeByUserIdx(savedUser.getUserIdx());
+
+        if (sum == null) {
+            return 0;
+        }
+
+        return sum;
+    }
 }

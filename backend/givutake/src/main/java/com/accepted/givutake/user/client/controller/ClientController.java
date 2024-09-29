@@ -106,7 +106,6 @@ public class ClientController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
-    //  ===== 펀딩 내역 관련 =====
     // 일정 기간 동안의 자신의 펀딩 내역 조회
     @GetMapping("/funding-participants")
     public ResponseEntity<ResponseDto> getFundingParticipantsListByJwt(@AuthenticationPrincipal UserDetails userDetails, @RequestParam(required = false) LocalDate startDate, @RequestParam(required = false) LocalDate endDate) {
@@ -142,9 +141,8 @@ public class ClientController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
-    // === 기부금 영수증 관련 =====
     // 이메일로 기부금 영수증 보내기
-    @GetMapping("/donation-receipt")
+    @GetMapping("/donation/receipt")
     public ResponseEntity<ResponseDto> sendEmailDonationReceipt(@AuthenticationPrincipal UserDetails userDetails) {
         String email = userDetails.getUsername();
         
@@ -152,6 +150,23 @@ public class ClientController {
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // 나의 기부금 총액 조회
+    @GetMapping("/donation/my-price")
+    public ResponseEntity<ResponseDto> calculateTotalFundingFeeByJwt(@AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+
+        long price = clientService.calculateTotalFundingFeeByEmail(email);
+
+        Map<String, Long> map = new HashMap<>();
+        map.put("price", price);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(map)
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);

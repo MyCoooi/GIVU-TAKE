@@ -12,7 +12,9 @@ import com.accepted.givutake.payment.repository.OrderRepository;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.user.common.entity.Users;
+import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.repository.UsersRepository;
+import com.accepted.givutake.user.common.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,6 +34,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UsersRepository userRepository;
     private final GiftRepository giftRepository;
+    private final UserService userService;
     private final GiftReviewRepository giftReviewRepository;
 
     public Orders createOrder(String email, CreateOrderDto request){
@@ -117,9 +120,23 @@ public class OrderService {
         return orderRepository.countByGift(gift);
     }
 
-    public int calculateTotalOrderPrice(){
+    public int calculateTotalOrderPrice() {
         int totalOrderPrice = Optional.ofNullable(orderRepository.getTotalOrderPrice()).orElse(0);
         return totalOrderPrice;
+    }
+
+    public int calculateTotalOrderPriceByEmail(String email) {
+        // 1. 유저 조회
+        UserDto savedUserDto = userService.getUserByEmail(email);
+
+        // 2. 사용자가 구매한 모든 답례품의 총금액 조회
+        Integer sum = orderRepository.sumPriceByUserIdx(savedUserDto.getUserIdx());
+
+        if (sum == null) {
+            return 0;
+        }
+
+        return sum;
     }
 
 }
