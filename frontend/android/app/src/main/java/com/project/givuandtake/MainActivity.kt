@@ -35,6 +35,7 @@ import com.project.givuandtake.feature.attraction.FestivalPage
 import com.project.givuandtake.feature.attraction.LocationSelect
 import com.project.givuandtake.feature.attraction.TripPage
 import com.project.givuandtake.feature.auth.FindPassword
+import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.fundinig.FundingMainPage
 //import com.project.givuandtake.feature.funding.navigation.MainFundingCard
 //import com.project.givuandtake.feature.fundinig.FundingDetailPage
@@ -100,16 +101,19 @@ class MainActivity : ComponentActivity() {
                             // 펀딩 페이지
                             composable("funding"){ FundingMainPage(navController)  }
                                                        // 펀딩 상세 페이지
-//                            composable(
-//                                "funding_detail/{title}/{location}/{startDate}/{endDate}/{nowAmount}/{goalAmount}/{imageUrl}"
-//                            ) { backStackEntry ->
-//                                val fundingCard = MainFundingCard(backStackEntry)
-//                                FundingDetailPage(
-//                                    fundingCard = fundingCard,
-//                                    navController = navController,
-//                                    onBackClick = { navController.popBackStack() }
-//                                )
-//                            }
+                            // 펀딩 상세 페이지 추가
+                            composable("funding_detail/{fundingIdx}") { backStackEntry ->
+                                val fundingIdx =
+                                    backStackEntry.arguments?.getString("fundingIdx")?.toIntOrNull()
+                                if (fundingIdx != null) {
+                                    FundingDetailPage(
+                                        fundingIdx = fundingIdx,
+                                        navController = navController,
+                                        onBackClick = {
+                                            navController.popBackStack()
+                                        })
+                                }
+                            }
                             composable("payment") { PaymentScreen(navController) }
 
                             composable("attraction") { AttractionMain(navController, "영도") } // Navigate to AttractionMain

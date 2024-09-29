@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -38,7 +37,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,9 +46,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.project.givuandtake.core.apis.FundingData
-import com.project.givuandtake.core.apis.FundingResponse
-import com.project.givuandtake.core.apis.SearchFundingApi
+import com.project.givuandtake.core.apis.Funding.FundingData
+import com.project.givuandtake.core.apis.Funding.FundingResponse
+import com.project.givuandtake.core.apis.Funding.SearchFundingApi
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -169,7 +167,12 @@ fun FundingMainPage(navController: NavController) {
                     endDate = card.endDate,
                     nowAmount = card.totalMoney.toFloat(),
                     goalAmount = card.goalMoney.toFloat(),
-                    imageUrl = card.fundingThumbnail
+                    imageUrl = card.fundingThumbnail,
+                    fundingIdx = card.fundingIdx,  // 각 카드에 fundingIdx를 전달
+                    onClick = { fundingIdx ->
+                        // 클릭 시 상세 페이지로 이동하는 로직
+                        navController.navigate("funding_detail/$fundingIdx")
+                    }
                 )
             }
 
@@ -274,7 +277,7 @@ fun CategoryTabItem(
     }
 }
 
-// 펀딩 카드 컴포저블
+// 펀딩 카드 컴포저블 수정 - onClick 추가
 @Composable
 fun FundingCardComposable(
     title: String,
@@ -283,14 +286,20 @@ fun FundingCardComposable(
     endDate: String,
     nowAmount: Float,
     goalAmount: Float,
-    imageUrl: String
+    imageUrl: String,
+    fundingIdx: Int,  // fundingIdx를 전달받음
+    onClick: (Int) -> Unit  // 클릭 시 호출될 콜백
 ) {
     val progress = if (goalAmount > 0) nowAmount / goalAmount else 0f
 
     // 금액을 3자리마다 쉼표로 구분
     val formattedGoalAmount = NumberFormat.getNumberInstance(Locale.KOREA).format(goalAmount.toInt())
 
-    Column(modifier = Modifier.padding(8.dp)) {
+    Column(
+        modifier = Modifier
+            .padding(8.dp)
+            .clickable { onClick(fundingIdx) }  // 클릭 시 fundingIdx 전달
+    ) {
         // 위치 표시
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(imageVector = Icons.Filled.LocationOn, contentDescription = "Location Icon")

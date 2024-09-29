@@ -1,4 +1,4 @@
-package com.project.givuandtake.core.apis
+package com.project.givuandtake.core.apis.Auth
 
 import retrofit2.Call
 import retrofit2.Retrofit
