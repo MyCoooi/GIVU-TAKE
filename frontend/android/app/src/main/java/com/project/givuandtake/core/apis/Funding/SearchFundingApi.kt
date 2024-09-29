@@ -1,4 +1,4 @@
-package com.project.givuandtake.core.apis
+package com.project.givuandtake.core.apis.Funding
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

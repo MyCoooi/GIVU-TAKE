@@ -1,4 +1,4 @@
-package com.project.givuandtake.core.apis
+package com.project.givuandtake.core.apis.Auth
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -8,36 +8,29 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.Call
 
-// 로그인 요청 데이터 클래스
-data class LoginRequest(
+// 인증번호 검증 요청 데이터 클래스
+data class VerifyCodeRequest(
     val email: String,
-    val password: String
+    val code: String
 )
 
-// 로그인 응답 데이터 클래스
-data class LoginResponse(
+// 인증번호 검증 응답 데이터 클래스
+data class VerifyCodeResponse(
     val success: Boolean,
-    val data: LoginData?
-)
-
-data class LoginData(
-    val grantType: String,
-    val accessToken: String,
-    val refreshToken: String
+    val data: Any?  // 응답에서 data는 null이므로 Any?로 처리
 )
 
 // Retrofit API 정의
-interface LoginApiService {
-    @POST("auth")
-    fun loginUser(@Body loginRequest: LoginRequest): Call<LoginResponse>
+interface VerifyCodeApiService {
+    @POST("users/password/code/verification")
+    fun verifyCode(@Body verifyCodeRequest: VerifyCodeRequest): Call<VerifyCodeResponse>
 }
 
-
 // Retrofit 인스턴스 생성
-object LoginApi {
+object FindPasswordVerificationApi {
     private const val BASE_URL = "https://j11e202.p.ssafy.io/api/"
 
-    val api: LoginApiService by lazy {
+    val api: VerifyCodeApiService by lazy {
         // HttpLoggingInterceptor 추가
         val logging = HttpLoggingInterceptor()
         logging.setLevel(HttpLoggingInterceptor.Level.BODY)
@@ -51,6 +44,6 @@ object LoginApi {
             .client(client)  // OkHttpClient 설정
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(LoginApiService::class.java)
+            .create(VerifyCodeApiService::class.java)
     }
 }

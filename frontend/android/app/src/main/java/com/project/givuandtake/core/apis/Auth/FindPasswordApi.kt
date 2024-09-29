@@ -1,4 +1,4 @@
-package com.project.givuandtake.core.apis
+package com.project.givuandtake.core.apis.Auth
 
 import retrofit2.Call
 import retrofit2.Retrofit
@@ -19,7 +19,7 @@ data class PasswordCodeResponse(
 
 // Retrofit API 인터페이스 정의
 interface FindPasswordApiService {
-    @POST("auth/password/code")
+    @POST("users/password/code")
     fun sendPasswordCode(@Body request: PasswordCodeRequest): Call<PasswordCodeResponse>
 }
 
