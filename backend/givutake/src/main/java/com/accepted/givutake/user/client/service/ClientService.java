@@ -1,10 +1,12 @@
 package com.accepted.givutake.user.client.service;
 
-import com.accepted.givutake.funding.entity.FundingParticipants;
 import com.accepted.givutake.funding.service.FundingParticipantService;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.payment.service.OrderService;
+import com.accepted.givutake.pdf.DonationParticipantsDto;
+import com.accepted.givutake.pdf.DonationReceiptFormDto;
+import com.accepted.givutake.pdf.PdfService;
 import com.accepted.givutake.region.service.RegionService;
 import com.accepted.givutake.user.client.entity.Addresses;
 import com.accepted.givutake.user.client.model.AddressAddDto;
@@ -17,7 +19,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -29,6 +34,7 @@ public class ClientService {
     private final UserService userService;
     private final RegionService regionService;
     private final OrderService orderService;
+    private final PdfService pdfService;
     private final FundingParticipantService fundingParticipantService;
 
     // 아이디가 email인 사용자의 모든 주소 조회
@@ -135,17 +141,44 @@ public class ClientService {
         return addressService.deleteAddressByAddressIdx(savedAddresses);
     }
 
-    // TODO: 이메일로 기부금 영수증 보내기
     public void sendEmailDonationReceipt(String email) {
         // 1. DB에서 유저 조회
         UserDto savedUserDto = userService.getUserByEmail(email);
 
         // 2. 사용자의 펀딩 내역 가져오기(현재 연도 기록만)
         int nowYear = LocalDate.now().getYear();
-        List<FundingParticipants> fundingParticipantsList = fundingParticipantService.getFundingParticipantsListByEmail(email, LocalDate.of(nowYear, 1, 1), LocalDate.of(nowYear, 12, 31));
+        LocalDate startDate = LocalDate.of(nowYear, 1, 1);
+        LocalDate endDate = LocalDate.of(nowYear, 12, 31);
+        List<DonationParticipantsDto> fundingDonationParticipantsDtoList = fundingParticipantService.getFundingParticipantsListByEmail(email, startDate, endDate)
+                .stream()
+                .map(participant -> DonationParticipantsDto.fundingPariticipantsToDto(participant, ""))
+                .collect(Collectors.toList());
 
-        // 3. 답례품 구매 내역 가져오기
-//        List<>
+        // 3. 답례품 구매 내역 가져오기(현재 연도 기록만)
+        List<DonationParticipantsDto> orderDonationParticipantsDtoList = orderService.getOrdersCreatedDateBetweenByEmail(email, startDate, endDate)
+                .stream()
+                .map(orders -> DonationParticipantsDto.ordersToDto(orders, ""))
+                .collect(Collectors.toList());
+
+        // 4. 두 리스트 합치기
+        List<DonationParticipantsDto> combinedList = new ArrayList<>(fundingDonationParticipantsDtoList);
+        combinedList.addAll(orderDonationParticipantsDtoList);
+        
+        // 5. 최신 순으로 정렬
+        Collections.sort(combinedList);
+
+        // 6. 대표 주소 가져오기
+        Addresses savedAddresses = addressService.getRepresentativeAddressesByUserIdx(savedUserDto.getUserIdx());
+
+        // 7. PDF 파일로 생성
+        DonationReceiptFormDto donationReceiptFormDto = DonationReceiptFormDto.builder()
+                .userName(savedUserDto.getName())
+                .userAddress(savedAddresses.getRoadAddress() + savedAddresses.getDetailAddress())
+                .userPhone(savedUserDto.getMobilePhone())
+                .donationParticipantsDtoList(combinedList)
+                .build();
+
+        pdfService.donationReceiptGenerate(donationReceiptFormDto);
     }
 
     // 나의 기부금 총액 조회

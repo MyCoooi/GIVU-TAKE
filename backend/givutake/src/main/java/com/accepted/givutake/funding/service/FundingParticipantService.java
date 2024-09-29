@@ -49,6 +49,9 @@ public class FundingParticipantService {
             return fundingParticipantsRepository.findByCreatedDateAfter(startDateTime);
         }
 
+        endDateTime = endDate.atTime(23, 59, 59);
+        startDateTime = startDate.atStartOfDay();
+
         return fundingParticipantsRepository.findByUsersAndCreatedDateBetween(savedUsers, startDateTime, endDateTime);
     }
 

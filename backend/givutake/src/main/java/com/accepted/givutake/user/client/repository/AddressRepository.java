@@ -13,6 +13,7 @@ import java.util.Optional;
 @Repository
 public interface AddressRepository extends JpaRepository<Addresses, Integer> {
     List<Addresses> findByUserIdxAndIsDeletedFalseOrderByIsRepresentativeDesc(int userIdx);
+    Optional<Addresses> findByUserIdxAndIsDeletedFalseAndIsRepresentativeTrue(int userIdx);
     Optional<Addresses> findByAddressIdx(int addressIdx);
     long countByUserIdx(int userIdx);
 

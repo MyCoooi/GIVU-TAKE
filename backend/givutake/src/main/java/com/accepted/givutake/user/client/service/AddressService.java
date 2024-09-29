@@ -63,6 +63,18 @@ public class AddressService {
         return savedAddresses;
     }
 
+    // userIdx에 해당하는 유저의 대표 주소 조회
+    public Addresses getRepresentativeAddressesByUserIdx(int userIdx) {
+        Optional<Addresses> optionalAddresses = addressRepository.findByUserIdxAndIsDeletedFalseAndIsRepresentativeTrue(userIdx);
+
+        if (optionalAddresses.isPresent()) {
+            return optionalAddresses.get();
+        }
+        else {
+            throw new ApiException(ExceptionEnum.NOT_FOUND_REPRESENTATIVE_ADDRESS_EXCEPTION);
+        }
+    }
+
     // addressIdx에 해당하는 주소 삭제
     public Addresses deleteAddressByAddressIdx(Addresses addresses) {
         addresses.setDeleted(true);

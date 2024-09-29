@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.ToString;
 import org.springframework.http.HttpStatus;
 
+import java.util.HashMap;
+
 @Getter
 @ToString
 public enum ExceptionEnum {
@@ -54,6 +56,7 @@ public enum ExceptionEnum {
     NOT_FOUND_REFRESHTOKEN_EXCEPTION(HttpStatus.NOT_FOUND, "EU4012", "토큰 정보를 찾을 수 없습니다."),
     NOT_FOUND_EMAILCODE_EXCEPTION(HttpStatus.NOT_FOUND, "EU4013", "인증 코드 정보를 찾을 수 없습니다."),
     NOT_FOUND_ADDRESSES_EXCEPTION(HttpStatus.NOT_FOUND, "EU4020", "주소 정보를 찾을 수 없습니다."),
+    NOT_FOUND_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.NOT_FOUND, "EU4021", "대표 주소 정보를 찾을 수 없습니다."),
     NOT_FOUND_FUNDING_REVIEW_EXCEPTION(HttpStatus.NOT_FOUND, "EU4030", "펀딩 후기 정보를 찾을 수 없습니다."),
     NOT_FOUND_FUNDING_WITH_IDX_EXCEPTION(HttpStatus.NOT_FOUND, "EU4031", "펀딩 정보를 찾을 수 없습니다."),
     NOT_FOUND_CHEER_COMMENT_EXCEPTION(HttpStatus.NOT_FOUND, "EU4040", "댓글 정보를 찾을 수 없습니다."),

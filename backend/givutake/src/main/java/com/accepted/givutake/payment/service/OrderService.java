@@ -23,6 +23,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.List;
 
@@ -71,6 +73,37 @@ public class OrderService {
                 .createdDate(order.getCreatedDate())
                 .build()
         ).toList();
+    }
+
+    // 특정 일자의 자신의 답례품 구매 내역 가져오기
+    public List<Orders> getOrdersCreatedDateBetweenByEmail(String email, LocalDate startDate, LocalDate endDate) {
+        // 1. 유저 정보 DB에서 조회
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        Users savedUsers = savedUserDto.toEntity();
+
+        // 2. 특정 일자의 구매 내역 가져오기
+        LocalDateTime startDateTime = null;
+        LocalDateTime endDateTime = null;
+
+        // startDate와 endDate가 null이면 모든 데이터 조회
+        if (startDate == null && endDate == null) {
+            return orderRepository.findByUsers(savedUsers);
+        }
+        // 시작일이 null일 경우 endDate이전의 모든 데이터 조회
+        else if (startDate == null) {
+            endDateTime = endDate.atTime(23, 59, 59);
+            return orderRepository.findByUsersAndCreatedDateBefore(savedUsers, endDateTime);
+        }
+        // 종료일이 null일 경우 startDate 이후의 모든 데이터 조회
+        else if (endDate == null) {
+            startDateTime = startDate.atStartOfDay();
+            return orderRepository.findByUsersAndCreatedDateAfter(savedUsers, startDateTime);
+        }
+        else {
+            startDateTime = startDate.atStartOfDay();
+            endDateTime = endDate.atTime(23, 59, 59);
+            return orderRepository.findByUsersAndCreatedDateBetween(savedUsers, startDateTime, endDateTime);
+        }
     }
 
     public OrderDto getOrder(String email, int orderIdx){
