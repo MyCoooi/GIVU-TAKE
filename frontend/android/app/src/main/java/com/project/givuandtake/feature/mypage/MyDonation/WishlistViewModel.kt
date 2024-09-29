@@ -1,6 +1,7 @@
 package com.project.givuandtake.feature.mypage.MyDonation
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.project.givuandtake.core.data.GiftDetail
@@ -9,7 +10,7 @@ import com.project.givuandtake.core.datastore.WishlistRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class WishlistViewModel(application: Application) : AndroidViewModel(application) {
+open class WishlistViewModel(application: Application) : AndroidViewModel(application) {
     private val context = getApplication<Application>().applicationContext
 
     // 실제 데이터 소스 (예: Repository)를 주입받아야 합니다.
@@ -24,6 +25,7 @@ class WishlistViewModel(application: Application) : AndroidViewModel(application
     fun addItemToWishlist(giftDetail: GiftDetail) {
         viewModelScope.launch {
             WishlistRepository.addItemToWishlist(context, giftDetail.giftIdx.toString())
+
         }
     }
 
@@ -38,6 +40,7 @@ class WishlistViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             val itemId = giftDetail.giftIdx.toString() // GiftDetail의 id를 String으로 변환
             val currentWishlist = wishlistItems.value // 현재 위시리스트 Set 가져오기
+            Log.d("WishlistViewModel", "currentWishlist: $currentWishlist")
 
             // contains 사용하여 해당 아이템이 있는지 확인
             if (currentWishlist.contains(itemId)) {
@@ -45,6 +48,10 @@ class WishlistViewModel(application: Application) : AndroidViewModel(application
             } else {
                 addItemToWishlist(giftDetail)
             }
+            // 로그로 상태 변화 확인
+            val updatedWishlist = wishlistItems.value
+            Log.d("WishlistViewModel", "Updated wishlist: $updatedWishlist")
+
         }
     }
 }

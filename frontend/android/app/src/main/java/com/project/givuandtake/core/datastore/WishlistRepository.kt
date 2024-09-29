@@ -1,6 +1,7 @@
 package com.project.givuandtake.core.datastore
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.coroutines.flow.Flow
@@ -20,6 +21,7 @@ object WishlistRepository {
             val currentWishlist = preferences[WISHLIST_KEY]?.toMutableSet() ?: mutableSetOf()
             currentWishlist.add(itemId)
             preferences[WISHLIST_KEY] = currentWishlist
+            Log.d("WishlistRepository", "Added item to wishlist: $itemId")
         }
     }
 
@@ -28,6 +30,7 @@ object WishlistRepository {
             val currentWishlist = preferences[WISHLIST_KEY]?.toMutableSet() ?: mutableSetOf()
             currentWishlist.remove(itemId)
             preferences[WISHLIST_KEY] = currentWishlist
+            Log.d("WishlistRepository", "Removed item from wishlist: $itemId")
         }
     }
 }

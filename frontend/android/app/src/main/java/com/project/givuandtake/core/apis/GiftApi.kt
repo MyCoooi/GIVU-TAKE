@@ -10,15 +10,17 @@ import retrofit2.http.Header
 import retrofit2.http.Path
 
 interface GiftApiService {
-    @GET("/api/gifts")
-    fun getGifts(
-        @Header("Authorization") token: String
-    ): Call<GiftResponse> // API 응답으로 받을 데이터 타입
 
+    // 코루틴을 사용한 비동기 API 호출
+    @GET("/api/gifts")
+    suspend fun getGifts(
+        @Header("Authorization") token: String
+    ): Response<GiftResponse> // suspend 함수로 변경하여 코루틴에서 사용 가능
 
     @GET("/api/gifts/{giftIdx}")
     suspend fun getGiftDetail(
         @Header("Authorization") token: String,
         @Path("giftIdx") giftIdx: Int
-    ): Response<GiftDetailResponse> // GiftDetailResponse는 응답 데이터를 위한 데이터 클래스
+    ): Response<GiftDetailResponse> // suspend 함수로 변경하여 코루틴에서 사용 가능
 }
+
