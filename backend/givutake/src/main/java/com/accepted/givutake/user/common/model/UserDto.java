@@ -5,7 +5,7 @@ import com.accepted.givutake.user.client.model.ClientViewDto;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.enumType.Roles;
 import com.accepted.givutake.user.common.enumType.SocialType;
-import com.accepted.givutake.user.corporation.model.CorporationViewDto;
+import com.accepted.givutake.user.corporation.model.CorporationDetailViewDto;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -31,7 +31,6 @@ public class UserDto {
     private boolean isSocial;
     private SocialType socialType;
     private String socialSerialNum;
-    private Byte status;
     private boolean isWithdraw;
 
     public static UserDto toDto(Users user) {
@@ -51,7 +50,6 @@ public class UserDto {
                 .isSocial(user.isSocial())
                 .socialType(user.getSocialType())
                 .socialSerialNum(user.getSocialSerialNum())
-                .status(user.getStatus())
                 .isWithdraw(user.isWithdraw())
                 .build();
     }
@@ -73,7 +71,6 @@ public class UserDto {
                 .isSocial(this.isSocial)
                 .socialType(this.socialType)
                 .socialSerialNum(this.socialSerialNum)
-                .status(this.status)
                 .isWithdraw(this.isWithdraw)
                 .build();
     }
@@ -90,8 +87,8 @@ public class UserDto {
                 .build();
     }
 
-    public CorporationViewDto toCorporationViewDto() {
-        return CorporationViewDto.builder()
+    public CorporationDetailViewDto toCorporationViewDto() {
+        return CorporationDetailViewDto.builder()
                 .email(this.email)
                 .name(this.name)
                 .mobilePhone(this.mobilePhone)

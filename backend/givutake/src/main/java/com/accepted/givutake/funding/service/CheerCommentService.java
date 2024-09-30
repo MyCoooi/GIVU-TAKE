@@ -3,7 +3,6 @@ package com.accepted.givutake.funding.service;
 import com.accepted.givutake.funding.entity.CheerComments;
 import com.accepted.givutake.funding.entity.Fundings;
 import com.accepted.givutake.funding.model.CheerCommentAddDto;
-import com.accepted.givutake.funding.model.CheerCommentViewDto;
 import com.accepted.givutake.funding.repository.CheerCommentsRepository;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
@@ -17,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service

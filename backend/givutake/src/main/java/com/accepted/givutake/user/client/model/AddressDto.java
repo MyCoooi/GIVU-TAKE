@@ -1,6 +1,7 @@
 package com.accepted.givutake.user.client.model;
 
 import com.accepted.givutake.user.client.entity.Addresses;
+import com.accepted.givutake.user.common.entity.Users;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -17,8 +18,8 @@ public class AddressDto extends AddressAddDto {
     @NotNull(message = "주소 코드는 필수 입력 값 입니다.")
     private int addressIdx;
 
-    @NotBlank(message = "사용자 코드는 필수 입력 값 입니다.")
-    private int userIdx;
+    @NotBlank(message = "사용자는 필수 입력 값 입니다.")
+    private Users users;
 
     @NotNull(message = "지역 코드는 필수 입력 값 입니다.")
     private Integer regionIdx;
@@ -26,7 +27,7 @@ public class AddressDto extends AddressAddDto {
     public AddressDto toDto(Addresses addresses) {
         return AddressDto.builder()
                 .addressIdx(addresses.getAddressIdx())
-                .userIdx(addresses.getUserIdx())
+                .users(addresses.getUsers())
                 .regionIdx(addresses.getRegionIdx())
                 .addressName(addresses.getAddressName())
                 .zoneCode(addresses.getZoneCode())

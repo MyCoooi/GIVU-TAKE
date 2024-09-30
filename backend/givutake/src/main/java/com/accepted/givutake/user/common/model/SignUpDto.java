@@ -68,13 +68,6 @@ public class SignUpDto extends LoginDto {
                 .isWithdraw(false)
                 .build();
 
-        if (this.roles == Roles.ROLE_CLIENT) {
-            ret.setStatus(null);
-        }
-        else if (this.roles == Roles.ROLE_CORPORATION) {
-            ret.setStatus((byte) 0);
-        }
-
         return ret;
     }
 

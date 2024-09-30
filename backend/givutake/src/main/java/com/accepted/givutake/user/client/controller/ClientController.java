@@ -1,5 +1,7 @@
 package com.accepted.givutake.user.client.controller;
 
+import com.accepted.givutake.funding.model.FundingParticipantViewDto;
+import com.accepted.givutake.funding.service.FundingParticipantService;
 import com.accepted.givutake.global.model.ResponseDto;
 import com.accepted.givutake.user.client.entity.Addresses;
 import com.accepted.givutake.user.client.model.AddressAddDto;
@@ -15,7 +17,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -25,6 +30,7 @@ import java.util.stream.Collectors;
 public class ClientController {
 
     private final ClientService clientService;
+    private final FundingParticipantService fundingParticipantService;
 
     // jwt 토큰으로 모든 주소 조회
     @GetMapping("/addresses")
@@ -95,6 +101,72 @@ public class ClientController {
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(addressDetailViewDto)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // 일정 기간 동안의 자신의 펀딩 내역 조회
+    @GetMapping("/funding-participants")
+    public ResponseEntity<ResponseDto> getFundingParticipantsListByJwt(@AuthenticationPrincipal UserDetails userDetails, @RequestParam(required = false) LocalDate startDate, @RequestParam(required = false) LocalDate endDate) {
+        String email = userDetails.getUsername();
+
+        List<FundingParticipantViewDto> fundingParticipantViewDtoList =
+                fundingParticipantService.getFundingParticipantsListByEmail(email, startDate, endDate)
+                        .stream()
+                        .map(FundingParticipantViewDto::toDto)
+                        .collect(Collectors.toList());
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(fundingParticipantViewDtoList)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // 자신이 참여한 펀딩 수 조회
+    @GetMapping("/funding-participants/count")
+    public ResponseEntity<ResponseDto> getFundingParticipantsCountByJwt(@AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+
+        long count = fundingParticipantService.getCountByEmail(email);
+
+        Map<String, Long> map = new HashMap<>();
+        map.put("count",count);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(map)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // 이메일로 기부금 영수증 보내기
+    @GetMapping("/donation/receipt")
+    public ResponseEntity<ResponseDto> sendEmailDonationReceipt(@AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+        
+        clientService.sendEmailDonationReceipt(email);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(null)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // 나의 기부금 총액 조회
+    @GetMapping("/donation/my-price")
+    public ResponseEntity<ResponseDto> calculateTotalFundingFeeByJwt(@AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+
+        long price = clientService.calculateTotalFundingFeeByEmail(email);
+
+        Map<String, Long> map = new HashMap<>();
+        map.put("price", price);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(map)
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);

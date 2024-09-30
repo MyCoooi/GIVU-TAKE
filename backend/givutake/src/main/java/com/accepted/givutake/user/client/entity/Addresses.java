@@ -1,6 +1,7 @@
 package com.accepted.givutake.user.client.entity;
 
 import com.accepted.givutake.global.entity.BaseTimeEntity;
+import com.accepted.givutake.user.common.entity.Users;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -21,8 +22,9 @@ public class Addresses extends BaseTimeEntity {
     @Column(name = "address_idx", nullable = false)
     private int addressIdx;
 
-    @Column(name = "user_idx", nullable = false)
-    private int userIdx;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_idx", nullable = false)
+    private Users users;
 
     @Column(name = "region_idx", nullable = false)
     private int regionIdx;

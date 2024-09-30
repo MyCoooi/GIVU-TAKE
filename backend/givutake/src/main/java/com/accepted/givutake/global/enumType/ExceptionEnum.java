@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.ToString;
 import org.springframework.http.HttpStatus;
 
+import java.util.HashMap;
+
 @Getter
 @ToString
 public enum ExceptionEnum {
@@ -32,6 +34,7 @@ public enum ExceptionEnum {
     ILLEGAL_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0006", "대표 주소 정보가 유효하지 않습니다."),
     ILLEGAL_REPRESENTATIVE_CARD_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0007", "대표 카드 정보가 유효하지 않습니다."),
     ILLEGAL_EMAIL_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0008", "이메일 형식이 올바르지 않습니다."),
+    ILLEGAL_ISAPPROVED_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0009", "isApproved는 'Y'이거나 'N'이어야 합니다."),
 
     DUPLICATED_EMAIL_EXCEPTION(HttpStatus.BAD_REQUEST, "EU1008", "이미 사용 중인 이메일입니다."),
 
@@ -54,6 +57,7 @@ public enum ExceptionEnum {
     NOT_FOUND_REFRESHTOKEN_EXCEPTION(HttpStatus.NOT_FOUND, "EU4012", "토큰 정보를 찾을 수 없습니다."),
     NOT_FOUND_EMAILCODE_EXCEPTION(HttpStatus.NOT_FOUND, "EU4013", "인증 코드 정보를 찾을 수 없습니다."),
     NOT_FOUND_ADDRESSES_EXCEPTION(HttpStatus.NOT_FOUND, "EU4020", "주소 정보를 찾을 수 없습니다."),
+    NOT_FOUND_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.NOT_FOUND, "EU4021", "대표 주소 정보를 찾을 수 없습니다."),
     NOT_FOUND_FUNDING_REVIEW_EXCEPTION(HttpStatus.NOT_FOUND, "EU4030", "펀딩 후기 정보를 찾을 수 없습니다."),
     NOT_FOUND_FUNDING_WITH_IDX_EXCEPTION(HttpStatus.NOT_FOUND, "EU4031", "펀딩 정보를 찾을 수 없습니다."),
     NOT_FOUND_CHEER_COMMENT_EXCEPTION(HttpStatus.NOT_FOUND, "EU4040", "댓글 정보를 찾을 수 없습니다."),
@@ -69,6 +73,7 @@ public enum ExceptionEnum {
     PASSWORD_MISMATCH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU6011", "비밀번호가 일치하지 않습니다."),
     REFRESHTOKEN_MISMATCH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU6012", "토큰 정보가 일치하지 않습니다."),
     EMAILCODE_MISMATCH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU6013", "인증 코드가 일치하지 않습니다."),
+    ADMING_SIGNUP_CODE_MISMATCH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU6014", "관리자 회원가입을 위한 확인 코드가 일치하지 않습니다."),
 
     NOT_ALLOWED_LAST_ADDRESS_DELETION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU7020", "마지막 주소 정보는 삭제할 수 없습니다."),
     NOT_ALLOWED_FUNDING_REVIEW_INSERTION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU7030", "이미 펀딩 후기가 작성 되어 있습니다."),
@@ -81,6 +86,8 @@ public enum ExceptionEnum {
     NOT_ALLOWED_LIKED_DELETION_EXCEPTION(HttpStatus.BAD_REQUEST,"EG7020","해당 좋아요를 삭제할 수 없습니다."),
     NOT_ALLOWED_OPERATION_ON_DELETED_REVIEW_EXCEPTION(HttpStatus.BAD_REQUEST,"EG7030", "해당 리뷰는 삭제된 리뷰입니다."),
     NOT_ALLOWED_GIFT_REVIEW_INSERTION_EXCEPTION(HttpStatus.BAD_REQUEST,"EG7040","해당 주문의 리뷰는 이미 작성하셨습니다."),
+    NOT_ALLOWED_UPDATE_CORPORATION_EXCEPTION(HttpStatus.BAD_REQUEST, "ES7080", "이미 수혜자 자격이 승인된 사용자입니다."),
+    NOT_ALLOWED_UPDATE_CORPORATIONYET_EXCEPTION(HttpStatus.BAD_REQUEST, "ES7081", "이미 수혜자 자격이 승인되지 않은 사용자입니다."),
 
     NOT_FOUND_CATEGORY_EXCEPTION(HttpStatus.NOT_FOUND, "EC0001", "해당 카테고리를 찾을 수 없습니다."),
     NOT_FOUND_GIFT_EXCEPTION(HttpStatus.NOT_FOUND,"EG0001", "해당 답례품을 찾을 수 없습니다."),

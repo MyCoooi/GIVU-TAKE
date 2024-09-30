@@ -73,10 +73,6 @@ public class Users extends BaseTimeEntity {
     @Column(name = "social_serial_num", nullable = true)
     private String socialSerialNum;
 
-    // 수혜자만 해당
-    @Column(name = "status", nullable = true)
-    private Byte status;
-
     @Column(name = "is_withdraw", nullable = false)
     private boolean isWithdraw;
 }

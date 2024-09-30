@@ -63,9 +63,9 @@ dependencies {
 	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
-	// mail
-	implementation 'org.springframework.boot:spring-boot-starter-mail:3.3.2'
-
+    // itexpdf
+    implementation 'com.itextpdf:itextpdf:5.5.13.4'
+    implementation 'com.itextpdf.tool:xmlworker:5.5.13.4'
 }
 
 tasks.named('test') {
