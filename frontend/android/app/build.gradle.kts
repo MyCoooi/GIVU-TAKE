@@ -58,9 +58,13 @@ dependencies {
     // 직렬화
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 
+    implementation ("androidx.camera:camera-core:1.1.0")
+    implementation ("androidx.camera:camera-camera2:1.1.0")
+    implementation ("androidx.camera:camera-lifecycle:1.1.0")
+    implementation ("androidx.camera:camera-view:1.1.0")
+
     // Room 추가
     implementation("androidx.room:room-runtime:2.6.1")
-    implementation("com.google.firebase:firebase-crashlytics-buildtools:3.0.2")
     kapt("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
 
@@ -91,8 +95,6 @@ dependencies {
     // datastore 추가
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
-    // coroutine 추가
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.5")

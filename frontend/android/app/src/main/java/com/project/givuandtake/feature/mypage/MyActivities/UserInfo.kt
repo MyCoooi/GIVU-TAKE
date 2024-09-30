@@ -131,7 +131,7 @@ fun UserInfo(navController: NavController) {
                         .clip(CircleShape) // 이미지를 원으로 잘라줍니다.
                         .background(Color.LightGray, CircleShape) // 배경색 적용
                         .border(0.5.dp, Color.LightGray, CircleShape), // 테두리 추가
-                contentScale = ContentScale.Crop // 이미지를 원 안에 꽉 차도록 설정
+                    contentScale = ContentScale.Crop // 이미지를 원 안에 꽉 차도록 설정
                 )
             } else {
                 // URL이 없으면 Image 사용하여 로컬 리소스를 불러옵니다
@@ -193,7 +193,9 @@ fun UserInfo(navController: NavController) {
                     .background(Color(0xffFBFAFF))
                     .border(1.dp, Color(0XFFA093DE), RoundedCornerShape(20.dp))
                     .padding(vertical = 8.dp, horizontal = 16.dp)
-                    .clickable { /* 회원 정보 수정 로직 */ }
+                    .clickable {
+                        navController.navigate("userinfoupdate") // 로그인 화면으로 이동
+                    }
             ) {
                 Text(text = "회원정보 수정", fontSize = 14.sp, color = Color.Black)
             }
@@ -249,3 +251,4 @@ fun DrawLine() {
         )
     }
 }
+
