@@ -43,15 +43,6 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 // 경로별 인가 작업
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/users/client/**").hasRole("CLIENT")
-                        .requestMatchers(HttpMethod.POST,
-                                "/api/government-fundings",
-                                "/api/government-fundings/*/review")
-                                .hasRole("CORPORATION")
-                        .requestMatchers(HttpMethod.PATCH, "/api/government-fundings/*/review",
-                                "/api/government-fundings/*")
-                                .hasRole("CORPORATION")
-                        .requestMatchers(HttpMethod.DELETE, "/api/government-fundings/*").hasRole("CORPORATION")
                         .requestMatchers("/",
                                 "/api/auth",
                                 "/swagger-ui/**",
@@ -64,13 +55,29 @@ public class SecurityConfig {
                                 "/api/regions/sido",
                                 "/api/regions/sigungu",
                                 "/api/government-fundings",
+                                "/api/government-fundings/*",
+                                "/api/experience-village",
                                 "/api/purchases/completed",
                                 "/api/purchases/cancel",
                                 "/api/purchases/fail").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/users",
+                                "/api/admin",
                                 "/api/users/password/code",
                                 "/api/users/password/code/verification").permitAll()
                         .requestMatchers(HttpMethod.PATCH,"/api/users/password").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/government-fundings",
+                                "/api/government-fundings/*/review")
+                                .hasRole("CORPORATION")
+                        .requestMatchers(HttpMethod.PATCH, "/api/government-fundings/*/review",
+                                "/api/government-fundings/*")
+                                .hasRole("CORPORATION")
+                        .requestMatchers(HttpMethod.DELETE, "/api/government-fundings/*",
+                                "/api/users").hasRole("CORPORATIONYET")
+                        .requestMatchers(HttpMethod.DELETE, "api/users").hasRole("CORPORATION_YET")
+                        .requestMatchers("/api/users/client/**").hasRole("CLIENT")
+                        .requestMatchers(HttpMethod.DELETE,"/api/users").hasRole("CLIENT")
                         // 이 밖에 모든 요청에 대해서 인증을 필요로 한다는 설정
                         .anyRequest().authenticated()
                 )
