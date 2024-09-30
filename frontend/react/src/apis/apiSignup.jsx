@@ -47,13 +47,18 @@ export const signUp = async (formData) => {
     socialSerialNum: null,
   };
 
+  console.log("회원가입 요청 데이터:", signUpDto);
+
   try {
     const response = await axios.post(`${apiUrl}/users`, { signUpDto }); // 회원가입 POST 요청
+    // 응답 로그 출력
+    console.log("회원가입 응답 데이터:", response.data);
     return response.data; // 응답 데이터 반환
   } catch (error) {
     console.error("Failed to sign up:", error);
     throw error;
   }
+
 };
 
 export default { getSido, getSigungu, signUp };
