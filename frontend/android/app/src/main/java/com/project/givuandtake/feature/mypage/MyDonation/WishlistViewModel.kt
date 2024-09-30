@@ -17,15 +17,13 @@ open class WishlistViewModel(application: Application) : AndroidViewModel(applic
     private val giftRepository = GiftRepository(context)
 
     // wishlistItems 타입을 명시적으로 지정 (StateFlow<Set<String>>)
-    val wishlistItems: StateFlow<Set<String>> = WishlistRepository.getWishlist(context)
+    val wishlistItemsIds: StateFlow<Set<String>> = WishlistRepository.getWishlist(context)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet<String>()) // 타입 지정
-
 
     // 아이템을 위시리스트에 추가
     fun addItemToWishlist(giftDetail: GiftDetail) {
         viewModelScope.launch {
             WishlistRepository.addItemToWishlist(context, giftDetail.giftIdx.toString())
-
         }
     }
 
@@ -35,11 +33,12 @@ open class WishlistViewModel(application: Application) : AndroidViewModel(applic
             WishlistRepository.removeItemFromWishlist(context, giftDetail.giftIdx.toString())
         }
     }
+
     // 찜 상태를 토글 (추가/제거)
     fun toggleWishlistItem(giftDetail: GiftDetail) {
         viewModelScope.launch {
             val itemId = giftDetail.giftIdx.toString() // GiftDetail의 id를 String으로 변환
-            val currentWishlist = wishlistItems.value // 현재 위시리스트 Set 가져오기
+            val currentWishlist = wishlistItemsIds.value // 현재 위시리스트 Set 가져오기
             Log.d("WishlistViewModel", "currentWishlist: $currentWishlist")
 
             // contains 사용하여 해당 아이템이 있는지 확인
@@ -48,11 +47,10 @@ open class WishlistViewModel(application: Application) : AndroidViewModel(applic
             } else {
                 addItemToWishlist(giftDetail)
             }
-            // 로그로 상태 변화 확인
-            val updatedWishlist = wishlistItems.value
-            Log.d("WishlistViewModel", "Updated wishlist: $updatedWishlist")
 
+            // 로그로 상태 변화 확인
+            val updatedWishlist = wishlistItemsIds.value
+            Log.d("WishlistViewModel", "Updated wishlist: $updatedWishlist")
         }
     }
 }
-

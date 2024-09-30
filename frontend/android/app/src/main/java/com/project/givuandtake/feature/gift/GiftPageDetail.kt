@@ -43,7 +43,7 @@ import com.project.givuandtake.core.datastore.TokenDataStore
 import com.project.givuandtake.core.datastore.getCartItems
 import com.project.givuandtake.core.datastore.saveCartItems
 import com.project.givuandtake.feature.gift.GiftViewModel
-import com.project.givuandtake.feature.gift.addToCart
+
 import kotlinx.coroutines.runBlocking
 
 
@@ -170,6 +170,8 @@ fun GiftBottomBar(
     navController: NavController,
     giftDetail: GiftDetailData
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -182,8 +184,21 @@ fun GiftBottomBar(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val context = LocalContext.current  // 현재 Context 가져오기
             Button(
-                onClick = { onAddToCart() },
+                onClick = {
+                    coroutineScope.launch {
+                        // 장바구니에 추가하는 API 호출
+                        val result = addToCartApi(context, giftDetail.giftIdx, 1)
+                        if (result) {
+                            // 성공 시 행동
+                            onAddToCart()
+                        } else {
+                            // 실패 시 행동
+                            println("장바구니 추가 실패")
+                        }
+                    }
+                },
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 4.dp),
