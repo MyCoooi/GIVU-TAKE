@@ -1,6 +1,7 @@
 package com.accepted.givutake.user.client.model;
 
 import com.accepted.givutake.user.client.entity.Addresses;
+import com.accepted.givutake.user.common.entity.Users;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -65,9 +66,9 @@ public class AddressAddDto {
 //    private BigDecimal latitude;
 //    private BigDecimal longitude;
 
-    public Addresses toEntity(int userIdx, int regionIdx) {
+    public Addresses toEntity(Users users, int regionIdx) {
         return Addresses.builder()
-                .userIdx(userIdx)
+                .users(users)
                 .regionIdx(regionIdx)
                 .addressName(this.addressName)
                 .zoneCode(this.zoneCode)

@@ -12,7 +12,9 @@ import com.accepted.givutake.payment.repository.OrderRepository;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.user.common.entity.Users;
+import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.repository.UsersRepository;
+import com.accepted.givutake.user.common.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,6 +23,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.List;
 
@@ -32,6 +36,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UsersRepository userRepository;
     private final GiftRepository giftRepository;
+    private final UserService userService;
     private final GiftReviewRepository giftReviewRepository;
 
     public Orders createOrder(String email, CreateOrderDto request){
@@ -68,6 +73,37 @@ public class OrderService {
                 .createdDate(order.getCreatedDate())
                 .build()
         ).toList();
+    }
+
+    // 특정 일자의 자신의 답례품 구매 내역 가져오기
+    public List<Orders> getOrdersCreatedDateBetweenByEmail(String email, LocalDate startDate, LocalDate endDate) {
+        // 1. 유저 정보 DB에서 조회
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        Users savedUsers = savedUserDto.toEntity();
+
+        // 2. 특정 일자의 구매 내역 가져오기
+        LocalDateTime startDateTime = null;
+        LocalDateTime endDateTime = null;
+
+        // startDate와 endDate가 null이면 모든 데이터 조회
+        if (startDate == null && endDate == null) {
+            return orderRepository.findByUsers(savedUsers);
+        }
+        // 시작일이 null일 경우 endDate이전의 모든 데이터 조회
+        else if (startDate == null) {
+            endDateTime = endDate.atTime(23, 59, 59);
+            return orderRepository.findByUsersAndCreatedDateBefore(savedUsers, endDateTime);
+        }
+        // 종료일이 null일 경우 startDate 이후의 모든 데이터 조회
+        else if (endDate == null) {
+            startDateTime = startDate.atStartOfDay();
+            return orderRepository.findByUsersAndCreatedDateAfter(savedUsers, startDateTime);
+        }
+        else {
+            startDateTime = startDate.atStartOfDay();
+            endDateTime = endDate.atTime(23, 59, 59);
+            return orderRepository.findByUsersAndCreatedDateBetween(savedUsers, startDateTime, endDateTime);
+        }
     }
 
     public OrderDto getOrder(String email, int orderIdx){
@@ -117,9 +153,23 @@ public class OrderService {
         return orderRepository.countByGift(gift);
     }
 
-    public int calculateTotalOrderPrice(){
+    public int calculateTotalOrderPrice() {
         int totalOrderPrice = Optional.ofNullable(orderRepository.getTotalOrderPrice()).orElse(0);
         return totalOrderPrice;
+    }
+
+    public int calculateTotalOrderPriceByEmail(String email) {
+        // 1. 유저 조회
+        UserDto savedUserDto = userService.getUserByEmail(email);
+
+        // 2. 사용자가 구매한 모든 답례품의 총금액 조회
+        Integer sum = orderRepository.sumPriceByUserIdx(savedUserDto.getUserIdx());
+
+        if (sum == null) {
+            return 0;
+        }
+
+        return sum;
     }
 
 }
