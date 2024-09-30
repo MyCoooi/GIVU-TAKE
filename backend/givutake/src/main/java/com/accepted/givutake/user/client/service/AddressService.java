@@ -3,8 +3,8 @@ package com.accepted.givutake.user.client.service;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.user.client.entity.Addresses;
-import com.accepted.givutake.user.client.model.AddressViewDto;
 import com.accepted.givutake.user.client.repository.AddressRepository;
+import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -22,27 +21,27 @@ import java.util.stream.Collectors;
 public class AddressService {
 
     private final AddressRepository addressRepository;
-    private final UsersRepository usersRepository;
 
-    // DB에 주소 정보 저장
-    public Addresses saveAddress(Addresses addresses) {
-        // 대표 주소일 때, 기존의 대표 주소가 있으면 비활성화
-        if (addresses.isRepresentative()) {
-            // TODO: 고치기..
-            // JPA의 영속성 문제로 이미 addresses가 db에서 대표주소로 설정되어 있다면, isRepresentative값이 true로 변경되지 않는 문제가 있어 아래 과정 추가
-            Boolean isRepresentative = addressRepository.findIsRepresentativeByAddressIdx(addresses.getAddressIdx());
-            if (isRepresentative == null || !isRepresentative) {
-                addressRepository.updateRepresentativeStatusFalse(addresses.getUserIdx());
-            }
-        }
-
+    // DB에 저장
+    public Addresses saveAddresses(Addresses addresses) {
         return addressRepository.save(addresses);
+    }
+
+    // 이전의 대표주소를 false 처리
+    public void updateRepresentativeAddressFalse(Users users) {
+        Optional<Addresses> optionalRepresentativeAddress = addressRepository.findByUsersAndIsDeletedFalseAndIsRepresentativeTrue(users);
+
+        if (optionalRepresentativeAddress.isPresent()) {
+            Addresses representativeAddresses = optionalRepresentativeAddress.get();
+            representativeAddresses.setRepresentative(false);
+            addressRepository.save(representativeAddresses);
+        }
     }
 
     // userIdx에 해당하는 유저의 모든 주소록 조회
     // (삭제 처리된 주소 제외하며, isRepresentative가 true인 정보 먼저 조회)
-    public List<Addresses> getAddressesByUserIdx(int userIdx) {
-        return addressRepository.findByUserIdxAndIsDeletedFalseOrderByIsRepresentativeDesc(userIdx);
+    public List<Addresses> getAddressesByUsers(Users users) {
+        return addressRepository.findByUsersAndIsDeletedFalseOrderByIsRepresentativeDesc(users);
     }
 
     // addressIdx에 해당하는 주소 조회(삭제된 주소는 조회 불가)
@@ -63,9 +62,9 @@ public class AddressService {
         return savedAddresses;
     }
 
-    // userIdx에 해당하는 유저의 대표 주소 조회
-    public Addresses getRepresentativeAddressesByUserIdx(int userIdx) {
-        Optional<Addresses> optionalAddresses = addressRepository.findByUserIdxAndIsDeletedFalseAndIsRepresentativeTrue(userIdx);
+    // 유저의 대표 주소 조회
+    public Addresses getRepresentativeAddressesByUsers(Users users) {
+        Optional<Addresses> optionalAddresses = addressRepository.findByUsersAndIsDeletedFalseAndIsRepresentativeTrue(users);
 
         if (optionalAddresses.isPresent()) {
             return optionalAddresses.get();
@@ -81,8 +80,8 @@ public class AddressService {
         return addressRepository.save(addresses);
     }
 
-    // userIdx에 해당하는 사용자의 총 주소 개수 조회
-    public long countByUserIdx(int userIdx) {
-        return addressRepository.countByUserIdx(userIdx);
+    // 사용자의 총 주소 개수 조회
+    public long countByUsers(Users users) {
+        return addressRepository.countByUsers(users);
     }
 }

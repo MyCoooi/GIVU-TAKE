@@ -106,7 +106,7 @@ public class UserService {
             String sigungu = addressAddDto.getSigungu();
             int regionIdx = regionService.getRegionIdxBySidoAndSigungu(sido, sigungu);
 
-            addressService.saveAddress(addressAddDto.toEntity(savedUser.getUserIdx(), regionIdx));
+            addressService.saveAddresses(addressAddDto.toEntity(savedUser, regionIdx));
         }
     }
 

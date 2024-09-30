@@ -1,6 +1,7 @@
 package com.accepted.givutake.user.client.repository;
 
 import com.accepted.givutake.user.client.entity.Addresses;
+import com.accepted.givutake.user.common.entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -12,14 +13,10 @@ import java.util.Optional;
 
 @Repository
 public interface AddressRepository extends JpaRepository<Addresses, Integer> {
-    List<Addresses> findByUserIdxAndIsDeletedFalseOrderByIsRepresentativeDesc(int userIdx);
-    Optional<Addresses> findByUserIdxAndIsDeletedFalseAndIsRepresentativeTrue(int userIdx);
+    List<Addresses> findByUsersAndIsDeletedFalseOrderByIsRepresentativeDesc(Users users);
+    Optional<Addresses> findByUsersAndIsDeletedFalseAndIsRepresentativeTrue(Users users);
     Optional<Addresses> findByAddressIdx(int addressIdx);
-    long countByUserIdx(int userIdx);
-
-    @Modifying
-    @Query("UPDATE Addresses a SET a.isRepresentative = false WHERE a.userIdx = :userIdx AND a.isRepresentative = true")
-    void updateRepresentativeStatusFalse(@Param("userIdx") int userIdx);
+    long countByUsers(Users users);
 
     @Query("SELECT a.isRepresentative FROM Addresses a WHERE a.addressIdx = :addressIdx")
     Boolean findIsRepresentativeByAddressIdx(@Param("addressIdx") int addressIdx);
