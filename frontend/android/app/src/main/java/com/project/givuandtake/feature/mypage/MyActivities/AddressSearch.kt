@@ -1,5 +1,8 @@
 package com.project.givuandtake.feature.mypage.MyActivities
 
+import android.content.Context
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -10,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,9 +28,7 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
@@ -37,17 +39,26 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.gson.Gson
 import com.project.givuandtake.R
-import com.project.givuandtake.feature.attraction.FestivalIdData
+import com.project.givuandtake.core.apis.Address.AddressPostApi
+import com.project.givuandtake.core.data.Address.AddressPostData
+import com.project.givuandtake.core.data.Address.Juso
+import com.project.givuandtake.core.data.Address.JusoResponse
+import com.project.givuandtake.core.datastore.TokenManager
 import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
@@ -56,23 +67,33 @@ import okhttp3.Request
 import okhttp3.Response
 import okio.IOException
 
-data class JusoResponse(val results: JusoResults)
+class AddressPostViewModel : ViewModel() {
+    fun postAddressData(token: String, addressRequest: AddressPostData, context: Context) {
+        viewModelScope.launch {
+            try {
+                // Log 시작 지점
+                Log.d("AddressPost", "주소 등록 시작: $addressRequest")
 
-data class JusoResults(val juso: List<Juso>)
+                val response = AddressPostApi.api.postAddressData("$token", addressRequest)
 
-data class Juso(
-    val roadAddr: String,
-    val jibunAddr: String,
-    val zipNo: String,
-    val admCd: String,
-    val bdMgtSn: String,
-    val bdNm: String,
-    val bdKdcd: String,
-    val siNm: String,
-    val sggNm: String,
-    val Rn: String,
-    val emdNo: String,
-)
+                // 응답 로그
+                Log.d("AddressPost", "응답 코드: ${response.code()}")
+                Log.d("AddressPost", "응답 메시지: ${response.message()}")
+
+                if (response.isSuccessful) {
+                    Log.d("AddressPost", "주소 등록 성공")
+                    Toast.makeText(context, "주소가 성공적으로 등록되었습니다.", Toast.LENGTH_LONG).show()
+                } else {
+                    Log.e("AddressPost", "주소 등록 실패: ${response.errorBody()?.string()}")
+                    Toast.makeText(context, "주소 등록에 실패했습니다.", Toast.LENGTH_LONG).show()
+                }
+            } catch (e: Exception) {
+                Log.e("AddressPost", "예외 발생: ${e.message}", e)
+                Toast.makeText(context, "네트워크 오류가 발생했습니다.", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+}
 
 fun fetchAddressResults(keyword: String, onResult: (List<Juso>) -> Unit) {
     val client = OkHttpClient()
@@ -117,13 +138,54 @@ fun fetchAddressResults(keyword: String, onResult: (List<Juso>) -> Unit) {
 @Composable
 fun AddressSearch(navController: NavController) {
     var addressInput by remember { mutableStateOf("") }
-    var searchResults by remember { mutableStateOf<List<Juso>>(listOf(Juso(roadAddr = "1", jibunAddr = "1", zipNo = "1", admCd = "1", bdMgtSn = "1", bdNm = "1", bdKdcd = "1", siNm = "1", sggNm = "1", Rn = "1", emdNo = "1" ))) }
+    var searchResults by remember {
+        mutableStateOf<List<Juso>>(
+            listOf(
+                Juso(
+                    roadAddr = "1",
+                    jibunAddr = "지번 주소",
+                    zipNo = "우편번호",
+                    bdNm = "건물명",
+                    bdKdcd = "건물 코드",
+                    siNm = "시 이름",
+                    sggNm = "구 이름",
+                    emdNm = "읍면동 이름",
+                    liNm = "리 이름"
+                )
+            )
+        )
+    }
     val scope = rememberCoroutineScope()
     var selectedJuso by remember { mutableStateOf<Juso?>(null) }
     var detailedAddress by remember { mutableStateOf("") }
     var addressName by remember { mutableStateOf("") }
-    var customAddress by remember { mutableStateOf("") }
     var openCustomAddress by remember { mutableStateOf(false) }
+
+    val viewModel: AddressPostViewModel = viewModel()
+    val context = LocalContext.current
+    val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
+
+    val addressRequest = AddressPostData(
+        zoneCode = "${selectedJuso?.zipNo}",
+        addressName = "$addressName",
+        address = "${selectedJuso?.siNm} ${selectedJuso?.sggNm}",
+        roadAddress = "${selectedJuso?.roadAddr}",
+        jibunAddress = "${selectedJuso?.jibunAddr}",
+        detailAddress = "$detailedAddress",
+        buildingName = "${selectedJuso?.bdNm}",
+        isApartment = when (selectedJuso?.bdKdcd) {
+            "1" -> true
+            "2" -> false
+            else -> false
+        },
+        sido = "${selectedJuso?.siNm}",
+        sigungu = "${selectedJuso?.sggNm}",
+        bname = "${selectedJuso?.emdNm}",
+        bname1 = "${selectedJuso?.liNm}",
+        isRepresentative = true
+    )
+
+    Log.d("AddressPost", "${addressName}")
 
     Column() {
 
@@ -319,8 +381,6 @@ fun AddressSearch(navController: NavController) {
                     .fillMaxWidth()
                     .fillMaxHeight()
                     .padding(8.dp),
-//                verticalArrangement = Arrangement.Center,
-//                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = selectedJuso!!.roadAddr,
@@ -395,7 +455,10 @@ fun AddressSearch(navController: NavController) {
                         modifier = Modifier
                             .weight(1f)
                             .border(
-                                border = if (addressName == "우리집" && openCustomAddress == false) BorderStroke(2.dp, Color(0xFFA093DE)) else BorderStroke(0.dp, Color.Transparent),
+                                border = if (addressName == "우리집" && openCustomAddress == false) BorderStroke(
+                                    2.dp,
+                                    Color(0xFFA093DE)
+                                ) else BorderStroke(0.dp, Color.Transparent),
                                 shape = RoundedCornerShape(8.dp)
                             )
                     ) {
@@ -419,7 +482,10 @@ fun AddressSearch(navController: NavController) {
                         modifier = Modifier
                             .weight(1f)
                             .border(
-                                border = if (addressName == "회사" && openCustomAddress == false) BorderStroke(2.dp, Color(0xFFA093DE)) else BorderStroke(0.dp, Color.Transparent),
+                                border = if (addressName == "회사" && openCustomAddress == false) BorderStroke(
+                                    2.dp,
+                                    Color(0xFFA093DE)
+                                ) else BorderStroke(0.dp, Color.Transparent),
                                 shape = RoundedCornerShape(8.dp)
                             )
                     ) {
@@ -442,7 +508,10 @@ fun AddressSearch(navController: NavController) {
                         modifier = Modifier
                             .weight(1f)
                             .border(
-                                border = if (openCustomAddress == true) BorderStroke(2.dp, Color(0xFFA093DE)) else BorderStroke(0.dp, Color.Transparent),
+                                border = if (openCustomAddress == true) BorderStroke(
+                                    2.dp,
+                                    Color(0xFFA093DE)
+                                ) else BorderStroke(0.dp, Color.Transparent),
                                 shape = RoundedCornerShape(8.dp)
                             )
                     ) {
@@ -507,6 +576,28 @@ fun AddressSearch(navController: NavController) {
                                 )
                             }
                         }
+                    }
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(10.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                viewModel.postAddressData(accessToken, addressRequest, context)
+                            }
+                                  },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .shadow(8.dp, RoundedCornerShape(24.dp))
+                            .height(55.dp)
+                            .align(Alignment.BottomCenter),
+                        shape = RoundedCornerShape(15.dp),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFB3C3F4))
+                    ) {
+                        Text(text = "주소 등록하기", fontSize = 18.sp, color = Color.White)
                     }
                 }
             }

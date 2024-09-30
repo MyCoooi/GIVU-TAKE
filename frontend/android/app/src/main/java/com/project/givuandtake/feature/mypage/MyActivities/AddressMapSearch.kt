@@ -1,11 +1,13 @@
 import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.content.Context.LOCATION_SERVICE
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -26,6 +28,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -38,7 +41,10 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.LocationTrackingMode
@@ -48,6 +54,10 @@ import com.naver.maps.map.NaverMapOptions
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.util.FusedLocationSource
 import com.project.givuandtake.R
+import com.project.givuandtake.core.apis.Address.AddressPostApi
+import com.project.givuandtake.core.data.Address.AddressPostData
+import com.project.givuandtake.core.datastore.TokenManager
+import com.project.givuandtake.feature.mypage.MyActivities.AddressPostViewModel
 import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
@@ -57,7 +67,35 @@ import okhttp3.Response
 import okio.IOException
 import org.json.JSONObject
 
-fun reverseGeocode(lat: Double, lng: Double, onResult: (String, String, String, String, String, String) -> Unit) {
+class AddressPostViewModel : ViewModel() {
+    fun postAddressData(token: String, addressRequest: AddressPostData, context: Context) {
+        viewModelScope.launch {
+            try {
+                // Log 시작 지점
+                Log.d("AddressPost", "주소 등록 시작: $addressRequest")
+
+                val response = AddressPostApi.api.postAddressData("$token", addressRequest)
+
+                // 응답 로그
+                Log.d("AddressPost", "응답 코드: ${response.code()}")
+                Log.d("AddressPost", "응답 메시지: ${response.message()}")
+
+                if (response.isSuccessful) {
+                    Log.d("AddressPost", "주소 등록 성공")
+                    Toast.makeText(context, "주소가 성공적으로 등록되었습니다.", Toast.LENGTH_LONG).show()
+                } else {
+                    Log.e("AddressPost", "주소 등록 실패: ${response.errorBody()?.string()}")
+                    Toast.makeText(context, "주소 등록에 실패했습니다.", Toast.LENGTH_LONG).show()
+                }
+            } catch (e: Exception) {
+                Log.e("AddressPost", "예외 발생: ${e.message}", e)
+                Toast.makeText(context, "네트워크 오류가 발생했습니다.", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+}
+
+fun reverseGeocode(lat: Double, lng: Double, onResult: (String, String, String, String, String, String, String, String) -> Unit) {
     val client = OkHttpClient()
     val url = "https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?request=coordsToaddr&coords=$lng,$lat&sourcecrs=epsg:4326&output=json&orders=legalcode,addr,roadaddr"
 
@@ -85,6 +123,8 @@ fun reverseGeocode(lat: Double, lng: Double, onResult: (String, String, String, 
                 var buildingName = "건물명 없음"
                 var legalDong = "법정동/법정리 없음"
                 var eupMyon = "읍/면 없음"
+                var sido = "시/도 없음"
+                var sigungu = "시/군/구 없음"
 
                 for (i in 0 until results.length()) {
                     val result = results.getJSONObject(i)
@@ -97,6 +137,8 @@ fun reverseGeocode(lat: Double, lng: Double, onResult: (String, String, String, 
                             val area2 = region.getJSONObject("area2").getString("name")
                             val roadName = land.getString("name")
                             roadAddress = "$area1 $area2 $roadName ${land.getString("number1")}"
+                            sido = "$area1"
+                            sigungu = "$area2"
 
                             // 우편번호와 건물명 추출
                             if (land.has("addition0") && land.getJSONObject("addition0").getString("type") == "building") {
@@ -127,7 +169,7 @@ fun reverseGeocode(lat: Double, lng: Double, onResult: (String, String, String, 
                 }
 
                 // 콜백으로 필요한 정보 반환
-                onResult(roadAddress, jibunAddress, postalCode, buildingName, legalDong, eupMyon)
+                onResult(roadAddress, jibunAddress, postalCode, buildingName, legalDong, eupMyon, sido, sigungu)
             }
         }
     })
@@ -141,6 +183,9 @@ fun AddressMapSearch(navController: NavController) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
     val activity = LocalContext.current as Activity
+    val scope = rememberCoroutineScope()
+    val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
+    val viewModel: AddressPostViewModel = viewModel()
 
     // FusedLocationSource를 생성합니다.
     val locationSource = remember { FusedLocationSource(activity, LOCATION_PERMISSION_REQUEST_CODE) }
@@ -157,12 +202,30 @@ fun AddressMapSearch(navController: NavController) {
     var buildingNameData by remember { mutableStateOf("빌딩이름을 찾을 수 없음") }
     var legalDongData by remember { mutableStateOf("법정동을 찾을 수 없음") }
     var eupMyonData by remember { mutableStateOf("법정면을 찾을 수 없음") }
+    var sidoData by remember { mutableStateOf("시도를 찾을 수 없음") }
+    var sigunguData by remember { mutableStateOf("시군구를 찾을 수 없음") }
 
     var settingCustomJuso by remember { mutableStateOf(false) }
     var openCustomAddress by remember { mutableStateOf(false) }
 
     var detailedAddress by remember { mutableStateOf("") }
     var addressName by remember { mutableStateOf("") }
+
+    val addressRequest = AddressPostData(
+        zoneCode = postalCodeData,
+        addressName = "$addressName",
+        address = "$sidoData $sigunguData",
+        roadAddress = roadAddressData,
+        jibunAddress = jibunAddressData,
+        detailAddress = "$detailedAddress",
+        buildingName = buildingNameData,
+        isApartment = false,
+        sido = sidoData,
+        sigungu = sigunguData,
+        bname = legalDongData,
+        bname1 = eupMyonData,
+        isRepresentative = true
+    )
 
     // 권한 요청을 위한 런처 설정
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -246,13 +309,15 @@ fun AddressMapSearch(navController: NavController) {
                     centerCoordinates = newCenter // Update the coordinates for the Text
 
                     // Reverse geocode to get the address
-                    reverseGeocode(centerCoordinates.latitude, centerCoordinates.longitude) { roadAddress, jibunAddress, postalCode, buildingName, legalDong, eupMyon ->
+                    reverseGeocode(centerCoordinates.latitude, centerCoordinates.longitude) { roadAddress, jibunAddress, postalCode, buildingName, legalDong, eupMyon, sido, sigungu ->
                         roadAddressData = roadAddress
                         jibunAddressData = jibunAddress
                         postalCodeData = postalCode
                         buildingNameData = buildingName
                         legalDongData = legalDong
                         eupMyonData = eupMyon
+                        sidoData = sido
+                        sigunguData = sigungu
                         Log.d("AddressMapSearch", "도로명 주소: $roadAddress, 지번 주소: $jibunAddress, 우편번호: $postalCode, 건물명: $buildingName, 법정동: $legalDong, 읍/면: $eupMyon")
                     }
                 }
@@ -568,6 +633,28 @@ fun AddressMapSearch(navController: NavController) {
                                 )
                             }
                         }
+                    }
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(10.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                viewModel.postAddressData(accessToken, addressRequest, context)
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .shadow(8.dp, RoundedCornerShape(24.dp))
+                            .height(55.dp)
+                            .align(Alignment.BottomCenter),
+                        shape = RoundedCornerShape(15.dp),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFB3C3F4))
+                    ) {
+                        Text(text = "주소 등록하기", fontSize = 18.sp, color = Color.White)
                     }
                 }
             }

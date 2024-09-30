@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -25,13 +26,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.givuandtake.FundingMainPage
-import com.google.gson.Gson
 import com.project.givuandtake.auth.LoginScreen
 import com.project.givuandtake.auth.SignupStep1
 import com.project.givuandtake.auth.SignupStep2
 import com.project.givuandtake.auth.SignupStep3
 import com.project.givuandtake.auth.SignupViewModel
-import com.project.givuandtake.core.apis.UserInfoResponse
 import com.project.givuandtake.core.data.CartItem
 import com.project.givuandtake.feature.attraction.FestivalPage
 import com.project.givuandtake.feature.attraction.LocationSelect
@@ -167,7 +166,7 @@ class MainActivity : ComponentActivity() {
                                 PaymentSuccessPage(navController)
                             }
 
-                            // 마이 페이지
+                            // 관광 페이지
                             composable("locationSelection") {
                                 LocationSelect(navController)
                             }
@@ -199,9 +198,6 @@ class MainActivity : ComponentActivity() {
                             composable("donationdetails") { DonationDetails(navController) }
                             composable("donationreceipt") { DonationReceipt(navController) }
                             composable("fundingdetails") { FundingDetails(navController) }
-
-
-
 
                             composable("mycomment") { MyComment(navController) }
                             composable("myreview") { MyReview(navController) }

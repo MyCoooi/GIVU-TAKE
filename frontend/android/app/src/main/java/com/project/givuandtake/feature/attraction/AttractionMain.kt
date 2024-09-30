@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.project.givuandtake.R
 import com.project.givuandtake.core.apis.RetrofitInstance
@@ -351,7 +352,7 @@ fun AttractionMain(navController: NavController, city: String?) {
                     }
 
                     3 -> {
-                        MainVillageTab()
+                        MainVillageTab(navController = navController, displayedCity = displayedCity, viewModel = viewModel())
                     }
                 }
             }
