@@ -1,331 +1,357 @@
-package com.example.givuandtake
+package com.project.givuandtake.feature.fundinig
 
-import android.net.Uri
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
-import com.project.givuandtake.ui.theme.GivuAndTakeTheme
-import kotlinx.coroutines.launch
+import com.project.givuandtake.core.apis.Funding.FundingData
+import com.project.givuandtake.core.apis.Funding.FundingResponse
+import com.project.givuandtake.core.apis.Funding.SearchFundingApi
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.text.NumberFormat
-import java.text.SimpleDateFormat
 import java.util.Locale
-
-data class FundingCard(
-    val title: String,
-    val location: String,
-    val startDate: String,
-    val endDate: String,
-    val amounts: Pair<Float, Float>,
-    val imageUrl: String // 이미지 URL 또는 리소스 경로 추가
-)
 
 @Composable
 fun FundingMainPage(navController: NavController) {
-    val scrollState = rememberScrollState()
-    val coroutineScope = rememberCoroutineScope()
+    var selectedCategory by remember { mutableStateOf("재난·재해") }  // 카테고리 선택 변수
+    var allFundingCards by remember { mutableStateOf<List<FundingData>>(emptyList()) }  // 전체 펀딩 데이터
+    var displayedFundingCards by remember { mutableStateOf<List<FundingData>>(emptyList()) }  // 화면에 표시되는 펀딩 데이터
+    var selectedState by remember { mutableStateOf(1) }  // 진행 중 or 완료 상태
+    var expandedSort by remember { mutableStateOf(false) }  // 정렬 드롭다운 상태
+    var selectedSort by remember { mutableStateOf("종료 임박순") }  // 정렬 옵션
+    var itemsToShow by remember { mutableStateOf(6) }  // 처음에 표시할 데이터 수
 
-    // 각각의 섹션에서 독립적인 정렬 및 필터 상태 관리
-    var disasterSelectedSort by remember { mutableStateOf("종료 임박순") }
-    var disasterSelectedFilter by remember { mutableStateOf("진행 중") }  // 필터 추가
-    var donationSelectedSort by remember { mutableStateOf("종료 임박순") }
-    var donationSelectedFilter by remember { mutableStateOf("진행 중") }  // 필터 추가
-
-    val disasterCards = listOf(
-        FundingCard("태풍 피해 복구 지원 사업", "울산광역시 동구", "2024-07-17", "2024-08-25", Pair(7000000f, 10000000f),
-            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg"),
-        FundingCard("산불 피해 복구 지원 사업", "경상북도 구미시", "2024-07-11", "2024-09-25", Pair(5000000f, 10000000f),
-            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg"),
-        FundingCard("추가 카드1", "위치1", "2024-06-11", "2024-09-25", Pair(3000000f, 10000000f),
-            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg"),
-        FundingCard("추가 카드2", "위치2", "2024-05-11", "2024-11-25", Pair(2000000f, 10000000f),
-            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg"),
-        FundingCard("추가 카드3", "위치3", "2024-04-11", "2024-10-25", Pair(2000000f, 10000000f),
-            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg"),
-        FundingCard("추가 카드3", "위치3", "2024-04-11", "2024-10-25", Pair(2000000f, 10000000f),
-            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg")
-    )
-
-    val localDonationCards = listOf(
-        FundingCard("유기 동물 구조·보호 지원 사업", "경상남도 하동군", "2024-08-11", "2024-08-25", Pair(3000000f, 10000000f),
-            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg"),
-        FundingCard("재난 지원 사업", "울산광역시 서구", "2024-09-11", "2024-09-25", Pair(2000000f, 10000000f),
-            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg"),
-        FundingCard("추가 카드3", "위치3", "2024-07-12", "2024-08-25", Pair(3000000f, 10000000f),
-            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg"),
-        FundingCard("추가 카드4", "위치4", "2024-07-13", "2024-08-25", Pair(2000000f, 10000000f),
-            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg"),
-        FundingCard("추가 카드5", "위치5", "2024-07-14", "2024-08-25", Pair(2000000f, 10000000f),
-            imageUrl = "https://cdn.idomin.com/news/photo/202108/769634_452493_1211.jpg")
-    )
-
-    // 필터링된 리스트
-    val filteredDisasterCards = if (disasterSelectedFilter == "진행 중") {
-        disasterCards.filter { it.endDate > "2024-09-10" }  // 현재 날짜보다 이후인 경우 진행 중
-    } else {
-        disasterCards.filter { it.endDate <= "2024-09-10" }  // 완료된 경우
-    }
-
-    val filteredDonationCards = if (donationSelectedFilter == "진행 중") {
-        localDonationCards.filter { it.endDate > "2024-09-10" }
-    } else {
-        localDonationCards.filter { it.endDate <= "2024-09-10" }
-    }
-
-    // 정렬
-    val sortedDisasterCards = when (disasterSelectedSort) {
-        "최근 등록순" -> filteredDisasterCards.sortedByDescending { parseDate(it.startDate) }
-        "종료 임박순" -> filteredDisasterCards.sortedBy { parseDate(it.endDate) }
-        else -> filteredDisasterCards
-    }
-
-    val sortedDonationCards = when (donationSelectedSort) {
-        "최근 등록순" -> filteredDonationCards.sortedByDescending { parseDate(it.startDate) }
-        "종료 임박순" -> filteredDonationCards.sortedBy { parseDate(it.endDate) }
-        else -> filteredDonationCards
-    }
-
-    // Pagination settings
-    var currentDisasterPage by remember { mutableStateOf(0) }
-    var currentDonationPage by remember { mutableStateOf(0) }
-    val itemsPerPage = 4
-
-    val disasterTotalPages = (sortedDisasterCards.size + itemsPerPage - 1) / itemsPerPage
-    val donationTotalPages = (sortedDonationCards.size + itemsPerPage - 1) / itemsPerPage
-
-    Column(modifier = Modifier
-        .padding(16.dp)
-        .verticalScroll(scrollState)) {
-
-        // 재난·재해 섹션
-        Text(text = "재난·재해", style = MaterialTheme.typography.titleLarge)
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // RadioButtonGroup에 필터 값 전달
-            RadioButtonGroup(
-                selectedOption = disasterSelectedFilter,
-                onOptionSelected = { disasterSelectedFilter = it }
-            )
-            SortDropdownMenu(selectedSort = disasterSelectedSort, onSortChange = { sortOption ->
-                disasterSelectedSort = sortOption
-            })
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        val disasterStartIndex = currentDisasterPage * itemsPerPage
-        val disasterEndIndex = minOf(disasterStartIndex + itemsPerPage, sortedDisasterCards.size)
-        val disasterItemsToShow = sortedDisasterCards.subList(disasterStartIndex, disasterEndIndex)
-
-        val disasterDynamicHeight = when (disasterItemsToShow.size) {
-            1, 2 -> 350.dp
-            else -> 700.dp
-        }
-
-        LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.height(disasterDynamicHeight)) {
-            items(disasterItemsToShow) { card ->
-                FundingCardComposable(
-                    card = card,
-                    navController = navController  // 네비게이션 추가
-                )
-
-            }
-        }
-
-        PaginationControls(currentPage = currentDisasterPage, totalPages = disasterTotalPages) { page ->
-            coroutineScope.launch {
-                scrollState.animateScrollTo(0)  // 페이지 변경 시 상단으로 스크롤
-            }
-            currentDisasterPage = page
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // 지역 기부 섹션
-        Text(text = "지역 기부", style = MaterialTheme.typography.titleLarge)
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // RadioButtonGroup에 필터 값 전달
-            RadioButtonGroup(
-                selectedOption = donationSelectedFilter,
-                onOptionSelected = { donationSelectedFilter = it }
-            )
-            SortDropdownMenu(selectedSort = donationSelectedSort, onSortChange = { sortOption ->
-                donationSelectedSort = sortOption
-            })
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        val donationStartIndex = currentDonationPage * itemsPerPage
-        val donationEndIndex = minOf(donationStartIndex + itemsPerPage, sortedDonationCards.size)
-        val donationItemsToShow = sortedDonationCards.subList(donationStartIndex, donationEndIndex)
-
-        // 동적 높이 적용
-        val donationDynamicHeight = when (donationItemsToShow.size) {
-            1, 2 -> 350.dp
-            else -> 700.dp
-        }
-
-
-        LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.height(donationDynamicHeight)) {
-            items(donationItemsToShow) { card ->
-                FundingCardComposable(
-                    card = card,
-                    navController = navController  // 네비게이션 추가
-                )
-            }
-        }
-
-
-        PaginationControls(currentPage = currentDonationPage, totalPages = donationTotalPages) { page ->
-            coroutineScope.launch {
-                scrollState.animateScrollTo(0)  // 페이지 변경 시 상단으로 스크롤
-            }
-            currentDonationPage = page
+    // 카테고리에 따른 데이터 로드
+    LaunchedEffect(selectedCategory, selectedState, selectedSort) {
+        val type = if (selectedCategory == "재난·재해") "D" else "R"
+        fetchFundingData(type, selectedState) { result ->
+            allFundingCards = result.sortedBySortOption(selectedSort)
+            itemsToShow = 6 // 카테고리 변경 시 초기화
+            displayedFundingCards = allFundingCards.take(itemsToShow) // 처음에는 6개만 표시
         }
     }
-}
-
-// 날짜 파싱 함수
-fun parseDate(dateString: String): Long {
-    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.KOREA)
-    return dateFormat.parse(dateString)?.time ?: 0
-}
-
-@Composable
-fun FundingCardComposable(card: FundingCard, navController: NavController) {
-    val progress = if (card.amounts.second > 0) card.amounts.first / card.amounts.second else 0f  // 비율 계산
-
-    // 숫자 형식을 한국어 로케일로 포맷팅
-    val formattedGoalAmount = NumberFormat.getNumberInstance(Locale.KOREA).format(card.amounts.second.toInt())
 
     Column(
         modifier = Modifier
-            .padding(8.dp)
-            .clickable {
-                // 네비게이션 경로로 이동
-                navController.navigate(
-                    "funding_detail/${Uri.encode(card.title)}/${Uri.encode(card.location)}/${card.startDate}/${card.endDate}/${card.amounts.first}/${card.amounts.second}/${Uri.encode(card.imageUrl)}"
-                )
-            }
+            .padding(16.dp)
+            .fillMaxHeight() // 화면 전체 사용
     ) {
-        // 위치 표시
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            Icon(
-                imageVector = Icons.Default.LocationOn,
-                contentDescription = "Location Icon",
-                modifier = Modifier.size(16.dp)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(text = card.location, style = MaterialTheme.typography.bodySmall)
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // 이미지 로드 및 표시
-        Image(
-            painter = rememberAsyncImagePainter(card.imageUrl),  // Coil을 사용하여 이미지 URL로 로드
-            contentDescription = null,  // 이미지 설명
-            modifier = Modifier
-                .aspectRatio(1f)  // 1:1 비율로 너비에 맞춰 높이를 조정
-                .fillMaxWidth()
-                .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp)),  // 둥근 테두리 추가
-            contentScale = ContentScale.Crop  // 이미지 크기 조정
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // 날짜를 "startDate ~ endDate" 형식으로 표시
-        Text(
-            text = "${card.startDate} ~ ${card.endDate}",
-            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
-            maxLines = 1
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // 제목
-        Text(
-            text = card.title,
-            style = MaterialTheme.typography.titleMedium.copy(fontSize = 15.sp),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // ProgressBar와 목표 금액 표시
-        androidx.compose.material3.LinearProgressIndicator(
-            progress = progress,
-            modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.primary
+        // 카테고리 선택 탭
+        CategoryTabs(
+            selectedCategory = selectedCategory,
+            onSelectCategory = { category ->
+                selectedCategory = category
+                itemsToShow = 6 // 카테고리 변경 시 데이터 초기화
+                displayedFundingCards = allFundingCards.take(itemsToShow)
+            }
         )
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // 목표 금액을 쉼표로 구분하여 표시
-        Text(
-            text = "${formattedGoalAmount}원",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.align(Alignment.End)
+        // 진행 상태 선택 라디오 버튼
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(
+                    selected = selectedState == 1,
+                    onClick = {
+                        selectedState = 1
+                        itemsToShow = 6
+                        displayedFundingCards = allFundingCards.take(itemsToShow)
+                    }
+                )
+                Text(text = "진행 중", fontSize = 16.sp)
+                Spacer(modifier = Modifier.width(8.dp))
+                RadioButton(
+                    selected = selectedState == 2,
+                    onClick = {
+                        selectedState = 2
+                        itemsToShow = 6
+                        displayedFundingCards = allFundingCards.take(itemsToShow)
+                    }
+                )
+                Text(text = "완료", fontSize = 16.sp)
+            }
+
+            // 정렬 드롭다운
+            Box {
+                TextButton(onClick = { expandedSort = true }) {
+                    Text(text = selectedSort)
+                    Icon(imageVector = Icons.Filled.ArrowDropDown, contentDescription = null)
+                }
+                DropdownMenu(
+                    expanded = expandedSort,
+                    onDismissRequest = { expandedSort = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("종료 임박순") },
+                        onClick = {
+                            selectedSort = "종료 임박순"
+                            allFundingCards = allFundingCards.sortedBySortOption(selectedSort)
+                            displayedFundingCards = allFundingCards.take(itemsToShow)
+                            expandedSort = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("최근 등록순") },
+                        onClick = {
+                            selectedSort = "최근 등록순"
+                            allFundingCards = allFundingCards.sortedBySortOption(selectedSort)
+                            displayedFundingCards = allFundingCards.take(itemsToShow)
+                            expandedSort = false
+                        }
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 펀딩 리스트와 더보기 버튼
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier.fillMaxHeight()  // 화면의 남은 높이를 모두 사용
+        ) {
+            items(displayedFundingCards) { card ->
+                FundingCardComposable(
+                    title = card.fundingTitle,
+                    location = "${card.sido} ${card.sigungu}",
+                    startDate = card.startDate,
+                    endDate = card.endDate,
+                    nowAmount = card.totalMoney.toFloat(),
+                    goalAmount = card.goalMoney.toFloat(),
+                    imageUrl = card.fundingThumbnail,
+                    fundingIdx = card.fundingIdx,  // 각 카드에 fundingIdx를 전달
+                    onClick = { fundingIdx ->
+                        // 클릭 시 상세 페이지로 이동하는 로직
+                        navController.navigate("funding_detail/$fundingIdx")
+                    }
+                )
+            }
+
+            // 더보기 버튼 (더 불러올 데이터가 있을 때만 표시)
+            if (itemsToShow < allFundingCards.size) {
+                item(span = { GridItemSpan(2) }) {  // 두 열을 모두 차지하도록 설정
+                    Spacer(modifier = Modifier.height(16.dp))
+                    TextButton(
+                        onClick = {
+                            itemsToShow += 6  // 더보기 버튼을 누를 때마다 6개씩 더 보여줌
+                            displayedFundingCards = allFundingCards.take(itemsToShow)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.CenterHorizontally)  // 중앙 정렬
+                    ) {
+                        Text("더보기")
+                        Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = "Arrow Down Icon")
+                    }
+                }
+            }
+        }
+    }
+}
+
+// 정렬 기준에 따른 정렬 함수
+fun List<FundingData>.sortedBySortOption(sortOption: String): List<FundingData> {
+    return when (sortOption) {
+        "종료 임박순" -> this.sortedBy { it.endDate }  // endDate가 가까운 순으로 정렬
+        "최근 등록순" -> this.sortedByDescending { it.fundingIdx }  // fundingIdx가 높은 순으로 정렬
+        else -> this
+    }
+}
+
+// 카테고리 선택 탭 (재난·재해 또는 지역 기부)
+@Composable
+fun CategoryTabs(
+    selectedCategory: String,
+    onSelectCategory: (String) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        CategoryTabItem(
+            category = "재난·재해",
+            isSelected = selectedCategory == "재난·재해",
+            onClick = { onSelectCategory("재난·재해") },
+            modifier = Modifier.weight(1f)
+        )
+
+        CategoryTabItem(
+            category = "지역 기부",
+            isSelected = selectedCategory == "지역 기부",
+            onClick = { onSelectCategory("지역 기부") },
+            modifier = Modifier.weight(1f)
         )
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview(showBackground = true)
+// 카테고리 탭 항목
 @Composable
-fun FundingMainPreview() {
-    GivuAndTakeTheme {
-        val navController = rememberNavController() // Preview를 위한 NavController 생성
-        FundingMainPage(navController)
+fun CategoryTabItem(
+    category: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .clickable { onClick() }
+    ) {
+        Text(
+            text = category,
+            fontSize = 22.sp, // 모든 탭에 동일한 크기 유지
+            fontWeight = FontWeight.Bold, // 굵은 글씨 유지
+            color = if (isSelected) Color.Black else Color.Gray, // 선택된 항목 색상만 변경
+            modifier = Modifier.padding(8.dp)
+        )
+        if (isSelected) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Divider(
+                color = Color.Blue,
+                thickness = 4.dp,
+                modifier = Modifier
+                    .fillMaxWidth(0.8f) // 밑줄의 길이를 80%로 설정
+            )
+        }
+        else{
+            Spacer(modifier = Modifier.height(4.dp))
+            Divider(
+                color = Color.White,
+                thickness = 4.dp,
+                modifier = Modifier
+                    .fillMaxWidth(0.8f) // 밑줄의 길이를 80%로 설정
+            )
+        }
     }
+}
+
+// 펀딩 카드 컴포저블 수정 - onClick 추가
+@Composable
+fun FundingCardComposable(
+    title: String,
+    location: String,
+    startDate: String,
+    endDate: String,
+    nowAmount: Float,
+    goalAmount: Float,
+    imageUrl: String,
+    fundingIdx: Int,  // fundingIdx를 전달받음
+    onClick: (Int) -> Unit  // 클릭 시 호출될 콜백
+) {
+    val progress = if (goalAmount > 0) nowAmount / goalAmount else 0f
+
+    // 금액을 3자리마다 쉼표로 구분
+    val formattedGoalAmount = NumberFormat.getNumberInstance(Locale.KOREA).format(goalAmount.toInt())
+
+    Column(
+        modifier = Modifier
+            .padding(8.dp)
+            .clickable { onClick(fundingIdx) }  // 클릭 시 fundingIdx 전달
+    ) {
+        // 위치 표시
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(imageVector = Icons.Filled.LocationOn, contentDescription = "Location Icon")
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(text = location, style = MaterialTheme.typography.bodySmall)
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // 이미지 로드 및 표시
+        Image(
+            painter = rememberAsyncImagePainter(imageUrl),
+            contentDescription = null,
+            modifier = Modifier
+                .aspectRatio(1f)
+                .fillMaxWidth()
+                .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // 날짜 및 제목
+        Text(text = "$startDate ~ $endDate", style = MaterialTheme.typography.bodySmall)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = title, style = MaterialTheme.typography.titleMedium, maxLines = 1)
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // ProgressBar 및 목표 금액
+        LinearProgressIndicator(progress = progress, modifier = Modifier.fillMaxWidth())
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Spacer(modifier = Modifier.weight(1f))
+            Text(text = "${formattedGoalAmount}원", style = MaterialTheme.typography.bodyMedium, fontSize = 12.sp)
+        }
+    }
+}
+
+// API 데이터 불러오는 함수
+fun fetchFundingData(type: String, state: Int, onSuccess: (List<FundingData>) -> Unit) {
+    val call = SearchFundingApi.api.searchGovernmentFundings(type, state)
+    call.enqueue(object : Callback<FundingResponse> {
+        override fun onResponse(call: Call<FundingResponse>, response: Response<FundingResponse>) {
+            if (response.isSuccessful && response.body()?.success == true) {
+                response.body()?.data?.let { onSuccess(it) }
+            }
+        }
+
+        override fun onFailure(call: Call<FundingResponse>, t: Throwable) {
+            // 실패 처리
+        }
+    })
 }

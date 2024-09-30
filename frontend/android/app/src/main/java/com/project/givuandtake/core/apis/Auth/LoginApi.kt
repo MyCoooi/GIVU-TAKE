@@ -1,4 +1,4 @@
-package com.project.givuandtake.core.apis
+package com.project.givuandtake.core.apis.Auth
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -54,14 +54,3 @@ object LoginApi {
             .create(LoginApiService::class.java)
     }
 }
-
-// 토큰 가져올때 필요한 함수
-//fun getAccessToken(context: Context): String? {
-//    val sharedPref: SharedPreferences = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-//    return sharedPref.getString("accessToken", null)
-//}
-//
-//fun getRefreshToken(context: Context): String? {
-//    val sharedPref: SharedPreferences = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-//    return sharedPref.getString("refreshToken", null)
-//}
