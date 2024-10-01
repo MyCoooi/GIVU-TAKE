@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // 페이지 이동을 위한 useNavigate 추가
 import Swal from "sweetalert2"; // SweetAlert2 추가
 import "./SignupPage.css";
-import { getSido, getSigungu, signUp } from "../../apis/apiSignup"; // signUp API 함수 추가
+import { getSido, getSigungu, signUp } from "../../apis/auth/apiSignup"; // signUp API 함수 추가
 
 const SignupPage = () => {
   const navigate = useNavigate(); // 페이지 이동을 위한 navigate 사용
