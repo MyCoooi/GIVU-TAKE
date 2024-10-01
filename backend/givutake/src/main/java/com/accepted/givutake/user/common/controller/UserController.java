@@ -19,6 +19,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collection;
 
@@ -31,13 +32,28 @@ public class  UserController {
     private final UserService userService;
 
     // 이메일 유저 회원가입
+//    @PostMapping
+//    public ResponseEntity<ResponseDto> emailSignUp(@Valid @RequestBody CompositionSignUpDto compositionSignUpDto) {
+//
+//        SignUpDto signUpDto = compositionSignUpDto.getSignUpDto();
+//        AddressAddDto addressAddDto = compositionSignUpDto.getAddressAddDto();
+//
+//        userService.emailSignUp(signUpDto, addressAddDto);
+//
+//        ResponseDto responseDto = ResponseDto.builder()
+//                .data(null)
+//                .build();
+//
+//        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+//    }
+
     @PostMapping
-    public ResponseEntity<ResponseDto> emailSignUp(@Valid @RequestBody CompositionSignUpDto compositionSignUpDto) {
+    public ResponseEntity<ResponseDto> emailSignUp(
+            @RequestPart(value = "signUpDto") @Valid SignUpDto signUpDto,
+            @RequestPart(value = "addressAddDto", required = false) AddressAddDto addressAddDto,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
 
-        SignUpDto signUpDto = compositionSignUpDto.getSignUpDto();
-        AddressAddDto addressAddDto = compositionSignUpDto.getAddressAddDto();
-
-        userService.emailSignUp(signUpDto, addressAddDto);
+        userService.emailSignUp(signUpDto, addressAddDto, profileImage);
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)

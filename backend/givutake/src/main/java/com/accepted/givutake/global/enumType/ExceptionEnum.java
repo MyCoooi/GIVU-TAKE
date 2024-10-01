@@ -35,6 +35,7 @@ public enum ExceptionEnum {
     ILLEGAL_REPRESENTATIVE_CARD_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0007", "대표 카드 정보가 유효하지 않습니다."),
     ILLEGAL_EMAIL_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0008", "이메일 형식이 올바르지 않습니다."),
     ILLEGAL_ISAPPROVED_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0009", "isApproved는 'Y'이거나 'N'이어야 합니다."),
+    ILLEGAL_PROFILE_IMAGE_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0010", "잘못된 프로필 이미지 입니다."),
 
     DUPLICATED_EMAIL_EXCEPTION(HttpStatus.BAD_REQUEST, "EU1008", "이미 사용 중인 이메일입니다."),
 

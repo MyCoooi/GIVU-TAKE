@@ -2,6 +2,7 @@ package com.accepted.givutake.user.common.service;
 
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
+import com.accepted.givutake.global.service.S3Service;
 import com.accepted.givutake.region.entity.Region;
 import com.accepted.givutake.region.service.RegionService;
 import com.accepted.givutake.user.client.model.AddressAddDto;
@@ -16,11 +17,14 @@ import com.accepted.givutake.user.common.repository.UsersRepository;
 import jakarta.mail.MessagingException;
 import jakarta.validation.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -37,17 +41,19 @@ public class UserService {
     private final AddressService addressService;
     private final PasswordEncoder passwordEncoder;
     private final Validator validator;
+    private final S3Service s3Service;
 
     // 1800(초) == 30분
     private static final long EMAIL_CODE_EXPIRATION_TIME = 1800;
 
-    public UserService(UsersRepository userRepository, RegionService regionService, PasswordEncoder passwordEncoder, EmailCodeRepository emailCodeRepository, MailService mailService, AddressService addressService) {
+    public UserService(UsersRepository userRepository, RegionService regionService, PasswordEncoder passwordEncoder, EmailCodeRepository emailCodeRepository, MailService mailService, AddressService addressService, S3Service s3Service) {
         this.userRepository = userRepository;
         this.regionService = regionService;
         this.emailCodeRepository = emailCodeRepository;
         this.mailService = mailService;
         this.addressService = addressService;
         this.passwordEncoder = passwordEncoder;
+        this.s3Service = s3Service;
 
         // ValidatorFactory와 Validator 초기화
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
@@ -55,7 +61,62 @@ public class UserService {
     }
 
     // 이메일 사용자 회원가입
-    public void emailSignUp(SignUpDto signUpDto, AddressAddDto addressAddDto) {
+//    public void emailSignUp(SignUpDto signUpDto, AddressAddDto addressAddDto) {
+//        Roles role = signUpDto.getRoles();
+//
+//        // 유효하지 않은 권한정보가 들어온 경우
+//        if (!(role == Roles.ROLE_CLIENT || role == Roles.ROLE_CORPORATIONYET)) {
+//            throw new AccessDeniedException("권한 정보가 유효하지 않습니다.");
+//        }
+//
+//        // 이메일 중복 검사
+//        this.emailDuplicatedCheck(signUpDto.getEmail());
+//
+//        // 비밀번호 암호화
+//        signUpDto.setPassword(this.encode(signUpDto.getPassword()));
+//
+//        // ref) 관리자는 회원가입할 수 없다. DB를 통해 직접 데이터 추가 요망.
+//        // 1. 수혜자 회원가입 관련 입력값 검증 및 처리
+//        if (role == Roles.ROLE_CORPORATIONYET) {
+//            // 주소값은 들어오면 안된다
+//            if (addressAddDto != null) {
+//                throw new ApiException(ExceptionEnum.UNEXPECTED_REPRESENTATIVE_ADDRESS_EXCEPTION);
+//            }
+//            // 수혜자 회원가입 유효성 검증
+//            checkArgumentValidityForCorporationSignUp(signUpDto);
+//
+//            // region 값 가져오기
+//            String sido = signUpDto.getSido();
+//            String sigungu = signUpDto.getSigungu();
+//            Region region = regionService.findRegionBySidoAndSigungu(sido, sigungu);
+//
+//            // DB에 회원 정보 저장
+//            userRepository.save(signUpDto.toEntity(region));
+//        }
+//        // 2. 사용자 회원가입 관련 입력값 검증 및 처리
+//        else {
+//            // 대표 주소는 필수 입력 값
+//            if (addressAddDto == null) {
+//                throw new ApiException(ExceptionEnum.MISSING_REPRESENTATIVE_ADDRESS_EXCEPTION);
+//            }
+//            // 사용자 회원가입 유효성 검증
+//            checkArgumentValidityForClientSignUp(signUpDto);
+//            // 대표 주소 DTO의 유효성을 수동으로 검증
+//            validateAddressAddDto(addressAddDto);
+//
+//            // DB에 저장
+//            Users savedUser = userRepository.save(signUpDto.toEntity(null));
+//
+//            // 지역 코드 넣기
+//            String sido = addressAddDto.getSido();
+//            String sigungu = addressAddDto.getSigungu();
+//            int regionIdx = regionService.getRegionIdxBySidoAndSigungu(sido, sigungu);
+//
+//            addressService.saveAddresses(addressAddDto.toEntity(savedUser, regionIdx));
+//        }
+//    }
+
+    public void emailSignUp(SignUpDto signUpDto, AddressAddDto addressAddDto, MultipartFile profileImage) {
         Roles role = signUpDto.getRoles();
 
         // 유효하지 않은 권한정보가 들어온 경우
@@ -84,8 +145,17 @@ public class UserService {
             String sigungu = signUpDto.getSigungu();
             Region region = regionService.findRegionBySidoAndSigungu(sido, sigungu);
 
+            String publicProfileImageUrl = null;
+
+            try {
+                // s3에 profile image 업로드
+                publicProfileImageUrl = s3Service.uploadProfileImage(profileImage);
+            } catch (IOException e) {
+                throw new ApiException(ExceptionEnum.ILLEGAL_PROFILE_IMAGE_EXCEPTION);
+            }
+
             // DB에 회원 정보 저장
-            userRepository.save(signUpDto.toEntity(region));
+            userRepository.save(signUpDto.toEntity(region, publicProfileImageUrl));
         }
         // 2. 사용자 회원가입 관련 입력값 검증 및 처리
         else {
@@ -98,8 +168,17 @@ public class UserService {
             // 대표 주소 DTO의 유효성을 수동으로 검증
             validateAddressAddDto(addressAddDto);
 
+            String publicProfileImageUrl = null;
+
+            try {
+                // s3에 profile image 업로드
+                publicProfileImageUrl = s3Service.uploadProfileImage(profileImage);
+            } catch (IOException e) {
+                throw new ApiException(ExceptionEnum.ILLEGAL_PROFILE_IMAGE_EXCEPTION);
+            }
+
             // DB에 저장
-            Users savedUser = userRepository.save(signUpDto.toEntity(null));
+            Users savedUser = userRepository.save(signUpDto.toEntity(null, publicProfileImageUrl));
 
             // 지역 코드 넣기
             String sido = addressAddDto.getSido();
