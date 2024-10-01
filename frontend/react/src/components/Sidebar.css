@@ -46,4 +46,21 @@
   .menu-item-active {
     background-color: #d0bdf4;
   }
+  .custom-confirm-btn {
+    background-color: #c2a6f1 !important; /* 확인 버튼 색상 */
+    border: none !important; /* 테두리 제거 */
+    color: white !important; /* 텍스트 색상 */
+    padding: 10px 20px !important; /* 버튼 패딩 */
+    border-radius: 5px !important; /* 둥근 모서리 */
+    font-size: 16px !important;
+  }
+  
+  .custom-cancel-btn {
+    background-color: #ffffff !important; /* 흰색 배경 */
+    border: 1px solid #c2a6f1 !important; /* 테두리 색상 */
+    color: #c2a6f1 !important; /* 텍스트 색상 */
+    padding: 10px 20px !important; /* 버튼 패딩 */
+    border-radius: 5px !important; /* 둥근 모서리 */
+    font-size: 16px !important;
+  }
   
