@@ -3,10 +3,10 @@ import MainPage from './components/mainPage/MainPage';
 import SignupPage from './components/auth/SignupPage';
 import LoginPage from './components/auth/LoginPage';
 import MyPage from './components/myPage/MyPage';
-import UserInfo from './components/myPage/UserInfo'
 import Donations from './components/donations/Donations';
 import Funding from './components/funding/Funding';
 import Statistics from './components/statistics/Statistics';
+import UserInfo from './components/userinfo/UserInfo';
 
 
 import React from 'react';
