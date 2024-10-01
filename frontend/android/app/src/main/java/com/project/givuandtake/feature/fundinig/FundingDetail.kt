@@ -1,8 +1,11 @@
 package com.project.givuandtake.feature.fundinig
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -15,12 +18,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -70,7 +77,7 @@ fun FundingDetailPage(
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
     val tabs = listOf("사업소개", "응원메시지", "기부후기")
-    var comments by remember { mutableStateOf<List<Comment>?>(null) } // 응원 메시지 리스트
+//    var comments by remember { mutableStateOf<List<Comment>?>(null) } // 응원 메시지 리스트
 
     // 펀딩 상세 데이터 로드
     LaunchedEffect(fundingIdx) {
@@ -137,9 +144,15 @@ fun FundingDetailPage(
                             modifier = Modifier.size(20.dp) // 아이콘 크기 조정
                         )
                         Spacer(modifier = Modifier.width(4.dp)) // 텍스트와 아이콘 간의 간격
-                        Text(text = "${detail.sido} ${detail.sigungu}", style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            text = "${detail.sido} ${detail.sigungu}",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
                     }
-                    Text(text = detail.fundingTitle, style = MaterialTheme.typography.headlineMedium)
+                    Text(
+                        text = detail.fundingTitle,
+                        style = MaterialTheme.typography.headlineMedium
+                    )
 
 
                     // 기간 표시
@@ -147,8 +160,10 @@ fun FundingDetailPage(
 
 
                     // 목표 금액과 모금된 금액
-                    val formattedGoalAmount = NumberFormat.getNumberInstance(Locale.KOREA).format(detail.goalMoney)
-                    val formattedTotalMoney = NumberFormat.getNumberInstance(Locale.KOREA).format(detail.totalMoney)
+                    val formattedGoalAmount =
+                        NumberFormat.getNumberInstance(Locale.KOREA).format(detail.goalMoney)
+                    val formattedTotalMoney =
+                        NumberFormat.getNumberInstance(Locale.KOREA).format(detail.totalMoney)
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -215,7 +230,7 @@ fun FundingDetailPage(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp)) // 탭 아래 여백 추가
+                    Spacer(modifier = Modifier.height(4.dp)) // 탭 아래 여백 추가
                 }
 
                 // 탭에 따라 다른 콘텐츠 표시
@@ -225,10 +240,137 @@ fun FundingDetailPage(
                         Text(text = detail.fundingContent)
                         Spacer(modifier = Modifier.height(16.dp))
                     }
+
                     1 -> {
-                        // 응원메시지 (임시 데이터)
-                        Text(text = "응원메시지들: 아직 추가되지 않았습니다.")
-                    }
+                        var commentText by remember { mutableStateOf("") } // 댓글 입력 상태
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            Text(
+                                text = "따뜻한 댓글을 남겨주세요",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+
+// 댓글 입력 필드 (OutlinedTextField로 변경하여 전체 테두리 적용)
+                            OutlinedTextField(
+                                value = commentText,
+                                onValueChange = { commentText = it },
+                                placeholder = { Text("댓글 남기기") },
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                colors = TextFieldDefaults.outlinedTextFieldColors(
+                                    backgroundColor = Color.White, // 내부 배경을 흰색으로 설정
+                                    focusedBorderColor = Color.Gray, // 포커스 되었을 때 테두리 색상 회색
+                                    unfocusedBorderColor = Color.Gray // 포커스되지 않았을 때 테두리 색상 회색
+                                ),
+                                shape = RoundedCornerShape(8.dp) // 모서리를 둥글게 설정
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+// 작성 버튼 (작게 만들고, 하얀색 배경에 테두리 추가)
+                            Button(
+                                onClick = {
+                                    // 댓글 작성 처리 로직 추가
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.End) // 오른쪽에 정렬
+                                    .size(width = 60.dp, height = 30.dp), // 버튼 크기를 줄임
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    containerColor = Color.White // 버튼의 배경을 흰색으로 설정
+                                ),
+                                border = BorderStroke(1.dp, Color.Gray),
+                                contentPadding = PaddingValues(
+                                    horizontal = 0.dp,
+                                    vertical = 0.dp
+                                ) // 테두리 색상과 두께 설정
+                            ) {
+                                Text("작성", color = Color.Black) // 텍스트 색상을 테두리와 맞춤
+                            }
+
+                            Spacer(modifier = Modifier.height(4.dp)) // 댓글과 입력창 사이 간격
+
+                            // Divider 추가 (댓글 입력란과 댓글 리스트 사이)
+                            Divider(
+                                color = Color.Gray,
+                                thickness = 1.dp,
+                                modifier = Modifier
+                                    .padding(vertical = 16.dp)
+                            )
+                            Spacer(modifier = Modifier.height(4.dp)) // 댓글과 입력창 사이 간격
+
+                            Text(
+                                text = "댓글 4개",
+                                fontWeight = FontWeight.Bold,
+                            )
+
+                            // 응원메시지 (댓글 리스트 예시 데이터)
+                            val comments = listOf(
+                                Comment(1, "김*성", "응원합니다"),
+                                Comment(2, "김*성", "응원합니다"),
+                                Comment(3, "박*성", "좋은 분들을 만나기를 바랍니다. 버려린 분들 벌 받으실 거예요..."),
+                                Comment(4, "김*성", "응원합니다")
+                            )
+
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            ) {
+                                comments.forEach { comment ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 8.dp)
+                                    ) {
+                                        // 프로필 이미지나 아이콘을 사용 (Placeholder)
+                                        AsyncImage(
+                                            model = "https://example.com/profile_image.png", // 실제 이미지 URL로 교체
+                                            contentDescription = "프로필 이미지",
+                                            modifier = Modifier
+                                                .size(40.dp)
+                                                .clip(RoundedCornerShape(20.dp))
+                                                .border(
+                                                    1.dp,
+                                                    Color.Gray,
+                                                    RoundedCornerShape(20.dp)
+                                                ),
+                                            contentScale = ContentScale.Crop
+                                        )
+
+                                        Spacer(modifier = Modifier.width(8.dp))
+
+                                        Column {
+                                            // 이름
+                                            Text(
+                                                text = comment.author,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 14.sp
+                                            )
+
+                                            // 댓글 내용에 따라 동적으로 border 적용
+                                            Box(
+                                                modifier = Modifier
+                                                    .border(
+                                                        1.dp,
+                                                        Color.LightGray,
+                                                        RoundedCornerShape(8.dp)
+                                                    ) // 동적 크기에 맞춰 border 설정
+                                                    .padding(8.dp)
+                                            ) {
+                                                Text(
+                                                    text = comment.content,
+                                                    fontSize = 14.sp
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }}}
                     2 -> Text(text = "기부후기: 아직 추가되지 않았습니다.")
                 }
 
@@ -242,7 +384,7 @@ fun FundingDetailPage(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.Center,
             ) {
-                Text("데이터를 불러오는 중입니다...")
+                Text("아직 응원메시지가 없습니다.ㅇ")
             }
         }
     }
