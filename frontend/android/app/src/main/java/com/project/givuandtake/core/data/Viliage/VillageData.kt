@@ -1,4 +1,4 @@
-package com.project.givuandtake.core.data
+package com.project.givuandtake.core.data.Viliage
 
 data class VillageData(
     val success: Boolean,
