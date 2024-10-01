@@ -1,5 +1,6 @@
 package com.project.givuandtake.feature.mypage.MyActivities
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -45,12 +46,24 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
 @Composable
-fun CardNumberInputField() {
+fun CardNumberInputField(cardNumber: String) {
     val focusManager = LocalFocusManager.current
-    val firstPart = remember { mutableStateOf("") }
-    val secondPart = remember { mutableStateOf("") }
-    val thirdPart = remember { mutableStateOf("") }
-    val fourthPart = remember { mutableStateOf("") }
+
+    val cardParts = if (cardNumber.length == 16) {
+        listOf(
+            cardNumber.substring(0, 4),
+            cardNumber.substring(4, 8),
+            cardNumber.substring(8, 12),
+            cardNumber.substring(12, 16)
+        )
+    } else {
+        listOf("", "", "", "")
+    }
+
+    val firstPart = remember { mutableStateOf(cardParts[0]) }
+    val secondPart = remember { mutableStateOf(cardParts[1]) }
+    val thirdPart = remember { mutableStateOf(cardParts[2]) }
+    val fourthPart = remember { mutableStateOf(cardParts[3]) }
 
     val firstFocusRequester = remember { FocusRequester() }
     val secondFocusRequester = remember { FocusRequester() }
@@ -108,7 +121,6 @@ fun CardNumberInputField() {
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Number
             ),
-            visualTransformation = PasswordVisualTransformation(),  // * 표시로 변환
             modifier = Modifier
                 .width(60.dp)
                 .padding(4.dp)
@@ -175,7 +187,6 @@ fun CardNumberInputField() {
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Number
             ),
-            visualTransformation = PasswordVisualTransformation(),  // * 표시로 변환
             modifier = Modifier
                 .width(60.dp)
                 .padding(4.dp)
@@ -198,12 +209,21 @@ fun CardNumberInputField() {
 }
 
 @Composable
-fun CardCustomRegistration(navController: NavController) {
-    var cardNumber by remember { mutableStateOf("") }
-    var expiryMonth by remember { mutableStateOf("") }
-    var expiryYear by remember { mutableStateOf("") }
+fun CardCustomRegistration(cardNumber: String, validThru: String, navController: NavController) {
+    Log.d("asdfqwer", "$cardNumber, $validThru")
+    val validThruParts = remember {
+        if (validThru.length == 5 && validThru.contains("/")) {
+            validThru.split("/")
+        } else {
+            listOf("", "")
+        }
+    }
+    var expiryMonth by remember { mutableStateOf(validThruParts[0]) }
+    var expiryYear by remember { mutableStateOf(validThruParts[1]) }
+
     var cvcCode by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
 
     Column () {
         Row(
@@ -242,7 +262,7 @@ fun CardCustomRegistration(navController: NavController) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(text = "카드 번호", fontSize = 18.sp, color = Color.Gray, modifier = Modifier.padding(bottom=5.dp))
-            CardNumberInputField()
+            CardNumberInputField(cardNumber)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -253,7 +273,7 @@ fun CardCustomRegistration(navController: NavController) {
                 BasicTextField(
                     value = expiryMonth,
                     onValueChange = { newValue ->
-                        if (expiryMonth.length <= 2) {
+                        if (newValue.length <= 2) {
                             expiryMonth = newValue
                         }
                     },
@@ -302,7 +322,7 @@ fun CardCustomRegistration(navController: NavController) {
                 BasicTextField(
                     value = expiryYear,
                     onValueChange = { newValue ->
-                        if (expiryYear.length <= 2) {
+                        if (newValue.length <= 2) {
                             expiryYear = newValue
                         }
                     },
@@ -351,13 +371,13 @@ fun CardCustomRegistration(navController: NavController) {
             BasicTextField(
                 value = cvcCode,
                 onValueChange = { newValue ->
-                    if (cvcCode.length <= 3) {
+                    if (newValue.length <= 3) {
                         cvcCode = newValue
                     }
                 },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 4.dp), // 하단 선과의 간격
+                    .padding(bottom = 4.dp)
+                    .width(40.dp), // 하단 선과의 간격
                 textStyle = LocalTextStyle.current.copy( // 기본 텍스트 스타일 적용
                     fontSize = 20.sp, // 글씨 크기
                     color = Color.Black
@@ -394,7 +414,7 @@ fun CardCustomRegistration(navController: NavController) {
                 },
                 modifier = Modifier
                     .padding(bottom = 4.dp)
-                    .width(80.dp),
+                    .width(40.dp),
                 textStyle = LocalTextStyle.current.copy(
                     fontSize = 20.sp,
                     color = Color.Black

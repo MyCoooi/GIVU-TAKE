@@ -5,9 +5,13 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.net.Uri
+import android.util.Base64
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.core.AspectRatio
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -33,23 +37,118 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
 import com.project.givuandtake.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import okhttp3.Response
+import okio.IOException
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.io.File
 
 var imageCapture: ImageCapture? = null
+fun cropToCardArea(bitmap: Bitmap, boxLeft: Int, boxTop: Int, boxWidth: Int, boxHeight: Int): Bitmap? {
+    Log.d("BoxSize", "Box Width: $boxWidth, Box Height: $boxHeight")
+    return try {
+        Bitmap.createBitmap(bitmap, boxLeft, boxTop, boxWidth, boxHeight)
+    } catch (e: Exception) {
+        Log.e("cropToCardArea", "Error while cropping image: ${e.message}")
+        null
+    }
+}
+
+
+fun bitmapToBase64(bitmap: Bitmap, format: Bitmap.CompressFormat): String {
+    val byteArrayOutputStream = ByteArrayOutputStream()
+    bitmap.compress(format, 100, byteArrayOutputStream)
+    val byteArray = byteArrayOutputStream.toByteArray()
+    return Base64.encodeToString(byteArray, Base64.NO_WRAP)
+}
+
+fun sendImageToApi(bitmap: Bitmap, imageFormat: String, onResponse: (String) -> Unit, onError: (Exception) -> Unit) {
+    val client = OkHttpClient()
+
+    val compressFormat = when (imageFormat.lowercase()) {
+        "png" -> Bitmap.CompressFormat.PNG
+        "jpg", "jpeg" -> Bitmap.CompressFormat.JPEG
+        else -> throw IllegalArgumentException("Unsupported image format: $imageFormat")
+    }
+    val base64Image = bitmapToBase64(bitmap, compressFormat)
+
+    val jsonBody = JSONObject().apply {
+        put("version", "V2")
+        put("requestId", "test")
+        put("timestamp", "0")
+        put("images", JSONArray().apply {
+            put(JSONObject().apply {
+                put("format", imageFormat)
+                put("data", base64Image)
+                put("name", "Starting JSON creationt")
+            })
+        })
+    }
+
+    val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
+    val body = RequestBody.create(mediaType, jsonBody.toString())
+
+    val request = Request.Builder()
+        .url("https://nolz8iywzq.apigw.ntruss.com/custom/v1/34650/4e936747d4186eba0ef498ce75b20fec58d668ff4a682b3435185019c6558c75/document/credit-card")
+        .post(body)
+        .addHeader("Content-Type", "application/json")
+        .addHeader("X-OCR-SECRET", "V0xwdUhOY1p5RUdYaFRqV2pYT0hFc1FWaGhtRU1wTUM=") // 여기에 실제 OCR SECRET 값을 넣어야 함
+        .build()
+
+    CoroutineScope(Dispatchers.IO).launch {
+        try {
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    Log.e("API_ERROR", "Request failed: ${e.message}", e)
+                    onError(e)
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    val responseString = response.body?.string()
+                    Log.d("API_RESPONSE", "Response: $responseString")
+
+                    if (response.isSuccessful) {
+                        responseString?.let { onResponse(it) }
+                    } else {
+                        Log.e("API_ERROR", "Request failed with status code: ${response.code}")
+                        onError(Exception("Request failed with status code: ${response.code}"))
+                    }
+                }
+            })
+        } catch (e: Exception) {
+            Log.e("API_ERROR", "Error: ${e.message}", e)
+            onError(e)
+        }
+    }
+}
 
 fun capturePhoto(context: Context, onImageCaptured: (Bitmap) -> Unit) {
     val photoFile = File(context.filesDir, "card_image.jpg")
@@ -61,7 +160,7 @@ fun capturePhoto(context: Context, onImageCaptured: (Bitmap) -> Unit) {
         object : ImageCapture.OnImageSavedCallback {
             override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                 val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
-                onImageCaptured(bitmap)  // 촬영된 이미지를 전달
+                onImageCaptured(bitmap)
             }
 
             override fun onError(exception: ImageCaptureException) {
@@ -70,6 +169,7 @@ fun capturePhoto(context: Context, onImageCaptured: (Bitmap) -> Unit) {
         }
     )
 }
+
 
 @Composable
 fun RequestCameraPermission(onPermissionGranted: () -> Unit) {
@@ -101,44 +201,13 @@ fun RequestCameraPermission(onPermissionGranted: () -> Unit) {
     }
 }
 
-//fun capturePhoto(onImageCaptured: (Bitmap) -> Unit) {
-//    val photoFile = File(context.filesDir, "card_image.jpg")
-//    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-//
-//    imageCapture.takePicture(
-//        outputOptions,
-//        ContextCompat.getMainExecutor(context),
-//        object : ImageCapture.OnImageSavedCallback {
-//            override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-//                val savedUri = outputFileResults.savedUri ?: Uri.fromFile(photoFile)
-//                val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
-//
-//                // 여기서 이미지를 크롭
-//                val croppedBitmap = cropToCardArea(bitmap)
-//
-//                // 크롭된 이미지를 넘겨줌
-//                onImageCaptured(croppedBitmap)
-//            }
-//
-//            override fun onError(exception: ImageCaptureException) {
-//                Log.e("CameraX", "Image capture failed", exception)
-//            }
-//        }
-//    )
-//}
-
-fun cropToCardArea(bitmap: Bitmap): Bitmap {
-    // 카드 영역 크롭
-    val left = 50  // 임의의 좌표
-    val top = 100
-    val width = 300
-    val height = 180
-
-    return Bitmap.createBitmap(bitmap, left, top, width, height)
-}
 
 @Composable
-fun CameraPreview(modifier: Modifier = Modifier, onCameraControlReady: (androidx.camera.core.CameraControl) -> Unit) {
+fun CameraPreview(
+    modifier: Modifier = Modifier,
+    onCameraControlReady: (androidx.camera.core.CameraControl) -> Unit,
+    onPreviewViewSizeReady: (Size) -> Unit
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalContext.current as LifecycleOwner
     var cameraProvider by remember { mutableStateOf<ProcessCameraProvider?>(null) }
@@ -153,13 +222,17 @@ fun CameraPreview(modifier: Modifier = Modifier, onCameraControlReady: (androidx
             factory = { ctx ->
                 val previewView = PreviewView(ctx)
 
-                val preview = Preview.Builder().build().also {
-                    it.setSurfaceProvider(previewView.surfaceProvider)
-                }
+                val preview = Preview.Builder()
+                    .setTargetAspectRatio(AspectRatio.RATIO_16_9)
+                    .build().also {
+                        it.setSurfaceProvider(previewView.surfaceProvider)
+                    }
 
                 val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
-                imageCapture = ImageCapture.Builder().build()  // 이미지 캡처 초기화
+                imageCapture = ImageCapture.Builder()
+                    .setTargetAspectRatio(AspectRatio.RATIO_16_9)
+                    .build()
 
                 try {
                     provider.unbindAll()
@@ -167,11 +240,19 @@ fun CameraPreview(modifier: Modifier = Modifier, onCameraControlReady: (androidx
                         lifecycleOwner,
                         cameraSelector,
                         preview,
-                        imageCapture  // 이미지 캡처 사용
+                        imageCapture
                     )
                     onCameraControlReady(camera.cameraControl)
                 } catch (e: Exception) {
                     Log.e("CameraX", "Use case binding failed", e)
+                }
+
+                previewView.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+                    val previewWidth = previewView.width.toFloat()
+                    val previewHeight = previewView.height.toFloat()
+                    if (previewWidth > 0 && previewHeight > 0) {
+                        onPreviewViewSizeReady(Size(previewWidth, previewHeight))
+                    }
                 }
 
                 previewView
@@ -181,12 +262,34 @@ fun CameraPreview(modifier: Modifier = Modifier, onCameraControlReady: (androidx
     }
 }
 
+fun rotateImageBy90Degrees(bitmap: Bitmap): Bitmap {
+    val matrix = Matrix()
+    matrix.postRotate(90f)
+    return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+}
+
+fun parseCreditCardResponse(response: String): Pair<String, String> {
+    val jsonObject = JSONObject(response)
+    val imagesArray = jsonObject.getJSONArray("images")
+    val creditCardObject = imagesArray.getJSONObject(0).getJSONObject("creditCard").getJSONObject("result")
+    val cardNumber = creditCardObject.getJSONObject("number").getString("text")
+    val validThru = creditCardObject.getJSONObject("validThru").getString("text")
+    return Pair(cardNumber, validThru)
+}
+
 @Composable
 fun CardRegistration(navController: NavController) {
     var hasCameraPermission by remember { mutableStateOf<Boolean?>(null) }
     var isFlashOn by remember { mutableStateOf(false) }
     var cameraControl by remember { mutableStateOf<androidx.camera.core.CameraControl?>(null) }
-    var capturedImage by remember { mutableStateOf<Bitmap?>(null) } // 촬영된 이미지를 저장할 상태
+    var capturedImage by remember { mutableStateOf<Bitmap?>(null) }
+    var croppedImage by remember { mutableStateOf<Bitmap?>(null) }
+    var cardNumber by remember { mutableStateOf<String?>(null) }
+    var validThru by remember { mutableStateOf<String?>("")}
+    var apiResponse by remember { mutableStateOf<String?>(null) }
+    var selectedFormat by remember { mutableStateOf("png") }
+
+    var previewViewSize by remember { mutableStateOf(Size.Zero) }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -206,6 +309,9 @@ fun CardRegistration(navController: NavController) {
             launcher.launch(Manifest.permission.CAMERA)
         }
     }
+
+    var boxSize by remember { mutableStateOf(androidx.compose.ui.geometry.Size.Zero) }
+    var boxPosition by remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
 
     when (hasCameraPermission) {
         null -> {
@@ -227,10 +333,12 @@ fun CardRegistration(navController: NavController) {
                     modifier = Modifier.fillMaxSize(),
                     onCameraControlReady = { control ->
                         cameraControl = control
+                    },
+                    onPreviewViewSizeReady = { size ->
+                        previewViewSize = size
                     }
                 )
 
-                // 카드 영역과 다른 UI
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -246,7 +354,6 @@ fun CardRegistration(navController: NavController) {
                     )
                     Spacer(modifier = Modifier.height(150.dp))
 
-                    // 카드 모양의 네모
                     Column(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -256,15 +363,19 @@ fun CardRegistration(navController: NavController) {
                                 .size(width = 300.dp, height = 180.dp)
                                 .border(
                                     BorderStroke(
-                                        3.dp, // 보더의 두께
+                                        3.dp,
                                         brush = Brush.linearGradient(
-                                            colors = listOf(Color(0xFFA093DE), Color.White),  // 보더 색상을 흰색과 검정색으로
-                                            tileMode = TileMode.Repeated  // 반복 모드로 설정
+                                            colors = listOf(Color(0xFFA093DE), Color.White),
+                                            tileMode = TileMode.Repeated
                                         )
                                     ),
-                                    shape = RoundedCornerShape(15.dp)  // 둥근 모서리 적용
+                                    shape = RoundedCornerShape(15.dp)
                                 )
-                                .background(Color.Transparent)  // 카드 박스는 투명
+                                .background(Color.Transparent)
+                                .onGloballyPositioned { coordinates ->
+                                    boxSize = coordinates.size.toSize()
+                                    boxPosition = coordinates.positionInRoot()
+                                }
                         )
                         Spacer(modifier = Modifier.height(10.dp))
 
@@ -276,68 +387,95 @@ fun CardRegistration(navController: NavController) {
                             modifier = Modifier.align(Alignment.CenterHorizontally)
                         )
 
-                        if (capturedImage == null) {
-
-                        } else {
-                            Image(
-                                bitmap = capturedImage!!.asImageBitmap(),
-                                contentDescription = "Captured Image",
-                                modifier = Modifier
-                                    .size(300.dp)  // 이미지 크기 설정
-                                    .clip(RoundedCornerShape(15.dp))  // 둥근 모서리
-                                    .border(BorderStroke(3.dp, Color.Gray))  // 테두리 설정
-                            )
-                            Button(
-                                onClick = {
-                                    capturedImage = null  // 다시 촬영하도록 설정
-//                                    croppedImage = null  // 크롭된 이미지도 초기화
-                                },
-                                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFD6D6D6)),
-                                shape = RoundedCornerShape(50),
-                                modifier = Modifier.size(56.dp)
-                            ) {
-                                Text(text = "다시 촬영", fontSize = 16.sp, color = Color.Black)
-                            }
-
-                        }
-
 //                        if (capturedImage == null) {
-//                            // 아직 촬영된 이미지가 없는 경우
+//
+//                        } else {
+////                            Image(
+////                                bitmap = croppedImage!!.asImageBitmap(),
+////                                contentDescription = "Captured Image",
+////                                modifier = Modifier
+////                                    .size(300.dp)
+////                                    .clip(RoundedCornerShape(15.dp))
+////                                    .border(BorderStroke(3.dp, Color.Gray))
+////                            )
+//                            cardNumber?.let {
+//                                Text(text = "카드 번호: $it", fontSize = 16.sp, color = Color.Black)
+//                            }
+//                            validThru?.let {
+//                                Text(text = "유효기간: $it", fontSize = 16.sp, color = Color.Black)
+//                            }
 //                            Button(
 //                                onClick = {
-//                                    // 사진을 촬영하고 크롭된 이미지를 보여줌
-//                                    capturePhoto { bitmap ->
-//                                        capturedImage = bitmap
-//                                    }
+//                                    capturedImage = null
+//                                    croppedImage = null
 //                                },
 //                                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFD6D6D6)),
 //                                shape = RoundedCornerShape(50),
 //                                modifier = Modifier.size(56.dp)
 //                            ) {
-//                                Icon(
-//                                    painter = painterResource(id = R.drawable.baseline_camera_24),
-//                                    contentDescription = "Toggle Flash",
-//                                    tint = if (isFlashOn) Color.Yellow else Color(0xFFA093DE),
-//                                    modifier = Modifier.size(20.dp)
+//                                Text(text = "다시 촬영", fontSize = 16.sp, color = Color.Black)
 //                            }
 //
-//                        } else {
-//                        // 촬영된 이미지를 보여줌
-//                            Image(
-//                                bitmap = capturedImage!!.asImageBitmap(),
-//                                contentDescription = "Captured Image",
-//                                modifier = Modifier
-//                                    .size(300.dp) // 원하는 크기로 조정
-//                                    .clip(RoundedCornerShape(15.dp)) // 모양 설정
-//                                    .border(BorderStroke(2.dp, Color.Black))
-//                                )
 //                        }
 
                         Spacer(modifier = Modifier.height(50.dp))
                         Button(
                             onClick = {
-                                capturePhoto(context) { bitmap ->
-                                    capturedImage = bitmap  // 촬영된 이미지를 저장
+                                try {
+                                    capturePhoto(context) { bitmap ->
+                                        val rotatedBitmap = rotateImageBy90Degrees(bitmap)
+                                        capturedImage = rotatedBitmap  // 90도 회전된 이미지를 저장
+
+                                        if (previewViewSize != Size.Zero) {
+                                            val scaleX = capturedImage!!.width.toFloat() / previewViewSize.width
+                                            val scaleY = capturedImage!!.height.toFloat() / previewViewSize.height
+
+                                            val boxLeftPx = (boxPosition.x * scaleX).toInt()
+                                            val boxTopPx = (boxPosition.y * scaleY).toInt()
+                                            val boxWidthPx = (boxSize.width * scaleX).toInt()
+                                            val boxHeightPx = (boxSize.height * scaleY).toInt()
+
+                                            if (boxLeftPx + boxWidthPx <= capturedImage!!.width && boxTopPx + boxHeightPx <= capturedImage!!.height) {
+                                                croppedImage = Bitmap.createBitmap(capturedImage!!, boxLeftPx, boxTopPx, boxWidthPx, boxHeightPx)
+                                            } else {
+                                                Log.e("CropError", "Cropping area exceeds the captured image bounds")
+                                            }
+                                        } else {
+                                            Log.d("previewsize", "$previewViewSize.width" +
+                                                    "$previewViewSize.height")
+                                            Log.e("PreviewSizeError", "PreviewView size is not ready")
+                                        }
+
+                                        croppedImage?.let { croppedBitmap ->
+                                            sendImageToApi(croppedBitmap, selectedFormat,
+                                                onResponse = { response ->
+                                                    apiResponse = response  // API 응답 저장
+                                                    try {
+                                                        val (number, validThruDate) = parseCreditCardResponse(response)
+                                                        cardNumber = number ?: ""
+                                                        validThru = Uri.encode(validThruDate) ?: ""
+                                                        CoroutineScope(Dispatchers.Main).launch {
+                                                            navController.navigate("cardcustomregistration/${cardNumber}/${validThru}")
+                                                        }
+                                                    } catch (e: Exception) {
+                                                        // 예외가 발생하면 빈 문자열로 처리
+                                                        cardNumber = ""
+                                                        validThru = ""
+                                                        Log.e("ParseError", "Failed to parse credit card response: ${e.message}")
+                                                        CoroutineScope(Dispatchers.Main).launch {
+                                                            navController.navigate("cardcustomregistration//")
+                                                        }
+                                                    }
+                                                },
+                                                onError = { error ->
+                                                    Log.e("API_ERROR", "Error: ${error.message}", error)
+                                                })
+                                        }
+//                                        navController.navigate("cardcustomregistration/${cardNumber}/${validThru}")
+                                    }
+                                } catch (e: Exception) {
+                                    // 예외가 발생하면 앱이 종료되지 않도록 로그만 남기고 무시
+                                    Log.e("CaptureError", "Error while capturing photo: ${e.message}", e)
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFD6D6D6)),
@@ -353,8 +491,11 @@ fun CardRegistration(navController: NavController) {
                         }
                         Spacer(modifier = Modifier.height(50.dp))
 
+                        val excardnnum = "1111111111111111"
+                        val exvalid = Uri.encode("11/11")
+
                         Button(
-                            onClick = { navController.navigate("cardcustomregistration") },
+                            onClick = { navController.navigate("cardcustomregistration/${excardnnum}/${exvalid}") },
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFA093DE)),
                             shape = RoundedCornerShape(24.dp),
                             modifier = Modifier
@@ -392,7 +533,7 @@ fun CardRegistration(navController: NavController) {
             }
         }
         false -> {
-            navController.navigate("cardcustomregistration")
+            navController.navigate("cardcustomregistration//")
         }
     }
 }
