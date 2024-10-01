@@ -1,6 +1,8 @@
 package com.project.givuandtake.feature.fundinig
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -18,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,6 +32,12 @@ import com.project.givuandtake.core.apis.Funding.FundingCommentsApi
 import com.project.givuandtake.core.apis.Funding.FundingDetailApi
 import com.project.givuandtake.core.apis.Funding.FundingDetailData
 import com.project.givuandtake.core.apis.Funding.FundingDetailResponse
+import com.project.givuandtake.core.apis.Funding.WriteCommentRequest
+import com.project.givuandtake.core.apis.Funding.WriteCommentResponse
+import com.project.givuandtake.core.apis.Funding.WriteFundingCommentApi
+import androidx.compose.ui.res.painterResource
+import com.project.givuandtake.R
+import com.project.givuandtake.core.datastore.TokenManager
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
@@ -52,6 +61,13 @@ fun FundingDetailPage(
     // 응원 메시지 데이터를 위한 상태 변수
     var comments by remember { mutableStateOf<List<CommentData>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) } // 데이터 로딩 상태
+    var commentText by remember { mutableStateOf("") } // 댓글 입력 상태
+    var isPosting by remember { mutableStateOf(false) } // 댓글 작성 중 상태
+    val context = LocalContext.current
+    val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
+    Log.d("AccessToken", "Token: $accessToken")
+
+
 
     // 펀딩 상세 데이터 로드
     LaunchedEffect(fundingIdx) {
@@ -245,10 +261,31 @@ fun FundingDetailPage(
 
                             Spacer(modifier = Modifier.height(8.dp))
 
+                            // 작성 버튼 (댓글 작성 중에는 버튼 비활성화)
                             Button(
                                 onClick = {
-                                    // 댓글 작성 처리 로직 추가
+                                    isPosting = true
+                                    // 댓글 작성 API 호출
+                                    writeComment(
+                                        accessToken = accessToken,
+                                        fundingIdx = fundingIdx,
+                                        commentContent = commentText,
+                                        onSuccess = {
+                                            // 댓글 작성 성공 시 UI 갱신
+                                            fetchFundingComments(fundingIdx) { response ->
+                                                comments = response.data
+                                                isLoading = false
+                                                commentText = "" // 댓글 작성 후 입력란 초기화
+                                                isPosting = false
+                                            }
+                                        },
+                                        onFailure = {
+                                            // 실패 처리 로직 (필요 시)
+                                            isPosting = false
+                                        }
+                                    )
                                 },
+                                enabled = commentText.isNotEmpty() && !isPosting, // 텍스트가 비어있지 않으면 활성화
                                 modifier = Modifier
                                     .align(Alignment.End)
                                     .size(width = 60.dp, height = 30.dp),
@@ -263,6 +300,7 @@ fun FundingDetailPage(
                             ) {
                                 Text("작성", color = Color.Black)
                             }
+
 
                             Spacer(modifier = Modifier.height(4.dp))
 
@@ -282,61 +320,65 @@ fun FundingDetailPage(
                                 Text("댓글을 불러오는 중입니다...")
                             } else {
                                 // 실제 응원 메시지 데이터 표시
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp)
-                                ) {
-                                    comments.forEach { comment ->
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(vertical = 8.dp)
-                                        ) {
-                                            AsyncImage(
-                                                model = "https://example.com/profile_image.png",
-                                                contentDescription = "프로필 이미지",
+                                            Column(
                                                 modifier = Modifier
-                                                    .size(40.dp)
-                                                    .clip(RoundedCornerShape(20.dp))
-                                                    .border(
-                                                        1.dp,
-                                                        Color.Gray,
-                                                        RoundedCornerShape(20.dp)
-                                                    ),
-                                                contentScale = ContentScale.Crop
-                                            )
+                                                    .fillMaxWidth()
+                                                    .padding(4.dp)
+                                            ) {
+                                                comments.forEach { comment ->
+                                                    Row(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(vertical = 8.dp)
+                                                    ) {
+                                                        // 이미지와 이름을 세로로 정렬
+                                                        Column(
+                                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                                            modifier = Modifier.padding(end = 8.dp) // 오른쪽에 간격 추가
+                                                        ) {
+                                                            Image(
+                                                                painter = painterResource(id = R.drawable.hamo), // drawable 리소스에서 이미지 가져오기
+                                                                contentDescription = "프로필 이미지",
+                                                                modifier = Modifier
+                                                                    .size(40.dp)
+                                                                    .clip(RoundedCornerShape(20.dp))
+                                                                    .border(
+                                                                        1.dp,
+                                                                        Color.Gray,
+                                                                        RoundedCornerShape(20.dp)
+                                                                    ),
+                                                                contentScale = ContentScale.Crop
+                                                            )
+                                                            Spacer(modifier = Modifier.height(4.dp)) // 이미지와 텍스트 사이 간격
+                                                            Text(
+                                                                text = comment.name,
+                                                                fontWeight = FontWeight.Bold,
+                                                                fontSize = 14.sp
+                                                            )
+                                                        }
 
-                                            Spacer(modifier = Modifier.width(8.dp))
-
-                                            Column {
-                                                Text(
-                                                    text = comment.name,
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 14.sp
-                                                )
-
-                                                Box(
-                                                    modifier = Modifier
-                                                        .border(
-                                                            1.dp,
-                                                            Color.LightGray,
-                                                            RoundedCornerShape(8.dp)
-                                                        )
-                                                        .padding(8.dp)
-                                                ) {
-                                                    Text(
-                                                        text = comment.commentContent,
-                                                        fontSize = 14.sp
-                                                    )
+                                                        // 댓글 내용을 오른쪽에 표시
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .border(
+                                                                    1.dp,
+                                                                    Color.LightGray,
+                                                                    RoundedCornerShape(8.dp)
+                                                                )
+                                                                .padding(8.dp)
+                                                                .wrapContentSize()
+                                                        ) {
+                                                            Text(
+                                                                text = comment.commentContent,
+                                                                fontSize = 14.sp
+                                                            )
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
                                     }
                                 }
-                            }
-                        }
-                    }
 
                     2 -> Text(text = "기부후기: 아직 추가되지 않았습니다.")
                 }
@@ -384,6 +426,35 @@ fun fetchFundingComments(fundingIdx: Int, onSuccess: (CommentResponse) -> Unit) 
 
         override fun onFailure(call: Call<CommentResponse>, t: Throwable) {
             // 에러 처리
+        }
+    })
+}
+
+// 댓글 작성 API 호출 함수
+fun writeComment(
+    accessToken: String,
+    fundingIdx: Int,
+    commentContent: String,
+    onSuccess: () -> Unit,
+    onFailure: () -> Unit
+) {
+    val call = WriteFundingCommentApi.api.writeFundingComment(
+        authorization = accessToken,
+        fundingIdx = fundingIdx,
+        request = WriteCommentRequest(commentContent)
+    )
+
+    call.enqueue(object : Callback<WriteCommentResponse> {
+        override fun onResponse(call: Call<WriteCommentResponse>, response: Response<WriteCommentResponse>) {
+            if (response.isSuccessful && response.body()?.success == true) {
+                onSuccess()
+            } else {
+                onFailure()
+            }
+        }
+
+        override fun onFailure(call: Call<WriteCommentResponse>, t: Throwable) {
+            onFailure()
         }
     })
 }
