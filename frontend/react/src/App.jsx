@@ -1,7 +1,13 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import MainPage from './components/mainPage/MainPage';
-import SignupPage from './components/auth/SignupPage'; // 회원가입 페이지를 import
-import LoginPage from './components/auth/LoginPage'; // 회원가입 페이지를 import
+import SignupPage from './components/auth/SignupPage';
+import LoginPage from './components/auth/LoginPage';
+import MyPage from './components/myPage/MyPage';
+import UserInfo from './components/myPage/UserInfo'
+import Donations from './components/donations/Donations';
+import Funding from './components/funding/Funding';
+import Statistics from './components/statistics/Statistics';
+
 
 import React from 'react';
 
@@ -12,6 +18,11 @@ const App = () => {
         <Route path="/" element={<MainPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/mypage" element={<MyPage />} />
+        <Route path="/userinfo" element={<UserInfo />} />
+        <Route path="/donations" element={<Donations />} />
+        <Route path="/funding" element={<Funding />} />
+        <Route path="/statistics" element={<Statistics />} />
       </Routes>
     </Router>
   );

@@ -29,7 +29,7 @@ const LoginPage = () => {
         confirmButtonText: "확인",
       }).then(() => {
         // 모달 확인 버튼 클릭 시 메인 페이지로 이동
-        navigate("/");
+        navigate("/mypage");
       });
     } catch (error) {
       console.error("로그인 실패:", error);
