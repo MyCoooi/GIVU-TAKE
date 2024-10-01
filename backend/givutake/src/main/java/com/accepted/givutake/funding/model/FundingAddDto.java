@@ -3,10 +3,7 @@ package com.accepted.givutake.funding.model;
 import com.accepted.givutake.funding.ValidFundingAddDtoDates;
 import com.accepted.givutake.funding.entity.Fundings;
 import com.accepted.givutake.user.common.entity.Users;
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -43,6 +40,7 @@ public class FundingAddDto {
     private String fundingThumbnail;
 
     @NotNull(message = "펀딩 종류는 필수 입력 값 입니다.")
+    @Pattern(regexp = "[RD]", message = "펀딩 종류는 'R' 또는 'D'만 허용됩니다.")
     private Character fundingType;
 
     public Fundings toEntity(Users users, byte state) {

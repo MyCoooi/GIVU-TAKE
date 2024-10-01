@@ -73,7 +73,7 @@ public class FundingController {
                 .data(fundingViewDto)
                 .build();
 
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
     // jwt 토큰으로 펀딩 수정
