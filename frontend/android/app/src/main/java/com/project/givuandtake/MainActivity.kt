@@ -45,6 +45,7 @@ import com.project.givuandtake.feature.mypage.CustomerService.FaqPage
 import com.project.givuandtake.feature.mypage.CustomerService.PersonalInquiry
 import com.project.givuandtake.feature.mypage.CustomerService.Announcement
 import com.project.givuandtake.feature.mypage.MyActivities.AddressBook
+import com.project.givuandtake.feature.mypage.MyActivities.AddressBookUpdate
 import com.project.givuandtake.feature.mypage.MyActivities.AddressSearch
 import com.project.givuandtake.feature.mypage.MyActivities.CardBook
 import com.project.givuandtake.feature.mypage.MyActivities.CardCustomRegistration
@@ -211,6 +212,7 @@ class MainActivity : ComponentActivity() {
 
                             composable("addresssearch") { AddressSearch(navController) }
                             composable("addressmapsearch") { AddressMapSearch(navController)}
+                            composable("addressbookupdate") { AddressBookUpdate(navController) }
                             composable("cardregistration") { CardRegistration(navController) }
                             composable("cardcustomregistration/{cardNumber}/{validThru}", arguments = listOf(
                                 navArgument("cardNumber") { defaultValue = "" },
@@ -244,7 +246,8 @@ class MainActivity : ComponentActivity() {
                             currentDestination != "faqpate" &&
                             currentDestination != "personalinquiry" &&
                             currentDestination != "cardregistration" &&
-                            currentDestination != "cardcustomregistration/{cardNumber}/{validThru}"
+                            currentDestination != "cardcustomregistration/{cardNumber}/{validThru}" &&
+                            currentDestination != "addressbookupdate"
                         ) {
                             BottomNavBar(navController, selectedItem) { newIndex ->
                                 selectedItem = newIndex

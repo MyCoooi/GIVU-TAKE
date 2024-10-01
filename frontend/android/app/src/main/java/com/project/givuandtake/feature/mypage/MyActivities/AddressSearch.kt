@@ -340,6 +340,13 @@ fun AddressSearch(navController: NavController) {
                                     fontSize = 14.sp,
                                     modifier = Modifier.padding(horizontal = 8.dp)
                                 )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = juso.jibunAddr,
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(horizontal = 8.dp)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
                                 Divider(
                                     color = Color.Gray,
                                     thickness = 1.dp,
