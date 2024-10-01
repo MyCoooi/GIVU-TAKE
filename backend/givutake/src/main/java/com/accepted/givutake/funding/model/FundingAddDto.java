@@ -40,7 +40,6 @@ public class FundingAddDto {
     private String fundingThumbnail;
 
     @NotNull(message = "펀딩 종류는 필수 입력 값 입니다.")
-    @Pattern(regexp = "[RD]", message = "펀딩 종류는 'R' 또는 'D'만 허용됩니다.")
     private Character fundingType;
 
     public Fundings toEntity(Users users, byte state) {
