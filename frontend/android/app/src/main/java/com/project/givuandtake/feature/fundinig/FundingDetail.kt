@@ -39,6 +39,8 @@ import com.project.givuandtake.core.apis.Funding.WriteCommentResponse
 import com.project.givuandtake.core.apis.Funding.WriteFundingCommentApi
 import androidx.compose.ui.res.painterResource
 import com.project.givuandtake.R
+import com.project.givuandtake.core.apis.Funding.DeleteCommentResponse
+import com.project.givuandtake.core.apis.Funding.DeleteFundingCommentApi
 import com.project.givuandtake.core.datastore.TokenManager
 import com.project.givuandtake.core.datastore.TokenManager.getUserIdFromToken
 import kotlinx.coroutines.launch
@@ -70,6 +72,9 @@ fun FundingDetailPage(
     val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
     val userId = TokenManager.getUserIdFromToken(context)
     val loggedInUserName = TokenManager.getUserNameFromToken(context) // 로그인한 사용자 이름 가져오기
+    var showDeleteDialog by remember { mutableStateOf(false) } // 모달창 상태 관리
+    var selectedCommentIdx by remember { mutableStateOf<Int?>(null) } // 삭제할 댓글의 ID 저장
+
     Log.d("LoggedInUserName", "Logged in user: $loggedInUserName")
     Log.d("AccessToken", "Token: $accessToken")
 
@@ -85,6 +90,38 @@ fun FundingDetailPage(
             comments = response.data
             isLoading = false
         }
+    }
+    // 삭제 확인 모달
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text(text = "댓글 삭제") },
+            text = { Text("댓글을 삭제하시겠습니까?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    selectedCommentIdx?.let { commentIdx ->
+                        deleteComment(
+                            accessToken = accessToken,
+                            fundingIdx = fundingIdx,
+                            commentIdx = commentIdx,
+                            onSuccess = {
+                                fetchFundingComments(fundingIdx) { response ->
+                                    comments = response.data
+                                }
+                                showDeleteDialog = false
+                            }
+                        )
+                    }
+                }) {
+                    Text("확인")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("취소")
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -388,7 +425,9 @@ fun FundingDetailPage(
                                             if (comment.name != loggedInUserName) {
                                                 IconButton(
                                                     onClick = {
-                                                        // 댓글 삭제 로직 추가
+                                                        // 삭제 확인 모달을 보여주고, 선택된 댓글의 ID를 저장
+                                                        selectedCommentIdx = comment.commentIdx
+                                                        showDeleteDialog = true
                                                     },
                                                     modifier = Modifier
                                                         .size(24.dp) // 아이콘 크기를 작게 설정
@@ -482,6 +521,29 @@ fun writeComment(
 
         override fun onFailure(call: Call<WriteCommentResponse>, t: Throwable) {
             onFailure()
+        }
+    })
+}
+// 댓글 삭제 API 호출 함수
+fun deleteComment(
+    accessToken: String,
+    fundingIdx: Int,
+    commentIdx: Int,
+    onSuccess: () -> Unit
+) {
+    DeleteFundingCommentApi.api.deleteFundingComment(
+        authorization = accessToken,
+        fundingIdx = fundingIdx,
+        commentIdx = commentIdx
+    ).enqueue(object : Callback<DeleteCommentResponse> {
+        override fun onResponse(call: Call<DeleteCommentResponse>, response: Response<DeleteCommentResponse>) {
+            if (response.isSuccessful && response.body()?.success == true) {
+                onSuccess()
+            }
+        }
+
+        override fun onFailure(call: Call<DeleteCommentResponse>, t: Throwable) {
+            // 에러 처리
         }
     })
 }
