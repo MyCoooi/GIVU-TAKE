@@ -12,6 +12,8 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -38,6 +40,7 @@ import com.project.givuandtake.core.apis.Funding.WriteFundingCommentApi
 import androidx.compose.ui.res.painterResource
 import com.project.givuandtake.R
 import com.project.givuandtake.core.datastore.TokenManager
+import com.project.givuandtake.core.datastore.TokenManager.getUserIdFromToken
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
@@ -65,8 +68,10 @@ fun FundingDetailPage(
     var isPosting by remember { mutableStateOf(false) } // 댓글 작성 중 상태
     val context = LocalContext.current
     val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
+    val userId = TokenManager.getUserIdFromToken(context)
+    val loggedInUserName = TokenManager.getUserNameFromToken(context) // 로그인한 사용자 이름 가져오기
+    Log.d("LoggedInUserName", "Logged in user: $loggedInUserName")
     Log.d("AccessToken", "Token: $accessToken")
-
 
 
     // 펀딩 상세 데이터 로드
@@ -320,66 +325,88 @@ fun FundingDetailPage(
                                 Text("댓글을 불러오는 중입니다...")
                             } else {
                                 // 실제 응원 메시지 데이터 표시
-                                            Column(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(4.dp)
-                                            ) {
-                                                comments.forEach { comment ->
-                                                    Row(
-                                                        modifier = Modifier
-                                                            .fillMaxWidth()
-                                                            .padding(vertical = 8.dp)
-                                                    ) {
-                                                        // 이미지와 이름을 세로로 정렬
-                                                        Column(
-                                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                                            modifier = Modifier.padding(end = 8.dp) // 오른쪽에 간격 추가
-                                                        ) {
-                                                            Image(
-                                                                painter = painterResource(id = R.drawable.hamo), // drawable 리소스에서 이미지 가져오기
-                                                                contentDescription = "프로필 이미지",
-                                                                modifier = Modifier
-                                                                    .size(40.dp)
-                                                                    .clip(RoundedCornerShape(20.dp))
-                                                                    .border(
-                                                                        1.dp,
-                                                                        Color.Gray,
-                                                                        RoundedCornerShape(20.dp)
-                                                                    ),
-                                                                contentScale = ContentScale.Crop
-                                                            )
-                                                            Spacer(modifier = Modifier.height(4.dp)) // 이미지와 텍스트 사이 간격
-                                                            Text(
-                                                                text = comment.name,
-                                                                fontWeight = FontWeight.Bold,
-                                                                fontSize = 14.sp
-                                                            )
-                                                        }
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(4.dp)
+                                ) {
+                                    comments.forEach { comment ->
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 8.dp),
+                                                    verticalAlignment = Alignment.CenterVertically // 세로 중앙 정렬
 
-                                                        // 댓글 내용을 오른쪽에 표시
-                                                        Box(
-                                                            modifier = Modifier
-                                                                .border(
-                                                                    1.dp,
-                                                                    Color.LightGray,
-                                                                    RoundedCornerShape(8.dp)
-                                                                )
-                                                                .padding(8.dp)
-                                                                .wrapContentSize()
-                                                        ) {
-                                                            Text(
-                                                                text = comment.commentContent,
-                                                                fontSize = 14.sp
-                                                            )
-                                                        }
-                                                    }
+                                        ) {
+                                            // 이미지와 이름을 세로로 정렬
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                modifier = Modifier.padding(end = 8.dp) // 오른쪽에 간격 추가
+                                            ) {
+                                                Image(
+                                                    painter = painterResource(id = R.drawable.hamo), // drawable 리소스에서 이미지 가져오기
+                                                    contentDescription = "프로필 이미지",
+                                                    modifier = Modifier
+                                                        .size(40.dp)
+                                                        .clip(RoundedCornerShape(20.dp))
+                                                        .border(
+                                                            1.dp,
+                                                            Color.Gray,
+                                                            RoundedCornerShape(20.dp)
+                                                        ),
+                                                    contentScale = ContentScale.Crop
+                                                )
+                                                Spacer(modifier = Modifier.height(4.dp)) // 이미지와 텍스트 사이 간격
+                                                Text(
+                                                    text = comment.name,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 14.sp
+                                                )
+                                            }
+
+                                            // 댓글 내용을 오른쪽에 표시
+                                            Box(
+                                                modifier = Modifier
+                                                    .border(
+                                                        1.dp,
+                                                        Color.LightGray,
+                                                        RoundedCornerShape(8.dp)
+                                                    )
+                                                    .padding(12.dp)
+                                                    .wrapContentSize() // 가로 공간의 80%를 차지하도록 설정
+                                                    .widthIn(max = 270.dp)
+                                                    .heightIn(min = 40.dp), // 최소 높이를 설정
+                                                        contentAlignment = Alignment.Center
+
+                                            ) {
+                                                Text(
+                                                    text = comment.commentContent,
+                                                    fontSize = 14.sp
+                                                )
+                                            }
+                                            // 만약 현재 댓글의 작성자가 로그인한 사용자라면 쓰레기통 아이콘 표시
+                                            if (comment.name != loggedInUserName) {
+                                                IconButton(
+                                                    onClick = {
+                                                        // 댓글 삭제 로직 추가
+                                                    },
+                                                    modifier = Modifier
+                                                        .size(24.dp) // 아이콘 크기를 작게 설정
+                                                        .padding(start = 4.dp) // 아이콘과 댓글 내용을 더 가깝게 배치
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Outlined.Delete,
+                                                        contentDescription = "댓글 삭제",
+                                                        tint = Color.Gray,
+                                                        modifier = Modifier.size(20.dp)
+                                                    )
                                                 }
                                             }
                                         }
                                     }
                                 }
-
+                            }
+                        }}
                     2 -> Text(text = "기부후기: 아직 추가되지 않았습니다.")
                 }
 

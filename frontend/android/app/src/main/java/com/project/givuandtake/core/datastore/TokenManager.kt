@@ -2,6 +2,9 @@ package com.project.givuandtake.core.datastore
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Base64
+import org.json.JSONObject
+
 
 object TokenManager {
 
@@ -36,5 +39,52 @@ object TokenManager {
         val editor = sharedPref.edit()
         editor.clear()
         editor.apply()
+    }
+    // JWT 토큰에서 userId 가져오기
+    fun getUserIdFromToken(context: Context): String? {
+        val accessToken = getAccessToken(context)
+        return accessToken?.let {
+            try {
+                // JWT 토큰의 payload 부분 디코딩
+                val parts = it.split(".")
+                if (parts.size != 3) {
+                    return null
+                }
+
+                // Base64 디코딩
+                val payload = String(Base64.decode(parts[1], Base64.DEFAULT))
+                val jsonObject = JSONObject(payload)
+
+                // userId 추출 (JWT의 필드 이름이 'userId'로 가정)
+                return jsonObject.getString("userId")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        }
+    }
+
+    // JWT 토큰에서 userName 가져오기
+    fun getUserNameFromToken(context: Context): String? {
+        val accessToken = getAccessToken(context)
+        return accessToken?.let {
+            try {
+                // JWT 토큰의 payload 부분 디코딩
+                val parts = it.split(".")
+                if (parts.size != 3) {
+                    return null
+                }
+
+                // Base64 디코딩
+                val payload = String(Base64.decode(parts[1], Base64.DEFAULT))
+                val jsonObject = JSONObject(payload)
+
+                // userName 추출 (JWT의 필드 이름이 'userName'으로 가정)
+                return jsonObject.getString("userName")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        }
     }
 }
