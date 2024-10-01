@@ -45,6 +45,8 @@ public enum ExceptionEnum {
     UNEXPECTED_BIRTH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2004", "생년월일 정보는 포함할 수 없습니다."),
     UNEXPECTED_STATUS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2005", "상태 정보는 포함할 수 없습니다."),
     UNEXPECTED_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2006", "대표 주소 정보는 포함할 수 없습니다."),
+    UNEXPECTED_LANDLINE_PHONE_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2007", "유선 전화 정보는 포함할 수 없습니다."),
+    UNEXPECTED_MOBILE_PHONE_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2007", "휴대폰 번호 정보는 포함할 수 없습니다."),
 
 //    MISSING_REGION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3001", "지역 정보는 필수 입력 값 입니다."),
     MISSING_SIDO_EXCEPTION(HttpStatus.BAD_REQUEST,"EU3001", "시/도명은 필수 입력 값 입니다."),
