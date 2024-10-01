@@ -352,7 +352,7 @@ fun AttractionMain(navController: NavController, city: String?) {
                     }
 
                     3 -> {
-                        MainVillageTab(navController = navController, displayedCity = displayedCity, viewModel = viewModel())
+                        MainVillageTab(navController = navController, displayedCity = displayedCity)
                     }
                 }
             }
