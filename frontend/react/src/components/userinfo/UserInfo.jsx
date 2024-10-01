@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../Sidebar";
 import TokenManager from "../../utils/TokenManager";
-import { getUserInfo } from "../../apis/apiUserInfo";
+import { getUserInfo } from "../../apis/auth/apiUserInfo";
 import { useNavigate } from "react-router-dom"; // useNavigate 훅 추가
 import Swal from "sweetalert2"
 import "./UserInfo.css";
@@ -61,7 +61,9 @@ const UserInfo = () => {
       <Sidebar selectedMenu={selectedMenu} setSelectedMenu={setSelectedMenu} />
       <div className="user-info-container">
         <div className="user-info-header">
-          <button className="edit-button">수정</button> {/* 수정 버튼 */}
+        <button className="edit-button" onClick={() => navigate("/userinfoupdate")}>
+          수정
+        </button>
         </div>
         <div className="user-info-content">
           <div className="profile-picture">
@@ -78,10 +80,10 @@ const UserInfo = () => {
               <strong>이메일 :</strong> {userInfo.email}
             </p>
             <p className="user-info-landlinePhone">
-              <strong>전화 번호 :</strong> {userInfo.landlinePhone}
+              <strong>유선번호 :</strong> {userInfo.landlinePhone}
             </p>
             <p className="user-info-mobilePhone">
-              <strong>휴대폰 번호 :</strong> {userInfo.mobilePhone}
+              <strong>휴대폰번호 :</strong> {userInfo.mobilePhone}
             </p>
           </div>
         </div>

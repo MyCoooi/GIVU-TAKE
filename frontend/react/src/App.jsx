@@ -7,6 +7,7 @@ import Donations from './components/donations/Donations';
 import Funding from './components/funding/Funding';
 import Statistics from './components/statistics/Statistics';
 import UserInfo from './components/userinfo/UserInfo';
+import UserInfoUpdate from './components/userinfo/UserInfoUpdate';
 
 
 import React from 'react';
@@ -19,7 +20,10 @@ const App = () => {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/mypage" element={<MyPage />} />
+
         <Route path="/userinfo" element={<UserInfo />} />
+        <Route path="/userinfoupdate" element={<UserInfoUpdate />} />
+
         <Route path="/donations" element={<Donations />} />
         <Route path="/funding" element={<Funding />} />
         <Route path="/statistics" element={<Statistics />} />

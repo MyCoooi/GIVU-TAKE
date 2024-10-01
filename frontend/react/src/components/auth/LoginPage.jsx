@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2"; // SweetAlert2 추가
 import "./LoginPage.css";
-import { login } from "../../apis/apiLogin"; // 로그인 API 호출 함수 추가
+import { login } from "../../apis/auth/apiLogin"; // 로그인 API 호출 함수 추가
 
 const LoginPage = () => {
   const navigate = useNavigate();
