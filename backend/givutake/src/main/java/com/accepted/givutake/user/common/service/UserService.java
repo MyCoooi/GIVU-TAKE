@@ -60,7 +60,7 @@ public class UserService {
 
         // 유효하지 않은 권한정보가 들어온 경우
         if (!(role == Roles.ROLE_CLIENT || role == Roles.ROLE_CORPORATIONYET)) {
-            throw new AccessDeniedException("권한 정보가 유효하지 않습니다.");
+            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
 
         // 이메일 중복 검사
