@@ -1,13 +1,16 @@
 package com.accepted.givutake.funding.service;
 
 import com.accepted.givutake.funding.entity.Fundings;
-import com.accepted.givutake.funding.model.FundingAddDto;
-import com.accepted.givutake.funding.model.FundingReviewAddDto;
+import com.accepted.givutake.funding.model.*;
 import com.accepted.givutake.funding.repository.FundingRepository;
+import com.accepted.givutake.gift.model.purchaser;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
+import com.accepted.givutake.payment.entity.FundingParticipants;
+import com.accepted.givutake.payment.repository.FundingParticipantsRepository;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.model.UserDto;
+import com.accepted.givutake.user.common.repository.UsersRepository;
 import com.accepted.givutake.user.common.service.UserService;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
@@ -20,8 +23,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -30,7 +36,9 @@ import java.util.Optional;
 public class FundingService {
 
     private final FundingRepository fundingRepository;
+    private final UsersRepository userRepository;
     private final UserService userService;
+    private final FundingParticipantsRepository fundingParticipantsRepository;
 
     // 조건에 해당하는 모든 펀딩 조회(삭제된 펀딩은 조회 불가)
     public List<Fundings> getFundingByTypeAndState(char fundingType, byte state) {
@@ -151,6 +159,48 @@ public class FundingService {
 
         savedFundings.setDeleted(true);
         return savedFundings;
+    }
+
+    public FundingDayStatisticDto getFundingDayStatisticByFundingIdx(String email, int fundingIdx) {
+        Fundings funding = fundingRepository.findByFundingIdx(fundingIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_FUNDING_WITH_IDX_EXCEPTION));
+        if(!funding.getCorporation().getEmail().equals(email)) {
+            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
+        }
+        LocalDate startDate = funding.getStartDate();
+        LocalDate endDate = funding.getEndDate();
+        int days = (int) ChronoUnit.DAYS.between(startDate, endDate) + 1;
+        int[] arr = new int[days];
+
+
+        List<FundingParticipants> participants = funding.getFundingParticipantsList();
+
+
+        for (FundingParticipants participant : participants) {
+            LocalDate participationDate = participant.getCreatedDate().toLocalDate();
+            if (!participationDate.isBefore(startDate) && !participationDate.isAfter(endDate)) {
+                int dayIndex = (int) ChronoUnit.DAYS.between(startDate, participationDate);
+                arr[dayIndex] += participant.getFundingFee();
+            }
+        }
+        return new FundingDayStatisticDto(arr);
+    }
+
+    public FundingParticipateDto getFundingParticipateByFundingIdx(String email, int fundingIdx) {
+        Fundings funding = fundingRepository.findByFundingIdx(fundingIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_FUNDING_WITH_IDX_EXCEPTION));
+        if(!funding.getCorporation().getEmail().equals(email)) {
+            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
+        }
+        List<Object[]> participateData = fundingParticipantsRepository.findFundingParticipantsByFundingIdx(fundingIdx);
+
+        List<participant> participants= participateData.stream()
+                .map(data -> new participant(
+                        (String) data[0],
+                        ((Number) data[1]).intValue()
+                ))
+                .sorted(Comparator.comparingInt(participant::getPrice).reversed())
+                .collect(Collectors.toList());
+
+        return new FundingParticipateDto(participants);
     }
 
 }
