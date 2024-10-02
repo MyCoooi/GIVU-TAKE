@@ -1,5 +1,8 @@
 package com.project.givuandtake.auth
 
+import android.content.Context
+import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -28,11 +32,77 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.project.givuandtake.R
+import com.project.givuandtake.core.apis.Auth.LoginApi
+import com.project.givuandtake.core.apis.Auth.LoginRequest
+import com.project.givuandtake.core.apis.Auth.LoginResponse
+import com.project.givuandtake.core.datastore.TokenManager
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+
+// SharedPreferences에 토큰을 저장하는 함수
+fun saveTokens(context: Context, accessToken: String, refreshToken: String) {
+    val sharedPref: SharedPreferences = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
+    val editor = sharedPref.edit()
+    editor.putString("accessToken", accessToken)
+    editor.putString("refreshToken", refreshToken)
+    editor.apply()
+}
+
 
 @Composable
 fun LoginScreen(navController: NavController) {
+    val context = LocalContext.current // 여기서 LocalContext를 사용해 context를 가져옴
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
+
+    // 앱 실행 시 토큰 확인
+    LaunchedEffect(Unit) {
+        val accessToken = TokenManager.getAccessToken(context)
+        if (accessToken != null) {
+            // 액세스 토큰이 있으면 메인 페이지로 이동
+            navController.navigate("mainpage") {
+                popUpTo("auth") { inclusive = true }  // 로그인 페이지를 백스택에서 제거
+            }
+        }
+    }
+
+    // 로그인 요청 함수
+    fun loginUser(email: String, password: String, onResult: (String) -> Unit) {
+        val loginRequest = LoginRequest(email, password)
+
+        LoginApi.api.loginUser(loginRequest).enqueue(object : Callback<LoginResponse> {
+            override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
+                if (response.isSuccessful) {
+                    val loginResponse = response.body()
+                    if (loginResponse?.success == true) {
+                        val accessToken = loginResponse.data?.accessToken ?: ""
+                        val refreshToken = loginResponse.data?.refreshToken ?: ""
+                        Log.d("LoginResponse", "로그인 성공 - AccessToken: $accessToken, RefreshToken: $refreshToken")
+
+                        // 로그인 성공 후 토큰을 SharedPreferences에 저장
+                        saveTokens(context, accessToken, refreshToken)
+
+                        onResult("로그인 성공")
+                    } else {
+                        Log.e("LoginResponse", "로그인 실패: ${loginResponse?.data}")
+                        onResult("로그인 실패")
+                    }
+                } else {
+                    Log.e("LoginResponse", "로그인 실패 - 코드: ${response.code()}, 오류: ${response.errorBody()?.string()}")
+                    onResult("로그인 실패 - ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                Log.e("LoginResponse", "로그인 실패: ${t.message}")
+                onResult("로그인 실패")
+            }
+        })
+    }
+
+
 
     Surface(
         modifier = Modifier
@@ -78,7 +148,7 @@ fun LoginScreen(navController: NavController) {
                 // 이메일 입력 필드
                 TextField(
                     value = email,
-                    onValueChange = { email = it },
+                    onValueChange = { email = it.trim() },  // 입력할 때 trim() 적용
                     label = { Text("이메일") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
@@ -111,11 +181,29 @@ fun LoginScreen(navController: NavController) {
 
                 // 로그인 버튼
                 Button(
-                    onClick = { /* 로그인 처리 */ },
-                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        loginUser(email, password) { result ->
+                            // result 값을 활용하여 로그인 결과에 따른 동작 수행
+                            if (result == "로그인 성공") {
+                                // 로그인 성공 시 페이지 이동
+                                navController.navigate("mainpage")
+                            } else {
+                                // 로그인 실패 시 에러 메시지 업데이트
+                                errorMessage = result
+                            }
+                        }
+                    },                    modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
                 ) {
                     Text(text = "이메일로 로그인", color = Color.White)
+                }
+                // 에러 메시지가 있을 경우 표시
+                if (errorMessage.isNotEmpty()) {
+                    Text(
+                        text = errorMessage,
+                        color = Color.Red,
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -131,6 +219,7 @@ fun LoginScreen(navController: NavController) {
                         text = "비밀번호 찾기",
                         color = Color.Gray,
                         modifier = Modifier.clickable {
+                            navController.navigate("find_password")
                         }
                     )
                     Text(

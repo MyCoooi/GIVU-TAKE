@@ -19,7 +19,7 @@ suspend fun addToCart(context: Context, giftDetail: GiftDetail, quantity: Int) {
 
     // GiftDetail을 CartItem으로 변환
     val newItem = CartItem(
-        name = giftDetail.name,
+        name = giftDetail.giftName,
         price = giftDetail.price,
         quantity = quantity,
         location = giftDetail.location

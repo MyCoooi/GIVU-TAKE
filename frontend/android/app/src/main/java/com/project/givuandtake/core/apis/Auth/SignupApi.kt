@@ -1,4 +1,4 @@
-package com.project.givuandtake.core.apis
+package com.project.givuandtake.core.apis.Auth
 
 import com.project.givuandtake.core.data.SignUpRequest
 import retrofit2.Retrofit

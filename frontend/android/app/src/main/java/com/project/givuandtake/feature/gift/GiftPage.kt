@@ -1,7 +1,6 @@
-package com.project.givuandtake.feature.gift.mainpage
+package com.project.givuandtake.feature.gift
 
-import GiftPageDetail
-import android.content.Context
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.project.givuandtake.R
@@ -27,11 +25,11 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,150 +42,46 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.NavType
+import coil.compose.rememberImagePainter
 
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import coil.compose.AsyncImage
 import com.project.givuandtake.core.data.GiftDetail
-import com.project.givuandtake.core.data.Product
-import com.project.givuandtake.core.datastore.dataStore
+import com.project.givuandtake.core.datastore.TokenDataStore
 import com.project.givuandtake.core.datastore.getCartItems
+import com.project.givuandtake.feature.gift.GiftViewModel
 import com.project.givuandtake.feature.gift.addToFavorites
-import com.project.givuandtake.feature.gift.getFavoriteProducts
+import com.project.givuandtake.feature.mypage.MyDonation.WishlistViewModel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
-//@Composable
-//fun GiftPage(navController: NavController) {
-//    val products = listOf(
-//        GiftDetail(1, "상품 1", 10000, "url1", "강원도 평창"),
-//        GiftDetail(2, "상품 2", 20000, "url2", "부산"),
-//        GiftDetail(3, "상품 3", 30000, "url3", "대구"),
-//        GiftDetail(4, "상품 4", 40000, "url4", "광주"),
-//        GiftDetail(5, "상품 5", 50000, "url5", "인천"),
-//        GiftDetail(6, "상품 6", 60000, "url6", "울산")
-//    )
-//    val context = LocalContext.current
-//    val favoriteProductsFlow = getFavoriteProducts(context)
-//    val favoriteProductsSet by favoriteProductsFlow.collectAsState(initial = emptySet())
-//
-//    val favoriteProducts = products.filter { product ->
-//        favoriteProductsSet.contains(product.id.toString())
-//    }
-//
-//    var searchText by remember { mutableStateOf("") }
-//    val coroutineScope = rememberCoroutineScope()  // CoroutineScope 생성
-//
-//    Scaffold(
-//        topBar = {
-//            TopAppBar(
-//                title = {
-//                    Row(
-//                        verticalAlignment = Alignment.CenterVertically,
-//                        horizontalArrangement = Arrangement.SpaceBetween,
-//                        modifier = Modifier.fillMaxWidth()
-//                    ) {
-//                        Image(
-//                            painter = painterResource(id = R.drawable.logo),
-//                            contentDescription = "Logo",
-//                            modifier = Modifier.size(48.dp)
-//                        )
-//                        Text(
-//                            text = "우리 고향 기부하기",
-//                            color = Color.Black,
-//                            modifier = Modifier.weight(1f),
-//                            textAlign = TextAlign.Center
-//                        )
-//                        CartIcon(cartItemCount = 3, onCartClick = {
-//                            // Add navigation or action to open the cart
-//                            navController.navigate("cart_page") // Assuming you have a cart page
-//                        })
-//                    }
-//                },
-//                backgroundColor = Color(0xFFDAEBFD)
-//            )
-//        },
-//    ) { innerPadding ->
-//        LazyColumn(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(innerPadding)
-//                .padding(horizontal = 16.dp)
-//        ) {
-//            item {
-//                Text(text = "우리 고향 기부하기", fontWeight = FontWeight.Bold, fontSize = 25.sp)
-//                Spacer(modifier = Modifier.height(16.dp))
-//            }
-//            item {
-//                TextField(
-//                    value = searchText,
-//                    onValueChange = { newText ->
-//                        searchText = newText
-//                    },
-//                    label = { Text("상품 이름 검색") },
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(vertical = 16.dp)
-//                        .background(Color.White)
-//                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
-//                        .padding(4.dp),
-//                    singleLine = true,
-//                    colors = TextFieldDefaults.textFieldColors(
-//                        backgroundColor = Color.White,
-//                        focusedIndicatorColor = Color.Transparent,
-//                        unfocusedIndicatorColor = Color.Transparent
-//                    )
-//                )
-//            }
-//            item {
-//                Text(text = "상품종류 순", fontWeight = FontWeight.Bold, fontSize = 25.sp)
-//                FilterButtons_category()
-//            }
-//            item {
-//                Text(text = "맞춤 추천상품", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-//                ProductGrid(
-//                    navController = navController,
-//                    products = products,
-//                    favoriteProducts = favoriteProducts,
-//                    onFavoriteToggle = { product ->
-//                        // 비동기적으로 addToFavorites 처리
-//                        coroutineScope.launch {
-//                            addToFavorites(context, product)  // 코루틴 내에서 안전하게 호출
-//                        }
-//                    }
-//                )
-//                Spacer(modifier = Modifier.height(16.dp))
-//            }
-//        }
-//    }
-//}
+
 @Composable
-fun GiftPage(navController: NavController) {
+fun GiftPage(navController: NavController, viewModel: GiftViewModel = viewModel(), wishlistViewModel: WishlistViewModel = viewModel()){ // WishlistViewModel도 주입받음
+    // ViewModel에서 필요한 데이터 가져오기
     val context = LocalContext.current
-    val products = listOf(
-        GiftDetail(1, "상품 1", 10000, "url1", "강원도 평창"),
-        GiftDetail(2, "상품 2", 20000, "url2", "부산"),
-        GiftDetail(3, "상품 3", 30000, "url3", "대구"),
-        GiftDetail(4, "상품 4", 40000, "url4", "광주"),
-        GiftDetail(5, "상품 5", 50000, "url5", "인천"),
-        GiftDetail(6, "상품 6", 60000, "url6", "울산")
-    )
+    val allProducts by viewModel.allGiftDetails.collectAsState()
+    val cartItemCount by viewModel.cartItemCount.collectAsState()
+    val wishlistItems by viewModel.wishlistItemsIds.collectAsState()
+
+    val tokenDataStore = TokenDataStore(context)
+    val Bearer_Token = "eyJhbGciOiJIUzUxMiJ9.eyJhdXRoIjoiUk9MRV9DT1JQT1JBVElPTiIsInN1YiI6ImJ1c2FuQGJ1c2FuLmNvbSIsImlzcyI6ImNvbS5hY2NlcHRlZC5naXZ1dGFrZSIsIm5iZiI6MTcyNzMzMjk1NCwiaWF0IjoxNzI3MzMyOTU0LCJleHAiOjE3MzQ3ODQ5NTQsImp0aSI6ImQ2ZDMyYzI4LTg1NzMtNGZkNC04OWUxLWMxNjIzNDY4YzEzOCJ9.-hyiFcVfR7IXUwiybtECAlwPfnMI14d7EjYRgUaJkaT94QITm1iIO-_nMrWoKTMDwFsGHjsZXB1eTzGqhshcaQ"
+    val token = "Bearer $Bearer_Token" // 실제 Bearer 토큰
+
+    // API에서 데이터를 불러오는 로직 추가
+    LaunchedEffect(Unit) {
+        // 토큰 저장
+        tokenDataStore.saveToken(token)
+        // 로그로 토큰 확인
+        Log.d("ApiCall", "Authorization 토큰:  $token")
+        viewModel.fetchGiftsFromApi(token) // API 호출
+    }
+    Log.d("giftlist","${allProducts}")
 
     // 장바구니 아이템을 상태로 저장
     val cartItemsFlow = getCartItems(context) // getCartItems는 DataStore나 DB에서 장바구니 정보를 불러오는 함수
     val cartItems by cartItemsFlow.collectAsState(initial = emptyList()) // 초기 상태는 빈 리스트로 설정
 
-    val favoriteProductsFlow = getFavoriteProducts(context)
-    val favoriteProductsSet by favoriteProductsFlow.collectAsState(initial = emptySet())
 
-    val favoriteProducts = products.filter { product ->
-        favoriteProductsSet.contains(product.id.toString())
-    }
 
     // 스크롤 상태를 추적하기 위한 rememberLazyListState
     val scrollState = rememberLazyListState()
@@ -230,9 +124,11 @@ fun GiftPage(navController: NavController) {
             item {
                 MiddleContent(
                     navController = navController,
-                    products = products,
-                    favoriteProducts = favoriteProducts,
-                    innerPadding = PaddingValues(0.dp) // 이미 LazyColumn 안이므로 패딩은 0으로 설정
+                    products = allProducts,
+                    wishlistItems = wishlistItems,
+                    onFavoriteToggle = { product ->
+                        wishlistViewModel.toggleWishlistItem(product) // 찜 상태 토글 함수 호출
+                    }
                 )
             }
         }
@@ -245,7 +141,7 @@ fun GiftPage(navController: NavController) {
         ) {
             TopBar(
                 navController = navController,
-                cartItemCount = cartItems.size // 장바구니 아이템 개수 전달
+                cartItemCount = cartItems.size, // 장바구니 아이템 개수 전달
             )
         }
     }
@@ -296,9 +192,19 @@ fun TopBar(navController: NavController, cartItemCount: Int) {
                 fontWeight = FontWeight.Bold,
                 fontSize = 25.sp
             )
-            CartIcon(cartItemCount = cartItemCount, onCartClick = {
-                navController.navigate("cart_page") // Cart 페이지로 이동
-            })
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // WishList 아이콘 추가
+                IconButton(onClick = {
+                    navController.navigate("wishlist_page")
+                }) {
+                    Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "WishList")
+                }
+                Spacer(modifier = Modifier.width(8.dp)) // 아이콘 사이 간격
+                // Cart 아이콘
+                CartIcon(cartItemCount = cartItemCount, onCartClick = {
+                    navController.navigate("cart_page") // Cart 페이지로 이동
+                })
+            }
         }
 
         // 검색창
@@ -346,8 +252,8 @@ fun TopBar(navController: NavController, cartItemCount: Int) {
 fun MiddleContent(
     navController: NavController,
     products: List<GiftDetail>,
-    favoriteProducts: List<GiftDetail>,
-    innerPadding: PaddingValues
+    wishlistItems: Set<String>,
+    onFavoriteToggle: (GiftDetail) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -396,12 +302,8 @@ fun MiddleContent(
             ProductGrid(
                 navController = navController,
                 products = products,
-                favoriteProducts = favoriteProducts,
-                onFavoriteToggle = { product ->
-                    coroutineScope.launch {
-                        addToFavorites(context, product)
-                    }
-                }
+                wishlistItems = wishlistItems,
+                onFavoriteToggle = onFavoriteToggle
             )
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -414,7 +316,7 @@ fun MiddleContent(
             ProductGrid(
                 navController = navController,
                 products = products,
-                favoriteProducts = favoriteProducts,
+                wishlistItems  = wishlistItems,
                 onFavoriteToggle = { product ->
                     coroutineScope.launch {
                         addToFavorites(context, product)
@@ -432,7 +334,7 @@ fun MiddleContent(
             ProductGrid(
                 navController = navController,
                 products = products,
-                favoriteProducts = favoriteProducts,
+                wishlistItems  = wishlistItems,
                 onFavoriteToggle = { product ->
                     coroutineScope.launch {
                         addToFavorites(context, product)
@@ -452,7 +354,7 @@ fun CartIcon(cartItemCount: Int, onCartClick: () -> Unit) {
     ) {
         IconButton(onClick = { onCartClick() }) {
             Icon(
-                painter = painterResource(id = R.drawable.baseline_add_shopping_cart_24), // 장바구니 아이콘
+                imageVector = Icons.Default.ShoppingCart, // 장바구니 아이콘
                 contentDescription = "Cart Icon",
                 tint = Color.Black
             )
@@ -483,7 +385,7 @@ fun CartIcon(cartItemCount: Int, onCartClick: () -> Unit) {
 fun ProductGrid(
     navController: NavController,
     products: List<GiftDetail>,
-    favoriteProducts: List<GiftDetail>,
+    wishlistItems: Set<String>,
     onFavoriteToggle: (GiftDetail) -> Unit
 ) {
     // LazyRow를 감싸는 Box에 테두리 추가
@@ -507,7 +409,7 @@ fun ProductGrid(
                     verticalArrangement = Arrangement.spacedBy(16.dp) // 세로 간격 설정
                 ) {
                     rowProducts.forEach { product ->
-                        val isFavorite = favoriteProducts.any { it.id == product.id } // 찜 상태 확인
+                        val isFavorite =  wishlistItems.contains(product.giftIdx.toString()) // 찜 상태 확인
                         ProductCard(
                             product = product,
                             isFavorite = isFavorite,
@@ -530,15 +432,14 @@ fun ProductCard(
     onFavoriteToggle: (GiftDetail) -> Unit,
     modifier: Modifier = Modifier // modifier 추가
 ) {
+    val location = "${product.corporationSido} ${product.corporationSigungu}"
     Card(
         shape = RoundedCornerShape(16.dp), // 카드 모서리를 둥글게 설정
         modifier = modifier
             .padding(8.dp)
             .fillMaxWidth()
             .clickable {
-                navController.navigate(
-                    "gift_page_detail/${product.id}/${product.name}/${product.price}/${product.imageUrl}/${product.location}"
-                )
+                navController.navigate("gift_page_detail/${product.giftIdx}")
             },
         elevation = 4.dp
     ) {
@@ -549,10 +450,12 @@ fun ProductCard(
                 .padding(8.dp), // 패딩을 조금 더 좁게 설정
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            // 상품 설명
+            val thumbnailUrl = "${product.giftThumbnail}"  // 썸네일 URL과 설명 파싱
             // 상품 이미지와 찜 아이콘을 같은 Box에 배치
             Box(modifier = Modifier.fillMaxWidth()) {
                 Image(
-                    painter = painterResource(id = R.drawable.blank), // 상품 이미지
+                    painter = painterResource(R.drawable.placeholder), // 상품 이미지
                     contentDescription = "Product Image",
                     modifier = Modifier
                         .fillMaxWidth()
@@ -577,7 +480,7 @@ fun ProductCard(
 
             // 상품명과 가격
             Text(
-                text = product.name,
+                text = product.giftName,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp, // 텍스트 크기를 조금 줄임
                 modifier = Modifier.padding(bottom = 4.dp)
@@ -600,7 +503,7 @@ fun ProductCard(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = product.location,
+                    text = location,
                     fontSize = 12.sp,
                     color = Color.Gray
                 )
