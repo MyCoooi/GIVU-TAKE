@@ -46,18 +46,23 @@ const FundingDetail = () => {
 
         <div className="funding-detail-body">
           <div className="funding-thumbnail">
-            <img src={funding.thumbnail} alt="펀딩 썸네일" />
+            {funding.thumbnail ? (
+              <img src={funding.thumbnail} alt="펀딩 썸네일" />
+            ) : (
+              <div className="thumbnail-placeholder">펀딩 썸네일</div>
+            )}
           </div>
           <div className="funding-info">
             <h2>{funding.fundingTitle}</h2>
             <p>펀딩 유형: {funding.fundingType === "D" ? "재난재해" : "지역기부"}</p>
-            <p>
-              {funding.startDate} ~ {funding.endDate}
-            </p>
+            <p>펀딩 기간: {funding.startDate} ~ {funding.endDate}</p>
+            <p>달성 금액: {funding.totalMoney.toLocaleString()}원</p>
             <p>목표 금액: {funding.goalMoney.toLocaleString()}원</p>
-            <p>등록일: {funding.startDate}</p>
+            <p className="achievement-rate">달성률: {Math.round((funding.totalMoney / funding.goalMoney) * 100)}%</p> {/* 달성률 추가 */}
           </div>
+          <p className="registration-date">등록일: {funding.startDate}</p> {/* 등록일을 오른쪽으로 옮김 */}
         </div>
+
 
         <div className="funding-description">
           <p>{funding.fundingContent}</p>
