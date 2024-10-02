@@ -85,11 +85,8 @@ const FundingDetail = () => {
               후기
             </button>
           </div>
-          {activeTab === "후기" ? (
-            <button className="write-review-button">후기 작성</button>
-          ) : activeTab === "소개" ? (
-            <button className="edit-button">수정</button>
-          ) : null}
+          {/* 수정 버튼은 '소개' 탭에서만 표시 */}
+          {activeTab === "소개" && <button className="edit-button">수정</button>}
         </div>
 
         {/* 응원댓글 클릭 시 펀딩 상세 정보 숨기기 */}
