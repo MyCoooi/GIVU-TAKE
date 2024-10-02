@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom"; // useParams로 fundingIdx를 URL에서 가져옴
 import Sidebar from "../Sidebar";
 import { apiFundingDetail } from "../../apis/funding/apiFundingDetail"; // API 파일 import
-import "./fundingDetail.css"; // 스타일 파일 import
+import "./FundingDetail.css"; // 스타일 파일 import
 
 const FundingDetail = () => {
   const { fundingIdx } = useParams(); // URL에서 fundingIdx 가져오기
