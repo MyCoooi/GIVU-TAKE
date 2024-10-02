@@ -1,0 +1,190 @@
+.create-funding-layout {
+  display: flex;
+  height: 100vh;
+}
+
+.create-funding-content {
+  flex-grow: 1;
+  padding: 30px;
+  background-color: #FBFAFF;
+}
+
+.create-funding-content .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  color: black;
+  font-size: 18px;
+}
+
+.save-button {
+  background-color: #6a5acd;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.save-button:hover {
+  background-color: #5b4ead;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.funding-details-container {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.thumbnail {
+  width: 300px;
+  height: 300px;
+  background-color: #f0f0f0;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.thumbnail-placeholder {
+  font-size: 16px;
+  color: #888;
+}
+
+.image-upload {
+  margin-top: 0px;
+}
+
+.image-upload label {
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.image-upload input[type="file"] {
+  display: none; /* 기본 파일 선택 버튼 숨기기 */
+}
+
+
+.custom-file-upload {
+  display: inline-block;
+  padding: 5px 10px;
+  cursor: pointer;
+  background-color: #6a5acd;
+  border: 2px solid #6a5acd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.custom-file-upload:hover {
+  background-color: #5b4ead;
+  border: 2px solid #5b4ead;
+  color: white;
+}
+
+.image-upload input {
+  margin-top: 10px;
+}
+
+.details-section {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.funding-name {
+  font-size: 18px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 50%;
+}
+
+.funding-type {
+  display: flex;
+  gap: 20px;
+  font-size: 18px;
+}
+
+.dates {
+  font-size: 18px;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dates .date-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.goal-amount input {
+  font-size: 18px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 50%;
+}
+
+.description-section {
+  margin-top: 20px;
+}
+
+.description-section textarea {
+  width: 100%;
+  height: 300px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  resize: none;
+}
+
+/* 추가된 react-datepicker 스타일 */
+.react-datepicker-wrapper {
+  width: 41%;
+}
+
+.react-datepicker__input-container input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  color: #333;
+}
+
+.react-datepicker-popper {
+  z-index: 2;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: #6a5acd;
+  color: white;
+}
+
+.react-datepicker__header {
+  color: white;
+}
+
+.react-datepicker__day--outside-month {
+  color: #ccc;
+}
