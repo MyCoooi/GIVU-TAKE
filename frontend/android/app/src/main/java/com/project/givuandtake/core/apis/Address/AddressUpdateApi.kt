@@ -1,6 +1,7 @@
 package com.project.givuandtake.core.apis.Address
 
 import com.project.givuandtake.core.data.Address.AddressPostData
+import com.project.givuandtake.core.data.Address.AddressUpdateData
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
@@ -16,8 +17,8 @@ interface AddressUpdateApiService {
     suspend fun updateAddressData(
         @Header("Authorization") token: String,
         @Path("addressIdx") addressIdx: Int,
-        @Body addressRequest: AddressPostData
-    ): Response<AddressPostData>
+        @Body addressRequest: AddressUpdateData
+    ): Response<AddressUpdateData>
 }
 
 object AddressUpdateApi {

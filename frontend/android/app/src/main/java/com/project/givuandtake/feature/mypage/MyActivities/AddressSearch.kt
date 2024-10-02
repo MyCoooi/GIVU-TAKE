@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -68,7 +70,7 @@ import okhttp3.Response
 import okio.IOException
 
 class AddressPostViewModel : ViewModel() {
-    fun postAddressData(token: String, addressRequest: AddressPostData, context: Context) {
+    fun postAddressData(token: String, addressRequest: AddressPostData, context: Context, navController: NavController) {
         viewModelScope.launch {
             try {
                 // Log 시작 지점
@@ -83,6 +85,9 @@ class AddressPostViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     Log.d("AddressPost", "주소 등록 성공")
                     Toast.makeText(context, "주소가 성공적으로 등록되었습니다.", Toast.LENGTH_LONG).show()
+                    navController.navigate("addressbook") {
+                        popUpTo("addressbook") { inclusive = true } // 중복 방지를 위해 이전 스택 제거
+                    }
                 } else {
                     Log.e("AddressPost", "주소 등록 실패: ${response.errorBody()?.string()}")
                     Toast.makeText(context, "주소 등록에 실패했습니다.", Toast.LENGTH_LONG).show()
@@ -98,7 +103,7 @@ class AddressPostViewModel : ViewModel() {
 fun fetchAddressResults(keyword: String, onResult: (List<Juso>) -> Unit) {
     val client = OkHttpClient()
     val request = Request.Builder()
-        .url("https://business.juso.go.kr/addrlink/addrLinkApi.do?confmKey=devU01TX0FVVEgyMDI0MDkyNTAwNDMyOTExNTEwODQ=&currentPage=1&countPerPage=5&keyword=$keyword&resultType=json&firstSort=road")
+        .url("https://business.juso.go.kr/addrlink/addrLinkApi.do?confmKey=devU01TX0FVVEgyMDI0MDkyNTAwNDMyOTExNTEwODQ=&currentPage=1&countPerPage=15&keyword=$keyword&resultType=json&firstSort=road")
         .build()
 
     client.newCall(request).enqueue(object : Callback {
@@ -317,11 +322,11 @@ fun AddressSearch(navController: NavController) {
 
                 // 검색 결과가 들어왔을 때 리스트 표시
                 searchResults != null && searchResults!!.isNotEmpty() -> {
-                    Column(
+                    LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
-                        searchResults!!.forEachIndexed { index, juso ->
+                        itemsIndexed(searchResults!!) { index, juso ->
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -333,18 +338,18 @@ fun AddressSearch(navController: NavController) {
                                 Text(
                                     text = juso.zipNo,
                                     fontSize = 10.sp,
-                                    modifier = Modifier.padding(horizontal = 8.dp)
+                                    modifier = Modifier.padding(horizontal = 15.dp)
                                 )
                                 Text(
                                     text = juso.roadAddr,
                                     fontSize = 14.sp,
-                                    modifier = Modifier.padding(horizontal = 8.dp)
+                                    modifier = Modifier.padding(horizontal = 15.dp)
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
                                     text = juso.jibunAddr,
                                     fontSize = 14.sp,
-                                    modifier = Modifier.padding(horizontal = 8.dp)
+                                    modifier = Modifier.padding(horizontal = 15.dp)
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Divider(
@@ -593,7 +598,7 @@ fun AddressSearch(navController: NavController) {
                     Button(
                         onClick = {
                             scope.launch {
-                                viewModel.postAddressData(accessToken, addressRequest, context)
+                                viewModel.postAddressData(accessToken, addressRequest, context, navController)
                             }
                                   },
                         modifier = Modifier

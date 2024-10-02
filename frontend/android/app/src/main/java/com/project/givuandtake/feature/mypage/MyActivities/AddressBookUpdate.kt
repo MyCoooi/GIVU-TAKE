@@ -49,6 +49,7 @@ import com.project.givuandtake.core.apis.Address.AddressDeleteApi
 import com.project.givuandtake.core.apis.Address.AddressUpdateApi
 import com.project.givuandtake.core.data.Address.AddressData
 import com.project.givuandtake.core.data.Address.AddressPostData
+import com.project.givuandtake.core.data.Address.AddressUpdateData
 import com.project.givuandtake.core.data.Address.UserAddress
 import com.project.givuandtake.core.datastore.TokenManager
 import kotlinx.coroutines.launch
@@ -59,7 +60,7 @@ class AddressUpdateViewModel : ViewModel() {
     private val _addresses = mutableStateOf<List<UserAddress>>(emptyList())
     val addresses: State<List<UserAddress>> = _addresses
 
-    fun updateAddress(token: String, addressIdx: Int, addressData: AddressPostData, onUpdateSuccess: () -> Unit, onError: () -> Unit) {
+    fun updateAddress(token: String, addressIdx: Int, addressData: AddressUpdateData, onUpdateSuccess: () -> Unit, onError: () -> Unit) {
         viewModelScope.launch {
             try {
                 val response = AddressUpdateApi.api.updateAddressData(token, addressIdx, addressData)
@@ -237,19 +238,7 @@ fun AddressUpdateItem(address: UserAddress, viewModel: AddressUpdateViewModel, a
                     if ( !address.representative ) {
                         OutlinedButton(
                             onClick = {
-                                val addressData = AddressPostData(
-                                    zoneCode = "",
-                                    addressName = address.detailAddress,
-                                    address = "",
-                                    roadAddress = address.roadAddress,
-                                    jibunAddress = address.jibunAddress,
-                                    detailAddress = address.detailAddress,
-                                    buildingName = "",
-                                    isApartment = false,
-                                    sido = "",
-                                    sigungu = "",
-                                    bname = "",
-                                    bname1 = "",
+                                val addressData = AddressUpdateData(
                                     isRepresentative = true
                                 )
                                 viewModel.updateAddress(
@@ -258,6 +247,7 @@ fun AddressUpdateItem(address: UserAddress, viewModel: AddressUpdateViewModel, a
                                     addressData = addressData,
                                     onUpdateSuccess = {
                                         Log.d("AddressUpdateItem", "수정 성공")
+                                        viewModel.fetchUserAddresses(accessToken)
                                     },
                                     onError = {
                                         Log.e("AddressUpdateItem", "수정 실패")
