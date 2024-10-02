@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Sidebar from "../Sidebar";
 import { apiFundingDetail } from "../../apis/funding/apiFundingDetail"; 
+import FundingReviews from "./FundingReviews";
+import FundingComments from "./FundingComments";
 import "./FundingDetail.css";
 
 const FundingDetail = () => {
@@ -41,17 +43,11 @@ const FundingDetail = () => {
           </div>
         );
       case "응원댓글":
-        return (
-          <div className="funding-comments">
-            <h2>응원댓글</h2>
-            <p>여기에 응원댓글을 불러옵니다.</p>
-          </div>
-        );
+        return <FundingComments fundingIdx={fundingIdx} />;
       case "후기":
         return (
-          <div className="funding-reviews">
-            <h2>후기</h2>
-            <p>여기에 후기를 불러옵니다.</p>
+          <div>
+            <FundingReviews />
           </div>
         );
       default:
@@ -62,9 +58,13 @@ const FundingDetail = () => {
   return (
     <div className="funding-detail-layout">
       <Sidebar selectedMenu={selectedMenu} setSelectedMenu={setSelectedMenu} />
+
       <div className="funding-detail-content">
+        {/* 펀딩 상세 제목 추가 */}
+        <h1 className="funding-detail-title">펀딩 상세</h1>
+
+        {/* 탭 UI는 상단에 유지 */}
         <div className="funding-detail-header">
-          <h1>펀딩 상세</h1>
           <div className="funding-tabs">
             <button
               className={activeTab === "소개" ? "active" : ""}
@@ -85,27 +85,34 @@ const FundingDetail = () => {
               후기
             </button>
           </div>
-          <button className="edit-button">수정</button>
+          {activeTab === "후기" ? (
+            <button className="write-review-button">후기 작성</button>
+          ) : activeTab === "소개" ? (
+            <button className="edit-button">수정</button>
+          ) : null}
         </div>
 
-        <div className="funding-detail-body">
-          <div className="funding-thumbnail">
-            {funding.thumbnail ? (
-              <img src={funding.thumbnail} alt="펀딩 썸네일" />
-            ) : (
-              <div className="thumbnail-placeholder">펀딩 썸네일</div>
-            )}
+        {/* 응원댓글 클릭 시 펀딩 상세 정보 숨기기 */}
+        {activeTab === "소개" && (
+          <div className="funding-detail-body">
+            <div className="funding-thumbnail">
+              {funding.thumbnail ? (
+                <img src={funding.thumbnail} alt="펀딩 썸네일" />
+              ) : (
+                <div className="thumbnail-placeholder">펀딩 썸네일</div>
+              )}
+            </div>
+            <div className="funding-info">
+              <h2>{funding.fundingTitle}</h2>
+              <p>펀딩 유형: {funding.fundingType === "D" ? "재난재해" : "지역기부"}</p>
+              <p>펀딩 기간: {funding.startDate} ~ {funding.endDate}</p>
+              <p>달성 금액: {funding.totalMoney.toLocaleString()}원</p>
+              <p>목표 금액: {funding.goalMoney.toLocaleString()}원</p>
+              <p className="achievement-rate">달성률: {Math.round((funding.totalMoney / funding.goalMoney) * 100)}%</p>
+            </div>
+            <p className="registration-date">등록일: {funding.startDate}</p>
           </div>
-          <div className="funding-info">
-            <h2>{funding.fundingTitle}</h2>
-            <p>펀딩 유형: {funding.fundingType === "D" ? "재난재해" : "지역기부"}</p>
-            <p>펀딩 기간: {funding.startDate} ~ {funding.endDate}</p>
-            <p>달성 금액: {funding.totalMoney.toLocaleString()}원</p>
-            <p>목표 금액: {funding.goalMoney.toLocaleString()}원</p>
-            <p className="achievement-rate">달성률: {Math.round((funding.totalMoney / funding.goalMoney) * 100)}%</p>
-          </div>
-          <p className="registration-date">등록일: {funding.startDate}</p>
-        </div>
+        )}
 
         {/* 현재 선택된 탭에 따라 다른 내용 렌더링 */}
         {renderContent()}

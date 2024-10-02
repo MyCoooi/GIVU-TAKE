@@ -1,0 +1,10 @@
+.funding-reviews {
+  background-color: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  line-height: 1.5;
+  overflow-y: auto; /* 스크롤 가능 */
+  max-height: 300px; /* 내용이 많을 경우 스크롤 가능하도록 제한 */
+}
