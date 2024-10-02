@@ -39,6 +39,9 @@ public class Orders extends BaseTimeEntity {
     @Column(name = "price", nullable = false) // 가격
     private int price;
 
+    @Column(name = "card_number", length = 20)
+    private String cardNumber;
+
     @Enumerated(EnumType.STRING) // 주문상태
     private DeliveryStatus status;
 }
