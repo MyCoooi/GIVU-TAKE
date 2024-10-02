@@ -102,7 +102,7 @@ public class SecurityConfig {
                         //.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                         // 인가되지 않은 사용자에 대한 처리
                         //.accessDeniedHandler(customAccessDeniedHandler)
-                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/index.html"))
+                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/"))
                 );
 
         return http.build();
