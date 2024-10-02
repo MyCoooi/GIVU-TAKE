@@ -1,8 +1,9 @@
 package com.project.givuandtake
 
+//import com.project.givuandtake.feature.mypage.MyDonation.WishList
+import AddressMapSearch
 import AttractionMain
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -12,21 +13,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.givuandtake.FundingMainPage
 import com.project.givuandtake.auth.LoginScreen
 import com.project.givuandtake.auth.SignupStep1
 import com.project.givuandtake.auth.SignupStep2
@@ -36,27 +34,32 @@ import com.project.givuandtake.core.data.CartItem
 import com.project.givuandtake.feature.attraction.FestivalPage
 import com.project.givuandtake.feature.attraction.LocationSelect
 import com.project.givuandtake.feature.attraction.TripPage
-import com.project.givuandtake.feature.funding.navigation.MainFundingCard
+import com.project.givuandtake.feature.auth.FindPassword
 import com.project.givuandtake.feature.fundinig.FundingDetailPage
+import com.project.givuandtake.feature.fundinig.FundingMainPage
+//import com.project.givuandtake.feature.funding.navigation.MainFundingCard
+//import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.gift.CartPage
-import com.project.givuandtake.feature.gift.mainpage.GiftPage
+import com.project.givuandtake.feature.gift.GiftPage
+import com.project.givuandtake.feature.gift.GiftPageDetail
 import com.project.givuandtake.feature.mainpage.MainPage
-import com.project.givuandtake.feature.mypage.MyPageScreen
+import com.project.givuandtake.feature.mypage.CustomerService.Announcement
 import com.project.givuandtake.feature.mypage.CustomerService.FaqPage
 import com.project.givuandtake.feature.mypage.CustomerService.PersonalInquiry
-import com.project.givuandtake.feature.mypage.CustomerService.Announcement
 import com.project.givuandtake.feature.mypage.MyActivities.AddressBook
-import com.project.givuandtake.feature.mypage.MyActivities.AddressMapSearch
 import com.project.givuandtake.feature.mypage.MyActivities.AddressSearch
 import com.project.givuandtake.feature.mypage.MyActivities.CardBook
+import com.project.givuandtake.feature.mypage.MyActivities.CardCustomRegistration
+import com.project.givuandtake.feature.mypage.MyActivities.CardRegistration
 import com.project.givuandtake.feature.mypage.MyActivities.UserInfo
+import com.project.givuandtake.feature.mypage.MyActivities.UserInfoUpdate
 import com.project.givuandtake.feature.mypage.MyDonation.DonationDetails
 import com.project.givuandtake.feature.mypage.MyDonation.DonationReceipt
 import com.project.givuandtake.feature.mypage.MyDonation.FundingDetails
-import com.project.givuandtake.feature.mypage.MyDonation.WishList
+import com.project.givuandtake.feature.mypage.MyDonation.WishlistPage
 import com.project.givuandtake.feature.mypage.MyManagement.MyComment
 import com.project.givuandtake.feature.mypage.MyManagement.MyReview
-import com.project.givuandtake.feature.navigation.addGiftPageDetailRoute
+import com.project.givuandtake.feature.mypage.MyPageScreen
 import com.project.givuandtake.feature.payment.KakaoPayManager
 import com.project.givuandtake.feature.payment.PaymentResultPage
 import com.project.givuandtake.feature.payment.PaymentSuccessPage
@@ -71,7 +74,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        handleIntent(intent) // 기존 Intent 처리
+//        handleIntent(intent) // 기존 Intent 처리
 
         setContent {
             GivuAndTakeTheme {
@@ -80,7 +83,6 @@ class MainActivity : ComponentActivity() {
                 val cartItems = remember { mutableStateOf(listOf<CartItem>()) } // 장바구니 상태
                 val currentBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = currentBackStackEntry?.destination?.route
-                // A surface container using the 'background' color from the theme
 
 
                 Surface(
@@ -97,21 +99,27 @@ class MainActivity : ComponentActivity() {
                             // 메인 페이지
                             composable("mainpage") { MainPage(navController) }
                             // 펀딩 페이지
-                            composable("funding") { FundingMainPage(navController) }
-                            // 펀딩 상세 페이지
-                            composable(
-                                "funding_detail/{title}/{location}/{startDate}/{endDate}/{nowAmount}/{goalAmount}/{imageUrl}"
-                            ) { backStackEntry ->
-                                val fundingCard = MainFundingCard(backStackEntry)
-                                FundingDetailPage(
-                                    fundingCard = fundingCard,
-                                    navController = navController,
-                                    onBackClick = { navController.popBackStack() }
-                                )
+                            composable("funding"){ FundingMainPage(navController)  }
+                                                       // 펀딩 상세 페이지
+                            // 펀딩 상세 페이지 추가
+                            composable("funding_detail/{fundingIdx}") { backStackEntry ->
+                                val fundingIdx =
+                                    backStackEntry.arguments?.getString("fundingIdx")?.toIntOrNull()
+                                if (fundingIdx != null) {
+                                    FundingDetailPage(
+                                        fundingIdx = fundingIdx,
+                                        navController = navController,
+                                        onBackClick = {
+                                            navController.popBackStack()
+                                        })
+                                }
                             }
+                            composable("payment") { PaymentScreen(navController) }
+
                             composable("attraction") { AttractionMain(navController, "영도") } // Navigate to AttractionMain
                             // 로그인 페이지
                             composable("auth") { LoginScreen(navController) }
+                            composable("find_password") { FindPassword(navController) }
                             // 회원가입 페이지
                             composable("signup_step1") { SignupStep1(navController, signupViewModel) }
                             composable("signup_step2") { SignupStep2(navController, signupViewModel) }
@@ -121,14 +129,33 @@ class MainActivity : ComponentActivity() {
                                 GiftPage(navController = navController) // cartItems는 MutableState로 전달
                             }
 
-                            // 기프트 상세 페이지
-                            addGiftPageDetailRoute(navController, cartItems) // cartItems는 MutableState로 전달
+                            composable(
+                                route = "gift_page_detail/{giftIdx}",
+                                arguments = listOf(navArgument("giftIdx") { type = NavType.IntType })
+                            ) { backStackEntry ->
+                                val giftIdx = backStackEntry.arguments?.getInt("giftIdx") ?: 0
+                                val cartItems = remember { mutableStateOf(emptyList<CartItem>()) }
+
+                                // GiftPageDetail 호출, 필요한 파라미터를 넘김
+                                GiftPageDetail(
+                                    giftIdx = giftIdx,
+                                    cartItems = cartItems,
+                                    navController = navController,
+                                )
+                            }
 
                             // 장바구니 페이지
                             composable("cart_page") {
                                 val context = LocalContext.current // LocalContext를 사용하여 Context 가져오기
                                 CartPage(navController = navController, context = context) // context 전달
                             }
+
+                            // 찜목록 페이지
+                            composable("wishlist_page") {
+                                WishlistPage(navController = navController)
+                            }
+
+
 
                             // 결제 페이지_답례품
                             composable(
@@ -159,7 +186,6 @@ class MainActivity : ComponentActivity() {
                             }
 
                             // 마이 페이지
-                            // composable("mypage") { ContributorScreen(navController) }
                             composable("locationSelection") {
                                 LocationSelect(navController)
                             }
@@ -191,16 +217,32 @@ class MainActivity : ComponentActivity() {
                             composable("donationdetails") { DonationDetails(navController) }
                             composable("donationreceipt") { DonationReceipt(navController) }
                             composable("fundingdetails") { FundingDetails(navController) }
-                            composable("wishlist") { WishList(navController) }
+
+
+
 
                             composable("mycomment") { MyComment(navController) }
                             composable("myreview") { MyReview(navController) }
 
                             composable("addressbook") { AddressBook(navController) }
                             composable("cardbook") { CardBook(navController) }
+
                             composable("userinfo") { UserInfo(navController) }
+                            composable("userinfoupdate") { UserInfoUpdate(navController) }
+
+
                             composable("addresssearch") { AddressSearch(navController) }
                             composable("addressmapsearch") { AddressMapSearch(navController)}
+                            composable("cardregistration") { CardRegistration(navController) }
+                            composable("cardcustomregistration/{cardNumber}/{validThru}", arguments = listOf(
+                                navArgument("cardNumber") { defaultValue = "" },
+                                navArgument("validThru") { defaultValue = "" }
+                            )) { backStackEntry ->
+                                val cardNumber = backStackEntry.arguments?.getString("cardNumber") ?: ""
+                                val validThru = backStackEntry.arguments?.getString("validThru") ?: ""
+
+                                CardCustomRegistration(cardNumber = cardNumber, validThru = validThru, navController)
+                            }
 
                             composable("announcement") { Announcement(navController) }
                             composable("faqpate") { FaqPage(navController) }
@@ -208,7 +250,24 @@ class MainActivity : ComponentActivity() {
                         }
 
                         // 하단 네비게이션 바
-                        if (currentDestination != "trippage?city={city}" && currentDestination != "festivalpage?city={city}") {
+                        if (currentDestination != "trippage?city={city}" &&
+                            currentDestination != "festivalpage?city={city}" &&
+                            currentDestination != "donationreceipt" &&
+                            currentDestination != "fundingdetails" &&
+                            currentDestination != "wishlist" &&
+                            currentDestination != "mycomment" &&
+                            currentDestination != "myreview" &&
+                            currentDestination != "addressbook" &&
+                            currentDestination != "cardbook" &&
+                            currentDestination != "userinfo" &&
+                            currentDestination != "addresssearch" &&
+                            currentDestination != "addressmapsearch" &&
+                            currentDestination != "announcement" &&
+                            currentDestination != "faqpate" &&
+                            currentDestination != "personalinquiry" &&
+                            currentDestination != "cardregistration" &&
+                            currentDestination != "cardcustomregistration/{cardNumber}/{validThru}"
+                        ) {
                             BottomNavBar(navController, selectedItem) { newIndex ->
                                 selectedItem = newIndex
                             }
@@ -235,8 +294,6 @@ class MainActivity : ComponentActivity() {
             Log.e("KakaoPayApi", "PG Token이 없습니다.")
         }
     }
-
-
 }
 
 

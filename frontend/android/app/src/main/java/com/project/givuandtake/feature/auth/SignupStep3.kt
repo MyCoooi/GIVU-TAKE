@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
 import com.project.givuandtake.R
-import com.project.givuandtake.core.apis.SignupApi
+import com.project.givuandtake.core.apis.Auth.SignupApi
 import com.project.givuandtake.core.data.SignUpRequest
 import kotlinx.coroutines.launch
 import retrofit2.Call
