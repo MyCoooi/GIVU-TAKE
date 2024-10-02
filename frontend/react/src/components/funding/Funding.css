@@ -5,7 +5,7 @@
 
 .funding-page-content {
   flex-grow: 1;
-  padding: 40px;
+  padding: 30px;
   background-color: #f5f5f5;
 }
 
@@ -13,7 +13,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 10px;
 }
 
 .register-button {
@@ -31,7 +31,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 40px;
+  margin-bottom: 25px;
 }
 
 .funding-type-buttons,
@@ -63,15 +63,15 @@
 
 .funding-card {
   background-color: white;
-  padding: 20px;
+  padding: 15px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   position: relative;
   align-items: flex-start;
   height: auto; /* 자동 높이로 변경 */
-  min-height: 180px; /* 최소 높이 설정 */
-  max-width: 600px; /* 카드의 최대 너비 설정 */
+  min-height: 18vh; /* 최소 높이 설정 */
+  max-width: 500px; /* 카드의 최대 너비 설정 */
   flex: 1 1 auto; /* 그리드 안에서 가변적인 카드 크기 */
   transition: transform 0.3s ease, box-shadow 0.3s ease; /* 애니메이션 추가 */
 }
@@ -84,8 +84,8 @@
 
 .funding-image-placeholder {
   background-color: #d8d8d8;
-  width: 180px;
-  height: 180px;
+  width: 32%;
+  height: 100%;
   border-radius: 8px;
 }
 
@@ -98,7 +98,7 @@
 }
 
 .funding-title {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: bold;
   color: #333;
   margin: 0;
@@ -129,14 +129,14 @@
   position: absolute;
   bottom: 20px;
   right: 20px;
-  font-size: 30px;
+  font-size: 28px;
   font-weight: bold;
   color: #333;
   text-align: right;
   line-height: 1.2; /* 줄 간격을 줄여서 달성률과 퍼센트 값 사이를 좁힘 */
 }
 .pagination {
-  margin-top: 30px;
+  margin: 2% 10% 2% 10%;
   text-align: center;
 }
 

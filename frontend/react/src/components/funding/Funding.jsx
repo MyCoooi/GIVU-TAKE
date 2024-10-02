@@ -2,9 +2,13 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "../Sidebar"; // Sidebar import
 import "./funding.css"; // 공통 CSS 파일
 import { apiSearchFunding } from "../../apis/funding/apiSearchFunding"; // 방금 만든 API 함수 import
+import { useNavigate } from "react-router-dom"; // useNavigate import 추가
+
 
 const Funding = () => {
   const [selectedMenu, setSelectedMenu] = useState("펀딩");
+  const navigate = useNavigate(); // useNavigate 훅
+
 
   // 펀딩 종류와 상태를 관리하는 state
   const [selectedType, setSelectedType] = useState("D"); // 기본값을 '재난재해'로 설정
@@ -108,28 +112,32 @@ const Funding = () => {
           <p>로딩 중...</p>
         ) : (
           <div className="funding-grid">
-            {currentItems.length > 0 ? (
-              currentItems.map((funding) => (
-                <div key={funding.fundingIdx} className="funding-card">
-                  <div className="funding-image-placeholder">이미지</div>
-                  <div className="funding-details">
-                    <h2 className="funding-title">{funding.fundingTitle}</h2>
-                    <div className="funding-info">
-                      <p className="end-date">마감일<br /> {funding.endDate}</p>
-                    </div>
-                  </div>
-                  <div className="funding-rate">
-                    달성률 <br />
-                    {funding.goalMoney === 0 || funding.totalMoney === 0
-                      ? "0%"
-                      : `${Math.round((funding.totalMoney / funding.goalMoney) * 100)}%`}
+          {currentItems.length > 0 ? (
+            currentItems.map((funding) => (
+              <div
+                key={funding.fundingIdx}
+                className="funding-card"
+                onClick={() => navigate(`/funding/${funding.fundingIdx}`)} // 클릭 시 상세 페이지로 이동
+              >
+                <div className="funding-image-placeholder">이미지</div>
+                <div className="funding-details">
+                  <h2 className="funding-title">{funding.fundingTitle}</h2>
+                  <div className="funding-info">
+                    <p className="end-date">마감일<br /> {funding.endDate}</p>
                   </div>
                 </div>
-              ))
-            ) : (
-              <p>해당 조건에 맞는 펀딩이 없습니다.</p>
-            )}
-          </div>
+                <div className="funding-rate">
+                  달성률 <br />
+                  {funding.goalMoney === 0 || funding.totalMoney === 0
+                    ? "0%"
+                    : `${Math.round((funding.totalMoney / funding.goalMoney) * 100)}%`}
+                </div>
+              </div>
+            ))
+          ) : (
+            <p>해당 조건에 맞는 펀딩이 없습니다.</p>
+          )}
+        </div>
         )}
 
         {/* 페이지네이션 */}

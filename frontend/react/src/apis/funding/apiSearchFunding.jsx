@@ -19,7 +19,7 @@ export const apiSearchFunding = async (type, state) => {
 
       // 데이터 구조 변환
       const formattedData = response.data.data.map((funding) => ({
-        id: funding.fundingIdx,
+        fundingIdx: funding.fundingIdx,
         fundingTitle: funding.fundingTitle, // 제목
         startDate: funding.startDate,
         endDate: funding.endDate,
