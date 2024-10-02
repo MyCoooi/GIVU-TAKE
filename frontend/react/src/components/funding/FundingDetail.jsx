@@ -43,11 +43,11 @@ const FundingDetail = () => {
           </div>
         );
       case "응원댓글":
-        return <FundingComments fundingIdx={fundingIdx} />;
+        return <FundingComments fundingIdx={fundingIdx} />
       case "후기":
         return (
           <div>
-            <FundingReviews />
+            <FundingReviews fundingIdx={fundingIdx} />
           </div>
         );
       default:
