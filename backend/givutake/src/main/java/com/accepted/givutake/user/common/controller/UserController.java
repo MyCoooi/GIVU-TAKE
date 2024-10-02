@@ -7,6 +7,7 @@ import com.accepted.givutake.user.admin.model.AdminDetailViewDto;
 import com.accepted.givutake.user.admin.model.AdminSignUpDto;
 import com.accepted.givutake.user.admin.model.AdminUserViewDto;
 import com.accepted.givutake.user.client.model.AddressAddDto;
+import com.accepted.givutake.user.client.model.AddressSignUpDto;
 import com.accepted.givutake.user.client.model.ClientViewDto;
 import com.accepted.givutake.user.common.enumType.Roles;
 import com.accepted.givutake.user.common.model.*;
@@ -40,9 +41,9 @@ public class  UserController {
     public ResponseEntity<ResponseDto> emailSignUp(@Valid @RequestBody CompositionSignUpDto compositionSignUpDto) {
 
         SignUpDto signUpDto = compositionSignUpDto.getSignUpDto();
-        AddressAddDto addressAddDto = compositionSignUpDto.getAddressAddDto();
+        AddressSignUpDto addressSignUpDto = compositionSignUpDto.getAddressSignUpDto();
 
-        userService.emailSignUp(signUpDto, addressAddDto);
+        userService.emailSignUp(signUpDto, addressSignUpDto);
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
