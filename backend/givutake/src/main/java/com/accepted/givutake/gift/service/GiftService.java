@@ -22,8 +22,11 @@ import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -315,4 +318,40 @@ public class GiftService {
         review.setLikedCount(review.getLikedCount()-1);
         giftReviewRepository.save(review);
     }
+
+    public GiftYearStatisticsDto getGiftYearStatistics(String email, Integer giftIdx) {
+        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        int year = LocalDate.now().getYear();
+        int[] arr = new int[13];
+        List<Object[]> monthlyAmounts = orderRepository.findMonthlyOrderAmounts(user.getUserIdx(), year, giftIdx);
+
+        GiftYearStatisticsDto statistics = new GiftYearStatisticsDto();
+
+        for (Object[] result : monthlyAmounts) {
+            int month = ((Number) result[0]).intValue();
+            int amount = ((Number) result[1]).intValue();
+
+            arr[month] = amount;
+
+        }
+        statistics.setArr(arr);
+
+        return statistics;
+    }
+
+    public GiftPurchaserDto getGiftPurchaser(String email, Integer giftIdx) {
+        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        List<Object[]> purchaserData = orderRepository.findPurchasersByGiftIdx(giftIdx, user.getUserIdx());
+
+        List<purchaser> purchasers = purchaserData.stream()
+                .map(data -> new purchaser(
+                        (String) data[0],  // name
+                        ((Number) data[1]).intValue()  // totalPrice
+                ))
+                .sorted(Comparator.comparingInt(purchaser::getPrice).reversed())
+                .collect(Collectors.toList());
+
+        return new GiftPurchaserDto(purchasers);
+    }
+
 }
