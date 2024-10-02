@@ -88,10 +88,19 @@ public class OrderController {
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody CreateOrderDto request) {
         Orders order = orderService.createOrder(userDetails.getUsername(), request);
-        ReadyResponse readyResponse = kaKaoPayService.payReady(userDetails.getUsername(), order.getOrderIdx(), "Gift",request);
-        SessionUtils.addAttribute("tid", readyResponse.getTid());
-        return readyResponse;
+        if(request.getPaymentMethod().equals("KAKAO")){
+            ReadyResponse readyResponse = kaKaoPayService.payReady(userDetails.getUsername(), order.getOrderIdx(), "Gift",request);
+            SessionUtils.addAttribute("tid", readyResponse.getTid());
+            readyResponse.setStatus("success");
+            return readyResponse;
+        }else{
+            return ReadyResponse.builder()
+                    .status("success")
+                    .build();
+        }
     }
+
+
 
     @PatchMapping("/{orderIdx}")
     public ResponseEntity<ResponseDto> updateOrder(

@@ -48,6 +48,7 @@ public class OrderService {
                 .paymentMethod(request.getPaymentMethod())
                 .amount(request.getAmount())
                 .price(request.getAmount()*gift.getPrice())
+                .cardNumber(request.getCardNumber())
                 .status(DeliveryStatus.PROCESSED)
                 .build();
         return orderRepository.save(newOrder);

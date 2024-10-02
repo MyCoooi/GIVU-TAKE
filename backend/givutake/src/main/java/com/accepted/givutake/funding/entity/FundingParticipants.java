@@ -31,4 +31,6 @@ public class FundingParticipants extends BaseTimeEntity {
 
     @Column(name = "funding_fee", nullable = false)
     private int fundingFee;
+
+
 }

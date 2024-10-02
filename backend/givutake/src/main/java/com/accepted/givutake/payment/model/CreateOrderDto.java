@@ -20,4 +20,7 @@ public class CreateOrderDto {
     @NotNull
     private int amount;
 
+    private String cardNumber;
+
+
 }
