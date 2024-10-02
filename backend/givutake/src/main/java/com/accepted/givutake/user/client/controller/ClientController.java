@@ -6,6 +6,7 @@ import com.accepted.givutake.global.model.ResponseDto;
 import com.accepted.givutake.user.client.entity.Addresses;
 import com.accepted.givutake.user.client.model.AddressAddDto;
 import com.accepted.givutake.user.client.model.AddressDetailViewDto;
+import com.accepted.givutake.user.client.model.AddressModifyDto;
 import com.accepted.givutake.user.client.model.AddressViewDto;
 import com.accepted.givutake.user.client.service.ClientService;
 import jakarta.validation.Valid;
@@ -79,10 +80,10 @@ public class ClientController {
 
     // jwt 토큰으로 주소 수정
     @PatchMapping("/addresses/{addressIdx}")
-    public ResponseEntity<ResponseDto> modifyAddressByJwt(@AuthenticationPrincipal UserDetails userDetails, @PathVariable int addressIdx, @Valid @RequestBody AddressAddDto addressAddDto) {
+    public ResponseEntity<ResponseDto> modifyAddressByJwt(@AuthenticationPrincipal UserDetails userDetails, @PathVariable int addressIdx, @Valid @RequestBody AddressModifyDto addressModifyDto) {
         String email = userDetails.getUsername();
 
-        AddressDetailViewDto addressDetailViewDto = clientService.modifyAddressByEmail(email, addressIdx, addressAddDto);
+        AddressDetailViewDto addressDetailViewDto = clientService.modifyAddressByEmail(email, addressIdx, addressModifyDto);
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(addressDetailViewDto)
