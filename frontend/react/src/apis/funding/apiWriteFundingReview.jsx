@@ -27,10 +27,17 @@ export const apiWriteFundingReview = async (fundingIdx, reviewContent, accessTok
       throw new Error("후기 작성에 실패했습니다.");
     }
   } catch (error) {
-    console.error(
-      "후기 작성 실패:",
-      error.response ? error.response.data : error.message
-    );
+    if (error.response && error.response.status === 401) {
+      // 401 에러일 경우
+      console.error("인증 오류: 유효하지 않은 토큰입니다. 다시 로그인하세요.");
+      alert("세션이 만료되었거나 유효하지 않은 토큰입니다. 다시 로그인해주세요.");
+      // 필요 시 재로그인 로직을 추가할 수 있습니다.
+    } else {
+      console.error(
+        "후기 작성 실패:",
+        error.response ? error.response.data : error.message
+      );
+    }
     throw error;
   }
 };

@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { apiSearchFundingReview } from "../../apis/funding/apiSearchFundingReview"; // API 함수 import
-import { apiWriteFundingReview } from "../../apis/funding/apiWriteFundingReview"; // 후기 작성 API 함수 import
+import { apiSearchFundingReview } from "../../apis/funding/apiSearchFundingReview"; 
+import { apiWriteFundingReview } from "../../apis/funding/apiWriteFundingReview"; 
+import TokenManager from "../../utils/TokenManager"; 
 import "./FundingReviews.css";
 
-const FundingReviews = ({ fundingIdx, accessToken }) => {
+const FundingReviews = ({ fundingIdx }) => {
   const [review, setReview] = useState("");
   const [loading, setLoading] = useState(true);
   const [hasReview, setHasReview] = useState(false);
-  const [isEditing, setIsEditing] = useState(false); // 후기 수정 모드인지 확인하는 상태
-  const [editReview, setEditReview] = useState(""); // 수정 중인 후기 내용
+  const [isEditing, setIsEditing] = useState(false); 
+  const [editReview, setEditReview] = useState("");
 
-  // 후기를 가져오는 함수
+  const accessToken = TokenManager.getAccessToken(); 
+
   useEffect(() => {
     const fetchReview = async () => {
       try {
@@ -32,24 +34,34 @@ const FundingReviews = ({ fundingIdx, accessToken }) => {
     fetchReview();
   }, [fundingIdx]);
 
-  // 후기 작성 또는 수정 요청 함수
   const handleSubmitReview = async () => {
+    if (editReview.trim() === "") {
+      alert("후기를 입력해주세요.");
+      return;
+    }
+
+    console.log("Submitting review:");
+    console.log("fundingIdx:", fundingIdx);
+    console.log("reviewContent:", editReview);
+    console.log("accessToken:", accessToken);
+
     try {
       await apiWriteFundingReview(fundingIdx, editReview, accessToken);
-      setReview(editReview); // 수정된 내용을 반영
-      setIsEditing(false); // 수정 모드 종료
-      setHasReview(true); // 후기가 존재한다고 업데이트
+      setReview(editReview); 
+      setIsEditing(false); 
+      setHasReview(true); 
     } catch (error) {
       console.error("후기 작성 또는 수정에 실패했습니다:", error);
     }
   };
 
-  // 기존의 후기 작성 버튼을 클릭했을 때 후기 작성 및 수정 모드로 전환
   const handleReviewButtonClick = () => {
     if (hasReview) {
-      setEditReview(review); // 기존 후기가 있을 경우 해당 내용을 불러옴
+      setEditReview(review); 
+    } else {
+      setEditReview(""); 
     }
-    setIsEditing(true); // 작성 또는 수정 모드로 전환
+    setIsEditing(true); 
   };
 
   if (loading) {
@@ -61,6 +73,13 @@ const FundingReviews = ({ fundingIdx, accessToken }) => {
       <div className="funding-reviews-header">
         <h2>펀딩 후기</h2>
       </div>
+      {!isEditing && (
+        <div className="write-review-button-container">
+          <button className="write-review-button" onClick={handleReviewButtonClick}>
+            {hasReview ? "후기 수정" : "후기 작성"}
+          </button>
+        </div>
+      )}
 
       {isEditing ? (
         <div className="editing-container">
@@ -82,14 +101,6 @@ const FundingReviews = ({ fundingIdx, accessToken }) => {
       ) : (
         <div>
           {hasReview ? <p>{review}</p> : <p>아직 작성된 후기가 없습니다.</p>}
-        </div>
-      )}
-
-      {!isEditing && (
-        <div className="write-review-button-container">
-          <button className="write-review-button" onClick={handleReviewButtonClick}>
-            {hasReview ? "후기 수정" : "후기 작성"}
-          </button>
         </div>
       )}
     </div>
