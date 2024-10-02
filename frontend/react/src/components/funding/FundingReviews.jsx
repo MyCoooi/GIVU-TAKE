@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { apiSearchFundingReview } from "../../apis/funding/apiSearchFundingReview"; 
 import { apiWriteFundingReview } from "../../apis/funding/apiWriteFundingReview"; 
+import { apiUpdateFundingReview } from "../../apis/funding/apiUpdateFundingReview"; // 수정 API 추가
 import TokenManager from "../../utils/TokenManager"; 
 import "./FundingReviews.css";
 
@@ -10,6 +11,7 @@ const FundingReviews = ({ fundingIdx }) => {
   const [hasReview, setHasReview] = useState(false);
   const [isEditing, setIsEditing] = useState(false); 
   const [editReview, setEditReview] = useState("");
+  const [isEditingReview, setIsEditingReview] = useState(false); // 후기 수정 중인지 확인하는 상태
 
   const accessToken = TokenManager.getAccessToken(); 
 
@@ -46,9 +48,19 @@ const FundingReviews = ({ fundingIdx }) => {
     console.log("accessToken:", accessToken);
 
     try {
-      await apiWriteFundingReview(fundingIdx, editReview, accessToken);
-      setReview(editReview); 
+      if (isEditingReview) {
+        // 후기 수정 모드일 때
+        await apiUpdateFundingReview(fundingIdx, editReview, accessToken); // 수정 API 호출
+        console.log("후기 수정 성공");
+      } else {
+        // 후기 작성 모드일 때
+        await apiWriteFundingReview(fundingIdx, editReview, accessToken); // 작성 API 호출
+        console.log("후기 작성 성공");
+      }
+
+      setReview(editReview); // 수정된 내용을 반영
       setIsEditing(false); 
+      setIsEditingReview(false); // 후기 수정 모드 종료
       setHasReview(true); 
     } catch (error) {
       console.error("후기 작성 또는 수정에 실패했습니다:", error);
@@ -58,8 +70,10 @@ const FundingReviews = ({ fundingIdx }) => {
   const handleReviewButtonClick = () => {
     if (hasReview) {
       setEditReview(review); 
+      setIsEditingReview(true); // 수정 모드로 전환
     } else {
       setEditReview(""); 
+      setIsEditingReview(false); // 새로운 작성 모드로 전환
     }
     setIsEditing(true); 
   };
@@ -91,7 +105,7 @@ const FundingReviews = ({ fundingIdx }) => {
           />
           <div className="review-buttons">
             <button className="submit-review-button" onClick={handleSubmitReview}>
-              작성 완료
+              {isEditingReview ? "수정 완료" : "작성 완료"} {/* 버튼 텍스트 변경 */}
             </button>
             <button className="cancel-review-button" onClick={() => setIsEditing(false)}>
               취소
