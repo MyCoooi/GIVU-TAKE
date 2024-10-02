@@ -44,7 +44,10 @@ public class SecurityConfig {
                 // 경로별 인가 작업
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/",
-                                "/index.html",
+                                "/*.html",
+                                "/*.css",
+                                "/*.js",
+                                "/favicon.ico",
                                 "/api/auth",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
