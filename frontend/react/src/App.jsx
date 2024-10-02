@@ -1,37 +1,43 @@
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import MainPage from './components/mainPage/MainPage';
+import SignupPage from './components/auth/SignupPage';
+import LoginPage from './components/auth/LoginPage';
+import MyPage from './components/myPage/MyPage';
+import Donations from './components/donations/Donations';
+import Funding from './components/funding/Funding';
+import FundingDetail from './components/funding/FundingDetail';
+import Statistics from './components/statistics/Statistics';
+import UserInfo from './components/userinfo/UserInfo';
+import UserInfoUpdate from './components/userinfo/UserInfoUpdate';
+import Sidebar from "./components/Sidebar";
+
+
+
 import React from 'react';
-import './MainPage.css';
-import logo from "./assets/logo.png";
-import download from "./assets/download.png";
 
-const MainPage = () => {
+const App = () => {
   return (
-    <div className="main-page">
-      <div className="content">
-        <div className="header">
-          <p className="brand">GIVU & TAKE</p>
+    <Router>
+      <Routes>
+        <Route path="/" element={<MainPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/mypage" element={<MyPage />} />
 
-          {/* 회원가입과 로그인 버튼 */}
-          <div className="auth-buttons">
-            <button className="signup-button">회원가입</button>
-            <button className="login-button">로그인</button>
-          </div>
-        </div>
-        
-        <h1 className="title">든든한<br />집밥 한상이<br />그리울 때</h1>
+        <Route path="/userinfo" element={<UserInfo />} />
+        <Route path="/userinfoupdate" element={<UserInfoUpdate />} />
 
-        <div className="download-button">
-          <a href="https://example.com" className="app-download">
-            <img src={download} className="downloadImg" alt="앱 다운로드" />
-          </a>
-        </div>
+        <Route path="/donations" element={<Donations />} />
 
-        <div className="qr-code">
-          <p className="qrtext">QR 코드 다운로드</p>
-          <img src={logo} className="qrImg" alt="QR 코드" />
-        </div>
-      </div>
-    </div>
+        <Route path="/funding" element={<Funding />} />
+        <Route path="/funding/:fundingIdx" element={<FundingDetail />} /> {/* 상세 페이지 경로 */}
+
+
+
+        <Route path="/statistics" element={<Statistics />} />
+      </Routes>
+    </Router>
   );
 };
 
-export default MainPage;
+export default App;

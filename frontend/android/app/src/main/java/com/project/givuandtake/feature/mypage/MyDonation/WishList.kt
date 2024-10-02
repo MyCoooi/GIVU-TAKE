@@ -32,8 +32,9 @@ import com.project.givuandtake.core.data.CartItem
 import com.project.givuandtake.core.data.GiftDetail
 import com.project.givuandtake.core.datastore.getCartItems
 import com.project.givuandtake.core.datastore.saveCartItems
+import com.project.givuandtake.feature.gift.CartIcon
 import com.project.givuandtake.feature.gift.GiftViewModel
-import com.project.givuandtake.feature.gift.mainpage.CartIcon
+
 import com.project.givuandtake.feature.mypage.MyDonation.WishlistViewModel
 import kotlinx.coroutines.launch
 
@@ -111,7 +112,7 @@ fun WishlistPage(
                             onAddToCart = {
                                 coroutineScope.launch {
                                     // 장바구니에 이미 있는지 확인
-                                    val isAlreadyInCart = cartItems.any { it.name == product.name }
+                                    val isAlreadyInCart = cartItems.any { it.name == product.giftName }
                                     if (isAlreadyInCart) {
                                         // 이미 장바구니에 있는 경우 토스트 메시지 표시
                                         Toast.makeText(context, "이미 장바구니에 있는 상품입니다.", Toast.LENGTH_SHORT).show()
@@ -120,7 +121,7 @@ fun WishlistPage(
                                         val updatedCartItems = cartItems.toMutableList().apply {
                                             add(
                                                 CartItem(
-                                                    name = product.name,
+                                                    name = product.giftName,
                                                     price = product.price,
                                                     quantity = 1, // 기본 수량을 1로 설정
                                                     location = product.location
@@ -160,7 +161,7 @@ fun WishListItem(
         ) {
             // 상품 이미지
             Image(
-                painter = rememberImagePainter(data = product.imageUrl),
+                painter = rememberImagePainter(data = product.giftThumbnail),
                 contentDescription = null,
                 modifier = Modifier
                     .size(100.dp)
@@ -175,7 +176,7 @@ fun WishListItem(
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                Text(text = product.name, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text(text = product.giftName, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(text = product.location, fontSize = 18.sp)
                 Spacer(modifier = Modifier.height(4.dp))
