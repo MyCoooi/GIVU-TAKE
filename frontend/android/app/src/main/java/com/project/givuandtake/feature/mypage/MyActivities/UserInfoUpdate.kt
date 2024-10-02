@@ -1,6 +1,12 @@
 package com.project.givuandtake.feature.mypage.MyActivities
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
+import android.provider.MediaStore
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -11,8 +17,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
@@ -23,7 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,13 +55,43 @@ fun UserInfoUpdate(navController: NavController) {
     var birthState by remember { mutableStateOf(("")) }
     var isMaleState by remember { mutableStateOf("") }
 
-    // 모달 상태 관리
-    var showDialog by remember { mutableStateOf(false) }
-    var dialogMessage by remember { mutableStateOf("") }
+    // 프로필 이미지 URI 상태
+    var profileImageUri by remember { mutableStateOf<Uri?>(null) }
 
-    // API 호출
+    // 사진첩에서 이미지 선택을 처리하는 launcher
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val uri: Uri? = result.data?.data
+            profileImageUri = uri // 선택한 이미지를 프로필 이미지로 설정
+            Log.d("UserInfoUpdate", "선택된 이미지 URI: $profileImageUri") // 디버그 로그 추가
+        }
+    }
+
     val context = LocalContext.current
     val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
+
+    // 프로필 이미지 업데이트 여부 확인
+    LaunchedEffect(profileImageUri) {
+        if (profileImageUri != null) {
+            Log.d("UserInfoUpdate", "프로필 이미지 업데이트 됨: $profileImageUri")
+        }
+    }
+
+
+
+    // 모달 상태 관리
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showUpdateSuccessDialog by remember { mutableStateOf(false) }
+    var showUpdateFailureDialog by remember { mutableStateOf(false) }
+
+    // UserAccountDeleteDialog 호출
+    UserAccountDeleteDialog(
+        navController = navController,
+        showDeleteDialog = showDeleteDialog,
+        onDismiss = { showDeleteDialog = false }
+    )
 
     LaunchedEffect(Unit) {
         val call = UserInfoApi.api.getUserInfo(accessToken)
@@ -94,7 +129,7 @@ fun UserInfoUpdate(navController: NavController) {
             birth = birthState,
             mobilePhone = phoneState,
             landlinePhone = null,  // 필요한 경우 사용자에게 입력받도록 수정 가능
-            profileImageUrl = userInfo?.data?.profileImageUrl // 프로필 이미지 URL 유지
+            profileImageUrl = profileImageUri?.toString() // 프로필 이미지 URI를 요청에 포함
         )
 
         val call = UserUpdateApi.api.updateUserInfo(accessToken, updateRequest)
@@ -104,19 +139,17 @@ fun UserInfoUpdate(navController: NavController) {
                 response: Response<UserUpdateResponse>
             ) {
                 if (response.isSuccessful) {
-                    Log.d("UserInfoUpdate", "수정 성공: ${response.body()?.message}")
-                    dialogMessage = "회원정보가 수정되었습니다"
+                    Log.d("UserInfoUpdate", "업데이트 성공: ${response.body()}")
+                    showUpdateSuccessDialog = true // 성공 시 모달 창을 띄움
                 } else {
-                    Log.e("UserInfoUpdate", "수정 실패: ${response.code()} - ${response.message()}")
-                    dialogMessage = "회원정보가 수정되지 않았습니다"
+                    Log.e("UserInfoUpdate", "업데이트 실패: ${response.code()} - ${response.message()}")
+                    showUpdateFailureDialog = true // 실패 시 모달 창을 띄움
                 }
-                showDialog = true // 성공/실패에 상관없이 다이얼로그 표시
             }
 
             override fun onFailure(call: Call<UserUpdateResponse>, t: Throwable) {
-                Log.e("UserInfoUpdate", "API 호출 에러: ${t.message}")
-                dialogMessage = "회원정보가 수정되지 않았습니다"
-                showDialog = true // 에러 발생 시 다이얼로그 표시
+                Log.e("UserInfoUpdate", "업데이트 에러: ${t.message}")
+                showUpdateFailureDialog = true // 실패 시 모달 창을 띄움
             }
         })
     }
@@ -160,10 +193,10 @@ fun UserInfoUpdate(navController: NavController) {
                 .align(Alignment.CenterHorizontally),
             contentAlignment = Alignment.Center
         ) {
-            val profileImageUrl = userInfo?.data?.profileImageUrl
-            if (profileImageUrl != null) {
+            if (profileImageUri != null) {
+                // 선택된 사진을 AsyncImage로 표시
                 AsyncImage(
-                    model = profileImageUrl,
+                    model = profileImageUri,
                     contentDescription = "User Profile Image",
                     modifier = Modifier
                         .size(130.dp)
@@ -173,31 +206,47 @@ fun UserInfoUpdate(navController: NavController) {
                     contentScale = ContentScale.Crop
                 )
             } else {
-                Image(
-                    painter = painterResource(id = R.drawable.hamo),
-                    contentDescription = "Default Profile Image",
-                    modifier = Modifier
-                        .size(130.dp)
-                        .clip(CircleShape)
-                        .background(Color.LightGray, CircleShape)
-                        .border(0.5.dp, Color.LightGray, CircleShape),
-                    contentScale = ContentScale.Crop
-                )
+                // 기본 프로필 이미지 표시
+                val profileImageUrl = userInfo?.data?.profileImageUrl
+                if (profileImageUrl != null) {
+                    AsyncImage(
+                        model = profileImageUrl,
+                        contentDescription = "User Profile Image",
+                        modifier = Modifier
+                            .size(130.dp)
+                            .clip(CircleShape)
+                            .background(Color.LightGray, CircleShape)
+                            .border(0.5.dp, Color.LightGray, CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(id = R.drawable.hamo),
+                        contentDescription = "Default Profile Image",
+                        modifier = Modifier
+                            .size(130.dp)
+                            .clip(CircleShape)
+                            .background(Color.LightGray, CircleShape)
+                            .border(0.5.dp, Color.LightGray, CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                }
             }
         }
 
-    // 프로필 사진 변경 버튼
+        // 프로필 사진 변경 버튼
         Spacer(modifier = Modifier.height(8.dp))
 
         Box(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .clip(RoundedCornerShape(20.dp))
-                .border(1.dp, Color(0XFFA093DE), RoundedCornerShape(20.dp)) // border 추가
+                .border(1.dp, Color(0XFFA093DE), RoundedCornerShape(20.dp))
                 .clickable {
-                    // 프로필 사진 변경 로직
+                    val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                    launcher.launch(intent)
                 }
-                .padding(vertical = 8.dp, horizontal = 16.dp) // 패딩을 추가하여 여백을 만듭니다.
+                .padding(vertical = 8.dp, horizontal = 16.dp)
         ) {
             Text(
                 text = "프로필사진 변경",
@@ -207,28 +256,29 @@ fun UserInfoUpdate(navController: NavController) {
             )
         }
 
-    // 수정 가능한 정보 입력 필드들
+        // 수정 가능한 정보 입력 필드들
         editableTextField("이름", nameState) { newValue -> nameState = newValue }
         DrawLine()
 
-    // 이메일 (수정 불가)
+        // 이메일 (수정 불가)
         displayTextField("이메일", emailState)
         DrawLine()
 
-    // 수정 가능한 전화번호 필드
+        // 수정 가능한 전화번호 필드
         editableTextField("전화번호", phoneState) { newValue -> phoneState = newValue }
         DrawLine()
 
-    // 성별 표시 (수정 불가)
+        // 성별 표시 (수정 불가)
         displayTextField("성별", isMaleState)
         DrawLine()
 
-    // 수정 가능한 생일 필드
+        // 수정 가능한 생일 필드
         editableTextField("생일", birthState) { newValue -> birthState = newValue }
         DrawLine()
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // 회원정보 수정 버튼
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -242,7 +292,11 @@ fun UserInfoUpdate(navController: NavController) {
                 color = Color.Red,
                 modifier = Modifier
                     .padding(start = 16.dp)
-                    .clickable { /* 회원 탈퇴 로직 */ }
+                    .clickable {
+                        Log.d("UserInfoUpdate", "회원탈퇴 버튼 클릭됨")  // 버튼 클릭 확인
+                        showDeleteDialog = true
+                        Log.d("UserInfoUpdate", "showDeleteDialog 값: $showDeleteDialog")
+                    }  // 상태 변경 확인
             )
 
             // 수정하기 버튼
@@ -259,96 +313,33 @@ fun UserInfoUpdate(navController: NavController) {
                 Text(text = "수정하기", fontSize = 14.sp, color = Color.Black)
             }
         }
-        // 모달(알림) 다이얼로그
-        if (showDialog) {
+        // 회원정보 수정 성공 모달 창
+        if (showUpdateSuccessDialog) {
             AlertDialog(
-                onDismissRequest = { showDialog = false },
-                title = {
-                    Text(
-                        text = "알림",
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Start,
-                        fontSize = 18.sp
-                    )
-                },
-                text = {
-                    Text(
-                        text = dialogMessage,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Start,
-                        fontSize = 16.sp
-                    )
-                },
+                onDismissRequest = { showUpdateSuccessDialog = false },
+                title = { Text(text = "성공") },
+                text = { Text(text = "회원정보가 업데이트되었습니다.") },
                 confirmButton = {
-                    Button(
-                        onClick = {
-                            showDialog = false
-                            navController.navigate("UserInfo") // UserInfo로 이동
-                        },
-                        modifier = Modifier
-                            .wrapContentWidth()  // 텍스트 길이에 맞게 버튼 크기 조정
-                            .align(Alignment.CenterHorizontally)
-                            .padding(horizontal = 24.dp)
+                    TextButton(
+                        onClick = { showUpdateSuccessDialog = false }
                     ) {
                         Text("확인")
                     }
-                },
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .padding(horizontal = 16.dp)
+                }
             )
         }
-    }
 
-    Spacer(modifier = Modifier.height(16.dp))
-}
-@Composable
-fun editableTextField(label: String, value: String, onValueChange: (String) -> Unit) {
-    Column(modifier = Modifier.padding(6.dp)) {
-        Text(
-            text = label,
-            fontSize = 14.sp,
-            color = Color.Gray,
-            modifier = Modifier.padding(bottom = 4.dp, start = 8.dp)
-        )
-
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .clip(RoundedCornerShape(8.dp)),
-            textStyle = androidx.compose.ui.text.TextStyle(
-                fontSize = 18.sp,
-                color = Color.Black
-            ),
-            enabled = true
-        )
-    }
-}
-
-@Composable
-fun displayTextField(label: String, value: String) {
-    Column(modifier = Modifier.padding(8.dp)) {
-        Text(
-            text = label,
-            fontSize = 14.sp,
-            color = Color.Gray,
-            modifier = Modifier.padding(bottom = 4.dp, start = 8.dp)
-        )
-
-        Text(
-            text = value,
-            fontSize = 18.sp,
-            color = Color.Black,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 4.dp, start = 24.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.Transparent)
-                .height(36.dp) // 입력 필드 높이 수정
-
-        )
-    }
-}
+        // 회원정보 수정 실패 모달 창
+        if (showUpdateFailureDialog) {
+            AlertDialog(
+                onDismissRequest = { showUpdateFailureDialog = false },
+                title = { Text(text = "실패") },
+                text = { Text(text = "회원정보 수정이 실패하였습니다.") },
+                confirmButton = {
+                    TextButton(
+                        onClick = { showUpdateFailureDialog = false }
+                    ) {
+                        Text("확인")
+                    }
+    })
+}}}

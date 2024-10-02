@@ -23,20 +23,20 @@ class WishlistViewModel(application: Application) : AndroidViewModel(application
     // 아이템을 위시리스트에 추가
     fun addItemToWishlist(giftDetail: GiftDetail) {
         viewModelScope.launch {
-            WishlistRepository.addItemToWishlist(context, giftDetail.id.toString())
+            WishlistRepository.addItemToWishlist(context, giftDetail.giftIdx.toString())
         }
     }
 
     // 아이템을 위시리스트에서 제거
     fun removeItemFromWishlist(giftDetail: GiftDetail) {
         viewModelScope.launch {
-            WishlistRepository.removeItemFromWishlist(context, giftDetail.id.toString())
+            WishlistRepository.removeItemFromWishlist(context, giftDetail.giftIdx.toString())
         }
     }
     // 찜 상태를 토글 (추가/제거)
     fun toggleWishlistItem(giftDetail: GiftDetail) {
         viewModelScope.launch {
-            val itemId = giftDetail.id.toString() // GiftDetail의 id를 String으로 변환
+            val itemId = giftDetail.giftIdx.toString() // GiftDetail의 id를 String으로 변환
             val currentWishlist = wishlistItems.value // 현재 위시리스트 Set 가져오기
 
             // contains 사용하여 해당 아이템이 있는지 확인

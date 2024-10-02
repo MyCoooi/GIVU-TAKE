@@ -1,5 +1,6 @@
 package com.project.givuandtake
 
+//import com.project.givuandtake.feature.mypage.MyDonation.WishList
 import AddressMapSearch
 import AttractionMain
 import android.content.Intent
@@ -25,7 +26,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+
 import com.example.givuandtake.FundingMainPage
+
 import com.project.givuandtake.auth.LoginScreen
 import com.project.givuandtake.auth.SignupStep1
 import com.project.givuandtake.auth.SignupStep2
@@ -35,16 +38,23 @@ import com.project.givuandtake.core.data.CartItem
 import com.project.givuandtake.feature.attraction.FestivalPage
 import com.project.givuandtake.feature.attraction.LocationSelect
 import com.project.givuandtake.feature.attraction.TripPage
+
 import com.project.givuandtake.feature.attraction.ViliagePage
 import com.project.givuandtake.feature.funding.navigation.MainFundingCard
+
+import com.project.givuandtake.feature.auth.FindPassword
+
 import com.project.givuandtake.feature.fundinig.FundingDetailPage
+import com.project.givuandtake.feature.fundinig.FundingMainPage
+//import com.project.givuandtake.feature.funding.navigation.MainFundingCard
+//import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.gift.CartPage
-import com.project.givuandtake.feature.gift.mainpage.GiftPage
+import com.project.givuandtake.feature.gift.GiftPage
+import com.project.givuandtake.feature.gift.GiftPageDetail
 import com.project.givuandtake.feature.mainpage.MainPage
-import com.project.givuandtake.feature.mypage.MyPageScreen
+import com.project.givuandtake.feature.mypage.CustomerService.Announcement
 import com.project.givuandtake.feature.mypage.CustomerService.FaqPage
 import com.project.givuandtake.feature.mypage.CustomerService.PersonalInquiry
-import com.project.givuandtake.feature.mypage.CustomerService.Announcement
 import com.project.givuandtake.feature.mypage.MyActivities.AddressBook
 import com.project.givuandtake.feature.mypage.MyActivities.AddressBookUpdate
 import com.project.givuandtake.feature.mypage.MyActivities.AddressSearch
@@ -57,16 +67,15 @@ import com.project.givuandtake.feature.mypage.MyDonation.DonationDetails
 import com.project.givuandtake.feature.mypage.MyDonation.DonationReceipt
 import com.project.givuandtake.feature.mypage.MyDonation.FundingDetails
 import com.project.givuandtake.feature.mypage.MyDonation.WishlistPage
-
-//import com.project.givuandtake.feature.mypage.MyDonation.WishList
 import com.project.givuandtake.feature.mypage.MyManagement.MyComment
 import com.project.givuandtake.feature.mypage.MyManagement.MyReview
-import com.project.givuandtake.feature.navigation.addGiftPageDetailRoute
+import com.project.givuandtake.feature.mypage.MyPageScreen
 import com.project.givuandtake.feature.payment.KakaoPayManager
 import com.project.givuandtake.feature.payment.PaymentResultPage
 import com.project.givuandtake.feature.payment.PaymentSuccessPage
 import com.project.givuandtake.ui.navbar.BottomNavBar
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
+import com.project.payment.PaymentScreen
 import com.project.payment.PaymentScreen_gift
 
 class MainActivity : ComponentActivity() {
@@ -100,21 +109,27 @@ class MainActivity : ComponentActivity() {
                             // 메인 페이지
                             composable("mainpage") { MainPage(navController) }
                             // 펀딩 페이지
-                            composable("funding") { FundingMainPage(navController) }
-                            // 펀딩 상세 페이지
-                            composable(
-                                "funding_detail/{title}/{location}/{startDate}/{endDate}/{nowAmount}/{goalAmount}/{imageUrl}"
-                            ) { backStackEntry ->
-                                val fundingCard = MainFundingCard(backStackEntry)
-                                FundingDetailPage(
-                                    fundingCard = fundingCard,
-                                    navController = navController,
-                                    onBackClick = { navController.popBackStack() }
-                                )
+                            composable("funding"){ FundingMainPage(navController)  }
+                                                       // 펀딩 상세 페이지
+                            // 펀딩 상세 페이지 추가
+                            composable("funding_detail/{fundingIdx}") { backStackEntry ->
+                                val fundingIdx =
+                                    backStackEntry.arguments?.getString("fundingIdx")?.toIntOrNull()
+                                if (fundingIdx != null) {
+                                    FundingDetailPage(
+                                        fundingIdx = fundingIdx,
+                                        navController = navController,
+                                        onBackClick = {
+                                            navController.popBackStack()
+                                        })
+                                }
                             }
+                            composable("payment") { PaymentScreen(navController) }
+
                             composable("attraction") { AttractionMain(navController, "영도") } // Navigate to AttractionMain
                             // 로그인 페이지
                             composable("auth") { LoginScreen(navController) }
+                            composable("find_password") { FindPassword(navController) }
                             // 회원가입 페이지
                             composable("signup_step1") { SignupStep1(navController, signupViewModel) }
                             composable("signup_step2") { SignupStep2(navController, signupViewModel) }
@@ -124,8 +139,20 @@ class MainActivity : ComponentActivity() {
                                 GiftPage(navController = navController) // cartItems는 MutableState로 전달
                             }
 
-                            // 기프트 상세 페이지
-                            addGiftPageDetailRoute(navController, cartItems) // cartItems는 MutableState로 전달
+                            composable(
+                                route = "gift_page_detail/{giftIdx}",
+                                arguments = listOf(navArgument("giftIdx") { type = NavType.IntType })
+                            ) { backStackEntry ->
+                                val giftIdx = backStackEntry.arguments?.getInt("giftIdx") ?: 0
+                                val cartItems = remember { mutableStateOf(emptyList<CartItem>()) }
+
+                                // GiftPageDetail 호출, 필요한 파라미터를 넘김
+                                GiftPageDetail(
+                                    giftIdx = giftIdx,
+                                    cartItems = cartItems,
+                                    navController = navController,
+                                )
+                            }
 
                             // 장바구니 페이지
                             composable("cart_page") {
