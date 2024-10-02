@@ -1,20 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom"; // useParams로 fundingIdx를 URL에서 가져옴
+import { useParams } from "react-router-dom";
 import Sidebar from "../Sidebar";
-import { apiFundingDetail } from "../../apis/funding/apiFundingDetail"; // API 파일 import
-import "./FundingDetail.css"; // 스타일 파일 import
+import { apiFundingDetail } from "../../apis/funding/apiFundingDetail"; 
+import "./FundingDetail.css";
 
 const FundingDetail = () => {
-  const { fundingIdx } = useParams(); // URL에서 fundingIdx 가져오기
+  const { fundingIdx } = useParams();
   const [funding, setFunding] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedMenu, setSelectedMenu] = useState("펀딩"); // Sidebar에서 사용할 상태 추가
+  const [selectedMenu, setSelectedMenu] = useState("펀딩");
+  const [activeTab, setActiveTab] = useState("소개"); // 선택된 탭을 관리하는 state 추가
 
   useEffect(() => {
     const fetchFundingDetail = async () => {
       try {
-        const data = await apiFundingDetail(fundingIdx); // API 요청
-        setFunding(data); // 받아온 데이터를 state에 저장
+        const data = await apiFundingDetail(fundingIdx);
+        setFunding(data);
       } catch (error) {
         console.error("펀딩 상세 정보를 가져오는 데 실패했습니다:", error);
       } finally {
@@ -29,17 +30,60 @@ const FundingDetail = () => {
     return <p>로딩 중...</p>;
   }
 
+  // 탭별 내용을 렌더링하는 함수
+  const renderContent = () => {
+    switch (activeTab) {
+      case "소개":
+        return (
+          <div className="funding-description">
+            <h2>펀딩 소개</h2>
+            <p>{funding.fundingContent}</p>
+          </div>
+        );
+      case "응원댓글":
+        return (
+          <div className="funding-comments">
+            <h2>응원댓글</h2>
+            <p>여기에 응원댓글을 불러옵니다.</p>
+          </div>
+        );
+      case "후기":
+        return (
+          <div className="funding-reviews">
+            <h2>후기</h2>
+            <p>여기에 후기를 불러옵니다.</p>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="funding-detail-layout">
-      {/* setSelectedMenu를 Sidebar에 전달 */}
       <Sidebar selectedMenu={selectedMenu} setSelectedMenu={setSelectedMenu} />
       <div className="funding-detail-content">
         <div className="funding-detail-header">
           <h1>펀딩 상세</h1>
           <div className="funding-tabs">
-            <span>소개</span>
-            <span>응원댓글</span>
-            <span>후기</span>
+            <button
+              className={activeTab === "소개" ? "active" : ""}
+              onClick={() => setActiveTab("소개")}
+            >
+              소개
+            </button>
+            <button
+              className={activeTab === "응원댓글" ? "active" : ""}
+              onClick={() => setActiveTab("응원댓글")}
+            >
+              응원댓글
+            </button>
+            <button
+              className={activeTab === "후기" ? "active" : ""}
+              onClick={() => setActiveTab("후기")}
+            >
+              후기
+            </button>
           </div>
           <button className="edit-button">수정</button>
         </div>
@@ -58,15 +102,13 @@ const FundingDetail = () => {
             <p>펀딩 기간: {funding.startDate} ~ {funding.endDate}</p>
             <p>달성 금액: {funding.totalMoney.toLocaleString()}원</p>
             <p>목표 금액: {funding.goalMoney.toLocaleString()}원</p>
-            <p className="achievement-rate">달성률: {Math.round((funding.totalMoney / funding.goalMoney) * 100)}%</p> {/* 달성률 추가 */}
+            <p className="achievement-rate">달성률: {Math.round((funding.totalMoney / funding.goalMoney) * 100)}%</p>
           </div>
-          <p className="registration-date">등록일: {funding.startDate}</p> {/* 등록일을 오른쪽으로 옮김 */}
+          <p className="registration-date">등록일: {funding.startDate}</p>
         </div>
 
-
-        <div className="funding-description">
-          <p>{funding.fundingContent}</p>
-        </div>
+        {/* 현재 선택된 탭에 따라 다른 내용 렌더링 */}
+        {renderContent()}
       </div>
     </div>
   );
