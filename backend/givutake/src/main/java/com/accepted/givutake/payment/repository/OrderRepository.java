@@ -25,4 +25,24 @@ public interface OrderRepository extends JpaRepository<Orders, Integer> {
     @Query("SELECT SUM(o.price) FROM Orders o WHERE o.users.userIdx = :userIdx")
     Integer sumPriceByUserIdx(@Param("userIdx") int userIdx);
 
+
+    @Query("SELECT FUNCTION('MONTH', o.createdDate) as month, SUM(o.amount) as total " +
+            "FROM Orders o " +
+            "JOIN o.gift g " +
+            "JOIN g.corporations c " +
+            "WHERE FUNCTION('YEAR', o.createdDate) = :year " +
+            "AND (:giftIdx IS NULL OR g.giftIdx = :giftIdx) " +
+            "AND c.userIdx = :corporationIdx " +
+            "GROUP BY FUNCTION('MONTH', o.createdDate)")
+    List<Object[]> findMonthlyOrderAmounts(@Param("corporationIdx") Integer corporationIdx, @Param("year") int year, @Param("giftIdx") Integer giftIdx);
+
+    @Query("SELECT u.name AS name, SUM(o.price) AS totalPrice " +
+            "FROM Orders o " +
+            "JOIN o.users u " +
+            "JOIN o.gift g " +
+            "JOIN g.corporations c " +
+            "WHERE (:giftIdx IS NULL OR g.giftIdx = :giftIdx) " +
+            "AND c.userIdx = :corporationIdx " +
+            "GROUP BY u.name")
+    List<Object[]> findPurchasersByGiftIdx(@Param("giftIdx") Integer giftIdx, @Param("corporationIdx") Integer corporationIdx);
 }

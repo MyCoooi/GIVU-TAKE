@@ -222,7 +222,7 @@ public class GiftController {
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/review/{reviewIdx}/deleteLiked") // 리뷰 좋아요 추가
+    @DeleteMapping("/review/{reviewIdx}/deleteLiked") // 리뷰 좋아요 삭제
     public ResponseEntity<ResponseDto> deleteLiked(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int reviewIdx) {
@@ -232,6 +232,17 @@ public class GiftController {
                 .build();
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
+
+//    @GetMapping("/year/statistics")
+//    public ResponseEntity<ResponseDto> getYearStatistics(
+//            @AuthenticationPrincipal UserDetails userDetails,
+//            @RequestParam(required = false) Integer giftIdx) {
+//        GiftPurchaserDto data =  giftService.getGiftPurchaser(userDetails.getUsername(), giftIdx);
+//        ResponseDto responseDto = ResponseDto.builder()
+//                .data(data)
+//                .build();
+//        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+//    }
 
 }
 
