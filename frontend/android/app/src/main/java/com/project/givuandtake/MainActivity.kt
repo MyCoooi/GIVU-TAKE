@@ -35,6 +35,7 @@ import com.project.givuandtake.core.data.CartItem
 import com.project.givuandtake.feature.attraction.FestivalPage
 import com.project.givuandtake.feature.attraction.LocationSelect
 import com.project.givuandtake.feature.attraction.TripPage
+import com.project.givuandtake.feature.attraction.ViliagePage
 import com.project.givuandtake.feature.funding.navigation.MainFundingCard
 import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.gift.CartPage
@@ -191,6 +192,14 @@ class MainActivity : ComponentActivity() {
                                 val city = backStackEntry.arguments?.getString("city")
                                 FestivalPage(navController, city) // Pass the city to TripPage
                             }
+                            composable(
+                                route = "viliagepage?city={city}", // Define the route with a city argument
+                                arguments = listOf(navArgument("city") { type = NavType.StringType }) // Declare argument type
+                            ) { backStackEntry ->
+                                // Retrieve the city from the arguments
+                                val city = backStackEntry.arguments?.getString("city")
+                                ViliagePage(navController, city) // Pass the city to TripPage
+                            }
 
                             // 마이 페이지
                             composable("mypage") { MyPageScreen(navController) }
@@ -232,6 +241,7 @@ class MainActivity : ComponentActivity() {
                         // 하단 네비게이션 바
                         if (currentDestination != "trippage?city={city}" &&
                             currentDestination != "festivalpage?city={city}" &&
+                            currentDestination != "viliagepage?city={city}" &&
                             currentDestination != "donationreceipt" &&
                             currentDestination != "fundingdetails" &&
                             currentDestination != "wishlist" &&

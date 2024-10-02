@@ -9,6 +9,7 @@ data class ExperienceVillage(
     val experienceVillageIdx: Int,
     val experienceVillageName: String,
     val experienceVillageAddress: String,
+    val experienceVillageProgram: String,
     val experienceVillagePhone: String = "",
     val experienceVillageHomepageUrl: String = ""
 )
