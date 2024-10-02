@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { apiSearchFundingReview } from "../../apis/funding/apiSearchFundingReview"; 
 import { apiWriteFundingReview } from "../../apis/funding/apiWriteFundingReview"; 
-import { apiUpdateFundingReview } from "../../apis/funding/apiUpdateFundingReview"; // 수정 API 추가
+import { apiUpdateFundingReview } from "../../apis/funding/apiUpdateFundingReview"; 
 import TokenManager from "../../utils/TokenManager"; 
+import Swal from "sweetalert2"; // SweetAlert2 import
 import "./FundingReviews.css";
 
 const FundingReviews = ({ fundingIdx }) => {
@@ -11,7 +12,7 @@ const FundingReviews = ({ fundingIdx }) => {
   const [hasReview, setHasReview] = useState(false);
   const [isEditing, setIsEditing] = useState(false); 
   const [editReview, setEditReview] = useState("");
-  const [isEditingReview, setIsEditingReview] = useState(false); // 후기 수정 중인지 확인하는 상태
+  const [isEditingReview, setIsEditingReview] = useState(false); 
 
   const accessToken = TokenManager.getAccessToken(); 
 
@@ -42,38 +43,47 @@ const FundingReviews = ({ fundingIdx }) => {
       return;
     }
 
-    console.log("Submitting review:");
-    console.log("fundingIdx:", fundingIdx);
-    console.log("reviewContent:", editReview);
-    console.log("accessToken:", accessToken);
-
     try {
       if (isEditingReview) {
-        // 후기 수정 모드일 때
-        await apiUpdateFundingReview(fundingIdx, editReview, accessToken); // 수정 API 호출
-        console.log("후기 수정 성공");
+        await apiUpdateFundingReview(fundingIdx, editReview, accessToken);
+        Swal.fire({
+          title: "수정 완료",
+          text: "후기 수정이 완료되었습니다",
+          icon: "success",
+          confirmButtonText: "확인",
+        });
       } else {
-        // 후기 작성 모드일 때
-        await apiWriteFundingReview(fundingIdx, editReview, accessToken); // 작성 API 호출
-        console.log("후기 작성 성공");
+        await apiWriteFundingReview(fundingIdx, editReview, accessToken);
+        Swal.fire({
+          title: "작성 완료",
+          text: "후기 작성이 완료되었습니다",
+          icon: "success",
+          confirmButtonText: "확인",
+        });
       }
 
-      setReview(editReview); // 수정된 내용을 반영
-      setIsEditing(false); 
-      setIsEditingReview(false); // 후기 수정 모드 종료
-      setHasReview(true); 
+      setReview(editReview);
+      setIsEditing(false);
+      setIsEditingReview(false);
+      setHasReview(true);
     } catch (error) {
       console.error("후기 작성 또는 수정에 실패했습니다:", error);
+      Swal.fire({
+        title: "오류",
+        text: "후기 작성 또는 수정 중 오류가 발생했습니다.",
+        icon: "error",
+        confirmButtonText: "확인",
+      });
     }
   };
 
   const handleReviewButtonClick = () => {
     if (hasReview) {
-      setEditReview(review); 
-      setIsEditingReview(true); // 수정 모드로 전환
+      setEditReview(review);
+      setIsEditingReview(true); 
     } else {
       setEditReview(""); 
-      setIsEditingReview(false); // 새로운 작성 모드로 전환
+      setIsEditingReview(false); 
     }
     setIsEditing(true); 
   };
@@ -105,7 +115,7 @@ const FundingReviews = ({ fundingIdx }) => {
           />
           <div className="review-buttons">
             <button className="submit-review-button" onClick={handleSubmitReview}>
-              {isEditingReview ? "수정 완료" : "작성 완료"} {/* 버튼 텍스트 변경 */}
+              {isEditingReview ? "수정 완료" : "작성 완료"}
             </button>
             <button className="cancel-review-button" onClick={() => setIsEditing(false)}>
               취소
