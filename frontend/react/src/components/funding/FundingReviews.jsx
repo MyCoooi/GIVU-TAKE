@@ -1,10 +1,12 @@
 import React from "react";
+import "./FundingReviews.css";
 
 const FundingReviews = () => {
   return (
-    <div>
-      <h2>펀딩후기</h2>
-      <p>후기지롱</p>
+    <div className="funding-reviews">
+      <h2>펀딩 후기</h2>
+      {/* 후기를 여기에 추가 */}
+      <p>여기에 후기를 불러옵니다.</p>
     </div>
   );
 };

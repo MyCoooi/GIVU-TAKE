@@ -9,8 +9,6 @@ import FundingDetail from './components/funding/FundingDetail';
 import Statistics from './components/statistics/Statistics';
 import UserInfo from './components/userinfo/UserInfo';
 import UserInfoUpdate from './components/userinfo/UserInfoUpdate';
-import Sidebar from "./components/Sidebar";
-
 
 
 import React from 'react';
