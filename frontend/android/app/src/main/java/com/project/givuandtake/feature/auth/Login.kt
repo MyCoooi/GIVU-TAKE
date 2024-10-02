@@ -32,9 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.project.givuandtake.R
-import com.project.givuandtake.core.apis.LoginApi
-import com.project.givuandtake.core.apis.LoginRequest
-import com.project.givuandtake.core.apis.LoginResponse
+import com.project.givuandtake.core.apis.Auth.LoginApi
+import com.project.givuandtake.core.apis.Auth.LoginRequest
+import com.project.givuandtake.core.apis.Auth.LoginResponse
 import com.project.givuandtake.core.datastore.TokenManager
 import retrofit2.Call
 import retrofit2.Callback
@@ -219,6 +219,7 @@ fun LoginScreen(navController: NavController) {
                         text = "비밀번호 찾기",
                         color = Color.Gray,
                         modifier = Modifier.clickable {
+                            navController.navigate("find_password")
                         }
                     )
                     Text(

@@ -1,3 +1,5 @@
+package com.project.givuandtake.feature.gift
+
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -34,9 +36,13 @@ import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.project.givuandtake.core.data.GiftDetail
+import com.project.givuandtake.core.data.GiftDetailData
+import com.project.givuandtake.core.datastore.TokenDataStore
 import com.project.givuandtake.core.datastore.getCartItems
 import com.project.givuandtake.core.datastore.saveCartItems
+import com.project.givuandtake.feature.gift.GiftViewModel
 import com.project.givuandtake.feature.gift.addToCart
 import kotlinx.coroutines.runBlocking
 
@@ -47,27 +53,34 @@ object TabState {
 
 @Composable
 fun GiftPageDetail(
-    giftDetail: GiftDetail,  // GiftDetail 클래스로 데이터 전달
-    cartItems: MutableState<List<CartItem>>,  // MutableState로 변경
-    onAddToCart: () -> Unit,  // 장바구니 항목 업데이트 콜백
-    navController: NavController
+    giftIdx: Int,  // 상품 ID
+    cartItems: MutableState<List<CartItem>>,  // 장바구니 항목 상태
+    navController: NavController,  // 네비게이션 컨트롤러
+    GiftViewModel : GiftViewModel = viewModel()  // 뷰 모델
 ) {
-    var selectedTabIndex by remember { mutableStateOf(0) }  // 선택된 탭의 인덱스
-    var searchText by remember { mutableStateOf("") }  // 검색창 입력값
-    val currentItem = CartItem(
-        name = giftDetail.name,
-        price = giftDetail.price,
-        quantity = 1,
-        location = giftDetail.location
-    )  // 현재 선택된 상품 정보
-    val scope = rememberCoroutineScope()  // CoroutineScope for async operations
+    var searchText by remember { mutableStateOf("") }  // 검색창 입력 상태
+    val giftDetail by GiftViewModel.giftDetail.collectAsState()  // 상품 상세 정보 상태
 
-    val context = LocalContext.current  // LocalContext.current는 Composable 함수 내부에서만 사용 가능
+    val scope = rememberCoroutineScope()  // 코루틴 스코프
+    val context = LocalContext.current  // 현재 Context
 
-    // 장바구니 아이템 불러오기
+    // 페이지 로드 시 상품 상세 정보를 API로부터 불러옴
+    LaunchedEffect(giftIdx) {
+        val tokenDataStore = TokenDataStore(context)  // DataStore 초기화
+
+        // 저장된 토큰을 Flow로 수집하여 사용
+        tokenDataStore.token.collect { token ->
+            token?.let {
+                // 불러온 토큰을 사용하여 API 호출
+                GiftViewModel.fetchGiftDetail(token = it, giftIdx = giftIdx)
+            }
+        }
+    }
+
+    // 장바구니 항목 불러오기
     LaunchedEffect(Unit) {
         getCartItems(context).collect { savedItems ->
-            cartItems.value = savedItems  // DataStore에서 불러온 항목들을 cartItems에 반영
+            cartItems.value = savedItems  // 저장된 장바구니 항목 반영
         }
     }
 
@@ -75,75 +88,92 @@ fun GiftPageDetail(
         topBar = {
             GiftTopBar(
                 searchText = searchText,
-                onSearchTextChanged = { newText -> searchText = newText },
-                cartItemCount = cartItems.value.size,  // 장바구니 아이템 개수 전달
+                onSearchTextChanged = { newText -> searchText = newText },  // 검색 텍스트 변경 콜백
+                cartItemCount = cartItems.value.size,  // 장바구니 아이템 개수
                 onCartClick = {
                     navController.navigate("cart_page")  // 장바구니 페이지로 이동
                 }
             )
         },
         bottomBar = {
-            GiftBottomBar(
-                onAddToCart = {
-                    scope.launch {
-                        // DataStore에 currentItem 추가
-                        val updatedCartItems = cartItems.value.toMutableList().apply {
-                            add(currentItem)
+            // 상품 상세 정보가 있을 때 하단바 컴포넌트 표시
+            giftDetail?.let { detail ->
+                GiftBottomBar(
+                    onAddToCart = {
+                        scope.launch {
+                            val updatedCartItems = cartItems.value.toMutableList()
+
+                            // 이미 같은 상품이 장바구니에 있는지 확인
+                            val existingItemIndex = updatedCartItems.indexOfFirst { it.name == detail.giftName }
+                            if (existingItemIndex != -1) {
+                                // 수량 증가
+                                val existingItem = updatedCartItems[existingItemIndex]
+                                updatedCartItems[existingItemIndex] = existingItem.copy(quantity = existingItem.quantity + 1)
+                            } else {
+                                // 새로 추가
+                                updatedCartItems.add(CartItem(detail.giftName, detail.price, 1, detail.location))
+                            }
+
+                            saveCartItems(context, updatedCartItems)  // 장바구니 업데이트
+                            cartItems.value = updatedCartItems  // UI 갱신
                         }
-                        saveCartItems(context, updatedCartItems)
-                        cartItems.value = updatedCartItems  // UI에 반영
-                    }
-                },
-                navController = navController,  // navController 전달
-                giftDetail = giftDetail  // GiftDetail 객체 전달
-            )
+                    },
+                    navController = navController,  // 네비게이션 컨트롤러 전달
+                    giftDetail = detail  // 상품 정보 전달
+                )
+            }
         }
     ) { innerPadding ->
-        // 상세 페이지 컨텐츠를 LazyColumn으로 구현
+        // 상품 상세 정보를 보여주는 컨텐츠 부분
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
-            // 상품 정보 섹션
-            item {
-                GiftInformation(giftDetail = giftDetail)
-            }
+            // 상품 정보가 있을 때만 표시
+            giftDetail?.let { detail ->
+                item {
+                    GiftInformation(giftDetail = detail)  // 상품 정보 표시
+                }
 
-            // 탭 섹션
-            item {
-                GiftTabs(
-                    selectedTabIndex = TabState.selectedTabIndex,
-                    onTabSelected = { TabState.selectedTabIndex = it }
-                )
-            }
+                // 탭 섹션
+                item {
+                    GiftTabs(
+                        selectedTabIndex = TabState.selectedTabIndex,
+                        onTabSelected = { TabState.selectedTabIndex = it }  // 탭 선택 콜백
+                    )
+                }
 
-            // 선택된 탭에 따라 다른 내용을 표시
-            item {
-                when (TabState.selectedTabIndex) {
-                    0 -> ProductIntroduction()  // 상품 소개 탭
-                    1 -> ProductReview(reviews = dummyReviews)  // 상품 리뷰 탭
-                    2 -> RelatedRecommendations(
-                        navController = navController,
-                        location = giftDetail.location
-                    )  // 연관 추천 탭
+                // 탭에 따라 다른 내용을 표시
+                item {
+                    when (TabState.selectedTabIndex) {
+                        0 -> ProductIntroduction(giftDetail = detail)  // 상품 소개 탭
+                        1 -> ProductReview(reviews = dummyReviews)  // 리뷰 탭 (더미 데이터)
+                        2 -> RelatedRecommendations(navController = navController, location = detail.location)  // 연관 추천 탭
+                    }
+                }
+            } ?: run {
+                // 상품 정보가 없을 때 로딩 메시지 표시
+                item {
+                    Text("Loading...", Modifier.padding(16.dp))
                 }
             }
         }
     }
 }
 
+
 @Composable
 fun GiftBottomBar(
     onAddToCart: () -> Unit,
     navController: NavController,
-    giftDetail: GiftDetail  // GiftDetail 객체로 통일
+    giftDetail: GiftDetailData
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.Transparent)  // 배경을 투명하게 설정
+            .background(Color.Transparent)
     ) {
         Row(
             modifier = Modifier
@@ -166,7 +196,7 @@ fun GiftBottomBar(
             Button(
                 onClick = {
                     navController.navigate(
-                        "payment_page_gift?name=${Uri.encode(giftDetail.name)}&location=${Uri.encode(giftDetail.location)}&price=${giftDetail.price}&quantity=1"
+                        "payment_page_gift?name=${Uri.encode(giftDetail.giftName)}&location=${Uri.encode(giftDetail.location)}&price=${giftDetail.price}&quantity=1"
                     )
                 },
                 modifier = Modifier
@@ -181,10 +211,11 @@ fun GiftBottomBar(
     }
 }
 
+
 @Composable
-fun GiftInformation(giftDetail: GiftDetail) {
+fun GiftInformation(giftDetail: GiftDetailData) {
     Image(
-        painter = painterResource(id = R.drawable.placeholder),  // 실제 이미지 경로 사용
+        painter = rememberImagePainter(giftDetail.giftThumbnail),  // 실제 이미지 경로 사용
         contentDescription = "상품 이미지",
         modifier = Modifier
             .fillMaxWidth()
@@ -210,7 +241,7 @@ fun GiftInformation(giftDetail: GiftDetail) {
     Spacer(modifier = Modifier.height(8.dp))
 
     // 상품 정보
-    Text(text = giftDetail.name, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+    Text(text = giftDetail.giftName, fontWeight = FontWeight.Bold, fontSize = 20.sp)
     Spacer(modifier = Modifier.height(8.dp))
 
     // 가느다란 실선 추가
@@ -393,20 +424,70 @@ fun GiftTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
 }
 
 @Composable
-fun ProductIntroduction() {
+fun ProductIntroduction(giftDetail: GiftDetailData) {
     Column(modifier = Modifier.padding(16.dp)) {
-        // 상품 소개 내용
+        // 상품 이름
         Text(
-            text = "As in handbags, the double ring and bar design defines the wallet shape...",
-            fontSize = 14.sp
+            text = giftDetail.giftName,  // 상품 이름
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold
         )
+
         Spacer(modifier = Modifier.height(8.dp))
+
+        // 회사 이름 및 위치
         Text(
-            text = "Material & Care\nAll products are made with carefully selected materials...",
-            fontSize = 14.sp
+            text = "제공 회사: ${giftDetail.corporationName} (${giftDetail.location})",
+            fontSize = 16.sp,
+            color = Color.Gray
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 가격
+        Text(
+            text = "가격: ₩${giftDetail.price}",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Green
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 상품 설명
+        val (thumbnailUrl, description) = giftDetail.giftContentDetails  // 썸네일 URL과 설명 파싱
+
+        if (thumbnailUrl != null) {
+            // 상품 썸네일 이미지
+            Image(
+                painter = rememberImagePainter(data = thumbnailUrl),
+                contentDescription = "상품 썸네일",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // 상품 설명
+        if (description != null) {
+            Text(
+                text = description,
+                fontSize = 16.sp
+            )
+        } else {
+            Text(
+                text = "상품 설명이 없습니다.",
+                fontSize = 16.sp,
+                color = Color.Gray
+            )
+        }
     }
 }
+
 
 @Composable
 fun ProductReview(reviews: List<Review>) {
