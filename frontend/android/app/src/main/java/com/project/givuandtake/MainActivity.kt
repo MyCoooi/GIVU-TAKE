@@ -19,12 +19,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+
+import com.example.givuandtake.FundingMainPage
+
 import com.project.givuandtake.auth.LoginScreen
 import com.project.givuandtake.auth.SignupStep1
 import com.project.givuandtake.auth.SignupStep2
@@ -34,7 +38,12 @@ import com.project.givuandtake.core.data.CartItem
 import com.project.givuandtake.feature.attraction.FestivalPage
 import com.project.givuandtake.feature.attraction.LocationSelect
 import com.project.givuandtake.feature.attraction.TripPage
+
+import com.project.givuandtake.feature.attraction.ViliagePage
+import com.project.givuandtake.feature.funding.navigation.MainFundingCard
+
 import com.project.givuandtake.feature.auth.FindPassword
+
 import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.fundinig.FundingMainPage
 //import com.project.givuandtake.feature.funding.navigation.MainFundingCard
@@ -47,6 +56,7 @@ import com.project.givuandtake.feature.mypage.CustomerService.Announcement
 import com.project.givuandtake.feature.mypage.CustomerService.FaqPage
 import com.project.givuandtake.feature.mypage.CustomerService.PersonalInquiry
 import com.project.givuandtake.feature.mypage.MyActivities.AddressBook
+import com.project.givuandtake.feature.mypage.MyActivities.AddressBookUpdate
 import com.project.givuandtake.feature.mypage.MyActivities.AddressSearch
 import com.project.givuandtake.feature.mypage.MyActivities.CardBook
 import com.project.givuandtake.feature.mypage.MyActivities.CardCustomRegistration
@@ -185,7 +195,7 @@ class MainActivity : ComponentActivity() {
                                 PaymentSuccessPage(navController)
                             }
 
-                            // 마이 페이지
+                            // 관광 페이지
                             composable("locationSelection") {
                                 LocationSelect(navController)
                             }
@@ -209,6 +219,14 @@ class MainActivity : ComponentActivity() {
                                 val city = backStackEntry.arguments?.getString("city")
                                 FestivalPage(navController, city) // Pass the city to TripPage
                             }
+                            composable(
+                                route = "viliagepage?city={city}", // Define the route with a city argument
+                                arguments = listOf(navArgument("city") { type = NavType.StringType }) // Declare argument type
+                            ) { backStackEntry ->
+                                // Retrieve the city from the arguments
+                                val city = backStackEntry.arguments?.getString("city")
+                                ViliagePage(navController, city) // Pass the city to TripPage
+                            }
 
                             // 마이 페이지
                             composable("mypage") { MyPageScreen(navController) }
@@ -217,9 +235,6 @@ class MainActivity : ComponentActivity() {
                             composable("donationdetails") { DonationDetails(navController) }
                             composable("donationreceipt") { DonationReceipt(navController) }
                             composable("fundingdetails") { FundingDetails(navController) }
-
-
-
 
                             composable("mycomment") { MyComment(navController) }
                             composable("myreview") { MyReview(navController) }
@@ -233,6 +248,7 @@ class MainActivity : ComponentActivity() {
 
                             composable("addresssearch") { AddressSearch(navController) }
                             composable("addressmapsearch") { AddressMapSearch(navController)}
+                            composable("addressbookupdate") { AddressBookUpdate(navController) }
                             composable("cardregistration") { CardRegistration(navController) }
                             composable("cardcustomregistration/{cardNumber}/{validThru}", arguments = listOf(
                                 navArgument("cardNumber") { defaultValue = "" },
@@ -252,6 +268,7 @@ class MainActivity : ComponentActivity() {
                         // 하단 네비게이션 바
                         if (currentDestination != "trippage?city={city}" &&
                             currentDestination != "festivalpage?city={city}" &&
+                            currentDestination != "viliagepage?city={city}" &&
                             currentDestination != "donationreceipt" &&
                             currentDestination != "fundingdetails" &&
                             currentDestination != "wishlist" &&
@@ -266,7 +283,8 @@ class MainActivity : ComponentActivity() {
                             currentDestination != "faqpate" &&
                             currentDestination != "personalinquiry" &&
                             currentDestination != "cardregistration" &&
-                            currentDestination != "cardcustomregistration/{cardNumber}/{validThru}"
+                            currentDestination != "cardcustomregistration/{cardNumber}/{validThru}" &&
+                            currentDestination != "addressbookupdate"
                         ) {
                             BottomNavBar(navController, selectedItem) { newIndex ->
                                 selectedItem = newIndex

@@ -6,6 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -123,6 +125,7 @@ fun fetchFestivalDataWithOkHttp(displayedCity:String, onDataFetched: (List<Festi
     })
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FestivalItem(
     location: String,
@@ -144,29 +147,46 @@ fun FestivalItem(
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = location,
-                fontSize = 10.sp,
+                fontSize = 12.sp,
                 color = Color.Gray
             )
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = description,
-                fontSize = 12.sp,
-                color = Color.Black
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
                 text = title,
-                fontSize = 20.sp,
+                fontSize = 25.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
+            Spacer(modifier = Modifier.height(4.dp))
+
             Text(
                 text = dateRange,
-                fontSize = 16.sp,
+                fontSize = 18.sp,
                 color = Color.Gray
             )
+            Spacer(modifier = Modifier.height(4.dp))
+
+            FlowRow(
+                modifier = Modifier.padding(vertical = 2.dp)
+            ) {
+                val periods = description.split("+")
+                periods.forEach { period ->
+                    val displayText = period
+                    Box(
+                        modifier = Modifier
+                            .padding(end = 4.dp, bottom = 4.dp)  // 항목 간 간격 설정
+                            .background(Color(0xFFA093DE), shape = RoundedCornerShape(4.dp))
+                            .padding(horizontal = 10.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = displayText,
+                            color = Color.White,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -191,7 +211,7 @@ fun MainFestivalTab(displayedCity:String, navController: NavController) {
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    Column(modifier = Modifier.fillMaxSize().padding(0.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -200,14 +220,14 @@ fun MainFestivalTab(displayedCity:String, navController: NavController) {
             Text(
                 text = "우리 고향 축제",
                 fontSize = 20.sp,
-                modifier = Modifier.padding(start = 8.dp)
+                modifier = Modifier.padding(start = 15.dp)
             )
             Text(
                 text = "전체보기",
                 fontSize = 14.sp,
                 color = Color.Gray,
                 modifier = Modifier
-                    .padding(end = 8.dp)
+                    .padding(end = 15.dp)
                     .clickable {
                         val city = displayedCity
                         navController.navigate("festivalpage?city=$city")
@@ -234,7 +254,5 @@ fun MainFestivalTab(displayedCity:String, navController: NavController) {
                 }
             }
         }
-
-
     }
 }
