@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../Sidebar"; // Sidebar import
-import "./funding.css"; // 공통 CSS 파일
+import "./Funding.css"; // 공통 CSS 파일
 import { apiSearchFunding } from "../../apis/funding/apiSearchFunding"; // 방금 만든 API 함수 import
 import { useNavigate } from "react-router-dom"; // useNavigate import 추가
 
