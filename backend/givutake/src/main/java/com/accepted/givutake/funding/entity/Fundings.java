@@ -1,6 +1,7 @@
 package com.accepted.givutake.funding.entity;
 
 import com.accepted.givutake.global.entity.BaseTimeEntity;
+import com.accepted.givutake.payment.entity.FundingParticipants;
 import com.accepted.givutake.user.common.entity.Users;
 import jakarta.persistence.*;
 import lombok.*;

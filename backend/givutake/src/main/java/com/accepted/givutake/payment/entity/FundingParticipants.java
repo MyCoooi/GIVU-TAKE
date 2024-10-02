@@ -1,8 +1,8 @@
-package com.accepted.givutake.funding.entity;
+package com.accepted.givutake.payment.entity;
 
+import com.accepted.givutake.funding.entity.Fundings;
 import com.accepted.givutake.global.entity.BaseTimeEntity;
 import com.accepted.givutake.user.common.entity.Users;
-import com.accepted.givutake.user.common.repository.UsersRepository;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,4 +31,11 @@ public class FundingParticipants extends BaseTimeEntity {
 
     @Column(name = "funding_fee", nullable = false)
     private int fundingFee;
+
+    @Column(name = "payment_method", nullable = false, length = 255) // 결제 수단
+    private String paymentMethod;
+
+    @Column(name = "card_number", length = 20)
+    private String cardNumber;
+
 }

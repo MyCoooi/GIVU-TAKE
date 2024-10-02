@@ -37,7 +37,6 @@ public class OrderService {
     private final UsersRepository userRepository;
     private final GiftRepository giftRepository;
     private final UserService userService;
-    private final GiftReviewRepository giftReviewRepository;
 
     public Orders createOrder(String email, CreateOrderDto request){
         Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
@@ -48,12 +47,13 @@ public class OrderService {
                 .paymentMethod(request.getPaymentMethod())
                 .amount(request.getAmount())
                 .price(request.getAmount()*gift.getPrice())
+                .cardNumber(request.getCardNumber())
                 .status(DeliveryStatus.PROCESSED)
                 .build();
         return orderRepository.save(newOrder);
     }
 
-    public List<OrderDto> getOrdres(String email, int pageNo, int pageSize){
+    public List<OrderDto> getOrders(String email, int pageNo, int pageSize){
         Pageable pageable = PageRequest.of(pageNo-1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
 
         Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));

@@ -3,7 +3,11 @@ package com.accepted.givutake.user.common.controller;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.model.ResponseDto;
+import com.accepted.givutake.user.admin.model.AdminDetailViewDto;
+import com.accepted.givutake.user.admin.model.AdminSignUpDto;
+import com.accepted.givutake.user.admin.model.AdminUserViewDto;
 import com.accepted.givutake.user.client.model.AddressAddDto;
+import com.accepted.givutake.user.client.model.AddressSignUpDto;
 import com.accepted.givutake.user.client.model.ClientViewDto;
 import com.accepted.givutake.user.common.enumType.Roles;
 import com.accepted.givutake.user.common.model.*;
@@ -21,6 +25,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.management.relation.Role;
+import java.nio.file.AccessDeniedException;
 import java.util.Collection;
 
 @Slf4j
@@ -64,6 +70,13 @@ public class  UserController {
             CorporationDetailViewDto corporationViewDto = savedUserDto.toCorporationViewDto();
             responseDto.setData(corporationViewDto);
         }
+        else if (savedUserDto.getRoles() == Roles.ROLE_ADMIN) {
+            AdminDetailViewDto adminDetailViewDto = savedUserDto.toAdminViewDto();
+            responseDto.setData(adminDetailViewDto);
+        }
+        else {
+            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
+        }
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
@@ -92,15 +105,32 @@ public class  UserController {
                 throw new ApiException(ExceptionEnum.UNEXPECTED_BIRTH_EXCEPTION);
             }
         }
-
         // 사용자는 isMale, birth 값이 필수로 있어야 한다
-        if ("ROLE_CLIENT".equals(role)) {
+        else if ("ROLE_CLIENT".equals(role)) {
             if (modifyUserDto.getIsMale() == null) {
                 throw new ApiException(ExceptionEnum.MISSING_ISMALE_EXCEPTION);
             }
             if (modifyUserDto.getBirth() == null) {
                 throw new ApiException(ExceptionEnum.MISSING_BIRTH_EXCEPTION);
             }
+        }
+        // 관리자는 isMale, birth, mobilePhone, landlinePhone 값을 가질 수 없다
+        else if ("ROLE_ADMIN".equals(role)) {
+            if (modifyUserDto.getIsMale() != null) {
+                throw new ApiException(ExceptionEnum.UNEXPECTED_ISMALE_EXCEPTION);
+            }
+            if (modifyUserDto.getBirth() != null) {
+                throw new ApiException(ExceptionEnum.UNEXPECTED_BIRTH_EXCEPTION);
+            }
+            if (modifyUserDto.getLandlinePhone() != null) {
+                throw new ApiException(ExceptionEnum.UNEXPECTED_LANDLINE_PHONE_EXCEPTION);
+            }
+            if (modifyUserDto.getMobilePhone() != null) {
+                throw new ApiException(ExceptionEnum.UNEXPECTED_MOBILE_PHONE_EXCEPTION);
+            }
+        }
+        else {
+            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
 
         UserDto savedUserDto = userService.modifyUserByEmail(email, modifyUserDto, profileImage);
@@ -116,6 +146,13 @@ public class  UserController {
         else if (savedUserDto.getRoles() == Roles.ROLE_CORPORATION || savedUserDto.getRoles() == Roles.ROLE_CORPORATIONYET) {
             CorporationDetailViewDto corporationViewDto = savedUserDto.toCorporationViewDto();
             responseDto.setData(corporationViewDto);
+        }
+        else if (savedUserDto.getRoles() == Roles.ROLE_ADMIN) {
+            AdminDetailViewDto adminDetailViewDto = savedUserDto.toAdminViewDto();
+            responseDto.setData(adminDetailViewDto);
+        }
+        else {
+            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
