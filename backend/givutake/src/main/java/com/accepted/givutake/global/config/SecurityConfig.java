@@ -45,7 +45,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/",
                                 // static 관련 파일들
-                                "/static/**",
+                                "/*.html",
+                                "/*.css",
+                                "/*.js",
+                                "/assets/*",
+                                "/favicon.ico",
+                                "/vite.svg",
+                                "/*.jpg",
 
                                 "/api/auth",
                                 "/swagger-ui/**",
