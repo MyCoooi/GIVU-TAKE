@@ -1,6 +1,6 @@
 package com.accepted.givutake.funding.model;
 
-import com.accepted.givutake.funding.entity.FundingParticipants;
+import com.accepted.givutake.payment.entity.FundingParticipants;
 import com.accepted.givutake.funding.entity.Fundings;
 import lombok.*;
 

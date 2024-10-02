@@ -20,7 +20,7 @@ public class Orders extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 주문 ID
     @Column(name = "order_idx")
-    private int orderIdx;
+    private Long orderIdx;
 
     @ManyToOne(targetEntity = Users.class, fetch = FetchType.LAZY)// Casecade 설정 불필요
     @JoinColumn(name = "user_idx", referencedColumnName = "user_idx")// 고객 ID 외래키 설정

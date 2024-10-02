@@ -1,8 +1,7 @@
 package com.accepted.givutake.funding.service;
 
-import com.accepted.givutake.funding.entity.FundingParticipants;
-import com.accepted.givutake.funding.entity.Fundings;
-import com.accepted.givutake.funding.repository.FundingParticipantsRepository;
+import com.accepted.givutake.payment.entity.FundingParticipants;
+import com.accepted.givutake.payment.repository.FundingParticipantsRepository;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.service.UserService;

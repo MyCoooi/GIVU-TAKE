@@ -5,6 +5,7 @@ import com.accepted.givutake.payment.model.*;
 import com.accepted.givutake.payment.service.KaKaoPayService;
 import com.accepted.givutake.payment.service.OrderService;
 import com.accepted.givutake.global.model.ResponseDto;
+import com.accepted.givutake.payment.service.ParticipantService;
 import com.accepted.givutake.payment.utils.SessionUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,13 +27,14 @@ public class OrderController {
 
     private final OrderService orderService;
     private final KaKaoPayService kaKaoPayService;
+    private final ParticipantService participantService;
 
     @GetMapping
     public ResponseEntity<ResponseDto> getOrders(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(value = "pageNo", defaultValue = "1")int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10")int pageSize) {
-        List<OrderDto> orders = orderService.getOrdres(userDetails.getUsername(), pageNo, pageSize);
+        List<OrderDto> orders = orderService.getOrders(userDetails.getUsername(), pageNo, pageSize);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(orders)
                 .build();
@@ -72,6 +74,7 @@ public class OrderController {
                             @RequestParam("orderIdx") int orderIdx,
                             @RequestParam("type") String type) {
         if(type.equals("Gift"))orderService.deleteOrder(email, orderIdx);
+        else participantService.deleteParticipant(email, orderIdx);
         return "취소";
     }
 
@@ -80,6 +83,7 @@ public class OrderController {
                           @RequestParam("orderIdx") int orderIdx,
                           @RequestParam("type") String type) {
         if(type.equals("Gift"))orderService.deleteOrder(email, orderIdx);
+        else participantService.deleteParticipant(email, orderIdx);
         return "실패";
     }
 
@@ -89,7 +93,7 @@ public class OrderController {
             @Valid @RequestBody CreateOrderDto request) {
         Orders order = orderService.createOrder(userDetails.getUsername(), request);
         if(request.getPaymentMethod().equals("KAKAO")){
-            ReadyResponse readyResponse = kaKaoPayService.payReady(userDetails.getUsername(), order.getOrderIdx(), "Gift",request);
+            ReadyResponse readyResponse = kaKaoPayService.payGiftReady(userDetails.getUsername(), order.getOrderIdx(),request);
             SessionUtils.addAttribute("tid", readyResponse.getTid());
             readyResponse.setStatus("success");
             return readyResponse;

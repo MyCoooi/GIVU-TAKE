@@ -18,7 +18,7 @@ public class GiftReviewDto {
     private Integer userIdx;
     private String userName;
     private String userProfileImage;
-    private Integer orderIdx;
+    private Long orderIdx;
     private Integer likedCount;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;

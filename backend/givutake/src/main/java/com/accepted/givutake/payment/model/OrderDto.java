@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class OrderDto {
-    private Integer orderIdx;
+    private Long orderIdx;
     private Integer userIdx;
     private Integer giftIdx;
     private String giftName;
