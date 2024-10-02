@@ -6,6 +6,7 @@ import com.accepted.givutake.funding.model.*;
 import com.accepted.givutake.funding.service.CheerCommentService;
 import com.accepted.givutake.funding.service.FundingReviewService;
 import com.accepted.givutake.funding.service.FundingService;
+import com.accepted.givutake.funding.service.FundingStatsService;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.model.ResponseDto;
@@ -30,6 +31,7 @@ public class FundingController {
     private final CheerCommentService cheerCommentService;
     private final FundingService fundingService;
     private final FundingReviewService fundingReviewService;
+    private final FundingStatsService fundingStaticsService;
 
     // ========= 펀딩 관련 ===========
     // 조건에 해당하는 모든 펀딩 조회
