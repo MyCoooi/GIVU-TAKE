@@ -276,8 +276,17 @@ fun AttractionMain(navController: NavController, city: String?) {
                             withStyle(style = SpanStyle(fontSize = 20.sp)) {
                                 append("°C   ")
                             }
+                            val displayWeatherDescription = when (weatherMoreDes) {
+                                "튼구름" -> "구름 조금"
+                                "구름조금" -> "구름 조금"
+                                "실 비" -> "비"
+                                "맑음" -> "맑음"
+                                "약간의 구름이 낀 하늘" -> "구름 약간"
+                                "온흐림" -> "구름 많음"
+                                else -> weatherMoreDes // Default case, keeps the original text if no match
+                            }
                             withStyle(style = SpanStyle(fontSize = 25.sp)) {
-                                append("$weatherMoreDes")
+                                append("$displayWeatherDescription")
                             }
                         },
                         fontSize = 30.sp,
