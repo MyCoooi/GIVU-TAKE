@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -52,9 +53,6 @@ public class SecurityConfig {
                                 "/favicon.ico",
                                 "/vite.svg",
                                 "/*.jpg",
-
-                                // 없는 url에 접근할 경우 /error 로 접근할 수 있도록 설정
-                                "/error",
 
                                 "/api/auth",
                                 "/swagger-ui/**",
@@ -101,9 +99,10 @@ public class SecurityConfig {
                 // 예외 처리 설정
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         // 인증되지 않은 사용자에 대한 처리
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                        //.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                         // 인가되지 않은 사용자에 대한 처리
-                        .accessDeniedHandler(customAccessDeniedHandler)
+                        //.accessDeniedHandler(customAccessDeniedHandler)
+                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/index.html"))
                 );
 
         return http.build();
