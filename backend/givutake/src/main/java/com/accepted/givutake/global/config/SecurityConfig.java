@@ -53,6 +53,9 @@ public class SecurityConfig {
                                 "/vite.svg",
                                 "/*.jpg",
 
+                                // 없는 url에 접근할 경우 /error 로 접근할 수 있도록 설정
+                                "/error",
+
                                 "/api/auth",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
