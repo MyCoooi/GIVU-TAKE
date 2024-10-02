@@ -13,6 +13,7 @@ public class ExperienceVillageViewDto {
 
     private int experienceVillageIdx;
     private String experienceVillageName;
+    private String experienceVillageProgram;
     private String experienceVillageAddress;
     private String experienceVillagePhone;
     private String experienceVillageHomepageUrl;
@@ -21,6 +22,7 @@ public class ExperienceVillageViewDto {
         return ExperienceVillageViewDto.builder()
                 .experienceVillageIdx(experienceVillage.getExperienceVillageIdx())
                 .experienceVillageName(experienceVillage.getExperienceVillageName())
+                .experienceVillageProgram(experienceVillage.getExperienceVillageProgram())
                 .experienceVillageAddress(experienceVillage.getExperienceVillageAddress())
                 .experienceVillagePhone(experienceVillage.getExperienceVillagePhone())
                 .experienceVillageHomepageUrl(experienceVillage.getExperienceVillageHomepageUrl())

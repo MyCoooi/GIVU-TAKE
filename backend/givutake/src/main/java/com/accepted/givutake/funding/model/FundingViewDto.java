@@ -23,6 +23,7 @@ public class FundingViewDto {
     protected LocalDate startDate;
     protected LocalDate endDate;
     protected String fundingThumbnail;
+    protected char fundingType;
 
     public static FundingViewDto toDto(Fundings fundings) {
         return FundingViewDto.builder()
@@ -35,6 +36,7 @@ public class FundingViewDto {
                 .startDate(fundings.getStartDate())
                 .endDate(fundings.getEndDate())
                 .fundingThumbnail(fundings.getFundingThumbnail())
+                .fundingType(fundings.getFundingType())
                 .build();
     }
 }

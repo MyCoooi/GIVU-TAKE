@@ -5,6 +5,8 @@ import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.region.entity.Region;
 import com.accepted.givutake.region.service.RegionService;
 import com.accepted.givutake.user.client.model.AddressAddDto;
+import com.accepted.givutake.user.client.model.AddressDto;
+import com.accepted.givutake.user.client.model.AddressSignUpDto;
 import com.accepted.givutake.user.client.service.AddressService;
 import com.accepted.givutake.user.common.entity.EmailCode;
 import com.accepted.givutake.user.common.entity.Users;
@@ -55,12 +57,12 @@ public class UserService {
     }
 
     // 이메일 사용자 회원가입
-    public void emailSignUp(SignUpDto signUpDto, AddressAddDto addressAddDto) {
+    public void emailSignUp(SignUpDto signUpDto, AddressSignUpDto addressSignUpDto) {
         Roles role = signUpDto.getRoles();
 
         // 유효하지 않은 권한정보가 들어온 경우
         if (!(role == Roles.ROLE_CLIENT || role == Roles.ROLE_CORPORATIONYET)) {
-            throw new AccessDeniedException("권한 정보가 유효하지 않습니다.");
+            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
 
         // 이메일 중복 검사
@@ -73,7 +75,7 @@ public class UserService {
         // 1. 수혜자 회원가입 관련 입력값 검증 및 처리
         if (role == Roles.ROLE_CORPORATIONYET) {
             // 주소값은 들어오면 안된다
-            if (addressAddDto != null) {
+            if (addressSignUpDto != null) {
                 throw new ApiException(ExceptionEnum.UNEXPECTED_REPRESENTATIVE_ADDRESS_EXCEPTION);
             }
             // 수혜자 회원가입 유효성 검증
@@ -90,23 +92,24 @@ public class UserService {
         // 2. 사용자 회원가입 관련 입력값 검증 및 처리
         else {
             // 대표 주소는 필수 입력 값
-            if (addressAddDto == null) {
+            if (addressSignUpDto == null) {
                 throw new ApiException(ExceptionEnum.MISSING_REPRESENTATIVE_ADDRESS_EXCEPTION);
             }
             // 사용자 회원가입 유효성 검증
             checkArgumentValidityForClientSignUp(signUpDto);
             // 대표 주소 DTO의 유효성을 수동으로 검증
-            validateAddressAddDto(addressAddDto);
+            validateAddressSignUpDto(addressSignUpDto);
 
-            // DB에 저장
+            // 회원 정보를 DB에 저장
             Users savedUser = userRepository.save(signUpDto.toEntity(null));
 
             // 지역 코드 넣기
-            String sido = addressAddDto.getSido();
-            String sigungu = addressAddDto.getSigungu();
+            String sido = addressSignUpDto.getSido();
+            String sigungu = addressSignUpDto.getSigungu();
             int regionIdx = regionService.getRegionIdxBySidoAndSigungu(sido, sigungu);
 
-            addressService.saveAddresses(addressAddDto.toEntity(savedUser, regionIdx));
+            // 주소 정보를 DB에 저장
+            addressService.saveAddresses(addressSignUpDto.toEntity(savedUser, regionIdx));
         }
     }
 
@@ -153,9 +156,9 @@ public class UserService {
     }
 
     // 대표 주소 DTO의 유효성을 수동으로 검증
-    public void validateAddressAddDto(AddressAddDto addressAddDto) {
+    public void validateAddressSignUpDto(AddressSignUpDto addressSignUpDto) {
         // 1. AddressDto 객체의 유효성 검사 수행
-        Set<ConstraintViolation<AddressAddDto>> violations = validator.validate(addressAddDto);
+        Set<ConstraintViolation<AddressSignUpDto>> violations = validator.validate(addressSignUpDto);
 
         // 2. 유효성 검증 결과에서 오류가 있는지 확인
         if (!violations.isEmpty()) {

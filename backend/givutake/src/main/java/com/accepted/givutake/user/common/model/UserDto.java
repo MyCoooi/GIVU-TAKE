@@ -1,6 +1,7 @@
 package com.accepted.givutake.user.common.model;
 
 import com.accepted.givutake.region.entity.Region;
+import com.accepted.givutake.user.admin.model.AdminDetailViewDto;
 import com.accepted.givutake.user.client.model.ClientViewDto;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.enumType.Roles;
@@ -95,6 +96,14 @@ public class UserDto {
                 .landlinePhone(this.landlinePhone)
                 .sido(this.region.getSido())
                 .sigungu(this.region.getSigungu())
+                .profileImageUrl(this.profileImageUrl)
+                .build();
+    }
+
+    public AdminDetailViewDto toAdminViewDto() {
+        return AdminDetailViewDto.builder()
+                .email(this.email)
+                .name(this.name)
                 .profileImageUrl(this.profileImageUrl)
                 .build();
     }

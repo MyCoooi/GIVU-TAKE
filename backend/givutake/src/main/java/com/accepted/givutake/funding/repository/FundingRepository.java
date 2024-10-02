@@ -14,8 +14,8 @@ import java.util.Optional;
 @Repository
 public interface FundingRepository extends JpaRepository<Fundings, Integer> {
     Optional<Fundings> findByFundingIdx(int fundingIdx);
-
     List<Fundings> findByFundingTypeAndStateAndIsDeletedFalse(char fundingType, byte state);
+    List<Fundings> findByIsDeletedFalseAndState(byte state);
 
     @Modifying
     @Transactional

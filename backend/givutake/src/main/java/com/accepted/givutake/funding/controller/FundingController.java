@@ -6,6 +6,8 @@ import com.accepted.givutake.funding.model.*;
 import com.accepted.givutake.funding.service.CheerCommentService;
 import com.accepted.givutake.funding.service.FundingReviewService;
 import com.accepted.givutake.funding.service.FundingService;
+import com.accepted.givutake.global.enumType.ExceptionEnum;
+import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.model.ResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -66,6 +68,10 @@ public class FundingController {
     public ResponseEntity<ResponseDto> addFundingByJwt(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody FundingAddDto fundingAddDto) {
         String email = userDetails.getUsername();
 
+        if (!(fundingAddDto.getFundingType() == 'R' || fundingAddDto.getFundingType() == 'D')) {
+            throw new ApiException(ExceptionEnum.ILLEGAL_FUNDINGTYPE_EXCEPTION);
+        }
+
         Fundings savedFundings = fundingService.addFundingByEmail(email, fundingAddDto);
         FundingViewDto fundingViewDto = FundingViewDto.toDto(savedFundings);
 
@@ -73,13 +79,17 @@ public class FundingController {
                 .data(fundingViewDto)
                 .build();
 
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
     // jwt 토큰으로 펀딩 수정
     @PatchMapping("/{fundingIdx}")
     public ResponseEntity<ResponseDto> modifyFundingByJwt(@AuthenticationPrincipal UserDetails userDetails, @PathVariable int fundingIdx, @Valid @RequestBody FundingAddDto fundingAddDto) {
         String email = userDetails.getUsername();
+
+        if (!(fundingAddDto.getFundingType() == 'R' || fundingAddDto.getFundingType() == 'D')) {
+            throw new ApiException(ExceptionEnum.ILLEGAL_FUNDINGTYPE_EXCEPTION);
+        }
 
         Fundings modifiedFundings = fundingService.modifyFundingByFundingIdx(email, fundingIdx, fundingAddDto);
         FundingViewDto fundingViewDto = FundingViewDto.toDto(modifiedFundings);

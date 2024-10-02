@@ -47,7 +47,8 @@ public class SecurityConfig {
                                 "/api/auth",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/swagger-resources/**"
+                                "/swagger-resources/**",
+                                "/s3/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/government-fundings/*/review",
                                 "/api/government-fundings/*/comments",
@@ -74,8 +75,8 @@ public class SecurityConfig {
                                 "/api/government-fundings/*")
                                 .hasRole("CORPORATION")
                         .requestMatchers(HttpMethod.DELETE, "/api/government-fundings/*",
-                                "/api/users").hasRole("CORPORATIONYET")
-                        .requestMatchers(HttpMethod.DELETE, "api/users").hasRole("CORPORATION_YET")
+                                "/api/users").hasRole("CORPORATION")
+                        .requestMatchers(HttpMethod.DELETE, "api/users").hasRole("CORPORATIONYET")
                         .requestMatchers("/api/users/client/**").hasRole("CLIENT")
                         .requestMatchers(HttpMethod.DELETE,"/api/users").hasRole("CLIENT")
                         // 이 밖에 모든 요청에 대해서 인증을 필요로 한다는 설정

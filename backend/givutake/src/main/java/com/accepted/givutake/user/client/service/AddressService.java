@@ -84,4 +84,9 @@ public class AddressService {
     public long countByUsers(Users users) {
         return addressRepository.countByUsers(users);
     }
+
+    // 대표 주소 갯수 들고오기
+    public int countByUsersAndIsRepresentativeTrue(Users users) {
+        return addressRepository.countByUsersAndIsRepresentativeTrue(users);
+    }
 }

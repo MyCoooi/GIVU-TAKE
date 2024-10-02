@@ -2,6 +2,7 @@ package com.accepted.givutake.user.common.model;
 
 import com.accepted.givutake.user.client.model.AddressAddDto;
 import com.accepted.givutake.user.client.model.AddressDto;
+import com.accepted.givutake.user.client.model.AddressSignUpDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -18,5 +19,5 @@ public class CompositionSignUpDto {
     @NotNull(message = "회원 정보는 필수 입력 값 입니다.")
     @Valid
     private SignUpDto signUpDto;
-    private AddressAddDto addressAddDto;
+    private AddressSignUpDto addressSignUpDto;
 }

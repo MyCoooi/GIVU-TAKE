@@ -11,6 +11,7 @@ import com.accepted.givutake.region.service.RegionService;
 import com.accepted.givutake.user.client.entity.Addresses;
 import com.accepted.givutake.user.client.model.AddressAddDto;
 import com.accepted.givutake.user.client.model.AddressDetailViewDto;
+import com.accepted.givutake.user.client.model.AddressModifyDto;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.service.UserService;
@@ -87,9 +88,10 @@ public class ClientService {
     }
 
     // 아이디가 email인 사용자의 주소 수정
-    public AddressDetailViewDto modifyAddressByEmail(String email, int addressIdx, AddressAddDto addressAddDto) {
+    public AddressDetailViewDto modifyAddressByEmail(String email, int addressIdx, AddressModifyDto addressModifyDto) {
         // 1. email로 부터 userIdx값 가져오기
         UserDto savedUserDto = userService.getUserByEmail(email);
+        Users savedUsers = savedUserDto.toEntity();
         int userIdx = savedUserDto.getUserIdx();
 
         // 2. DB에서 주소 조회
@@ -100,27 +102,36 @@ public class ClientService {
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
 
-        // 4. 지역 코드 넣기
-        String sido = addressAddDto.getSido();
-        String sigungu = addressAddDto.getSigungu();
-        int regionIdx = regionService.getRegionIdxBySidoAndSigungu(sido, sigungu);
+        // 5. 대표 주소로 설정한다면
+        boolean isRepresentative = addressModifyDto.getIsRepresentative();
+        if (isRepresentative) {
+            // 이미 대표 주소로 설정되어 있다면 수정하지 않고 그대로 return
+            if (savedAddresses.isRepresentative()) {
+                return AddressDetailViewDto.toDto(savedAddresses);
+            }
+            // 대표 주소로 설정되어 있지 않다면 이전의 대표 주소는 false 처리
+            else {
+                addressService.updateRepresentativeAddressFalse(savedAddresses.getUsers());
+            }
+        }
+        // 6. 대표 주소로 설정하지 않는다면
+        else {
+            // 이미 대표 주소로 설정되어 있지 않다면 수정하지 않고 그대로 return
+            if (!savedAddresses.isRepresentative()) {
+                return AddressDetailViewDto.toDto(savedAddresses);
+            }
+            // 대표 주소로 설정되어 있다면
+            else {
+                // 회원당 대표주소 1개는 꼭 필수이므로 대표 주소값이 있는지 확인
+                if (addressService.countByUsersAndIsRepresentativeTrue(savedUsers) <= 1) {
+                    throw new ApiException(ExceptionEnum.NOT_ALLOWED_LAST_ADDRESS_ISREPRESENTATIVE_EXCEPTION);
+                }
+            }
 
-        // 5. 대표 주소로 설정한다면, 이전의 대표 주소는 false 처리
-        if (addressAddDto.getIsRepresentative()) {
-            addressService.updateRepresentativeAddressFalse(savedAddresses.getUsers());
         }
 
         // 5. 수정
-        savedAddresses.setRegionIdx(regionIdx);
-        savedAddresses.setAddressName(addressAddDto.getAddressName());
-        savedAddresses.setZoneCode(addressAddDto.getZoneCode());
-        savedAddresses.setJibunAddress(addressAddDto.getJibunAddress());
-        savedAddresses.setDetailAddress(addressAddDto.getDetailAddress());
-        savedAddresses.setBuildingName(addressAddDto.getBuildingName());
-        savedAddresses.setApartment(addressAddDto.getIsApartment());
-        savedAddresses.setBname(addressAddDto.getBname());
-        savedAddresses.setBname1(addressAddDto.getBname1());
-        savedAddresses.setRepresentative(addressAddDto.getIsRepresentative());
+        savedAddresses.setRepresentative(isRepresentative);
 //        savedAddresses.setLatitude(addressUpdateDto.getLatitude());
 //        savedAddresses.setLongitude(addressUpdateDto.getLongitude());
 

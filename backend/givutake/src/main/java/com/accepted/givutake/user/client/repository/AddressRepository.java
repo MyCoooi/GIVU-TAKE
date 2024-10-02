@@ -17,6 +17,7 @@ public interface AddressRepository extends JpaRepository<Addresses, Integer> {
     Optional<Addresses> findByUsersAndIsDeletedFalseAndIsRepresentativeTrue(Users users);
     Optional<Addresses> findByAddressIdx(int addressIdx);
     long countByUsers(Users users);
+    int countByUsersAndIsRepresentativeTrue(Users users);
 
     @Query("SELECT a.isRepresentative FROM Addresses a WHERE a.addressIdx = :addressIdx")
     Boolean findIsRepresentativeByAddressIdx(@Param("addressIdx") int addressIdx);
