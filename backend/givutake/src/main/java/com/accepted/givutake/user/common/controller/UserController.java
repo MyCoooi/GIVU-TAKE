@@ -31,22 +31,6 @@ public class  UserController {
 
     private final UserService userService;
 
-    // 이메일 유저 회원가입
-//    @PostMapping
-//    public ResponseEntity<ResponseDto> emailSignUp(@Valid @RequestBody CompositionSignUpDto compositionSignUpDto) {
-//
-//        SignUpDto signUpDto = compositionSignUpDto.getSignUpDto();
-//        AddressAddDto addressAddDto = compositionSignUpDto.getAddressAddDto();
-//
-//        userService.emailSignUp(signUpDto, addressAddDto);
-//
-//        ResponseDto responseDto = ResponseDto.builder()
-//                .data(null)
-//                .build();
-//
-//        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
-//    }
-
     @PostMapping
     public ResponseEntity<ResponseDto> emailSignUp(
             @RequestPart(value = "signUpDto") @Valid SignUpDto signUpDto,
@@ -86,7 +70,10 @@ public class  UserController {
 
     // JWT 토큰으로 회원 정보 수정
     @PatchMapping
-    public ResponseEntity<ResponseDto> modifyUserByToken(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody ModifyUserDto modifyUserDto) {
+    public ResponseEntity<ResponseDto> modifyUserByToken(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestPart(value = "modifyUserDto") ModifyUserDto modifyUserDto,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
         String email = userDetails.getUsername();
         Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
 
@@ -116,7 +103,7 @@ public class  UserController {
             }
         }
 
-        UserDto savedUserDto = userService.modifyUserByEmail(email, modifyUserDto);
+        UserDto savedUserDto = userService.modifyUserByEmail(email, modifyUserDto, profileImage);
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
