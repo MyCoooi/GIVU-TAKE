@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2"; // SweetAlert2 추가
 import "./LoginPage.css";
-import { login } from "../../apis/apiLogin"; // 로그인 API 호출 함수 추가
+import { login } from "../../apis/auth/apiLogin"; // 로그인 API 호출 함수 추가
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -29,7 +29,7 @@ const LoginPage = () => {
         confirmButtonText: "확인",
       }).then(() => {
         // 모달 확인 버튼 클릭 시 메인 페이지로 이동
-        navigate("/");
+        navigate("/mypage");
       });
     } catch (error) {
       console.error("로그인 실패:", error);
