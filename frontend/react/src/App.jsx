@@ -9,6 +9,7 @@ import Donations from './components/donations/Donations';
 import Funding from './components/funding/Funding';
 import FundingDetail from './components/funding/FundingDetail';
 import CreateFunding from "./components/funding/CreateFunding";
+// import UpdateFunding from './components/funding/UpdateFunding';
 
 import Statistics from './components/statistics/Statistics';
 
@@ -35,6 +36,7 @@ const App = () => {
         <Route path="/funding" element={<Funding />} />
         <Route path="/funding/:fundingIdx" element={<FundingDetail />} /> {/* 상세 페이지 경로 */}
         <Route path="/funding/create-funding" element={<CreateFunding />} />
+        {/* <Route path="/funding/update/:fundingIdx" element={<UpdateFunding />} /> */}
 
 
         <Route path="/statistics" element={<Statistics />} />
