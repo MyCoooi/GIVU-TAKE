@@ -42,7 +42,8 @@ public class DataInitializer {
 
     private boolean isDataInitialized() {
         try {
-            return jdbcTemplate.queryForObject("SELECT initialized FROM initialization_flag", Boolean.class);
+            jdbcTemplate.queryForObject("SELECT COUNT(*) FROM initialization_flag", Integer.class);
+            return true;
         } catch (Exception e) {
             return false;
         }
