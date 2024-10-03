@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -44,6 +45,15 @@ public class SecurityConfig {
                 // 경로별 인가 작업
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/",
+                                // static 관련 파일들
+                                "/*.html",
+                                "/*.css",
+                                "/*.js",
+                                "/assets/*",
+                                "/favicon.ico",
+                                "/vite.svg",
+                                "/*.jpg",
+
                                 "/api/auth",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
@@ -90,9 +100,10 @@ public class SecurityConfig {
                 // 예외 처리 설정
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         // 인증되지 않은 사용자에 대한 처리
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                        //.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                         // 인가되지 않은 사용자에 대한 처리
-                        .accessDeniedHandler(customAccessDeniedHandler)
+                        //.accessDeniedHandler(customAccessDeniedHandler)
+                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/"))
                 );
 
         return http.build();
@@ -117,5 +128,4 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
 }

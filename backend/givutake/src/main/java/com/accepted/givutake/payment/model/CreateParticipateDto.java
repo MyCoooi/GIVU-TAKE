@@ -9,18 +9,16 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @Builder
-public class CreateOrderDto {
+public class CreateParticipateDto {
 
     @NotNull
-    private int giftIdx;
+    private int fundingIdx;
 
     @NotBlank
     private String paymentMethod;
 
     @NotNull
-    private int amount;
+    private int price;
 
     private String cardNumber;
-
-
 }

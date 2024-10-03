@@ -27,6 +27,7 @@ public class FundingDetailViewDto extends FundingViewDto {
                 .startDate(fundings.getStartDate())
                 .endDate(fundings.getEndDate())
                 .fundingThumbnail(fundings.getFundingThumbnail())
+                .fundingType(fundings.getFundingType())
                 .state(fundings.getState())
                 .build();
     }

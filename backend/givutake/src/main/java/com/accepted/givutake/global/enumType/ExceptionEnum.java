@@ -61,6 +61,7 @@ public enum ExceptionEnum {
     NOT_FOUND_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.NOT_FOUND, "EA4001", "대표 주소 정보를 찾을 수 없습니다."),
     NOT_FOUND_FUNDING_REVIEW_EXCEPTION(HttpStatus.NOT_FOUND, "EF4010", "펀딩 후기 정보를 찾을 수 없습니다."),
     NOT_FOUND_FUNDING_WITH_IDX_EXCEPTION(HttpStatus.NOT_FOUND, "EF4000", "펀딩 정보를 찾을 수 없습니다."),
+    NOT_FOUND_FUNDING_PARTICIPATE_EXCEPTION(HttpStatus.NOT_FOUND, "EF4020","펀딩 참여 정보를 찾을수 없습니다"),
     NOT_FOUND_CHEER_COMMENT_EXCEPTION(HttpStatus.NOT_FOUND, "EF4020", "댓글 정보를 찾을 수 없습니다."),
     NOT_FOUND_REGION_EXCEPTION(HttpStatus.NOT_FOUND, "ER4000", "지역 정보를 찾을 수 없습니다."),
     NOT_FOUND_CARD_EXCEPTION(HttpStatus.NOT_FOUND, "EC4000", "카드 정보를 찾을 수 없습니다."),
