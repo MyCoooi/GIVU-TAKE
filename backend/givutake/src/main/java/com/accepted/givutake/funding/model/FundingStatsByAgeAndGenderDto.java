@@ -15,6 +15,11 @@ public class FundingStatsByAgeAndGenderDto {
     private List<AgeGroupData> femaleData;
 
     @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Setter
+    @ToString
+    @Builder
     public static class AgeGroupData {
         private String ageGroup;
         private int totalFunding;

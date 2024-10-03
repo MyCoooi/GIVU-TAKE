@@ -10,7 +10,7 @@ import java.util.List;
 
 
 @Repository
-public interface FundingStatisticsRepository extends JpaRepository<FundingParticipants, Long> {
+public interface FundingStatisticsRepository extends JpaRepository<FundingParticipants, Integer> {
     @Query(nativeQuery = true, value = """
             SELECT
                 IF(u.is_male = TRUE, 'male', 'female') AS gender,
