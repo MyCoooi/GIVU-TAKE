@@ -387,37 +387,6 @@ fun CardRegistration(navController: NavController) {
                             modifier = Modifier.align(Alignment.CenterHorizontally)
                         )
 
-//                        if (capturedImage == null) {
-//
-//                        } else {
-////                            Image(
-////                                bitmap = croppedImage!!.asImageBitmap(),
-////                                contentDescription = "Captured Image",
-////                                modifier = Modifier
-////                                    .size(300.dp)
-////                                    .clip(RoundedCornerShape(15.dp))
-////                                    .border(BorderStroke(3.dp, Color.Gray))
-////                            )
-//                            cardNumber?.let {
-//                                Text(text = "카드 번호: $it", fontSize = 16.sp, color = Color.Black)
-//                            }
-//                            validThru?.let {
-//                                Text(text = "유효기간: $it", fontSize = 16.sp, color = Color.Black)
-//                            }
-//                            Button(
-//                                onClick = {
-//                                    capturedImage = null
-//                                    croppedImage = null
-//                                },
-//                                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFD6D6D6)),
-//                                shape = RoundedCornerShape(50),
-//                                modifier = Modifier.size(56.dp)
-//                            ) {
-//                                Text(text = "다시 촬영", fontSize = 16.sp, color = Color.Black)
-//                            }
-//
-//                        }
-
                         Spacer(modifier = Modifier.height(50.dp))
                         Button(
                             onClick = {
@@ -491,8 +460,8 @@ fun CardRegistration(navController: NavController) {
                         }
                         Spacer(modifier = Modifier.height(50.dp))
 
-                        val excardnnum = "1111111111111111"
-                        val exvalid = Uri.encode("11/11")
+                        val excardnnum = ""
+                        val exvalid = Uri.encode("")
 
                         Button(
                             onClick = { navController.navigate("cardcustomregistration/${excardnnum}/${exvalid}") },
