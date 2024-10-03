@@ -65,22 +65,26 @@ const FundingDetail = () => {
       text: "이 작업은 되돌릴 수 없습니다.",
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
+      confirmButtonColor: '#6a5acd', // 보라색
+      cancelButtonColor: '#ffffff', // 하얀색 배경
       confirmButtonText: '삭제',
-      cancelButtonText: '취소'
+      cancelButtonText: '취소',
+      customClass: {
+        confirmButton: 'swal2-delete-button',
+        cancelButton: 'swal2-cancel-button'
+      }
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const accessToken = TokenManager.getAccessToken(); // AccessToken from TokenManager
-          await apiDeleteFunding(fundingIdx, accessToken); // API 호출하여 삭제 요청
-
+          const accessToken = TokenManager.getAccessToken();
+          await apiDeleteFunding(fundingIdx, accessToken);
+  
           Swal.fire(
             '삭제되었습니다!',
             '펀딩이 성공적으로 삭제되었습니다.',
             'success'
           ).then(() => {
-            navigate('/funding'); // 삭제 후 펀딩 리스트로 리디렉션
+            navigate('/funding');
           });
         } catch (error) {
           Swal.fire('삭제 실패', '펀딩 삭제 중 오류가 발생했습니다.', 'error');
@@ -90,13 +94,15 @@ const FundingDetail = () => {
   };
 
   // 숫자에 쉼표를 추가하는 함수
-  const formatNumberWithCommas = (number) => {
-    return number.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
+const formatNumberWithCommas = (number) => {
+  return number.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
 
-  const removeCommas = (number) => {
-    return number.replace(/,/g, "");
-  };
+// 쉼표를 제거하는 함수
+const removeCommas = (number) => {
+  return number.replace(/,/g, "");
+};
+
 
   const handleSaveClick = async () => {
     try {
