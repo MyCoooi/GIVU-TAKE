@@ -22,3 +22,20 @@ data class CartResponse(
     val code: String?,  // 실패 시 코드 (성공 시에는 null)
     val message: String?  // 실패 시 메시지 (성공 시에는 null)
 )
+
+@Serializable
+data class CartItemDataResponse(
+    val success: Boolean,
+    val data: List<CartItemData>
+)
+
+@Serializable
+data class CartItemData(
+    val cartIdx: Int,
+    val giftIdx: Int,
+    val giftName: String,
+    val giftThumbnail: String,
+    val userIdx: Int,
+    val amount: Int,
+    val price: Int
+)

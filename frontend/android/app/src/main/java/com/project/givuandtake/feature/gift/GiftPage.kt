@@ -51,6 +51,7 @@ import coil.size.Scale
 
 import com.project.givuandtake.core.data.GiftDetail
 import com.project.givuandtake.core.datastore.TokenDataStore
+import com.project.givuandtake.core.datastore.TokenManager
 import com.project.givuandtake.core.datastore.getCartItems
 import com.project.givuandtake.feature.gift.GiftViewModel
 import com.project.givuandtake.feature.gift.addToFavorites
@@ -68,16 +69,17 @@ fun GiftPage(navController: NavController, viewModel: GiftViewModel = viewModel(
     val wishlistItems by viewModel.wishlistItemsIds.collectAsState()
 
     val tokenDataStore = TokenDataStore(context)
-    val Bearer_Token = "eyJhbGciOiJIUzUxMiJ9.eyJhdXRoIjoiUk9MRV9DT1JQT1JBVElPTiIsInN1YiI6ImJ1c2FuQGJ1c2FuLmNvbSIsImlzcyI6ImNvbS5hY2NlcHRlZC5naXZ1dGFrZSIsIm5iZiI6MTcyNzMzMjk1NCwiaWF0IjoxNzI3MzMyOTU0LCJleHAiOjE3MzQ3ODQ5NTQsImp0aSI6ImQ2ZDMyYzI4LTg1NzMtNGZkNC04OWUxLWMxNjIzNDY4YzEzOCJ9.-hyiFcVfR7IXUwiybtECAlwPfnMI14d7EjYRgUaJkaT94QITm1iIO-_nMrWoKTMDwFsGHjsZXB1eTzGqhshcaQ"
-    val token = "Bearer $Bearer_Token" // 실제 Bearer 토큰
+//    val Bearer_Token = "eyJhbGciOiJIUzUxMiJ9.eyJhdXRoIjoiUk9MRV9DT1JQT1JBVElPTllFVCIsInN1YiI6InNzYWZ5QGV4YW1wbGUuY29tIiwiaXNzIjoiY29tLmFjY2VwdGVkLmdpdnV0YWtlIiwibmJmIjoxNzI3NjYzNDM3LCJpYXQiOjE3Mjc2NjM0MzcsImV4cCI6MTc1OTE5OTQzNywianRpIjoiZWVmZjY1YmMtYmQ2Mi00OGFlLTk1Y2EtMTgzN2RmNTJhZWQyIn0.IaXBf_a262ItMrJC9ExSO4tBZT6i9jbIVDrC_7wi4lcPuaBA_uiUjXcRh1DyV24vO3iNoV7fXMXo3Bik81Z_tg"
+    val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
+//    val token = "Bearer $Bearer_Token" // 실제 Bearer 토큰
 
     // API에서 데이터를 불러오는 로직 추가
     LaunchedEffect(Unit) {
         // 토큰 저장
-        tokenDataStore.saveToken(token)
+//        tokenDataStore.saveToken(token)
         // 로그로 토큰 확인
-        Log.d("ApiCall", "Authorization 토큰:  $token")
-        viewModel.fetchGiftsFromApi(token) // API 호출
+        viewModel.fetchGiftsFromApi(accessToken) // API 호출
+        Log.d("ApiCall", "Authorization 토큰:  $accessToken")
     }
     Log.d("giftlist","${allProducts}")
 

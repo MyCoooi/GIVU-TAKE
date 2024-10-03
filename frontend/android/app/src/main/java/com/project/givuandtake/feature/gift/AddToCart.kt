@@ -3,7 +3,7 @@ package com.project.givuandtake.feature.gift
 import android.content.Context
 import android.net.http.HttpResponseCache.install
 import android.util.Log
-import com.google.firebase.crashlytics.buildtools.reloc.org.apache.http.client.HttpClient
+
 import com.google.firebase.crashlytics.internal.network.HttpResponse
 import com.project.givuandtake.core.apis.GiftApiService
 import com.project.givuandtake.core.apis.RetrofitClient
