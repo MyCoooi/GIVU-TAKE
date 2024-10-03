@@ -37,6 +37,7 @@ public enum ExceptionEnum {
     ILLEGAL_FUNDINGTYPE_EXCEPTION(HttpStatus.BAD_REQUEST, "", "펀딩 종류는 'R' 또는 'D'만 허용됩니다."),
 
     DUPLICATED_EMAIL_EXCEPTION(HttpStatus.BAD_REQUEST, "EU1004", "이미 사용 중인 이메일입니다."),
+    DUPLICATED_CARD_EXCEPTION(HttpStatus.BAD_REQUEST, "EC1000", "이미 동일한 카드가 등록 되어 있습니다."),
 
     UNEXPECTED_SIDO_EXCEPTION(HttpStatus.BAD_REQUEST, "ER2001", "시/도 정보는 포함할 수 없습니다."),
     UNEXPECTED_SIGUNGU_EXCEPTION(HttpStatus.BAD_REQUEST, "ER2002", "시/군/구 정보는 포함할 수 없습니다."),
@@ -47,7 +48,6 @@ public enum ExceptionEnum {
     UNEXPECTED_LANDLINE_PHONE_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2005", "유선 전화 정보는 포함할 수 없습니다."),
     UNEXPECTED_MOBILE_PHONE_EXCEPTION(HttpStatus.BAD_REQUEST, "EU2006", "휴대폰 번호 정보는 포함할 수 없습니다."),
 
-//    MISSING_REGION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3001", "지역 정보는 필수 입력 값 입니다."),
     MISSING_SIDO_EXCEPTION(HttpStatus.BAD_REQUEST,"ER3001", "시/도명은 필수 입력 값 입니다."),
     MISSING_SIGUNGU_EXCEPTION(HttpStatus.BAD_REQUEST, "ER3002", "시/군/구명은 필수 입력 값 입니다."),
     MISSING_ISMALE_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3001", "성별은 필수 입력 값 입니다."),
@@ -64,6 +64,7 @@ public enum ExceptionEnum {
     NOT_FOUND_FUNDING_PARTICIPATE_EXCEPTION(HttpStatus.NOT_FOUND, "EF4020","펀딩 참여 정보를 찾을수 없습니다"),
     NOT_FOUND_CHEER_COMMENT_EXCEPTION(HttpStatus.NOT_FOUND, "EF4020", "댓글 정보를 찾을 수 없습니다."),
     NOT_FOUND_REGION_EXCEPTION(HttpStatus.NOT_FOUND, "ER4000", "지역 정보를 찾을 수 없습니다."),
+    NOT_FOUND_CARD_EXCEPTION(HttpStatus.NOT_FOUND, "EC4000", "카드 정보를 찾을 수 없습니다."),
 
     USER_ALREADY_WITHDRAWN_EXCEPTION(HttpStatus.NOT_FOUND, "EU5000", "이미 탈퇴한 회원입니다."),
     ADDRESSES_ALREADY_DELETED_EXCEPTION(HttpStatus.NOT_FOUND, "EA5000", "이미 삭제된 주소입니다."),
@@ -71,6 +72,7 @@ public enum ExceptionEnum {
     FUNDING_ALREADY_DELETED_EXCEPTION(HttpStatus.NOT_FOUND, "EF5000", "이미 삭제된 펀딩 입니다."),
     CHEER_COMMENT_ALREADY_DELETED_EXCEPTION(HttpStatus.NOT_FOUND, "EF5020", "이미 삭제된 댓글 입니다."),
     GIFT_REVIEW_ALREADY_DELETED_EXCEPTION(HttpStatus.NOT_FOUND,"EG5001","이미 삭제된 후기 입니다."),
+    CARD_ALREADY_DELETED_EXCEPTION(HttpStatus.NOT_FOUND, "EC5000", "이미 삭제된 카드입니다."),
 
     PASSWORD_MISMATCH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU6007", "비밀번호가 일치하지 않습니다."),
     REFRESHTOKEN_MISMATCH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU6020", "토큰 정보가 일치하지 않습니다."),
@@ -91,6 +93,8 @@ public enum ExceptionEnum {
     NOT_ALLOWED_GIFT_REVIEW_INSERTION_EXCEPTION(HttpStatus.BAD_REQUEST,"EG7040","해당 주문의 리뷰는 이미 작성하셨습니다."),
     NOT_ALLOWED_UPDATE_CORPORATION_EXCEPTION(HttpStatus.BAD_REQUEST, "ES7080", "이미 수혜자 자격이 승인된 사용자입니다."),
     NOT_ALLOWED_UPDATE_CORPORATIONYET_EXCEPTION(HttpStatus.BAD_REQUEST, "ES7081", "이미 수혜자 자격이 승인되지 않은 사용자입니다."),
+
+    FAILED_CARD_DELETION_EXCEPTION(HttpStatus.OK, "EC8001", "카드 정보 삭제에 실패했습니다."),
 
     NOT_FOUND_CATEGORY_EXCEPTION(HttpStatus.NOT_FOUND, "EC0001", "해당 카테고리를 찾을 수 없습니다."),
     NOT_FOUND_GIFT_EXCEPTION(HttpStatus.NOT_FOUND,"EG0001", "해당 답례품을 찾을 수 없습니다."),

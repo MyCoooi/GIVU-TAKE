@@ -52,10 +52,6 @@ public class Users extends BaseTimeEntity {
     @JoinColumn(name = "region_idx", nullable = true)
     private Region region;
 
-    // 사용자만 해당
-    @Column(name = "card_idx", nullable = true)
-    private Integer cardIdx;
-
     @Column(name = "profile_image_url", nullable = true)
     private String profileImageUrl;
 

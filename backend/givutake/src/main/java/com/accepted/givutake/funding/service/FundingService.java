@@ -1,6 +1,7 @@
 package com.accepted.givutake.funding.service;
 
 import com.accepted.givutake.funding.entity.Fundings;
+import com.accepted.givutake.funding.model.FundingAddDto;
 import com.accepted.givutake.funding.model.*;
 import com.accepted.givutake.funding.repository.FundingRepository;
 import com.accepted.givutake.gift.model.purchaser;
@@ -12,13 +13,10 @@ import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.repository.UsersRepository;
 import com.accepted.givutake.user.common.service.UserService;
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +37,17 @@ public class FundingService {
     private final UsersRepository userRepository;
     private final UserService userService;
     private final FundingParticipantsRepository fundingParticipantsRepository;
+
+    // 자신이 작성한 모든 펀딩 조회
+    public List<Fundings> getMyFundingList(String email, int pageNo, int pageSize) {
+        // 1. DB에서 유저 조회
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        Users savedUsers = savedUserDto.toEntity();
+
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+        return fundingRepository.findByCorporation(savedUsers, pageable).getContent();
+    }
 
     // 조건에 해당하는 모든 펀딩 조회(삭제된 펀딩은 조회 불가)
     public List<Fundings> getFundingByTypeAndState(char fundingType, byte state) {

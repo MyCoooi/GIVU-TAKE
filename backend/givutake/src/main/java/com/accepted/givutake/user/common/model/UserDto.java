@@ -26,7 +26,6 @@ public class UserDto {
     private Boolean isMale;
     private LocalDate birth;
     private Region region;
-    private Integer cardIdx;
     private String profileImageUrl;
     private Roles roles;
     private boolean isSocial;
@@ -45,7 +44,6 @@ public class UserDto {
                 .isMale(user.getIsMale())
                 .birth(user.getBirth())
                 .region(user.getRegion())
-                .cardIdx(user.getCardIdx())
                 .profileImageUrl(user.getProfileImageUrl())
                 .roles(user.getRoles())
                 .isSocial(user.isSocial())
@@ -66,7 +64,6 @@ public class UserDto {
                 .isMale(this.isMale)
                 .birth(this.birth)
                 .region(this.region)
-                .cardIdx(this.cardIdx)
                 .profileImageUrl(this.profileImageUrl)
                 .roles(this.roles)
                 .isSocial(this.isSocial)

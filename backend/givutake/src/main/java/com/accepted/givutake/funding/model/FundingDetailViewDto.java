@@ -13,6 +13,7 @@ import lombok.experimental.SuperBuilder;
 public class FundingDetailViewDto extends FundingViewDto {
 
     private String fundingContent;
+    private byte state;
 
     public static FundingDetailViewDto toDto(Fundings fundings) {
         return FundingDetailViewDto.builder()
@@ -27,6 +28,7 @@ public class FundingDetailViewDto extends FundingViewDto {
                 .endDate(fundings.getEndDate())
                 .fundingThumbnail(fundings.getFundingThumbnail())
                 .fundingType(fundings.getFundingType())
+                .state(fundings.getState())
                 .build();
     }
 }
