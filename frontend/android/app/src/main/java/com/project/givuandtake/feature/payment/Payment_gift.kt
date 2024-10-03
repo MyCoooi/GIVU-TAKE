@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -33,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
 import com.project.givuandtake.R
 import com.project.givuandtake.core.data.PaymentInfo
 import com.project.givuandtake.feature.payment.AmountButtonsRow
@@ -46,7 +48,14 @@ import com.project.givuandtake.feature.payment.PaymentTotal_gift
 import com.project.givuandtake.feature.payment.TopBar
 
 @Composable
-fun PaymentScreen_gift(navController: NavController, name: String, location: String, price: Int, quantity: Int) {
+fun PaymentScreen_gift(
+    navController: NavController,
+    name: String,
+    location: String,
+    price: Int,
+    quantity: Int,
+    thumbnailUrl: String // 썸네일 URL을 추가로 받음
+) {
     var selectedMethod by remember { mutableStateOf("") } // 결제 수단 상태
 
     // 결제 정보 객체 생성
@@ -66,8 +75,13 @@ fun PaymentScreen_gift(navController: NavController, name: String, location: Str
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-
-            PaymentProjectInfo_gift(paymentInfo.name, paymentInfo.location, paymentInfo.quantity)
+            // 상품 정보를 표시하는 컴포저블
+            PaymentProjectInfo_gift(
+                name = paymentInfo.name,
+                location = paymentInfo.location,
+                quantity = paymentInfo.quantity,
+                thumbnailUrl = thumbnailUrl // 썸네일 URL 전달
+            )
             // 결제 수단을 선택하는 UI
             PaymentMethods_gift(
                 selectedMethod = selectedMethod,
@@ -82,11 +96,8 @@ fun PaymentScreen_gift(navController: NavController, name: String, location: Str
     }
 }
 
-
-
-
 @Composable
-fun PaymentProjectInfo_gift(name: String, location: String, quantity: Int) {
+fun PaymentProjectInfo_gift(name: String, location: String, quantity: Int, thumbnailUrl: String) {
 
     Surface(
         shape = RoundedCornerShape(12.dp),
@@ -110,11 +121,15 @@ fun PaymentProjectInfo_gift(name: String, location: String, quantity: Int) {
                     color = Color(0xFFE0E0E0),
                     modifier = Modifier.size(100.dp)
                 ) {
+                    // 썸네일 이미지를 표시
                     Image(
-                        painter = painterResource(id = R.drawable.placeholder),
-                        contentDescription = "Image",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.size(100.dp)
+                        painter = rememberImagePainter(data = thumbnailUrl), // thumbnailUrl 사용
+                        contentDescription = "상품 썸네일",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                        contentScale = ContentScale.Crop
                     )
                 }
 
@@ -136,7 +151,6 @@ fun PaymentProjectInfo_gift(name: String, location: String, quantity: Int) {
                         fontWeight = FontWeight.Bold
                     )
 
-
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -157,16 +171,7 @@ fun PaymentProjectInfo_gift(name: String, location: String, quantity: Int) {
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-
-//            // 금액 입력 필드
-//            AmountInputField(
-//                inputText = currentAmount.toString(),
-//                onInputChange = { newValue -> currentAmount = newValue.toIntOrNull() ?: 0 },
-//                isFocused = false,
-//                onFocusChange = {}
-//            )
-//
-//            AmountButtonsRow { amountToAdd -> currentAmount += amountToAdd }
         }
     }
 }
+
