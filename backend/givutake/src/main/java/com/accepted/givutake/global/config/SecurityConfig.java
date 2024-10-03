@@ -50,6 +50,7 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/s3/**"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/government-fundings/my-fundings").hasRole("CORPORATION")
                         .requestMatchers(HttpMethod.GET, "/api/government-fundings/*/review",
                                 "/api/government-fundings/*/comments",
                                 "/api/government-fundings/*/comments/*",

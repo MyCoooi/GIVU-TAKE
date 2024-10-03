@@ -32,6 +32,27 @@ public class FundingController {
     private final FundingReviewService fundingReviewService;
 
     // ========= 펀딩 관련 ===========
+    // 자신이 작성한 모든 펀딩 조회
+    @GetMapping("/my-fundings")
+    public ResponseEntity<ResponseDto> getMyFundingList(@AuthenticationPrincipal UserDetails userDetails,
+                                                        @RequestParam(required = false, defaultValue = "0") int pageNo,
+                                                        @RequestParam(required = false, defaultValue = "10") int pageSize) {
+
+        String email = userDetails.getUsername();
+
+        List<FundingViewDto> fundingViewDtoList =
+                fundingService.getMyFundingList(email, pageNo, pageSize)
+                        .stream()
+                        .map(FundingViewDto::toDto)
+                        .collect(Collectors.toList());
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(fundingViewDtoList)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
     // 조건에 해당하는 모든 펀딩 조회
     @GetMapping
     public ResponseEntity<ResponseDto> getFundingList(@RequestParam char type, @RequestParam byte state) {
