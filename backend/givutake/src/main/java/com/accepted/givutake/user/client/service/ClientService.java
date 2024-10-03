@@ -262,4 +262,47 @@ public class ClientService {
 
         return savedCardDto;
     }
+
+    // 카드 수정
+    public CardDto modifyCardByCardIdx(String email, int cardIdx, CardModifyDto cardModifyDto) {
+        // 1. email로 부터 userIdx값 가져오기
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        Users savedUsers = savedUserDto.toEntity();
+        int userIdx = savedUserDto.getUserIdx();
+
+        // 2. DB에서 카드 조회
+        CardDto savedCardDto = cardService.getCardByCardIdx(cardIdx);
+
+        // 3. userIdx값이 일치하지 않는 경우 수정 불가
+        if (userIdx != savedCardDto.getUsers().getUserIdx()) {
+            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
+        }
+
+        // 5. 대표 카드로 설정한다면
+        boolean isRepresentative = cardModifyDto.getIsRepresentative();
+        if (isRepresentative) {
+            // 이미 대표 카드로 설정되어 있다면 수정하지 않고 그대로 return
+            if (savedCardDto.isRepresentative()) {
+                return savedCardDto;
+            }
+            // 대표 카드로 설정되어 있지 않다면 이전의 대표 주소는 false 처리
+            else {
+                cardService.updateRepresentativeCardFalse(savedUsers);
+            }
+        }
+        // 6. 대표 카드로 설정하지 않는다면
+        else {
+            // 이미 대표 카드로 설정되어 있지 않다면 수정하지 않고 그대로 return
+            if (!savedCardDto.isRepresentative()) {
+                return savedCardDto;
+            }
+        }
+
+        // 5. 수정
+        Cards cards = savedCardDto.toEntity();
+        cards.setRepresentative(isRepresentative);
+
+        // 6. DB에 저장
+        return cardService.saveCard(cards);
+    }
 }

@@ -201,4 +201,19 @@ public class ClientController {
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
+
+    // 카드 수정
+    @PatchMapping("/cards/{cardIdx}")
+    public ResponseEntity<ResponseDto> modifyCard(@AuthenticationPrincipal UserDetails userDetails, @PathVariable int cardIdx, @Valid @RequestBody CardModifyDto cardModifyDto) {
+        String email = userDetails.getUsername();
+
+        CardDto modifiedCardDto = clientService.modifyCardByCardIdx(email, cardIdx, cardModifyDto);
+        CardViewDto cardViewDto = modifiedCardDto.toCardViewDto();
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(cardViewDto)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
 }

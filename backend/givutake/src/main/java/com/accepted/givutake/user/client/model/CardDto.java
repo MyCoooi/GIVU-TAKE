@@ -22,8 +22,23 @@ public class CardDto {
     private String cardNumber;
     private String cardCVC;
     private LocalDate cardExpiredDate;
+    private String cardPassword;
     private boolean isRepresentative;
     private boolean isDeleted;
+
+    public Cards toEntity() {
+        return Cards.builder()
+                .cardIdx(this.cardIdx)
+                .users(this.users)
+                .cardCompany(this.cardCompany)
+                .cardNumber(this.cardNumber)
+                .cardCVC(this.cardCVC)
+                .cardExpiredDate(this.cardExpiredDate)
+                .cardPassword(this.cardPassword)
+                .isRepresentative(this.isRepresentative)
+                .isDeleted(this.isDeleted)
+                .build();
+    }
 
     public static CardDto toDto(Cards cards) {
         return CardDto.builder()
@@ -33,6 +48,7 @@ public class CardDto {
                 .cardNumber(cards.getCardNumber())
                 .cardCVC(cards.getCardCVC())
                 .cardExpiredDate(cards.getCardExpiredDate())
+                .cardPassword(cards.getCardPassword())
                 .isRepresentative(cards.isRepresentative())
                 .isDeleted(cards.isDeleted())
                 .build();

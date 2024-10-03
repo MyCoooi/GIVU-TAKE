@@ -58,10 +58,6 @@ public class CardService {
 
     // DB에 카드 등록
     public CardDto saveCard(Cards cards) {
-        if (this.isExistCardByCardNumber(cards.getCardNumber())) {
-            throw new ApiException(ExceptionEnum.DUPLICATED_CARD_EXCEPTION);
-        }
-
         return CardDto.toDto(cardsRepository.save(cards));
     }
 
