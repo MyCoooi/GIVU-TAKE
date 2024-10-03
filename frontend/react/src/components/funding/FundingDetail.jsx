@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom"; // useNavigate 추가
 import Sidebar from "../Sidebar";
 import { apiFundingDetail } from "../../apis/funding/apiFundingDetail"; 
 import { apiUpdateFunding } from "../../apis/funding/apiUpdateFunding"; // Update API import
+import { apiDeleteFunding } from "../../apis/funding/apiDeleteFunding"; // Delete API import
 import FundingReviews from "./FundingReviews";
 import FundingComments from "./FundingComments";
 import "./FundingDetail.css";
@@ -12,6 +13,7 @@ import Swal from 'sweetalert2'; // SweetAlert2 import
 
 const FundingDetail = () => {
   const { fundingIdx } = useParams();
+  const navigate = useNavigate(); // useNavigate for redirecting after deletion
   const [funding, setFunding] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedMenu, setSelectedMenu] = useState("펀딩");
@@ -57,12 +59,41 @@ const FundingDetail = () => {
     setIsEditing(false); // 수정 모드 비활성화
   };
 
+  const handleDeleteClick = async () => {
+    Swal.fire({
+      title: '정말 삭제하시겠습니까?',
+      text: "이 작업은 되돌릴 수 없습니다.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: '삭제',
+      cancelButtonText: '취소'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const accessToken = TokenManager.getAccessToken(); // AccessToken from TokenManager
+          await apiDeleteFunding(fundingIdx, accessToken); // API 호출하여 삭제 요청
+
+          Swal.fire(
+            '삭제되었습니다!',
+            '펀딩이 성공적으로 삭제되었습니다.',
+            'success'
+          ).then(() => {
+            navigate('/funding'); // 삭제 후 펀딩 리스트로 리디렉션
+          });
+        } catch (error) {
+          Swal.fire('삭제 실패', '펀딩 삭제 중 오류가 발생했습니다.', 'error');
+        }
+      }
+    });
+  };
+
   // 숫자에 쉼표를 추가하는 함수
   const formatNumberWithCommas = (number) => {
     return number.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
-// 쉼표를 제거하는 함수 (숫자 포맷을 변경할 때)
   const removeCommas = (number) => {
     return number.replace(/,/g, "");
   };
@@ -76,8 +107,6 @@ const FundingDetail = () => {
       };
 
       await apiUpdateFunding(fundingIdx, updatedData, accessToken); // API 호출하여 수정 내용 저장
-      
-      // SweetAlert2로 성공 모달 표시
       Swal.fire({
         title: "펀딩이 수정되었습니다.",
         icon: "success",
@@ -88,8 +117,6 @@ const FundingDetail = () => {
       
     } catch (error) {
       console.error("펀딩 수정 중 오류 발생:", error);
-      
-      // SweetAlert2로 실패 모달 표시
       Swal.fire({
         title: "펀딩 수정이 실패하였습니다.",
         icon: "error",
@@ -126,7 +153,6 @@ const FundingDetail = () => {
     return <p>로딩 중...</p>;
   }
 
-  // 탭별 내용을 렌더링하는 함수
   const renderContent = () => {
     switch (activeTab) {
       case "소개":
@@ -187,7 +213,7 @@ const FundingDetail = () => {
             </button>
           </div>
 
-          {/* 수정 버튼 자리에 저장/취소 버튼 표시 */}
+          {/* 수정 및 삭제 버튼 표시 */}
           {isEditing ? (
             <div className="edit-buttons">
               <button className="save-button" onClick={handleSaveClick}>저장</button>
@@ -195,9 +221,10 @@ const FundingDetail = () => {
             </div>
           ) : (
             activeTab === "소개" && (
-              <button className="edit-button" onClick={handleEditClick}>
-                수정
-              </button>
+              <div className="edit-buttons">
+                <button className="edit-button" onClick={handleEditClick}>수정</button>
+                <button className="delete-button" onClick={handleDeleteClick}>삭제</button>
+              </div>
             )
           )}
         </div>
