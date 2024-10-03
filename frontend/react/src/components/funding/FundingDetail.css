@@ -106,13 +106,15 @@
 }
 
 .funding-info h2 {
-  font-size: 40px;
+  font-size: 36px;
   font-weight: bold;
   margin-bottom: 10px;
 }
 
 .funding-description {
   background-color: white;
+  max-width: 1050px;
+  max-height: 300px; /* 높이 제한 추가 */
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
