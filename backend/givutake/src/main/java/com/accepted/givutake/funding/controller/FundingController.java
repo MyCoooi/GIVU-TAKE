@@ -219,8 +219,8 @@ public class FundingController {
     // ========= 후기 관련 ===========
     // 특정 펀딩의 펀딩 후기 조회
     @GetMapping("/{fundingIdx}/review")
-    public ResponseEntity<ResponseDto> getFundingReviewListByJwt(@PathVariable int fundingIdx) {
-        FundingReviewViewDto savedFundingReviewDto = fundingReviewService.getFundingReviewListByFundingIdx(fundingIdx);
+    public ResponseEntity<ResponseDto> getFundingReviewByJwt(@PathVariable int fundingIdx) {
+        FundingReviewViewDto savedFundingReviewDto = fundingReviewService.getFundingReviewByFundingIdx(fundingIdx);
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(savedFundingReviewDto)
