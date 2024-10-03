@@ -10,10 +10,7 @@ import com.accepted.givutake.pdf.PdfService;
 import com.accepted.givutake.region.service.RegionService;
 import com.accepted.givutake.user.client.entity.Addresses;
 import com.accepted.givutake.user.client.entity.Cards;
-import com.accepted.givutake.user.client.model.AddCardDto;
-import com.accepted.givutake.user.client.model.AddressAddDto;
-import com.accepted.givutake.user.client.model.AddressDetailViewDto;
-import com.accepted.givutake.user.client.model.AddressModifyDto;
+import com.accepted.givutake.user.client.model.*;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.service.UserService;
@@ -221,7 +218,7 @@ public class ClientService {
     }
 
     // 카드 등록하기
-    public Cards addCardByEmail(String email, AddCardDto addCardDto) {
+    public CardDto addCardByEmail(String email, AddCardDto addCardDto) {
         // 1. DB에서 사용자 조회
         UserDto savedUserDto = userService.getUserByEmail(email);
         Users savedUsers = savedUserDto.toEntity();
@@ -244,5 +241,25 @@ public class ClientService {
         // 3. DB에 카드 추가
         Cards cards = addCardDto.toEntity(savedUsers);
         return cardService.saveCard(cards);
+    }
+
+    // 카드 삭제하기
+    public CardDto deleteCardByCardIdx(String email, int cardIdx) {
+        // 1. 유저 조회
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        Users savedUsers = savedUserDto.toEntity();
+
+        // 2. cardIdx에 해당하는 카드 가져오기
+        CardDto savedCardDto = cardService.getCardByCardIdx(cardIdx);
+
+        // 3. userIdx값이 일치하지 않는 경우 삭제 불가
+        if (savedUsers.getUserIdx() != savedCardDto.getUsers().getUserIdx()) {
+            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
+        }
+
+        // 4. 삭제
+        cardService.deleteCardByCardIdx(cardIdx);
+
+        return savedCardDto;
     }
 }

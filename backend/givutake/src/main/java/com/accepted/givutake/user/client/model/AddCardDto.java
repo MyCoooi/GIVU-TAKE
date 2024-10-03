@@ -2,7 +2,6 @@ package com.accepted.givutake.user.client.model;
 
 import com.accepted.givutake.user.client.entity.Cards;
 import com.accepted.givutake.user.common.entity.Users;
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -49,6 +48,7 @@ public class AddCardDto {
                 .cardExpiredDate(this.cardExpiredDate)
                 .cardPassword(this.cardPassword)
                 .isRepresentative(this.isRepresentative)
+                .isDeleted(false)
                 .build();
     }
 

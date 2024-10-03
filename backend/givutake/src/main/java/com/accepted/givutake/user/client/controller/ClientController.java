@@ -177,13 +177,28 @@ public class ClientController {
     public ResponseEntity<ResponseDto> addCard(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody AddCardDto addCardDto) {
         String email = userDetails.getUsername();
 
-        Cards savedCard = clientService.addCardByEmail(email, addCardDto);
-        CardViewDto cardViewDto = CardViewDto.toDto(savedCard);
+        CardDto savedCardDto = clientService.addCardByEmail(email, addCardDto);
+        CardViewDto cardViewDto = savedCardDto.toCardViewDto();
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(cardViewDto)
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+    }
+
+    // 카드 삭제
+    @DeleteMapping("/cards/{cardIdx}")
+    public ResponseEntity<ResponseDto> deleteCard(@AuthenticationPrincipal UserDetails userDetails, @PathVariable int cardIdx) {
+        String email = userDetails.getUsername();
+
+        CardDto deletedCardDto = clientService.deleteCardByCardIdx(email, cardIdx);
+        CardViewDto cardViewDto = deletedCardDto.toCardViewDto();
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(cardViewDto)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 }
