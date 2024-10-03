@@ -643,7 +643,7 @@ fun AddressMapSearch(navController: NavController) {
                     Button(
                         onClick = {
                             scope.launch {
-                                viewModel.postAddressData(accessToken, addressRequest, context)
+                                viewModel.postAddressData(accessToken, addressRequest, context, navController)
                             }
                         },
                         modifier = Modifier
