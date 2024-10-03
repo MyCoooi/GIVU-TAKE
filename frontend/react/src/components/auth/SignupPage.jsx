@@ -91,7 +91,7 @@ const SignupPage = () => {
           confirmButtonText: "확인",
         }).then(() => {
           // 확인 버튼 클릭 시 메인 페이지로 이동
-          navigate("/");
+          navigate("/login");
         });
       } catch (error) {
         console.error("회원가입 실패:", error);

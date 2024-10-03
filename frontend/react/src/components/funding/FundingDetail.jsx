@@ -173,7 +173,9 @@ const removeCommas = (number) => {
                 className="edit-textarea"
               />
             ) : (
-              <p>{funding.fundingContent}</p>
+              <p style={{ whiteSpace: "pre-wrap" }}>
+                {funding.fundingContent}
+                </p>
             )}
           </div>
         );
