@@ -55,13 +55,13 @@ public class GiftService {
         return giftRepository.save(newGift);
     }
 
-    public List<GiftDto> getGifts(Integer corporationIdx, String search, Integer categoryIdx ,int pageNo, int pageSize) {
+    public List<GiftDto> getGifts(String corporationEmail, String search, Integer categoryIdx ,int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo-1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
 
         Specification<Gifts> spec = Specification.where((root, query, cb) -> cb.equal(root.get("isDelete"), false)); // 동적 쿼리 생성
 
-        if(corporationIdx != null){
-            Optional<Users> corporation = userRepository.findById(corporationIdx);
+        if(corporationEmail != null){
+            Optional<Users> corporation = userRepository.findByEmail(corporationEmail);
             if (corporation.isPresent()) { // 특정 사용자가 등록한 물품
                 spec = spec.and((root, query, cb) -> cb.equal(root.get("corporations"), corporation.get()));
             }
