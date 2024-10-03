@@ -9,6 +9,8 @@ import com.accepted.givutake.pdf.DonationReceiptFormDto;
 import com.accepted.givutake.pdf.PdfService;
 import com.accepted.givutake.region.service.RegionService;
 import com.accepted.givutake.user.client.entity.Addresses;
+import com.accepted.givutake.user.client.entity.Cards;
+import com.accepted.givutake.user.client.model.AddCardDto;
 import com.accepted.givutake.user.client.model.AddressAddDto;
 import com.accepted.givutake.user.client.model.AddressDetailViewDto;
 import com.accepted.givutake.user.client.model.AddressModifyDto;
@@ -17,6 +19,7 @@ import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,10 +35,12 @@ import java.util.stream.Collectors;
 @Transactional
 public class ClientService {
 
+    private final PasswordEncoder passwordEncoder;
     private final AddressService addressService;
     private final UserService userService;
     private final RegionService regionService;
     private final OrderService orderService;
+    private final CardService cardService;
     private final PdfService pdfService;
     private final FundingParticipantService fundingParticipantService;
 
@@ -213,5 +218,31 @@ public class ClientService {
         int giftPrice = orderService.calculateTotalOrderPriceByEmail(email);
 
         return (long) fundingPrice + (long) giftPrice;
+    }
+
+    // 카드 등록하기
+    public Cards addCardByEmail(String email, AddCardDto addCardDto) {
+        // 1. DB에서 사용자 조회
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        Users savedUsers = savedUserDto.toEntity();
+
+        // 2. 카드 중복 등록 여부 확인
+        boolean isExist = cardService.isExistCardByCardNumber(addCardDto.getCardNumber());
+        if (isExist) {
+            throw new ApiException(ExceptionEnum.DUPLICATED_CARD_EXCEPTION);
+        }
+
+        // 3. 대표 카드로 설정한다면, 이전의 대표 카드는 false 처리
+        if (addCardDto.getIsRepresentative()) {
+            cardService.updateRepresentativeCardFalse(savedUsers);
+        }
+
+        // 4. 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(addCardDto.getCardPassword());
+        addCardDto.setCardPassword(encodedPassword);
+
+        // 3. DB에 카드 추가
+        Cards cards = addCardDto.toEntity(savedUsers);
+        return cardService.saveCard(cards);
     }
 }

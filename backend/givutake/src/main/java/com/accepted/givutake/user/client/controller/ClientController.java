@@ -4,10 +4,8 @@ import com.accepted.givutake.funding.model.FundingParticipantViewDto;
 import com.accepted.givutake.funding.service.FundingParticipantService;
 import com.accepted.givutake.global.model.ResponseDto;
 import com.accepted.givutake.user.client.entity.Addresses;
-import com.accepted.givutake.user.client.model.AddressAddDto;
-import com.accepted.givutake.user.client.model.AddressDetailViewDto;
-import com.accepted.givutake.user.client.model.AddressModifyDto;
-import com.accepted.givutake.user.client.model.AddressViewDto;
+import com.accepted.givutake.user.client.entity.Cards;
+import com.accepted.givutake.user.client.model.*;
 import com.accepted.givutake.user.client.service.ClientService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -171,5 +169,21 @@ public class ClientController {
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // ============== 카드 관련 ============
+    // 카드 등록
+    @PostMapping("/cards")
+    public ResponseEntity<ResponseDto> addCard(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody AddCardDto addCardDto) {
+        String email = userDetails.getUsername();
+
+        Cards savedCard = clientService.addCardByEmail(email, addCardDto);
+        CardViewDto cardViewDto = CardViewDto.toDto(savedCard);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(cardViewDto)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 }

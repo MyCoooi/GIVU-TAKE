@@ -37,6 +37,7 @@ public enum ExceptionEnum {
     ILLEGAL_FUNDINGTYPE_EXCEPTION(HttpStatus.BAD_REQUEST, "", "펀딩 종류는 'R' 또는 'D'만 허용됩니다."),
 
     DUPLICATED_EMAIL_EXCEPTION(HttpStatus.BAD_REQUEST, "EU1004", "이미 사용 중인 이메일입니다."),
+    DUPLICATED_CARD_EXCEPTION(HttpStatus.BAD_REQUEST, "EC1000", "이미 동일한 카드가 등록 되어 있습니다."),
 
     UNEXPECTED_SIDO_EXCEPTION(HttpStatus.BAD_REQUEST, "ER2001", "시/도 정보는 포함할 수 없습니다."),
     UNEXPECTED_SIGUNGU_EXCEPTION(HttpStatus.BAD_REQUEST, "ER2002", "시/군/구 정보는 포함할 수 없습니다."),
