@@ -2,9 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom"; // useNavigate 추가
 import Sidebar from "../Sidebar";
 import { apiFundingDetail } from "../../apis/funding/apiFundingDetail"; 
+import { apiUpdateFunding } from "../../apis/funding/apiUpdateFunding"; // Update API import
 import FundingReviews from "./FundingReviews";
 import FundingComments from "./FundingComments";
 import "./FundingDetail.css";
+import TokenManager from "../../utils/TokenManager"; // TokenManager import
+import Swal from 'sweetalert2'; // SweetAlert2 import
+
 
 const FundingDetail = () => {
   const { fundingIdx } = useParams();
@@ -54,37 +58,54 @@ const FundingDetail = () => {
   };
 
   // 숫자에 쉼표를 추가하는 함수
-const formatNumberWithCommas = (number) => {
-  return number.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-};
+  const formatNumberWithCommas = (number) => {
+    return number.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
 
 // 쉼표를 제거하는 함수 (숫자 포맷을 변경할 때)
-const removeCommas = (number) => {
-  return number.replace(/,/g, "");
-};
+  const removeCommas = (number) => {
+    return number.replace(/,/g, "");
+  };
 
-
-  
   const handleSaveClick = async () => {
     try {
-      await apiUpdateFunding(fundingIdx, updatedFunding); // API 호출하여 수정 내용 저장
-      setIsEditing(false); // 저장 후 수정 모드 비활성화
-      alert("펀딩이 성공적으로 수정되었습니다.");
+      const accessToken = TokenManager.getAccessToken(); // AccessToken from TokenManager
+      const updatedData = {
+        ...updatedFunding,
+        goalMoney: parseInt(removeCommas(updatedFunding.goalMoney)), // 쉼표 제거 후 숫자로 변환
+      };
+
+      await apiUpdateFunding(fundingIdx, updatedData, accessToken); // API 호출하여 수정 내용 저장
+      
+      // SweetAlert2로 성공 모달 표시
+      Swal.fire({
+        title: "펀딩이 수정되었습니다.",
+        icon: "success",
+        confirmButtonText: "확인",
+      }).then(() => {
+        window.location.reload(); // 확인 버튼 누르면 새로고침
+      });
+      
     } catch (error) {
       console.error("펀딩 수정 중 오류 발생:", error);
-      alert("펀딩 수정 중 오류가 발생했습니다.");
+      
+      // SweetAlert2로 실패 모달 표시
+      Swal.fire({
+        title: "펀딩 수정이 실패하였습니다.",
+        icon: "error",
+        confirmButtonText: "확인",
+      });
     }
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     
-    // 만약 목표 금액 필드라면 쉼표를 추가
     if (name === "goalMoney") {
-      const numericValue = removeCommas(value); // 쉼표 제거 후 숫자만 추출
+      const numericValue = removeCommas(value);
       setUpdatedFunding((prev) => ({
         ...prev,
-        [name]: formatNumberWithCommas(numericValue), // 쉼표 추가된 숫자를 다시 설정
+        [name]: formatNumberWithCommas(numericValue),
       }));
     } else {
       setUpdatedFunding((prev) => ({
@@ -142,10 +163,8 @@ const removeCommas = (number) => {
       <Sidebar selectedMenu={selectedMenu} setSelectedMenu={setSelectedMenu} />
 
       <div className="funding-detail-content">
-        {/* 펀딩 상세 제목 추가 */}
         <h1 className="funding-detail-title">펀딩 상세</h1>
 
-        {/* 탭 UI는 상단에 유지 */}
         <div className="funding-detail-header">
           <div className="funding-tabs">
             <button
