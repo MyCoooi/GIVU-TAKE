@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Icon
@@ -48,12 +49,12 @@ fun PaymentScreen_gift(
     price: Int,
     quantity: Int,
     thumbnailUrl: String,
-    giftIdx: Int, // giftIdx 추가
-    viewModel: PaymentViewModel = viewModel() // ViewModel 추가
+    giftIdx: Int,
+    viewModel: PaymentViewModel = viewModel()
 ) {
     var selectedMethod by remember { mutableStateOf("KAKAO") } // 결제 수단 상태
-    var amount by remember { mutableStateOf(price * quantity) } // 결제 금액을 상품 수량과 가격에 맞게 설정
-    val context = LocalContext.current // Composable 내에서 context를 가져옴
+    var amount by remember { mutableStateOf(price * quantity) } // 결제 금액 설정
+    val context = LocalContext.current
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -80,39 +81,100 @@ fun PaymentScreen_gift(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 결제 요청 버튼
-            Button(
-                onClick = {
-
-                    // 결제 정보를 담은 KakaoPaymentInfo 객체 생성
-                    val paymentInfo = KakaoPaymentInfo(
-                        giftIdx = giftIdx, // giftIdx를 String으로 변환하여 전달
-                        paymentMethod = selectedMethod, // 선택된 결제 수단
-                        amount = quantity // 총 결제 금액 (가격 * 수량)
-                    )
-
-                    // 결제 요청 ViewModel 호출
-                    viewModel.preparePayment(
-                        navController = navController,
-                        context = context, // 현재 Context 전달
-                        paymentInfo = paymentInfo // 생성한 결제 정보 전달
-                    )
-                },
-                modifier = Modifier
-                    .height(50.dp)
-                    .width(150.dp)
-            ) {
-                Text("결제하기", fontSize = 18.sp)
-            }
+            // 결제 총 금액 및 버튼 UI
+            PaymentTotalAndButton2_gift(
+                kakaoPaymentInfo = KakaoPaymentInfo(
+                    giftIdx = giftIdx,
+                    paymentMethod = selectedMethod,
+                    amount = amount
+                ),
+                navController = navController,
+                viewModel = viewModel
+            )
         }
     }
 }
 
+@Composable
+fun PaymentTotalAndButton2_gift(
+    kakaoPaymentInfo: KakaoPaymentInfo,
+    navController: NavController,
+    viewModel: PaymentViewModel
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        color = Color.White,
+        shadowElevation = 4.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 결제 총 금액 표시
+            PaymentTotal_gift(kakaoPaymentInfo.amount)
 
+            // 결제하기 버튼
+            PaymentButton_gift(
+                kakaoPaymentInfo = kakaoPaymentInfo,
+                navController = navController,
+                viewModel = viewModel
+            )
+        }
+    }
+}
+
+@Composable
+fun PaymentTotal_gift(amount: Int) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .padding(end = 16.dp)
+    ) {
+        Text(
+            text = "결제 총 금액",
+            fontSize = 14.sp,
+            color = Color(0xFF1E88E5) // 파란색
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "₩${String.format("%,d", amount)}",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
+    }
+}
+
+@Composable
+fun PaymentButton_gift(kakaoPaymentInfo: KakaoPaymentInfo, navController: NavController, viewModel: PaymentViewModel) {
+    val context = LocalContext.current
+
+    Button(
+        onClick = {
+            viewModel.preparePayment(navController = navController, context = context, paymentInfo = kakaoPaymentInfo)
+        },
+        shape = RoundedCornerShape(24.dp),
+        modifier = Modifier
+            .height(50.dp)
+            .width(150.dp),
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF9C88FF)) // 배경색 설정
+    ) {
+        Text(
+            text = "결제하기",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+    }
+}
 
 @Composable
 fun PaymentProjectInfo_gift(name: String, location: String, quantity: Int, thumbnailUrl: String) {
-
     Surface(
         shape = RoundedCornerShape(12.dp),
         color = Color.White,
@@ -135,9 +197,8 @@ fun PaymentProjectInfo_gift(name: String, location: String, quantity: Int, thumb
                     color = Color(0xFFE0E0E0),
                     modifier = Modifier.size(100.dp)
                 ) {
-                    // 썸네일 이미지를 표시
                     Image(
-                        painter = rememberImagePainter(data = thumbnailUrl), // thumbnailUrl 사용
+                        painter = rememberImagePainter(data = thumbnailUrl),
                         contentDescription = "상품 썸네일",
                         modifier = Modifier
                             .fillMaxWidth()
@@ -160,7 +221,7 @@ fun PaymentProjectInfo_gift(name: String, location: String, quantity: Int, thumb
                     )
 
                     Text(
-                        text = quantity.toString(),
+                        text = "구매 수량 : ${quantity}",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -188,4 +249,5 @@ fun PaymentProjectInfo_gift(name: String, location: String, quantity: Int, thumb
         }
     }
 }
+
 
