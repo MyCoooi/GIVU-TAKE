@@ -26,7 +26,7 @@ public class GiftStatsService {
         }
 
         GiftPercentageDto giftPercentageDto = new GiftPercentageDto();
-        Map<String, List<GiftPercentageDto.StatDto>> statistics = new HashMap<>();
+        Map<String, Map<String, GiftPercentageDto.StatDto>> statistics = new HashMap<>();
 
         for (Object[] row : results) {
             String statType = (String) row[0];
@@ -34,9 +34,9 @@ public class GiftStatsService {
             Long count = ((Number) row[2]).longValue();
             Double percentage = ((Number) row[3]).doubleValue();
 
-            GiftPercentageDto.StatDto statDto = new GiftPercentageDto.StatDto(name, count, percentage);
+            GiftPercentageDto.StatDto statDto = new GiftPercentageDto.StatDto(count, percentage);
 
-            statistics.computeIfAbsent(statType, k -> new ArrayList<>()).add(statDto);
+            statistics.computeIfAbsent(statType, k -> new HashMap<>()).put(name, statDto);
         }
 
         giftPercentageDto.setStatistics(statistics);
