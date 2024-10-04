@@ -23,9 +23,9 @@ public interface FundingStatisticsRepository extends JpaRepository<FundingPartic
                 END AS age_group,
                 IFNULL(SUM(fp.funding_fee), 0) AS total_funding
             FROM
-                Funding_participants fp
+                funding_participants fp
             JOIN
-                Users u ON fp.user_idx = u.user_idx
+                users u ON fp.user_idx = u.user_idx
             WHERE
                 fp.funding_idx = :fundingIdx
             GROUP BY
