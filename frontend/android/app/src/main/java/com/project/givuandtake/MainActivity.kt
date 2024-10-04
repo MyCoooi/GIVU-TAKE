@@ -291,7 +291,8 @@ class MainActivity : ComponentActivity() {
                             currentDestination != "cardregistration" &&
                             currentDestination != "cardcustomregistration/{cardNumber}/{validThru}" &&
                             currentDestination != "addressbookupdate" &&
-                            currentDestination != "personalinquirywrite"
+                            currentDestination != "personalinquirywrite" &&
+                            currentDestination != "cardbookupdate"
                         ) {
                             BottomNavBar(navController, selectedItem) { newIndex ->
                                 selectedItem = newIndex

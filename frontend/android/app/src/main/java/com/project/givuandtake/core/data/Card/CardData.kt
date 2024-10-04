@@ -8,10 +8,10 @@ data class CardData(
 )
 
 data class UserCard(
-    val cardIdx: Int,  // 추가
+    val cardIdx: Int,
     val cardCompany: String,
     val cardNumber: String,
     val cardCVC: String,
     val cardExpiredDate: String,
-    val representative: Boolean  // 수정
+    val representative: Boolean
 )

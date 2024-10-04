@@ -201,7 +201,7 @@ fun TopBar(navController: NavController, cartItemCount: Int) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // WishList 아이콘 추가
                 IconButton(onClick = {
-                    navController.navigate("wishlist_page")
+                    navController.navigate("wishlist")
                 }) {
                     Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "WishList")
                 }
