@@ -72,6 +72,11 @@ public class QnAService {
                 .userName(qna.getUsers().getName())
                 .userProfileImage(qna.getUsers().getProfileImageUrl())
                 .qnaTitle(qna.getQnaTitle())
+                .qnaContent(qna.getQnaContent())
+                .createdDate(qna.getCreatedDate())
+                .answer(answerRepository.findByQna(qna)
+                        .map(AnswerDto::toDto)
+                        .orElse(null))
                 .build()
         ).toList();
     }
