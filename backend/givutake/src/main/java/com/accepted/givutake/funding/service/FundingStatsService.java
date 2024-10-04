@@ -38,6 +38,12 @@ public class FundingStatsService {
         if(!funding.getCorporation().getEmail().equals(email)) {
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
+        if(funding.getState() == 0){
+            throw new ApiException(ExceptionEnum.NOT_ALLOWED_FUNDING_IN_BEFORE_STATISTICS_EXCEPTION);
+        }
+        if(funding.getState() == 1){
+            throw new ApiException(ExceptionEnum.NOT_ALLOWED_FUNDING_IN_PROCESS_STATISTICS_EXCEPTION);
+        }
         LocalDate startDate = funding.getStartDate();
         LocalDate endDate = funding.getEndDate();
         int days = (int) ChronoUnit.DAYS.between(startDate, endDate) + 1;
@@ -62,6 +68,12 @@ public class FundingStatsService {
         if(!funding.getCorporation().getEmail().equals(email)) {
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
+        if(funding.getState() == 0){
+            throw new ApiException(ExceptionEnum.NOT_ALLOWED_FUNDING_IN_BEFORE_STATISTICS_EXCEPTION);
+        }
+        if(funding.getState() == 1){
+            throw new ApiException(ExceptionEnum.NOT_ALLOWED_FUNDING_IN_PROCESS_STATISTICS_EXCEPTION);
+        }
         List<Object[]> participateData = fundingParticipantsRepository.findFundingParticipantsByFundingIdx(fundingIdx);
 
         List<participant> participants= participateData.stream()
@@ -80,6 +92,13 @@ public class FundingStatsService {
         if(!funding.getCorporation().getEmail().equals(email)) {
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
+        if(funding.getState() == 0){
+            throw new ApiException(ExceptionEnum.NOT_ALLOWED_FUNDING_IN_BEFORE_STATISTICS_EXCEPTION);
+        }
+        if(funding.getState() == 1){
+            throw new ApiException(ExceptionEnum.NOT_ALLOWED_FUNDING_IN_PROCESS_STATISTICS_EXCEPTION);
+        }
+
         List<Object[]> results = fundingStatisticsRepository.getFundingStatsByAgeAndGender(fundingIdx);
 
         FundingStatsByAgeAndGenderDto result = new FundingStatsByAgeAndGenderDto();

@@ -34,11 +34,12 @@ public class GiftController {
 
     @GetMapping // 답례품 조회
     public ResponseEntity<ResponseDto> getGifts(
-            @RequestParam(value = "corporationEmail", defaultValue = "")String corporationEmail,
-            @RequestParam(value = "search", defaultValue = "")String search,
-            @RequestParam(value = "categoryIdx", defaultValue = "")Integer categoryIdx,
+            @RequestParam(value = "corporationEmail", required = false)String corporationEmail,
+            @RequestParam(value = "search", required = false)String search,
+            @RequestParam(value = "categoryIdx", required = false)Integer categoryIdx,
             @RequestParam(value = "pageNo", defaultValue = "1")int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10")int pageSize) {
+        System.out.println(categoryIdx);
         List<GiftDto> gifts = giftService.getGifts(corporationEmail, search, categoryIdx,pageNo, pageSize);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(gifts)

@@ -18,6 +18,7 @@ import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.repository.UsersRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -61,19 +63,22 @@ public class GiftService {
         Specification<Gifts> spec = Specification.where((root, query, cb) -> cb.equal(root.get("isDelete"), false)); // 동적 쿼리 생성
 
         if(corporationEmail != null){
+            log.info("categoryIdx: {}",corporationEmail);
             Optional<Users> corporation = userRepository.findByEmail(corporationEmail);
             if (corporation.isPresent()) { // 특정 사용자가 등록한 물품
                 spec = spec.and((root, query, cb) -> cb.equal(root.get("corporations"), corporation.get()));
             }
         }
         if(categoryIdx != null) {
+            log.info("categoryIdx: {}",categoryIdx);
             Optional<Categories> category = categoryRepository.findById(categoryIdx);
             if (category.isPresent()) { // 카테고리별 분류
                 spec = spec.and((root, query, cb) -> cb.equal(root.get("category"), category.get()));
             }
         }
 
-        if (!search.isEmpty()) { // 검색어 필터링
+        if (search != null) { // 검색어 필터링
+            log.info("categoryIdx: {}",search);
             spec = spec.and((root, query, cb) -> cb.like(root.get("giftName"), "%" + search + "%"));
         }
 
