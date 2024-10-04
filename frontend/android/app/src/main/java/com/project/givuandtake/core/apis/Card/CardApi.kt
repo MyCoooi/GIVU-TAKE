@@ -1,6 +1,6 @@
 package com.project.givuandtake.core.apis.Card
 
-import com.project.givuandtake.core.data.Address.AddressData
+import com.project.givuandtake.core.data.Card.CardData
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
