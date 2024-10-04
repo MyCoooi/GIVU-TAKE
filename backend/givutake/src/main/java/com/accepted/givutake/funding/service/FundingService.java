@@ -170,46 +170,6 @@ public class FundingService {
         return savedFundings;
     }
 
-    public FundingDayStatisticDto getFundingDayStatisticByFundingIdx(String email, int fundingIdx) {
-        Fundings funding = fundingRepository.findByFundingIdx(fundingIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_FUNDING_WITH_IDX_EXCEPTION));
-        if(!funding.getCorporation().getEmail().equals(email)) {
-            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
-        }
-        LocalDate startDate = funding.getStartDate();
-        LocalDate endDate = funding.getEndDate();
-        int days = (int) ChronoUnit.DAYS.between(startDate, endDate) + 1;
-        int[] arr = new int[days];
 
-
-        List<FundingParticipants> participants = funding.getFundingParticipantsList();
-
-
-        for (FundingParticipants participant : participants) {
-            LocalDate participationDate = participant.getCreatedDate().toLocalDate();
-            if (!participationDate.isBefore(startDate) && !participationDate.isAfter(endDate)) {
-                int dayIndex = (int) ChronoUnit.DAYS.between(startDate, participationDate);
-                arr[dayIndex] += participant.getFundingFee();
-            }
-        }
-        return new FundingDayStatisticDto(arr);
-    }
-
-    public FundingParticipateDto getFundingParticipateByFundingIdx(String email, int fundingIdx) {
-        Fundings funding = fundingRepository.findByFundingIdx(fundingIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_FUNDING_WITH_IDX_EXCEPTION));
-        if(!funding.getCorporation().getEmail().equals(email)) {
-            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
-        }
-        List<Object[]> participateData = fundingParticipantsRepository.findFundingParticipantsByFundingIdx(fundingIdx);
-
-        List<participant> participants= participateData.stream()
-                .map(data -> new participant(
-                        (String) data[0],
-                        ((Number) data[1]).intValue()
-                ))
-                .sorted(Comparator.comparingInt(participant::getPrice).reversed())
-                .collect(Collectors.toList());
-
-        return new FundingParticipateDto(participants);
-    }
 
 }

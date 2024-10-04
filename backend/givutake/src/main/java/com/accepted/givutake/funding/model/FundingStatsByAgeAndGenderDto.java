@@ -2,7 +2,7 @@ package com.accepted.givutake.funding.model;
 
 import lombok.*;
 
-import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -11,17 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FundingStatsByAgeAndGenderDto {
-    private List<AgeGroupData> maleData;
-    private List<AgeGroupData> femaleData;
+    private Map<String, Long> maleData;
+    private Map<String, Long> femaleData;
 
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Getter
-    @Setter
-    @ToString
-    @Builder
-    public static class AgeGroupData {
-        private String ageGroup;
-        private int totalFunding;
-    }
 }
