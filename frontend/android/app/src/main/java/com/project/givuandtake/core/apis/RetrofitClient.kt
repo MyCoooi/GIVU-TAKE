@@ -13,5 +13,6 @@ object RetrofitClient {
         .build()
 
     val giftApiService: GiftApiService = retrofit.create(GiftApiService::class.java)
-
+    val paymentApiService: PaymentApiService = retrofit.create(PaymentApiService::class.java) // PaymentApiService 추가
 }
+

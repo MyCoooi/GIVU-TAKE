@@ -10,7 +10,7 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 40px;
-  background-color: #ffffff;
+  background-color: #FBFAFF;
   border-radius: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 상자 그림자 추가 */
 }

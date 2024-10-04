@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Icon
@@ -26,38 +26,35 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.project.givuandtake.R
-import com.project.givuandtake.core.data.PaymentInfo
-import com.project.givuandtake.feature.payment.AmountButtonsRow
-import com.project.givuandtake.feature.payment.AmountInputField
-import com.project.givuandtake.feature.payment.PaymentMethods
+import coil.compose.rememberImagePainter
+import com.project.givuandtake.core.data.KakaoPaymentInfo
 import com.project.givuandtake.feature.payment.PaymentMethods_gift
-import com.project.givuandtake.feature.payment.PaymentTotal
-import com.project.givuandtake.feature.payment.PaymentTotalAndButton
 import com.project.givuandtake.feature.payment.PaymentTotalAndButton_gift
-import com.project.givuandtake.feature.payment.PaymentTotal_gift
-import com.project.givuandtake.feature.payment.TopBar
+import com.project.givuandtake.feature.payment.PaymentViewModel
 
 @Composable
-fun PaymentScreen_gift(navController: NavController, name: String, location: String, price: Int, quantity: Int) {
-    var selectedMethod by remember { mutableStateOf("") } // 결제 수단 상태
-
-    // 결제 정보 객체 생성
-    val paymentInfo = PaymentInfo(
-        selectedGivu = "답례품 구매",
-        selectedMethod = selectedMethod,
-        amount = price,
-        name = name,
-        location = location,
-        quantity = quantity
-    )
+fun PaymentScreen_gift(
+    navController: NavController,
+    name: String,
+    location: String,
+    price: Int,
+    quantity: Int,
+    thumbnailUrl: String,
+    giftIdx: Int,
+    viewModel: PaymentViewModel = viewModel()
+) {
+    var selectedMethod by remember { mutableStateOf("KAKAO") } // 결제 수단 상태
+    var amount by remember { mutableStateOf(price * quantity) } // 결제 금액 설정
+    val context = LocalContext.current
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -66,9 +63,17 @@ fun PaymentScreen_gift(navController: NavController, name: String, location: Str
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
+            // 상품 정보를 표시하는 컴포저블
+            PaymentProjectInfo_gift(
+                name = name,
+                location = location,
+                quantity = quantity,
+                thumbnailUrl = thumbnailUrl
+            )
 
-            PaymentProjectInfo_gift(paymentInfo.name, paymentInfo.location, paymentInfo.quantity)
-            // 결제 수단을 선택하는 UI
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 결제 수단 선택 UI
             PaymentMethods_gift(
                 selectedMethod = selectedMethod,
                 onMethodSelected = { method -> selectedMethod = method }
@@ -76,18 +81,100 @@ fun PaymentScreen_gift(navController: NavController, name: String, location: Str
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 결제 총 금액 및 버튼 섹션, NavController 전달
-            PaymentTotalAndButton_gift(paymentInfo = paymentInfo, navController = navController)
+            // 결제 총 금액 및 버튼 UI
+            PaymentTotalAndButton2_gift(
+                kakaoPaymentInfo = KakaoPaymentInfo(
+                    giftIdx = giftIdx,
+                    paymentMethod = selectedMethod,
+                    amount = amount
+                ),
+                navController = navController,
+                viewModel = viewModel
+            )
         }
     }
 }
 
+@Composable
+fun PaymentTotalAndButton2_gift(
+    kakaoPaymentInfo: KakaoPaymentInfo,
+    navController: NavController,
+    viewModel: PaymentViewModel
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        color = Color.White,
+        shadowElevation = 4.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 결제 총 금액 표시
+            PaymentTotal_gift(kakaoPaymentInfo.amount)
 
-
+            // 결제하기 버튼
+            PaymentButton_gift(
+                kakaoPaymentInfo = kakaoPaymentInfo,
+                navController = navController,
+                viewModel = viewModel
+            )
+        }
+    }
+}
 
 @Composable
-fun PaymentProjectInfo_gift(name: String, location: String, quantity: Int) {
+fun PaymentTotal_gift(amount: Int) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .padding(end = 16.dp)
+    ) {
+        Text(
+            text = "결제 총 금액",
+            fontSize = 14.sp,
+            color = Color(0xFF1E88E5) // 파란색
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "₩${String.format("%,d", amount)}",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
+    }
+}
 
+@Composable
+fun PaymentButton_gift(kakaoPaymentInfo: KakaoPaymentInfo, navController: NavController, viewModel: PaymentViewModel) {
+    val context = LocalContext.current
+
+    Button(
+        onClick = {
+            viewModel.preparePayment(navController = navController, context = context, paymentInfo = kakaoPaymentInfo)
+        },
+        shape = RoundedCornerShape(24.dp),
+        modifier = Modifier
+            .height(50.dp)
+            .width(150.dp),
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF9C88FF)) // 배경색 설정
+    ) {
+        Text(
+            text = "결제하기",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+    }
+}
+
+@Composable
+fun PaymentProjectInfo_gift(name: String, location: String, quantity: Int, thumbnailUrl: String) {
     Surface(
         shape = RoundedCornerShape(12.dp),
         color = Color.White,
@@ -111,10 +198,13 @@ fun PaymentProjectInfo_gift(name: String, location: String, quantity: Int) {
                     modifier = Modifier.size(100.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.placeholder),
-                        contentDescription = "Image",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.size(100.dp)
+                        painter = rememberImagePainter(data = thumbnailUrl),
+                        contentDescription = "상품 썸네일",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                        contentScale = ContentScale.Crop
                     )
                 }
 
@@ -131,11 +221,10 @@ fun PaymentProjectInfo_gift(name: String, location: String, quantity: Int) {
                     )
 
                     Text(
-                        text = quantity.toString(),
+                        text = "구매 수량 : ${quantity}",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
-
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically
@@ -157,16 +246,8 @@ fun PaymentProjectInfo_gift(name: String, location: String, quantity: Int) {
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-
-//            // 금액 입력 필드
-//            AmountInputField(
-//                inputText = currentAmount.toString(),
-//                onInputChange = { newValue -> currentAmount = newValue.toIntOrNull() ?: 0 },
-//                isFocused = false,
-//                onFocusChange = {}
-//            )
-//
-//            AmountButtonsRow { amountToAdd -> currentAmount += amountToAdd }
         }
     }
 }
+
+
