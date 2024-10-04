@@ -42,25 +42,6 @@ public class ParticipantService {
         return fundingParticipantsRepository.save(newParticipant);
     }
 
-    public List<ParticipantDto> getParticipants(String email, int pageNo, int pageSize){
-        Pageable pageable = PageRequest.of(pageNo-1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
-
-        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
-
-        Page<FundingParticipants> participantList = fundingParticipantsRepository.findByUsers(user, pageable);
-
-        return participantList.map(participant -> ParticipantDto.builder()
-                .participantIdx(participant.getParticipantIdx())
-                .fundingIdx(participant.getFundings().getFundingIdx())
-                .fundingTitle(participant.getFundings().getFundingTitle())
-                .fundingThumbnail(participant.getFundings().getFundingThumbnail())
-                .fundingType(participant.getFundings().getFundingType())
-                .participatedDate(participant.getCreatedDate())
-                .price(participant.getFundingFee())
-                .build()
-        ).toList();
-    }
-
     public void updateFunding(int fundingIdx,int price){
         Fundings funding = fundingRepository.findByFundingIdx(fundingIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_FUNDING_WITH_IDX_EXCEPTION));
 
