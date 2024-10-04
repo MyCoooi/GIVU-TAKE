@@ -1,5 +1,5 @@
 import axios from "axios";
-import TokenManager from "../utils/TokenManager"; // TokenManager 추가
+import TokenManager from "../../utils/TokenManager"; // TokenManager 추가
 
 const apiUrl = "https://j11e202.p.ssafy.io/api";
 // const apiUrl = "/dev/api";

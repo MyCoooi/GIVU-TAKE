@@ -1,6 +1,5 @@
 package com.project.givuandtake
 
-//import com.project.givuandtake.feature.mypage.MyDonation.WishList
 import AddressMapSearch
 import AttractionMain
 import android.content.Intent
@@ -20,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -36,6 +36,7 @@ import com.project.givuandtake.core.data.CartItem
 import com.project.givuandtake.feature.attraction.FestivalPage
 import com.project.givuandtake.feature.attraction.LocationSelect
 import com.project.givuandtake.feature.attraction.TripPage
+import com.project.givuandtake.feature.attraction.ViliagePage
 import com.project.givuandtake.feature.auth.FindPassword
 import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.fundinig.FundingMainPage
@@ -48,7 +49,9 @@ import com.project.givuandtake.feature.mainpage.MainPage
 import com.project.givuandtake.feature.mypage.CustomerService.Announcement
 import com.project.givuandtake.feature.mypage.CustomerService.FaqPage
 import com.project.givuandtake.feature.mypage.CustomerService.PersonalInquiry
+import com.project.givuandtake.feature.mypage.CustomerService.PersonalInquiryWrite
 import com.project.givuandtake.feature.mypage.MyActivities.AddressBook
+import com.project.givuandtake.feature.mypage.MyActivities.AddressBookUpdate
 import com.project.givuandtake.feature.mypage.MyActivities.AddressSearch
 import com.project.givuandtake.feature.mypage.MyActivities.CardBook
 import com.project.givuandtake.feature.mypage.MyActivities.CardCustomRegistration
@@ -58,7 +61,7 @@ import com.project.givuandtake.feature.mypage.MyActivities.UserInfoUpdate
 import com.project.givuandtake.feature.mypage.MyDonation.DonationDetails
 import com.project.givuandtake.feature.mypage.MyDonation.DonationReceipt
 import com.project.givuandtake.feature.mypage.MyDonation.FundingDetails
-import com.project.givuandtake.feature.mypage.MyDonation.WishlistPage
+import com.project.givuandtake.feature.mypage.MyDonation.Wishlist
 import com.project.givuandtake.feature.mypage.MyManagement.MyComment
 import com.project.givuandtake.feature.mypage.MyManagement.MyReview
 import com.project.givuandtake.feature.mypage.MyPageScreen
@@ -152,13 +155,6 @@ class MainActivity : ComponentActivity() {
                                 CartPage(navController = navController, context = context) // context 전달
                             }
 
-                            // 찜목록 페이지
-                            composable("wishlist_page") {
-                                WishlistPage(navController = navController)
-                            }
-
-
-
                             // 결제 페이지_답례품
                             composable(
                                 route = "payment_page_gift?name={name}&location={location}&price={price}&quantity={quantity}&thumbnailUrl={thumbnailUrl}&giftIdx={giftIdx}", // giftIdx 추가
@@ -213,20 +209,25 @@ class MainActivity : ComponentActivity() {
                                 AttractionMain(navController, city)
                             }
                             composable(
-                                route = "trippage?city={city}", // Define the route with a city argument
-                                arguments = listOf(navArgument("city") { type = NavType.StringType }) // Declare argument type
+                                route = "trippage?city={city}",
+                                arguments = listOf(navArgument("city") { type = NavType.StringType })
                             ) { backStackEntry ->
-                                // Retrieve the city from the arguments
                                 val city = backStackEntry.arguments?.getString("city")
-                                TripPage(navController, city) // Pass the city to TripPage
+                                TripPage(navController, city)
                             }
                             composable(
-                                route = "festivalpage?city={city}", // Define the route with a city argument
-                                arguments = listOf(navArgument("city") { type = NavType.StringType }) // Declare argument type
+                                route = "festivalpage?city={city}",
+                                arguments = listOf(navArgument("city") { type = NavType.StringType })
                             ) { backStackEntry ->
-                                // Retrieve the city from the arguments
                                 val city = backStackEntry.arguments?.getString("city")
-                                FestivalPage(navController, city) // Pass the city to TripPage
+                                FestivalPage(navController, city)
+                            }
+                            composable(
+                                route = "viliagepage?city={city}",
+                                arguments = listOf(navArgument("city") { type = NavType.StringType })
+                            ) { backStackEntry ->
+                                val city = backStackEntry.arguments?.getString("city")
+                                ViliagePage(navController, city)
                             }
 
                             // 마이 페이지
@@ -236,9 +237,7 @@ class MainActivity : ComponentActivity() {
                             composable("donationdetails") { DonationDetails(navController) }
                             composable("donationreceipt") { DonationReceipt(navController) }
                             composable("fundingdetails") { FundingDetails(navController) }
-
-
-
+                            composable("wishlist") { Wishlist(navController) }
 
                             composable("mycomment") { MyComment(navController) }
                             composable("myreview") { MyReview(navController) }
@@ -252,6 +251,7 @@ class MainActivity : ComponentActivity() {
 
                             composable("addresssearch") { AddressSearch(navController) }
                             composable("addressmapsearch") { AddressMapSearch(navController)}
+                            composable("addressbookupdate") { AddressBookUpdate(navController) }
                             composable("cardregistration") { CardRegistration(navController) }
                             composable("cardcustomregistration/{cardNumber}/{validThru}", arguments = listOf(
                                 navArgument("cardNumber") { defaultValue = "" },
@@ -266,11 +266,13 @@ class MainActivity : ComponentActivity() {
                             composable("announcement") { Announcement(navController) }
                             composable("faqpate") { FaqPage(navController) }
                             composable("personalinquiry") { PersonalInquiry(navController) }
+                            composable("personalinquirywrite") { PersonalInquiryWrite(navController) }
                         }
 
                         // 하단 네비게이션 바
                         if (currentDestination != "trippage?city={city}" &&
                             currentDestination != "festivalpage?city={city}" &&
+                            currentDestination != "viliagepage?city={city}" &&
                             currentDestination != "donationreceipt" &&
                             currentDestination != "fundingdetails" &&
                             currentDestination != "wishlist" &&
@@ -285,7 +287,9 @@ class MainActivity : ComponentActivity() {
                             currentDestination != "faqpate" &&
                             currentDestination != "personalinquiry" &&
                             currentDestination != "cardregistration" &&
-                            currentDestination != "cardcustomregistration/{cardNumber}/{validThru}"
+                            currentDestination != "cardcustomregistration/{cardNumber}/{validThru}" &&
+                            currentDestination != "addressbookupdate" &&
+                            currentDestination != "personalinquirywrite"
                         ) {
                             BottomNavBar(navController, selectedItem) { newIndex ->
                                 selectedItem = newIndex
