@@ -44,7 +44,7 @@ public class GiftService {
     private final OrderService orderService;
 
     public Gifts createGift(String email, CreateGiftDto request) {
-        Categories category = categoryRepository.findById(request.getCartegoryIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_CATEGORY_EXCEPTION));
+        Categories category = categoryRepository.findById(request.getCategoryIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_CATEGORY_EXCEPTION));
         Users corporation = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
         Gifts newGift = Gifts.builder()
                 .giftName(request.getGiftName())
