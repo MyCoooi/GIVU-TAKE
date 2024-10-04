@@ -1,12 +1,24 @@
 package com.accepted.givutake.funding.service;
 
+import com.accepted.givutake.funding.entity.Fundings;
+import com.accepted.givutake.funding.model.FundingDayStatisticDto;
+import com.accepted.givutake.funding.model.FundingParticipateDto;
 import com.accepted.givutake.funding.model.FundingStatsByAgeAndGenderDto;
+import com.accepted.givutake.funding.model.participant;
+import com.accepted.givutake.funding.repository.FundingRepository;
 import com.accepted.givutake.funding.repository.FundingStatisticsRepository;
+import com.accepted.givutake.global.enumType.ExceptionEnum;
+import com.accepted.givutake.global.exception.ApiException;
+import com.accepted.givutake.payment.entity.FundingParticipants;
+import com.accepted.givutake.payment.repository.FundingParticipantsRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -17,7 +29,51 @@ import java.util.stream.Collectors;
 @Transactional
 public class FundingStatsService {
 
+    private final FundingRepository fundingRepository;
+    private final FundingParticipantsRepository fundingParticipantsRepository;
     private final FundingStatisticsRepository fundingStatisticsRepository;
+
+    public FundingDayStatisticDto getFundingDayStatisticByFundingIdx(String email, int fundingIdx) {
+        Fundings funding = fundingRepository.findByFundingIdx(fundingIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_FUNDING_WITH_IDX_EXCEPTION));
+        if(!funding.getCorporation().getEmail().equals(email)) {
+            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
+        }
+        LocalDate startDate = funding.getStartDate();
+        LocalDate endDate = funding.getEndDate();
+        int days = (int) ChronoUnit.DAYS.between(startDate, endDate) + 1;
+        int[] arr = new int[days];
+
+
+        List<FundingParticipants> participants = funding.getFundingParticipantsList();
+
+
+        for (FundingParticipants participant : participants) {
+            LocalDate participationDate = participant.getCreatedDate().toLocalDate();
+            if (!participationDate.isBefore(startDate) && !participationDate.isAfter(endDate)) {
+                int dayIndex = (int) ChronoUnit.DAYS.between(startDate, participationDate);
+                arr[dayIndex] += participant.getFundingFee();
+            }
+        }
+        return new FundingDayStatisticDto(arr);
+    }
+
+    public FundingParticipateDto getFundingParticipateByFundingIdx(String email, int fundingIdx) {
+        Fundings funding = fundingRepository.findByFundingIdx(fundingIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_FUNDING_WITH_IDX_EXCEPTION));
+        if(!funding.getCorporation().getEmail().equals(email)) {
+            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
+        }
+        List<Object[]> participateData = fundingParticipantsRepository.findFundingParticipantsByFundingIdx(fundingIdx);
+
+        List<participant> participants= participateData.stream()
+                .map(data -> new participant(
+                        (String) data[0],
+                        ((Number) data[1]).intValue()
+                ))
+                .sorted(Comparator.comparingInt(participant::getPrice).reversed())
+                .collect(Collectors.toList());
+
+        return new FundingParticipateDto(participants);
+    }
 
     public FundingStatsByAgeAndGenderDto getFundingCountByAgeAndGender(int fundingIdx) {
 

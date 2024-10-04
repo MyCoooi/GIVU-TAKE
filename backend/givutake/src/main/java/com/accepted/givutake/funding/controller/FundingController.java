@@ -263,7 +263,7 @@ public class FundingController {
     public ResponseEntity<ResponseDto> getYearStatistics(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int fundingIdx) {
-        FundingParticipateDto data =  fundingService.getFundingParticipateByFundingIdx(userDetails.getUsername(), fundingIdx);
+        FundingStatsByAgeAndGenderDto data = fundingStaticsService.getFundingCountByAgeAndGender(fundingIdx);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(data)
                 .build();
