@@ -6,7 +6,7 @@ import com.accepted.givutake.user.common.entity.Users;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Table(name="Funding_participants")
+@Table(name="funding_participants")
 @Entity
 @Getter
 @Setter
