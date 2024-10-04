@@ -10,12 +10,10 @@ import "./FundingDetail.css";
 import TokenManager from "../../utils/TokenManager"; // TokenManager import
 import Swal from 'sweetalert2'; // SweetAlert2 import
 
-
 const FundingDetail = () => {
   const { fundingIdx } = useParams();
   const navigate = useNavigate(); // useNavigate for redirecting after deletion
   const [funding, setFunding] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [selectedMenu, setSelectedMenu] = useState("펀딩");
   const [activeTab, setActiveTab] = useState("소개"); // 선택된 탭을 관리하는 state 추가
   const [isEditing, setIsEditing] = useState(false); // 수정 모드 여부를 관리하는 state
@@ -43,8 +41,6 @@ const FundingDetail = () => {
         });
       } catch (error) {
         console.error("펀딩 상세 정보를 가져오는 데 실패했습니다:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -94,15 +90,14 @@ const FundingDetail = () => {
   };
 
   // 숫자에 쉼표를 추가하는 함수
-const formatNumberWithCommas = (number) => {
-  return number.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-};
+  const formatNumberWithCommas = (number) => {
+    return number.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
 
-// 쉼표를 제거하는 함수
-const removeCommas = (number) => {
-  return number.replace(/,/g, "");
-};
-
+  // 쉼표를 제거하는 함수
+  const removeCommas = (number) => {
+    return number.replace(/,/g, "");
+  };
 
   const handleSaveClick = async () => {
     try {
@@ -155,10 +150,6 @@ const removeCommas = (number) => {
     }));
   };
 
-  if (loading) {
-    return <p>로딩 중...</p>;
-  }
-
   const renderContent = () => {
     switch (activeTab) {
       case "소개":
@@ -174,8 +165,8 @@ const removeCommas = (number) => {
               />
             ) : (
               <p style={{ whiteSpace: "pre-wrap" }}>
-                {funding.fundingContent}
-                </p>
+                {funding?.fundingContent}
+              </p>
             )}
           </div>
         );
@@ -241,7 +232,7 @@ const removeCommas = (number) => {
         {activeTab === "소개" && (
           <div className="funding-detail-body">
             <div className="funding-thumbnail">
-              {funding.thumbnail ? (
+              {funding?.thumbnail ? (
                 <img src={funding.thumbnail} alt="펀딩 썸네일" />
               ) : (
                 <div className="thumbnail-placeholder">펀딩 썸네일</div>
@@ -324,15 +315,15 @@ const removeCommas = (number) => {
                   </>
                 ) : (
                   <>
-                    <h2>{funding.fundingTitle}</h2>
-                    <p>펀딩 유형: {funding.fundingType === "D" ? "재난재해" : "지역기부"}</p>
-                    <p>펀딩 기간: {funding.startDate} ~ {funding.endDate}</p>
-                    <p>달성 금액: {funding.totalMoney.toLocaleString()}원</p>
-                    <p>목표 금액: {funding.goalMoney.toLocaleString()}원</p>
+                    <h2>{funding?.fundingTitle}</h2>
+                    <p>펀딩 유형: {funding?.fundingType === "D" ? "재난재해" : "지역기부"}</p>
+                    <p>펀딩 기간: {funding?.startDate} ~ {funding?.endDate}</p>
+                    <p>달성 금액: {funding?.totalMoney?.toLocaleString()}원</p>
+                    <p>목표 금액: {funding?.goalMoney?.toLocaleString()}원</p>
                   </>
                 )}
               </div>
-              <p className="registration-date">등록일: {funding.startDate}</p>
+              <p className="registration-date">등록일: {funding?.startDate}</p>
             </div>
           </div>
         )}

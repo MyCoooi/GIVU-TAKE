@@ -119,11 +119,11 @@ const CreateDonations = () => {
               <option value="" disabled>
                 카테고리
               </option>
-              <option value="category1">카테고리1</option>
-              <option value="category2">카테고리2</option>
-              <option value="category3">카테고리3</option>
-              <option value="category4">카테고리4</option>
-              <option value="category5">카테고리5</option>
+              <option value="category1">지역상품권</option>
+              <option value="category2">농축산물</option>
+              <option value="category3">수산물</option>
+              <option value="category4">가공식품</option>
+              <option value="category5">공예품</option>
             </select>
 
             <input
