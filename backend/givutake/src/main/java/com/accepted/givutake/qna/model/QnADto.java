@@ -2,6 +2,8 @@ package com.accepted.givutake.qna.model;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @ToString
@@ -14,4 +16,6 @@ public class QnADto {
     private String userProfileImage;
     private String qnaTitle;
     private String qnaContent;
+//    private LocalDateTime createdDate;
+//    private AnswerDto answer;
 }

@@ -4,14 +4,18 @@ import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.user.client.entity.Cards;
 import com.accepted.givutake.user.client.model.CardDto;
+import com.accepted.givutake.user.client.model.CardViewDto;
 import com.accepted.givutake.user.client.repository.CardsRepository;
 import com.accepted.givutake.user.common.entity.Users;
+import com.accepted.givutake.user.common.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -20,6 +24,15 @@ import java.util.Optional;
 public class CardService {
 
     private final CardsRepository cardsRepository;
+    private final UsersRepository usersRepository;
+
+    public List<CardViewDto> getCardListByEmail(String email) {
+        Users user = usersRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        List<Cards> cards = cardsRepository.findByUsersAndIsDeletedFalse(user);
+        return cards.stream()
+                .map(CardViewDto::toDto)
+                .collect(Collectors.toList());
+    }
 
     // cardIdx에 해당하는 카드 조회
     public CardDto getCardByCardIdx(int cardIdx) {
