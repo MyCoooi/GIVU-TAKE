@@ -24,6 +24,7 @@
   padding: 10px 20px;
   border: none;
   border-radius: 8px;
+  font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
 }
@@ -31,6 +32,7 @@
 .donations-save-button-unique:hover {
   background-color: #5b4ead;
   color: white;
+  font-size: 16px;
   padding: 10px 20px;
   border: none;
   border-radius: 8px;
@@ -65,20 +67,20 @@
   color: #888;
 }
 
-.donations-image-upload-unique {
+.donations-image-upload {
   margin-top: 0px;
 }
 
-.donations-image-upload-unique label {
+.donations-image-upload label {
   font-size: 16px;
   color: #ffffff;
 }
 
-.donations-image-upload-unique input[type="file"] {
+.donations-image-upload input[type="file"] {
   display: none; /* 기본 파일 선택 버튼 숨기기 */
 }
 
-.donations-custom-file-upload-unique {
+.donations-custom-file-upload {
   display: inline-block;
   padding: 5px 10px;
   cursor: pointer;
@@ -89,7 +91,7 @@
   transition: background-color 0.3s, color 0.3s;
 }
 
-.donations-custom-file-upload-unique:hover {
+.donations-custom-file-upload:hover {
   background-color: #5b4ead;
   border: 2px solid #5b4ead;
   color: white;
@@ -114,11 +116,14 @@
   width: 50%;
 }
 
-.donations-category-select-unique {
-  display: flex;
-  gap: 20px;
-  font-size: 18px;
+.category-select-unique {
+  padding: 10px;
+  width: 240pxx;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 53%;
 }
+
 
 .donations-description-section-unique {
   margin-top: 20px;

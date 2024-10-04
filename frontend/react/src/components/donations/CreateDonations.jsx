@@ -9,6 +9,20 @@ const CreateDonations = () => {
   const [description, setDescription] = useState("");
   const [selectedMenu, setSelectedMenu] = useState("기부품");
 
+  const [thumbnail, setThumbnail] = useState(null); // 이미지 상태 추가
+
+  // 이미지 선택 핸들러
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setThumbnail(reader.result); // 선택한 이미지 파일을 미리보기로 표시
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSave = () => {
     // Save logic here
     console.log({
@@ -16,6 +30,7 @@ const CreateDonations = () => {
       category,
       price,
       description,
+      thumbnail, // 썸네일 이미지 포함
     });
   };
 
@@ -33,7 +48,15 @@ const CreateDonations = () => {
 
         <div className="donations-details-unique">
           <div className="donations-thumbnail-section-unique">
-            <div className="donations-thumbnail-placeholder-unique">썸네일</div>
+            {thumbnail ? (
+              <img
+                src={thumbnail}
+                alt="썸네일 미리보기"
+                className="donations-thumbnail-unique"
+              />
+            ) : (
+              <div className="donations-thumbnail-placeholder-unique">썸네일</div>
+            )}
           </div>
 
           <div className="donations-details-section-unique">
@@ -47,8 +70,8 @@ const CreateDonations = () => {
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="donations-input-unique"
-            >
+              className="donations-input-unique category-select-unique"
+              >
               <option value="" disabled>
                 카테고리
               </option>
@@ -57,9 +80,8 @@ const CreateDonations = () => {
               <option value="category3">카테고리3</option>
               <option value="category4">카테고리4</option>
               <option value="category5">카테고리5</option>
-
-              {/* Add more categories here */}
             </select>
+
             <input
               type="text"
               placeholder="가격"
@@ -67,6 +89,13 @@ const CreateDonations = () => {
               onChange={(e) => setPrice(e.target.value)}
               className="donations-input-unique"
             />
+            <div className="donations-image-upload">
+              <label htmlFor="thumbnail" className="donations-custom-file-upload">
+                이미지 선택
+              </label>
+              <input type="file" id="thumbnail" accept="image/*" onChange={handleImageChange} />
+            </div>
+
           </div>
         </div>
 
