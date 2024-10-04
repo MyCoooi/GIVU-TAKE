@@ -612,36 +612,7 @@ fun TripPage(navController: NavController, city: String?) {
             }
 
             Column {
-                val dragAmount = remember { mutableStateOf(0f) }
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(20.dp) // 회색 바의 높이 설정
-                        .pointerInput(Unit) {
-                            detectDragGestures(
-                                onDragEnd = {
-                                    if (dragAmount.value > 50) { // 드래그 거리가 50 이상이면 축소
-                                        isBoxExpanded = false
-                                    }
-                                    dragAmount.value = 0f // 드래그 값 초기화
-                                },
-                                onDrag = { change, dragAmountDelta ->
-                                    dragAmount.value += dragAmountDelta.y
-                                }
-                            )
-                        }
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .width(120.dp)  // 너비 설정
-                            .height(10.dp)  // 높이 설정
-                            .background(Color.Gray, shape = RoundedCornerShape(16.dp))
-                            .align(Alignment.Center)
-                    ) {
-                    }
-                }
 
-                Spacer(modifier = Modifier.height(15.dp))  // 원하는 높이로 조절
 
 
                 if (!isBoxExpanded) {
@@ -655,7 +626,42 @@ fun TripPage(navController: NavController, city: String?) {
                         text = "$Description",
                         modifier = Modifier.padding(8.dp)
                     )
+                    Text(
+                        text = "아이콘을 클릭하시면 상세정보가 나옵니다.",
+                        color = Color(0xFFA093DE),
+                        modifier = Modifier.padding(8.dp)
+                    )
                 } else {
+                    val dragAmount = remember { mutableStateOf(0f) }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(20.dp) // 회색 바의 높이 설정
+                            .pointerInput(Unit) {
+                                detectDragGestures(
+                                    onDragEnd = {
+                                        if (dragAmount.value > 50) { // 드래그 거리가 50 이상이면 축소
+                                            isBoxExpanded = false
+                                        }
+                                        dragAmount.value = 0f // 드래그 값 초기화
+                                    },
+                                    onDrag = { change, dragAmountDelta ->
+                                        dragAmount.value += dragAmountDelta.y
+                                    }
+                                )
+                            }
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .width(120.dp)  // 너비 설정
+                                .height(10.dp)  // 높이 설정
+                                .background(Color.Gray, shape = RoundedCornerShape(16.dp))
+                                .align(Alignment.Center)
+                        ) {
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(15.dp))  // 원하는 높이로 조절
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()

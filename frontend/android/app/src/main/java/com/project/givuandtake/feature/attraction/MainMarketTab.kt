@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.project.givuandtake.R
 import com.project.givuandtake.core.apis.MarketRetrofitInstance
@@ -60,29 +61,45 @@ fun SquareMarketItem(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // 주소 텍스트 (상단)
             Text(
                 text = address,
                 fontSize = 12.sp,
                 color = Color.Gray,
-                modifier = Modifier.padding(top = 8.dp, bottom=0.dp)
+                modifier = Modifier
+                    .padding(top = 8.dp, bottom=0.dp)
+                    .weight(1f)
             )
-            // 주차장 및 화장실 아이콘 (중간)
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(vertical = 1.dp)
+                modifier = Modifier.weight(1f)
+//                modifier = Modifier.padding(vertical = 1.dp)
             ) {
                 if (parkingAvailable) {
                     Image(
-                        painter = painterResource(id = R.drawable.parking),
+                        painter = painterResource(id = R.drawable.parkingo),
+                        contentDescription = "Parking available",
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                } else {
+                    Image(
+                        painter = painterResource(id = R.drawable.parkingx),
                         contentDescription = "Parking available",
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                 }
+
                 if (restroomAvailable) {
                     Image(
-                        painter = painterResource(id = R.drawable.toilet),
+                        painter = painterResource(id = R.drawable.toileto),
+                        contentDescription = "Restroom available",
+                        modifier = Modifier.size(18.dp)
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(id = R.drawable.toiletx),
                         contentDescription = "Restroom available",
                         modifier = Modifier.size(18.dp)
                     )
@@ -94,7 +111,9 @@ fun SquareMarketItem(
                 fontSize = 25.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.Black,
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+                    .weight(2f)
             )
         }
     }
@@ -121,8 +140,8 @@ fun MarketItem(
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                Text(text = address, fontSize = 18.sp, color = Color.Gray)
-                Text(text = marketName, fontSize = 26.sp, color = Color.Black)
+                Text(text = address, fontSize = 12.sp, color = Color.Gray)
+                Text(text = marketName, fontSize = 25.sp, color = Color.Black, fontWeight = FontWeight.ExtraBold,)
                 Row(
                     modifier = Modifier.padding(vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -132,7 +151,7 @@ fun MarketItem(
                         Box(
                             modifier = Modifier
                                 .background(Color(0xFFA093DE), shape = RoundedCornerShape(4.dp))
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                                .padding(horizontal = 8.dp, vertical = 2.dp)
                         ) {
                             Text(
                                 text = period,
@@ -148,7 +167,15 @@ fun MarketItem(
                 if (parkingAvailable) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Image(
-                        painter = painterResource(id = R.drawable.parking),
+                        painter = painterResource(id = R.drawable.parkingo),
+                        contentDescription = "Parking available",
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                } else {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Image(
+                        painter = painterResource(id = R.drawable.parkingx),
                         contentDescription = "Parking available",
                         modifier = Modifier.size(24.dp)
                     )
@@ -157,7 +184,15 @@ fun MarketItem(
                 if (restroomAvailable) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Image(
-                        painter = painterResource(id = R.drawable.toilet),
+                        painter = painterResource(id = R.drawable.toileto),
+                        contentDescription = "Restroom available",
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                } else {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Image(
+                        painter = painterResource(id = R.drawable.toiletx),
                         contentDescription = "Restroom available",
                         modifier = Modifier.size(24.dp)
                     )
@@ -205,47 +240,13 @@ fun MainMarketTab(displayedCity: String) {
         }
     }
 
-    Text(
-        text = "우리 고향 정기 전통시장",
-        fontSize = 20.sp,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 8.dp)
-    )
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    // Market 정보
-    Column(modifier = Modifier.fillMaxSize()) {
-        val filteredMarkets = marketProperties.filter { it.opn_per != "매일" }
-
-        when {
-            filteredMarkets.isEmpty() -> {
-                Text(text = "정기 전통시장이 열리지 않아요", fontSize = 18.sp, color = Color.Red, modifier = Modifier.padding(10.dp))
-            }
-            else -> {
-                filteredMarkets.forEach { market ->
-                    MarketItem(
-                        marketName = market.name,
-                        address = market.adr_road,
-                        parkingAvailable = market.park == "Y",
-                        restroomAvailable = market.toilet == "Y",
-                        openPeriod = market.opn_per
-                    )
-                    Spacer(modifier = Modifier.height(8.dp)) // 리스트 간격 추가
-                }
-            }
-        }
-    }
-
-    Spacer(modifier = Modifier.height(16.dp))
 
     Text(
         text = "우리 고향 상설 전통시장",
         fontSize = 20.sp,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 8.dp)
+            .padding(start = 15.dp)
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -272,4 +273,41 @@ fun MainMarketTab(displayedCity: String) {
             }
         }
     }
+
+    Spacer(modifier = Modifier.height(20.dp))
+
+    Text(
+        text = "우리 고향 정기 전통시장",
+        fontSize = 20.sp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 8.dp)
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    // Market 정보
+    Column(modifier = Modifier.fillMaxSize()) {
+        val filteredMarkets = marketProperties.filter { it.opn_per != "매일" }
+
+        when {
+            filteredMarkets.isEmpty() -> {
+                Text(text = "정기 전통시장이 열리지 않아요", fontSize = 18.sp, color = Color.Red, modifier = Modifier.padding(10.dp))
+            }
+            else -> {
+                filteredMarkets.take(3).forEach { market ->
+                    MarketItem(
+                        marketName = market.name,
+                        address = market.adr_road,
+                        parkingAvailable = market.park == "Y",
+                        restroomAvailable = market.toilet == "Y",
+                        openPeriod = market.opn_per
+                    )
+                    Spacer(modifier = Modifier.height(8.dp)) // 리스트 간격 추가
+                }
+            }
+        }
+    }
+
+    Spacer(modifier = Modifier.height(16.dp))
 }
