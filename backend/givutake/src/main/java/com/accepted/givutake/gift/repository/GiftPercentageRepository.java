@@ -89,6 +89,19 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
                 JOIN Users u ON o.user_idx = u.user_idx
                 JOIN Gifts g ON o.gift_idx = g.gift_idx
                 JOIN CategoryGifts cg ON g.category_idx = cg.category_idx
+            ),
+            GiftStats AS (
+                SELECT
+                    o.gift_idx,
+                    g.gift_name,
+                    u.is_male,
+                    FLOOR(DATEDIFF(CURDATE(), u.birth) / 365) AS age,
+                    o.amount,
+                    SUM(o.amount) OVER () AS total_amount
+                FROM Orders o
+                JOIN Users u ON o.user_idx = u.user_idx
+                JOIN Gifts g ON o.gift_idx = g.gift_idx
+                WHERE g.gift_idx = :giftIdx
             )
             SELECT
                 'gift' AS stat_type,
@@ -104,8 +117,8 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
                 'gender' AS stat_type,
                 IF(is_male, 'Male', 'Female') AS name,
                 SUM(amount) AS count,
-                SUM(amount) / MAX(category_total_amount) * 100 AS percentage
-            FROM OrderStats
+                SUM(amount) / MAX(total_amount) * 100 AS percentage
+            FROM GiftStats
             GROUP BY is_male
             
             UNION ALL
@@ -120,8 +133,8 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
                     ELSE '60+'
                 END AS name,
                 SUM(amount) AS count,
-                SUM(amount) / MAX(category_total_amount) * 100 AS percentage
-            FROM OrderStats
+                SUM(amount) / MAX(total_amount) * 100 AS percentage
+            FROM GiftStats
             GROUP BY
                 CASE
                     WHEN age < 30 THEN '20s'
