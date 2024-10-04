@@ -29,18 +29,6 @@ public class ParticipantController {
     private final ParticipantService participantService;
     private final KaKaoPayService kaKaoPayService;
 
-    @GetMapping
-    public ResponseEntity<ResponseDto> getParticipants(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(value = "pageNo", defaultValue = "1")int pageNo,
-            @RequestParam(value = "pageSize", defaultValue = "10")int pageSize) {
-        List<ParticipantDto> participants = participantService.getParticipants(userDetails.getUsername(), pageNo, pageSize);
-        ResponseDto responseDto = ResponseDto.builder()
-                .data(participants)
-                .build();
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
-    }
-
     @PostMapping
     public @ResponseBody ReadyResponse createParticipant(
             @AuthenticationPrincipal UserDetails userDetails,
