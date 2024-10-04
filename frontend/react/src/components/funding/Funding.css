@@ -85,6 +85,8 @@
 
 .funding-image-placeholder {
   background-color: #d8d8d8;
+  min-height: 160px;
+  min-width: 160px;
   width: 32%;
   height: 100%;
   border-radius: 8px;

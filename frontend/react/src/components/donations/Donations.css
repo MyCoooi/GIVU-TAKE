@@ -74,6 +74,7 @@
   background-color: #d8d8d8;
   width: 32%;
   min-width: 160px;
+  min-height: 160px;
   height: 100%;
   border-radius: 8px;
   overflow: hidden; /* 이미지가 튀어나오지 않도록 숨김 처리 */
