@@ -25,7 +25,7 @@ public interface FundingStatisticsRepository extends JpaRepository<FundingPartic
             FROM
                 funding_participants fp
             JOIN
-                Users u ON fp.user_idx = u.user_idx
+                users u ON fp.user_idx = u.user_idx
             WHERE
                 fp.funding_idx = :fundingIdx
             GROUP BY
