@@ -1,15 +1,19 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // 페이지 이동을 위한 useNavigate import
 import Sidebar from "../Sidebar"; // Sidebar component import
 import "./CreateDonations.css"; // CSS import
+import { apiCreateDonations } from "../../apis/donations/apiCreateDonations"; // API 파일 import
+import TokenManager from "../../utils/TokenManager"; // TokenManager import
+import Swal from "sweetalert2"; // SweetAlert2 for alerts
 
 const CreateDonations = () => {
   const [donationName, setDonationName] = useState("");
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
-  const [selectedMenu, setSelectedMenu] = useState("기부품");
-
   const [thumbnail, setThumbnail] = useState(null); // 이미지 상태 추가
+  const [selectedMenu, setSelectedMenu] = useState("기부품");
+  const navigate = useNavigate(); // 페이지 이동을 위한 useNavigate 훅
 
   // 이미지 선택 핸들러
   const handleImageChange = (e) => {
@@ -23,15 +27,55 @@ const CreateDonations = () => {
     }
   };
 
-  const handleSave = () => {
-    // Save logic here
-    console.log({
-      donationName,
-      category,
-      price,
-      description,
-      thumbnail, // 썸네일 이미지 포함
-    });
+  // 숫자 포맷 함수: 입력된 숫자를 천 단위로 쉼표를 추가하는 함수
+  const formatPrice = (value) => {
+    const number = value.replace(/[^0-9]/g, ""); // 숫자 외의 문자는 모두 제거
+    return new Intl.NumberFormat().format(number); // 천 단위 쉼표 추가
+  };
+
+  // 가격 입력 핸들러
+  const handlePriceChange = (e) => {
+    const formattedValue = formatPrice(e.target.value);
+    setPrice(formattedValue); // 쉼표가 추가된 값을 상태에 저장
+  };
+
+  // 등록 버튼 클릭 핸들러
+  const handleSave = async () => {
+    const accessToken = TokenManager.getAccessToken(); // TokenManager에서 accessToken 가져오기
+
+    const donationData = {
+      giftName: donationName,
+      cartegoryIdx: parseInt(category.replace("category", "")), // category가 예를 들어 'category1'이므로 숫자로 변환
+      giftThumbnail: thumbnail,
+      giftContent: description,
+      price: parseInt(price.replace(/,/g, "")), // 쉼표 제거 후 숫자로 변환
+    };
+
+    try {
+      // API 호출
+      const result = await apiCreateDonations(donationData, accessToken);
+      console.log("기부품 등록 성공:", result);
+
+      // 성공 알림 및 페이지 이동
+      Swal.fire({
+        title: "등록 성공",
+        text: "기부품이 성공적으로 등록되었습니다.",
+        icon: "success",
+        confirmButtonText: "확인",
+      }).then(() => {
+        navigate("/donations"); // 확인 버튼 클릭 시 /donations로 이동
+      });
+    } catch (error) {
+      console.error("기부품 등록 실패:", error);
+
+      // 오류 알림
+      Swal.fire({
+        title: "등록 실패",
+        text: "기부품 등록 중 오류가 발생했습니다. 다시 시도해주세요.",
+        icon: "error",
+        confirmButtonText: "확인",
+      });
+    }
   };
 
   return (
@@ -71,7 +115,7 @@ const CreateDonations = () => {
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               className="donations-input-unique category-select-unique"
-              >
+            >
               <option value="" disabled>
                 카테고리
               </option>
@@ -86,7 +130,7 @@ const CreateDonations = () => {
               type="text"
               placeholder="가격"
               value={price}
-              onChange={(e) => setPrice(e.target.value)}
+              onChange={handlePriceChange} // 가격 입력 핸들러
               className="donations-input-unique"
             />
             <div className="donations-image-upload">
