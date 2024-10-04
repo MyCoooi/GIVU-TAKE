@@ -40,8 +40,8 @@ export const signUp = async (formData) => {
     sido: formData.sido,
     sigungu: formData.sigungu,
     profileImageUrl: formData.profileImageUrl || "http://example.com/profile.jpg", // 프로필 이미지 URL 기본값
-    // roles: "ROLE_CORPORATIONYET", // 기본 역할 설정
-    roles: "ROLE_CORPORATION", // 기본 역할 설정
+    roles: "ROLE_CORPORATIONYET", // 기본 역할 설정
+    // roles: "ROLE_CORPORATION", // 기본 역할 설정
     isSocial: false,
     socialType: null,
     socialSerialNum: null,

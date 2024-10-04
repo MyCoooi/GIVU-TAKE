@@ -1,5 +1,10 @@
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -141,6 +146,8 @@ fun TripItem(
     facilities: String,
     parking: String
 ) {
+    var isExpanded by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -150,28 +157,38 @@ fun TripItem(
             )
             .background(Color.White, shape = RoundedCornerShape(12.dp))
             .padding(16.dp)
+            .clickable { isExpanded = !isExpanded }
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = location,
-                fontSize = 10.sp,
+                fontSize = 12.sp,
                 color = Color.Gray
             )
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 text = title,
-                fontSize = 20.sp,
+                fontSize = 25.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
-            Text(
-                text = description,
-                fontSize = 12.sp,
-                color = Color.Black
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                Column {
+                    Text(
+                        text = description,
+                        fontSize = 15.sp,
+                        color = Color.Black
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
 
             FlowRow(
                 modifier = Modifier.padding(vertical = 2.dp)
@@ -188,7 +205,7 @@ fun TripItem(
                         Text(
                             text = displayText,
                             color = Color.White,
-                            fontSize = 8.sp
+                            fontSize = 12.sp
                         )
                     }
                 }
@@ -210,23 +227,23 @@ fun MainTripTab(displayedCity: String = "영도", navController: NavController) 
 
     Column(modifier = Modifier
         .fillMaxWidth()
-        .padding(16.dp)) {
+        .padding(0.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "우리고향 관광지",
+                text = "우리 고향 관광지",
                 fontSize = 20.sp,
-                modifier = Modifier.padding(start = 8.dp)
+                modifier = Modifier.padding(start = 15.dp)
             )
             Text(
-                text = "전체보기",
+                text = "지도로 더 보기",
                 fontSize = 14.sp,
                 color = Color.Gray,
                 modifier = Modifier
-                    .padding(end = 8.dp)
+                    .padding(end = 15.dp)
                     .clickable {
                         val city = displayedCity
                         navController.navigate("trippage?city=$city")
@@ -241,7 +258,7 @@ fun MainTripTab(displayedCity: String = "영도", navController: NavController) 
         } else {
             Column {
                 // 상위 3개 데이터만 출력
-                tourismData.forEach { trip ->
+                tourismData.take(3).forEach { trip ->
                     TripItem(
                         location = trip.rdnmadr ?: "주소 없음",
                         description = trip.trrsrtIntrcn ?: "설명 없음",

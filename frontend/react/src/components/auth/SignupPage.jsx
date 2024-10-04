@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // 페이지 이동을 위한 useNavigate 추가
 import Swal from "sweetalert2"; // SweetAlert2 추가
 import "./SignupPage.css";
-import { getSido, getSigungu, signUp } from "../../apis/apiSignup"; // signUp API 함수 추가
+import { getSido, getSigungu, signUp } from "../../apis/auth/apiSignup"; // signUp API 함수 추가
 
 const SignupPage = () => {
   const navigate = useNavigate(); // 페이지 이동을 위한 navigate 사용
@@ -91,7 +91,7 @@ const SignupPage = () => {
           confirmButtonText: "확인",
         }).then(() => {
           // 확인 버튼 클릭 시 메인 페이지로 이동
-          navigate("/");
+          navigate("/login");
         });
       } catch (error) {
         console.error("회원가입 실패:", error);
