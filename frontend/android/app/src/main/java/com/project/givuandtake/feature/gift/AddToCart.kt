@@ -1,7 +1,14 @@
 package com.project.givuandtake.feature.gift
 
 import android.content.Context
+import android.net.http.HttpResponseCache.install
+import android.util.Log
+
+import com.google.firebase.crashlytics.internal.network.HttpResponse
+import com.project.givuandtake.core.apis.GiftApiService
+import com.project.givuandtake.core.apis.RetrofitClient
 import com.project.givuandtake.core.data.CartItem
+import com.project.givuandtake.core.data.CartRequest
 import com.project.givuandtake.core.datastore.getCartItems
 import com.project.givuandtake.core.datastore.saveCartItems
 import kotlinx.coroutines.Dispatchers
@@ -9,39 +16,86 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
 import com.project.givuandtake.core.data.GiftDetail
+import com.project.givuandtake.core.datastore.TokenDataStore
+import com.project.givuandtake.core.datastore.TokenManager
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+
 
 // DataStore에서 cartItems를 관리하는 함수 (GiftDetail을 추가할 수 있도록 수정)
-suspend fun addToCart(context: Context, giftDetail: GiftDetail, quantity: Int) {
-    // 현재 장바구니 항목을 DataStore에서 불러옴
-    val currentCartItems = withContext(Dispatchers.IO) {
-        getCartItems(context).first()
-    }
+//suspend fun addToCart(context: Context, giftDetail: GiftDetail, quantity: Int) {
+//    // 현재 장바구니 항목을 DataStore에서 불러옴
+//    val currentCartItems = withContext(Dispatchers.IO) {
+//        getCartItems(context).first()
+//    }
+//
+//    // GiftDetail을 CartItem으로 변환
+//    val newItem = CartItem(
+//        name = giftDetail.giftName,
+//        price = giftDetail.price,
+//        quantity = quantity,
+//        location = giftDetail.location
+//    )
+//
+//    // 장바구니 업데이트 로직
+//    val updatedCartItems = currentCartItems.toMutableList().apply {
+//        val existingItemIndex = indexOfFirst { it.name == newItem.name && it.location == newItem.location }
+//
+//        if (existingItemIndex != -1) {
+//            // 기존 아이템이 있다면 수량을 업데이트
+//            val existingItem = this[existingItemIndex]
+//            this[existingItemIndex] = existingItem.copy(quantity = existingItem.quantity + newItem.quantity)
+//        } else {
+//            // 기존 아이템이 없다면 새 아이템 추가
+//            add(newItem)
+//        }
+//    }
+//
+//    // DataStore에 업데이트된 장바구니 저장
+//    saveCartItems(context, updatedCartItems)
+//}
+suspend fun addToCartApi(context: Context, giftIdx: Int, amount: Int): Boolean {
+    val tokenDataStore = TokenDataStore(context)
 
-    // GiftDetail을 CartItem으로 변환
-    val newItem = CartItem(
-        name = giftDetail.giftName,
-        price = giftDetail.price,
-        quantity = quantity,
-        location = giftDetail.location
-    )
+    return try {
+        // 토큰 가져오기 (Flow에서 첫 번째 값만 가져옴)
+        val token = tokenDataStore.token.first()
+        Log.d("Cart", "token : ${token}")
 
-    // 장바구니 업데이트 로직
-    val updatedCartItems = currentCartItems.toMutableList().apply {
-        val existingItemIndex = indexOfFirst { it.name == newItem.name && it.location == newItem.location }
-
-        if (existingItemIndex != -1) {
-            // 기존 아이템이 있다면 수량을 업데이트
-            val existingItem = this[existingItemIndex]
-            this[existingItemIndex] = existingItem.copy(quantity = existingItem.quantity + newItem.quantity)
-        } else {
-            // 기존 아이템이 없다면 새 아이템 추가
-            add(newItem)
+        // 토큰이 null인 경우 처리
+        if (token.isNullOrEmpty()) {
+            println("토큰이 없습니다. 로그인 필요.")
+            return false
         }
-    }
 
-    // DataStore에 업데이트된 장바구니 저장
-    saveCartItems(context, updatedCartItems)
+        // 네트워크 호출은 IO 스레드에서 수행
+        val cartRequest = CartRequest(giftIdx, amount)
+        Log.d("Cart", "request : ${cartRequest}")
+        val response = withContext(Dispatchers.IO) {
+            RetrofitClient.giftApiService.addToCart("$token", cartRequest)
+        }
+        Log.d("Cart","response : ${response}")
+
+        // 응답 처리
+        if (response.isSuccessful) {
+            val cartResponse = response.body()
+            cartResponse?.let {
+                return it.success
+            }
+            return false
+        } else {
+            println("HTTP 에러: ${response.code()} - ${response.message()}")
+            return false
+        }
+    } catch (e: Exception) {
+        println("Error: ${e.localizedMessage}")
+        return false
+    }
 }
+
+
+
+
 
 
 

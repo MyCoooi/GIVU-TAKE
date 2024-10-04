@@ -25,11 +25,12 @@ class GiftRepository(private val context: Context) {
         return giftDetailDao.getGiftDetailsByIds(ids)
     }
 
-    // API에서 데이터를 불러와 Room에 저장
+    // API에서 데이터를 불러와 Room에 저장 (코루틴 사용)
     suspend fun fetchGiftsFromApi(token: String) {
         withContext(Dispatchers.IO) {
             try {
-                val response = RetrofitClient.giftApiService.getGifts(token).execute()
+                // 코루틴 기반 API 호출
+                val response = RetrofitClient.giftApiService.getGifts(token)
 
                 if (response.isSuccessful) {
                     response.body()?.let { giftResponse: GiftResponse ->
@@ -60,16 +61,18 @@ class GiftRepository(private val context: Context) {
                     throw Exception("Failed to fetch gifts: ${response.code()}")
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("GiftRepository", "Error fetching gifts: ${e.message}", e)
             }
         }
     }
 
-    // 상품 상세 정보 API에서 가져오기
+    // 상품 상세 정보 API에서 가져오기 (코루틴 사용)
     suspend fun fetchGiftDetailFromApi(token: String, giftIdx: Int): GiftDetailData? {
         return withContext(Dispatchers.IO) {
             try {
+                // 코루틴 기반 API 호출
                 val response = RetrofitClient.giftApiService.getGiftDetail(token, giftIdx)
+
                 if (response.isSuccessful) {
                     response.body()?.data
                 } else {
@@ -82,8 +85,6 @@ class GiftRepository(private val context: Context) {
             }
         }
     }
-
-
 
     // Room에 데이터를 저장
     private suspend fun insertGiftDetails(giftDetails: List<GiftDetail>) {

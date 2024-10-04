@@ -10,42 +10,35 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.project.givuandtake.core.data.KakaoPaymentInfo
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun PaymentResultPage(
-    navController: NavController,
-    kakaoPayManager: KakaoPayManager // 결제 승인 관리를 위한 KakaoPayManager 객체
+    navController: NavController
 ) {
     val context = LocalContext.current
     val intent = (context as? Activity)?.intent
     val uri = intent?.data
 
     LaunchedEffect(uri) {
-        // 3초 대기
-        delay(10000L)
 
-        // 리다이렉트된 URL에서 pg_token 추출
-        val pgToken = uri?.getQueryParameter("pg_token")
-        Log.d("KakaopayApi", "pg : ${pgToken}")
-        Log.d("KakaopayApi", "uri : ${uri}")
-
-
-        if (pgToken != null) {
-            // pg_token이 있으면 결제 승인 요청
-            kakaoPayManager.approveKakaoPay(navController, pgToken)
-        } else {
-            // pg_token이 없으면 결제 실패 처리
-            navController.navigate("payment_success")
-        }
+        delay(5000L) // 5초 대기
+        Log.d("uri_pay:","uri : ${uri}")
+        Log.d("uri_pay:","intent : ${intent}")
+        // 결제 성공 페이지로 이동
+        navController.navigate("payment_success")
     }
 
     Scaffold(
@@ -69,3 +62,47 @@ fun PaymentResultPage(
     )
 }
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@Composable
+fun PaymentResultPagePreview() {
+    // 가짜 NavController 대체
+    val fakeNavController = rememberCoroutineScope()
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("결제 대기 중") },
+                backgroundColor = Color(0xFFB3C3F4), // 배경색을 보라색으로 설정 (커스텀 색상)
+                )
+        },
+        content = {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("결제 처리가 진행 중입니다. 잠시만 기다려주세요.")
+                    Spacer(modifier = Modifier.height(20.dp))
+                    CircularProgressIndicator()
+                }
+            }
+        }
+    )
+
+    // 가짜 네비게이션을 실행하는 프리뷰
+    LaunchedEffect(Unit) {
+        fakeNavController.launch {
+            // 5초 후에 결제 성공 페이지로 이동
+            delay(5000L)
+        }
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewPaymentResultPage() {
+    PaymentResultPagePreview()
+}
