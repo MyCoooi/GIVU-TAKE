@@ -10,7 +10,6 @@ import com.accepted.givutake.payment.model.ParticipantDto;
 import com.accepted.givutake.payment.repository.FundingParticipantsRepository;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.model.UserDto;
-import com.accepted.givutake.user.common.repository.UsersRepository;
 import com.accepted.givutake.user.common.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

@@ -20,6 +20,7 @@ import com.accepted.givutake.user.common.repository.UsersRepository;
 import com.accepted.givutake.user.common.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -42,12 +44,12 @@ public class GiftService {
     private final UsersRepository userRepository;
     private final UserService userService;
     private final OrderRepository orderRepository;
+    private final OrderService orderService;
 
     public Gifts createGift(String email, CreateGiftDto request) {
-        Categories category = categoryRepository.findById(request.getCartegoryIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_CATEGORY_EXCEPTION));
+        Categories category = categoryRepository.findById(request.getCategoryIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_CATEGORY_EXCEPTION));
         UserDto savedUserDto = userService.getUserByEmail(email);
         Users corporation = savedUserDto.toEntity();
-
         Gifts newGift = Gifts.builder()
                 .giftName(request.getGiftName())
                 .corporations(corporation)
@@ -77,7 +79,7 @@ public class GiftService {
             }
         }
 
-        if (!search.isEmpty()) { // 검색어 필터링
+        if (search != null) { // 검색어 필터링
             spec = spec.and((root, query, cb) -> cb.like(root.get("giftName"), "%" + search + "%"));
         }
 
