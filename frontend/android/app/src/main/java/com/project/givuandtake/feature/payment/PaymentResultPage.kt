@@ -22,30 +22,18 @@ import kotlinx.coroutines.delay
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun PaymentResultPage(
-    navController: NavController,
-    kakaoPayManager: KakaoPayManager // 결제 승인 관리를 위한 KakaoPayManager 객체
+    navController: NavController
 ) {
     val context = LocalContext.current
     val intent = (context as? Activity)?.intent
     val uri = intent?.data
 
     LaunchedEffect(uri) {
-        // 3초 대기
-        delay(10000L)
 
-        // 리다이렉트된 URL에서 pg_token 추출
-        val pgToken = uri?.getQueryParameter("pg_token")
-        Log.d("KakaopayApi", "pg : ${pgToken}")
-        Log.d("KakaopayApi", "uri : ${uri}")
+        delay(5000L) // 5초 대기
 
-
-        if (pgToken != null) {
-            // pg_token이 있으면 결제 승인 요청
-            kakaoPayManager.approveKakaoPay(navController, pgToken)
-        } else {
-            // pg_token이 없으면 결제 실패 처리
-            navController.navigate("payment_success")
-        }
+        // 결제 성공 페이지로 이동
+        navController.navigate("payment_success")
     }
 
     Scaffold(
@@ -68,4 +56,5 @@ fun PaymentResultPage(
         }
     )
 }
+
 

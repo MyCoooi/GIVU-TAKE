@@ -11,9 +11,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Icon
@@ -29,23 +28,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
-import com.project.givuandtake.R
-import com.project.givuandtake.core.data.PaymentInfo
-import com.project.givuandtake.feature.payment.AmountButtonsRow
-import com.project.givuandtake.feature.payment.AmountInputField
-import com.project.givuandtake.feature.payment.PaymentMethods
+import com.project.givuandtake.core.data.KakaoPaymentInfo
 import com.project.givuandtake.feature.payment.PaymentMethods_gift
-import com.project.givuandtake.feature.payment.PaymentTotal
-import com.project.givuandtake.feature.payment.PaymentTotalAndButton
 import com.project.givuandtake.feature.payment.PaymentTotalAndButton_gift
-import com.project.givuandtake.feature.payment.PaymentTotal_gift
-import com.project.givuandtake.feature.payment.TopBar
+import com.project.givuandtake.feature.payment.PaymentViewModel
 
 @Composable
 fun PaymentScreen_gift(
@@ -54,19 +47,13 @@ fun PaymentScreen_gift(
     location: String,
     price: Int,
     quantity: Int,
-    thumbnailUrl: String // 썸네일 URL을 추가로 받음
+    thumbnailUrl: String,
+    giftIdx: Int, // giftIdx 추가
+    viewModel: PaymentViewModel = viewModel() // ViewModel 추가
 ) {
-    var selectedMethod by remember { mutableStateOf("") } // 결제 수단 상태
-
-    // 결제 정보 객체 생성
-    val paymentInfo = PaymentInfo(
-        selectedGivu = "답례품 구매",
-        selectedMethod = selectedMethod,
-        amount = price,
-        name = name,
-        location = location,
-        quantity = quantity
-    )
+    var selectedMethod by remember { mutableStateOf("KAKAO") } // 결제 수단 상태
+    var amount by remember { mutableStateOf(price * quantity) } // 결제 금액을 상품 수량과 가격에 맞게 설정
+    val context = LocalContext.current // Composable 내에서 context를 가져옴
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -77,12 +64,15 @@ fun PaymentScreen_gift(
         ) {
             // 상품 정보를 표시하는 컴포저블
             PaymentProjectInfo_gift(
-                name = paymentInfo.name,
-                location = paymentInfo.location,
-                quantity = paymentInfo.quantity,
-                thumbnailUrl = thumbnailUrl // 썸네일 URL 전달
+                name = name,
+                location = location,
+                quantity = quantity,
+                thumbnailUrl = thumbnailUrl
             )
-            // 결제 수단을 선택하는 UI
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 결제 수단 선택 UI
             PaymentMethods_gift(
                 selectedMethod = selectedMethod,
                 onMethodSelected = { method -> selectedMethod = method }
@@ -90,11 +80,35 @@ fun PaymentScreen_gift(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 결제 총 금액 및 버튼 섹션, NavController 전달
-            PaymentTotalAndButton_gift(paymentInfo = paymentInfo, navController = navController)
+            // 결제 요청 버튼
+            Button(
+                onClick = {
+
+                    // 결제 정보를 담은 KakaoPaymentInfo 객체 생성
+                    val paymentInfo = KakaoPaymentInfo(
+                        giftIdx = giftIdx, // giftIdx를 String으로 변환하여 전달
+                        paymentMethod = selectedMethod, // 선택된 결제 수단
+                        amount = quantity // 총 결제 금액 (가격 * 수량)
+                    )
+
+                    // 결제 요청 ViewModel 호출
+                    viewModel.preparePayment(
+                        navController = navController,
+                        context = context, // 현재 Context 전달
+                        paymentInfo = paymentInfo // 생성한 결제 정보 전달
+                    )
+                },
+                modifier = Modifier
+                    .height(50.dp)
+                    .width(150.dp)
+            ) {
+                Text("결제하기", fontSize = 18.sp)
+            }
         }
     }
 }
+
+
 
 @Composable
 fun PaymentProjectInfo_gift(name: String, location: String, quantity: Int, thumbnailUrl: String) {
