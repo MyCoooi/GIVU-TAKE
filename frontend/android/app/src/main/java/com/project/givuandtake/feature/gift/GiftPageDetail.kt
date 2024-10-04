@@ -213,7 +213,7 @@ fun GiftBottomBar(
             Button(
                 onClick = {
                     navController.navigate(
-                        "payment_page_gift?name=${Uri.encode(giftDetail.giftName)}&location=${Uri.encode(giftDetail.location)}&price=${giftDetail.price}&quantity=1&thumbnailUrl=${Uri.encode(giftDetail.giftThumbnail)}" // 썸네일 URL 전달
+                        "payment_page_gift?name=${Uri.encode(giftDetail.giftName)}&location=${Uri.encode(giftDetail.location)}&price=${giftDetail.price}&quantity=1&thumbnailUrl=${Uri.encode(giftDetail.giftThumbnail)}&giftIdx=${giftDetail.giftIdx}" // 썸네일 URL 전달
                     )
                 },
                 modifier = Modifier

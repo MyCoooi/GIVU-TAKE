@@ -26,6 +26,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.project.givuandtake.auth.LoginScreen
 import com.project.givuandtake.auth.SignupStep1
 import com.project.givuandtake.auth.SignupStep2
@@ -61,7 +62,7 @@ import com.project.givuandtake.feature.mypage.MyDonation.WishlistPage
 import com.project.givuandtake.feature.mypage.MyManagement.MyComment
 import com.project.givuandtake.feature.mypage.MyManagement.MyReview
 import com.project.givuandtake.feature.mypage.MyPageScreen
-import com.project.givuandtake.feature.payment.KakaoPayManager
+//import com.project.givuandtake.feature.payment.KakaoPayManager
 import com.project.givuandtake.feature.payment.PaymentResultPage
 import com.project.givuandtake.feature.payment.PaymentSuccessPage
 import com.project.givuandtake.ui.navbar.BottomNavBar
@@ -160,13 +161,14 @@ class MainActivity : ComponentActivity() {
 
                             // 결제 페이지_답례품
                             composable(
-                                route = "payment_page_gift?name={name}&location={location}&price={price}&quantity={quantity}&thumbnailUrl={thumbnailUrl}",
+                                route = "payment_page_gift?name={name}&location={location}&price={price}&quantity={quantity}&thumbnailUrl={thumbnailUrl}&giftIdx={giftIdx}", // giftIdx 추가
                                 arguments = listOf(
                                     navArgument("name") { type = NavType.StringType },
                                     navArgument("location") { type = NavType.StringType },
                                     navArgument("price") { type = NavType.IntType },
                                     navArgument("quantity") { type = NavType.IntType },
-                                    navArgument("thumbnailUrl") { type = NavType.StringType } // 썸네일 URL 추가
+                                    navArgument("thumbnailUrl") { type = NavType.StringType }, // 썸네일 URL 추가
+                                    navArgument("giftIdx") { type = NavType.IntType } // giftIdx 추가
                                 )
                             ) { backStackEntry ->
                                 val name = backStackEntry.arguments?.getString("name") ?: ""
@@ -174,13 +176,19 @@ class MainActivity : ComponentActivity() {
                                 val price = backStackEntry.arguments?.getInt("price") ?: 0
                                 val quantity = backStackEntry.arguments?.getInt("quantity") ?: 1
                                 val thumbnailUrl = backStackEntry.arguments?.getString("thumbnailUrl") ?: "" // 썸네일 URL 받기
-                                PaymentScreen_gift(navController, name, location, price, quantity, thumbnailUrl)
+                                val giftIdx = backStackEntry.arguments?.getInt("giftIdx") ?: 0 // giftIdx 받기
+
+                                PaymentScreen_gift(navController, name, location, price, quantity, thumbnailUrl, giftIdx) // giftIdx 추가하여 전달
                             }
 
 
+
                             // 결제 대기 페이지
+                           //composable("payment_result") {
+                                //PaymentResultPage(navController = navController, kakaoPayManager = KakaoPayManager())
+                           //}
                             composable("payment_result") {
-                                PaymentResultPage(navController = navController, kakaoPayManager = KakaoPayManager())
+                                PaymentResultPage(navController = navController)
                             }
 
 
@@ -188,6 +196,13 @@ class MainActivity : ComponentActivity() {
                             composable("payment_success") {
                                 PaymentSuccessPage(navController)
                             }
+
+                            composable(
+                                "payment_success",
+                                deepLinks = listOf(navDeepLink { uriPattern = "https://givuandtake/payment/success" })
+                            ) { PaymentSuccessPage(navController) }
+
+
 
                             // 마이 페이지
                             composable("locationSelection") {
