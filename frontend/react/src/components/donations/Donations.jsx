@@ -17,6 +17,11 @@ const Donations = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6; // 페이지당 표시할 항목 수
 
+  // 가격을 천 단위로 쉼표로 구분해주는 함수
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat().format(price) + "원";
+  };
+
   // API 호출 함수
   const fetchDonationList = async () => {
     try {
@@ -37,8 +42,7 @@ const Donations = () => {
   // 필터 버튼 클릭 시 상태 업데이트
   const handleFilterChange = (type) => {
     setSelectedType(type);
-    // 필터 상태를 반영하여 추가 로직을 구현할 수 있습니다
-    // 예: fetchDonationList(type)으로 카테고리에 맞는 데이터를 가져오는 로직
+    setCurrentPage(1); // 필터가 변경될 때 첫 페이지로 이동
   };
 
   // 페이지 변경 핸들러
@@ -46,13 +50,18 @@ const Donations = () => {
     setCurrentPage(pageNumber);
   };
 
+  // 선택된 필터에 맞는 기부품 목록을 필터링
+  const filteredDonations = selectedType
+    ? donationList.filter((donation) => donation.categoryName === selectedType)
+    : donationList;
+
   // 현재 페이지에서 보여줄 데이터 계산
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = donationList.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredDonations.slice(indexOfFirstItem, indexOfLastItem);
 
   // 총 페이지 수 계산
-  const totalPages = Math.max(1, Math.ceil(donationList.length / itemsPerPage));
+  const totalPages = Math.max(1, Math.ceil(filteredDonations.length / itemsPerPage));
 
   return (
     <div className="donations-page-layout">
@@ -116,7 +125,7 @@ const Donations = () => {
                   </div>
                   <div className="donation-details">
                     <h2 className="donation-title">{donation.giftName}</h2>
-                    <p className="donation-price">가격: {donation.price}원</p>
+                    <p className="donation-price">가격: {formatPrice(donation.price)}</p>
                   </div>
                 </div>
               ))
