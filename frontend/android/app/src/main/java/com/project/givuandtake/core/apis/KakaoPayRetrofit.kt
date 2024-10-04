@@ -3,15 +3,12 @@ package com.project.givuandtake.core.apis
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-object KakaoPayRetrofit {
-    private val retrofit by lazy {
-        Retrofit.Builder()
-            .baseUrl("https://open-api.kakaopay.com")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
-
-    val api: KakaoPayApi by lazy {
-        retrofit.create(KakaoPayApi::class.java)
-    }
-}
+//object PaymentRetrofitInstance  {
+//    val api: PaymentApiService by lazy {
+//        Retrofit.Builder()
+//            .baseUrl("https://your-api-url.com/") // 적절한 API URL로 대체
+//            .addConverterFactory(GsonConverterFactory.create())
+//            .build()
+//            .create(PaymentApiService::class.java)
+//    }
+//}

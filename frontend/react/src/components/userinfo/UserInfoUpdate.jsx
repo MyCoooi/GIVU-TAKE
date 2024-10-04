@@ -70,6 +70,11 @@ const UserInfoUpdate = () => {
     }
   };
 
+  // 취소 버튼 핸들러: 취소 시 회원 정보 페이지로 이동
+  const handleCancel = () => {
+    navigate("/userinfo");
+  };
+
   return (
     <div className="userinfoupdate-page">
       <Sidebar selectedMenu={selectedMenu} setSelectedMenu={setSelectedMenu} />
@@ -77,7 +82,10 @@ const UserInfoUpdate = () => {
         <div className="userinfoupdate-header">
           <button className="userinfoupdate-save-button" onClick={handleSave}>
             저장
-          </button> {/* 저장 버튼 */}
+          </button>
+          <button className="userinfoupdate-cancel-button" onClick={handleCancel}>
+            취소
+          </button> {/* 취소 버튼 */}
         </div>
         <div className="userinfoupdate-content">
           <div className="userinfoupdate-profile-picture">

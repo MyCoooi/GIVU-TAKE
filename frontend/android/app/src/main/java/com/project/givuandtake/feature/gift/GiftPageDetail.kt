@@ -40,10 +40,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.project.givuandtake.core.data.GiftDetail
 import com.project.givuandtake.core.data.GiftDetailData
 import com.project.givuandtake.core.datastore.TokenDataStore
+import com.project.givuandtake.core.datastore.TokenManager
 import com.project.givuandtake.core.datastore.getCartItems
 import com.project.givuandtake.core.datastore.saveCartItems
 import com.project.givuandtake.feature.gift.GiftViewModel
-import com.project.givuandtake.feature.gift.addToCart
+
 import kotlinx.coroutines.runBlocking
 
 
@@ -63,18 +64,19 @@ fun GiftPageDetail(
 
     val scope = rememberCoroutineScope()  // 코루틴 스코프
     val context = LocalContext.current  // 현재 Context
-
+    val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
     // 페이지 로드 시 상품 상세 정보를 API로부터 불러옴
     LaunchedEffect(giftIdx) {
-        val tokenDataStore = TokenDataStore(context)  // DataStore 초기화
+//        val tokenDataStore = TokenDataStore(context)  // DataStore 초기화
 
         // 저장된 토큰을 Flow로 수집하여 사용
-        tokenDataStore.token.collect { token ->
-            token?.let {
-                // 불러온 토큰을 사용하여 API 호출
-                GiftViewModel.fetchGiftDetail(token = it, giftIdx = giftIdx)
-            }
-        }
+        GiftViewModel.fetchGiftDetail(token = accessToken, giftIdx = giftIdx)
+//        tokenDataStore.token.collect { token ->
+//            token?.let {
+//                // 불러온 토큰을 사용하여 API 호출
+//                GiftViewModel.fetchGiftDetail(token = it, giftIdx = giftIdx)
+//            }
+//        }
     }
 
     // 장바구니 항목 불러오기
@@ -170,6 +172,8 @@ fun GiftBottomBar(
     navController: NavController,
     giftDetail: GiftDetailData
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -182,8 +186,21 @@ fun GiftBottomBar(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val context = LocalContext.current  // 현재 Context 가져오기
             Button(
-                onClick = { onAddToCart() },
+                onClick = {
+                    coroutineScope.launch {
+                        // 장바구니에 추가하는 API 호출
+                        val result = addToCartApi(context, giftDetail.giftIdx, 1)
+                        if (result) {
+                            // 성공 시 행동
+                            onAddToCart()
+                        } else {
+                            // 실패 시 행동
+                            println("장바구니 추가 실패")
+                        }
+                    }
+                },
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 4.dp),
@@ -196,7 +213,7 @@ fun GiftBottomBar(
             Button(
                 onClick = {
                     navController.navigate(
-                        "payment_page_gift?name=${Uri.encode(giftDetail.giftName)}&location=${Uri.encode(giftDetail.location)}&price=${giftDetail.price}&quantity=1"
+                        "payment_page_gift?name=${Uri.encode(giftDetail.giftName)}&location=${Uri.encode(giftDetail.location)}&price=${giftDetail.price}&quantity=1&thumbnailUrl=${Uri.encode(giftDetail.giftThumbnail)}&giftIdx=${giftDetail.giftIdx}" // 썸네일 URL 전달
                     )
                 },
                 modifier = Modifier

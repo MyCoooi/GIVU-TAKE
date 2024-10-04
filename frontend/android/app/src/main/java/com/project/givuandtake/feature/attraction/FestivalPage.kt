@@ -547,7 +547,7 @@ data class FestivalItemMainDetails(
 
 @Composable
 fun FestivalPage(navController: NavController, city: String?) {
-    var selectedCategory by remember { mutableStateOf(0) }
+    var selectedCategory by remember { mutableStateOf(1) }
     var FestivalMainData by remember { mutableStateOf(listOf<FestivalItemMainDetails>()) }
 
     val currentDate = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
@@ -725,7 +725,7 @@ fun FestivalPage(navController: NavController, city: String?) {
                 else -> city // Default case for cities not specified
             }
             Image(
-                painter = painterResource(id = R.drawable.baseline_egg_alt_24),
+                painter = painterResource(id = R.drawable.baseline_location_on_24),
                 contentDescription = "map",
                 modifier = Modifier
                     .size(25.dp)
