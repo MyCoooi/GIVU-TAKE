@@ -19,6 +19,12 @@ public class ApiController {
 
     private final PasswordEncoder passwordEncoder;
 
+    @Value("${api.weather}")
+    String weatherKey;
+
+    @Value("${api.market}")
+    String marketKey;
+
     @Value("${api.attraction}")
     String attractionKey;
 
@@ -30,6 +36,22 @@ public class ApiController {
 
     @Value("${api.ocr}")
     String ocrKey;
+
+    @GetMapping("/weather")
+    public ResponseEntity<ResponseDto> weather() {
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(passwordEncoder.encode(weatherKey))
+                .build();
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    @GetMapping("/market")
+    public ResponseEntity<ResponseDto> market() {
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(passwordEncoder.encode(marketKey))
+                .build();
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
 
     @GetMapping("/attraction")
     public ResponseEntity<ResponseDto> attraction() {
