@@ -241,7 +241,7 @@ fun CardBook(navController: NavController) {
                 text = "편집",
                 textAlign = TextAlign.Center,
                 fontSize = 16.sp,
-                modifier = Modifier.clickable{ navController.navigate("addressbookupdate")}
+                modifier = Modifier.clickable{ navController.navigate("cardbookupdate")}
             )
         }
 
