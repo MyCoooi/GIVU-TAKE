@@ -77,7 +77,7 @@ public class GiftService {
             }
         }
 
-        if (!search.isEmpty()) { // 검색어 필터링
+        if (search != null) { // 검색어 필터링
             log.info("categoryIdx: {}",search);
             spec = spec.and((root, query, cb) -> cb.like(root.get("giftName"), "%" + search + "%"));
         }
