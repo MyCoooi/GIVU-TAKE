@@ -17,6 +17,11 @@ const Donations = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6; // 페이지당 표시할 항목 수
 
+  // 가격을 천 단위로 쉼표로 구분해주는 함수
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat().format(price) + "원";
+  };
+
   // API 호출 함수
   const fetchDonationList = async () => {
     try {
@@ -116,7 +121,7 @@ const Donations = () => {
                   </div>
                   <div className="donation-details">
                     <h2 className="donation-title">{donation.giftName}</h2>
-                    <p className="donation-price">가격: {donation.price}원</p>
+                    <p className="donation-price">가격: {formatPrice(donation.price)}</p>
                   </div>
                 </div>
               ))
