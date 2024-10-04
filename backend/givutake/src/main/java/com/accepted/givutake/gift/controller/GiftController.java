@@ -39,7 +39,6 @@ public class GiftController {
             @RequestParam(value = "categoryIdx", required = false)Integer categoryIdx,
             @RequestParam(value = "pageNo", defaultValue = "1")int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10")int pageSize) {
-        System.out.println(categoryIdx);
         List<GiftDto> gifts = giftService.getGifts(corporationEmail, search, categoryIdx,pageNo, pageSize);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(gifts)
