@@ -19,8 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -75,27 +76,41 @@ public class FundingStatsService {
         return new FundingParticipateDto(participants);
     }
 
-    public FundingStatsByAgeAndGenderDto getFundingCountByAgeAndGender(int fundingIdx) {
-
+    public FundingStatsByAgeAndGenderDto getFundingCountByAgeAndGender(String email, int fundingIdx) {
+        Fundings funding = fundingRepository.findByFundingIdx(fundingIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_FUNDING_WITH_IDX_EXCEPTION));
+        if(!funding.getCorporation().getEmail().equals(email)) {
+            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
+        }
         List<Object[]> results = fundingStatisticsRepository.getFundingStatsByAgeAndGender(fundingIdx);
 
-        Map<String, List<FundingStatsByAgeAndGenderDto.AgeGroupData>> groupedData = results.stream()
-                .map(row -> new Object[]{
-                        (String) row[0],
-                        (String) row[1],
-                        ((Number) row[2]).intValue()
-                })
-                .collect(Collectors.groupingBy(
-                        row -> (String) row[0],
-                        Collectors.mapping(
-                                row -> new FundingStatsByAgeAndGenderDto.AgeGroupData((String) row[1], ((Number) row[2]).intValue()),
-                                Collectors.toList()
-                        )
-                ));
+        FundingStatsByAgeAndGenderDto result = new FundingStatsByAgeAndGenderDto();
 
-        return FundingStatsByAgeAndGenderDto.builder()
-                .maleData(groupedData.getOrDefault("male", List.of()))
-                .femaleData(groupedData.getOrDefault("female", List.of()))
-                .build();
+        HashMap<String, Long> maleData = new HashMap<>();
+        HashMap<String, Long> femaleData = new HashMap<>();
+
+        String[] ageGroups = { "20s", "30s", "40s", "50s", "60+" };
+
+        for (String ageGroup : ageGroups) {
+            maleData.put(ageGroup, 0L);
+            femaleData.put(ageGroup, 0L);
+        }
+
+        results.forEach(row -> {
+                    String gender = (String) row[0];
+                    String ageGroup = (String) row[1];
+                    Long count = ((Number) row[2]).longValue();
+
+                    if ("male".equals(gender)) {
+                        maleData.put(ageGroup, count);
+                    } else {
+                        femaleData.put(ageGroup, count);
+                    }
+                }
+        );
+
+        result.setMaleData(maleData);
+        result.setFemaleData(femaleData);
+
+        return result;
     }
 }

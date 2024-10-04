@@ -11,5 +11,5 @@ import lombok.*;
 public class FundingStatisticsDto {
     private FundingDayStatisticDto fundingDayStatistic;
     private FundingParticipateDto fundingParticipate;
-    private FundingStatisticsDto fundingStatistics;
+    private FundingStatsByAgeAndGenderDto fundingStatsByAgeAndGender;
 }
