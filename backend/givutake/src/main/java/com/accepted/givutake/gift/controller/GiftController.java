@@ -3,6 +3,7 @@ package com.accepted.givutake.gift.controller;
 import com.accepted.givutake.gift.entity.Gifts;
 import com.accepted.givutake.gift.model.*;
 import com.accepted.givutake.gift.service.GiftService;
+import com.accepted.givutake.gift.service.GiftStatsService;
 import com.accepted.givutake.global.enumType.ActEnum;
 import com.accepted.givutake.global.enumType.ContentTypeEnum;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
@@ -29,6 +30,7 @@ public class GiftController {
 
     private final GiftService giftService;
     private final UserViewLogService userViewLogService;
+    private final GiftStatsService giftStatsService;
 
     @GetMapping // 답례품 조회
     public ResponseEntity<ResponseDto> getGifts(
@@ -233,16 +235,16 @@ public class GiftController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
-//    @GetMapping("/year/statistics")
-//    public ResponseEntity<ResponseDto> getYearStatistics(
-//            @AuthenticationPrincipal UserDetails userDetails,
-//            @RequestParam(required = false) Integer giftIdx) {
-//        GiftPurchaserDto data =  giftService.getGiftPurchaser(userDetails.getUsername(), giftIdx);
-//        ResponseDto responseDto = ResponseDto.builder()
-//                .data(data)
-//                .build();
-//        return new ResponseEntity<>(responseDto, HttpStatus.OK);
-//    }
+    @GetMapping("/year/statistics")
+    public ResponseEntity<ResponseDto> getYearStatistics(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) Integer giftIdx) {
+        GiftPercentageDto data = giftStatsService.getGiftPercentage(giftIdx);
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(data)
+                .build();
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
 
 }
 

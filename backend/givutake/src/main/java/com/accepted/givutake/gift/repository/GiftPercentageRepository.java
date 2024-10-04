@@ -30,7 +30,7 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
                 'category' AS stat_type,
                 category_name AS name,
                 SUM(amount) AS count,
-                SUM(amount) / OrderStats.total_amount * 100 AS percentage
+                SUM(amount) / MAX(total_amount) * 100 AS percentage
             FROM OrderStats
             GROUP BY category_idx, category_name
     
@@ -39,8 +39,8 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
             SELECT
                 'gender' AS stat_type,
                 IF(is_male, 'Male', 'Female') AS name,
-                SUM(amount) AS total_amount,
-                SUM(amount) / OrderStats.total_amount * 100 AS percentage
+                SUM(amount) AS count,
+                SUM(amount) / MAX(total_amount) * 100 AS percentage
             FROM OrderStats
             GROUP BY is_male
     
@@ -55,8 +55,8 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
                     WHEN age < 60 THEN '50s'
                     ELSE '60+'
                 END AS name,
-                SUM(amount) AS total_amount,
-                SUM(amount) / OrderStats.total_amount * 100 AS percentage
+                SUM(amount) AS count,
+                SUM(amount) / MAX(total_amount) * 100 AS percentage
             FROM OrderStats
             GROUP BY
                 CASE
@@ -72,7 +72,7 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
 
     @Query(nativeQuery = true, value =
             """
-                WITH CategoryGifts AS (
+            WITH CategoryGifts AS (
                 SELECT g.category_idx
                 FROM Gifts g
                 WHERE g.gift_idx = :giftIdx
@@ -93,20 +93,20 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
             SELECT
                 'gift' AS stat_type,
                 gift_name AS name,
-                SUM(amount) AS total_amount,
-                SUM(amount) / category_total_amount * 100 AS percentage
+                SUM(amount) AS count,
+                SUM(amount) / MAX(category_total_amount) * 100 AS percentage
             FROM OrderStats
-            GROUP BY gift_idx, gift_name, category_total_amount
+            GROUP BY gift_idx, gift_name
             
             UNION ALL
             
             SELECT
                 'gender' AS stat_type,
                 IF(is_male, 'Male', 'Female') AS name,
-                SUM(amount) AS total_amount,
-                SUM(amount) / category_total_amount * 100 AS percentage
+                SUM(amount) AS count,
+                SUM(amount) / MAX(category_total_amount) * 100 AS percentage
             FROM OrderStats
-            GROUP BY is_male, category_total_amount
+            GROUP BY is_male
             
             UNION ALL
             
@@ -119,8 +119,8 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
                     WHEN age < 60 THEN '50s'
                     ELSE '60+'
                 END AS name,
-                SUM(amount) AS total_amount,
-                SUM(amount) / category_total_amount * 100 AS percentage
+                SUM(amount) AS count,
+                SUM(amount) / MAX(category_total_amount) * 100 AS percentage
             FROM OrderStats
             GROUP BY
                 CASE
@@ -129,8 +129,7 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
                     WHEN age < 50 THEN '40s'
                     WHEN age < 60 THEN '50s'
                     ELSE '60+'
-                END,
-                category_total_amount
+                END
             """
     )
     List<Object[]> getGiftStatisticsByGiftId(@Param("giftIdx") Integer giftIdx);
