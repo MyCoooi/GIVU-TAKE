@@ -260,14 +260,13 @@ public class FundingController {
     }
 
     @GetMapping("/statistics/{fundingIdx}")
-    public ResponseEntity<ResponseDto> getYearStatistics(
+    public ResponseEntity<FundingStatsByAgeAndGenderDto> getYearStatistics(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int fundingIdx) {
-        FundingParticipateDto data =  fundingService.getFundingParticipateByFundingIdx(userDetails.getUsername(), fundingIdx);
-        ResponseDto responseDto = ResponseDto.builder()
-                .data(data)
-                .build();
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+
+        FundingStatsByAgeAndGenderDto data = fundingStaticsService.getFundingCountByAgeAndGender(fundingIdx);
+
+        return new ResponseEntity<>(data, HttpStatus.OK);
     }
 
 }
