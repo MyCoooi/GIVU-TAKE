@@ -1,7 +1,7 @@
 .userinfoupdate-page {
   display: flex;
   height: 100vh;
-  background-color: #FBFAFF;
+  background-color: #FBFAFF; /* 배경색 약간 변경 */
 }
 
 .userinfoupdate-container {
@@ -10,7 +10,7 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 40px;
-  background-color: #ffffff;
+  background-color: #FBFAFF; /* 배경색 약간 변경 */
   border-radius: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -25,7 +25,7 @@
   color: white;
   padding: 10px 20px;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s ease;
@@ -103,3 +103,18 @@
   border-color: #6a5acd;
 }
 
+.userinfoupdate-cancel-button {
+  background-color: #ccc;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.userinfoupdate-cancel-button:hover {
+  background-color: #aaa;
+}
