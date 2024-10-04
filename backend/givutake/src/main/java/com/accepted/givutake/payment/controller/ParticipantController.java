@@ -51,8 +51,10 @@ public class ParticipantController {
             ReadyResponse readyResponse = kaKaoPayService.payFundingReady(userDetails.getUsername(), participants.getParticipantIdx(), request);
             SessionUtils.addAttribute("tid", readyResponse.getTid());
             readyResponse.setStatus("success");
+            participantService.updateFunding(request.getFundingIdx(), request.getPrice());
             return readyResponse;
         }else{
+            participantService.updateFunding(request.getFundingIdx(), request.getPrice());
             return ReadyResponse.builder()
                     .status("success")
                     .build();
