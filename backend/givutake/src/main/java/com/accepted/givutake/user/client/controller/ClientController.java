@@ -6,6 +6,7 @@ import com.accepted.givutake.global.model.ResponseDto;
 import com.accepted.givutake.user.client.entity.Addresses;
 import com.accepted.givutake.user.client.entity.Cards;
 import com.accepted.givutake.user.client.model.*;
+import com.accepted.givutake.user.client.service.CardService;
 import com.accepted.givutake.user.client.service.ClientService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class ClientController {
 
     private final ClientService clientService;
     private final FundingParticipantService fundingParticipantService;
+    private final CardService cardService;
 
     // jwt 토큰으로 모든 주소 조회
     @GetMapping("/addresses")
@@ -172,6 +174,18 @@ public class ClientController {
     }
 
     // ============== 카드 관련 ============
+
+    @GetMapping("/cards")
+    public ResponseEntity<ResponseDto> getCardsList(@AuthenticationPrincipal UserDetails userDetails) {
+        List<CardViewDto> cardlist = cardService.getCardListByEmail(userDetails.getUsername());
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(cardlist)
+                .build();
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+
     // 카드 등록
     @PostMapping("/cards")
     public ResponseEntity<ResponseDto> addCard(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody AddCardDto addCardDto) {
