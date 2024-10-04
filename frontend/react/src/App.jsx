@@ -6,6 +6,8 @@ import MyPage from './components/myPage/MyPage';
 
 import Donations from './components/donations/Donations';
 import CreateDonations from './components/donations/CreateDonations';
+import DonationsDetail from './components/donations/DonationsDetail';
+
 
 
 import Funding from './components/funding/Funding';
@@ -35,6 +37,7 @@ const App = () => {
 
         <Route path="/donations" element={<Donations />} />
         <Route path="/donations/create-donation" element={<CreateDonations />} />
+        <Route path="/donations/:giftIdx" element={<DonationsDetail />} /> {/* 상세 페이지 경로 */}
 
 
         <Route path="/funding" element={<Funding />} />
