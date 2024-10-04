@@ -55,6 +55,9 @@ android {
 }
 
 dependencies {
+    // 직렬화
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
+
     implementation ("androidx.camera:camera-core:1.1.0")
     implementation ("androidx.camera:camera-camera2:1.1.0")
     implementation ("androidx.camera:camera-lifecycle:1.1.0")

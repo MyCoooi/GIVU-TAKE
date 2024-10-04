@@ -251,8 +251,8 @@ fun PaymentMethods_gift(selectedMethod: String, onMethodSelected: (String) -> Un
                         "카카오 페이",
                         R.drawable.kakao,
                         Modifier.weight(1f),
-                        selected = selectedMethod == "카카오 페이",
-                        onClick = { onMethodSelected("카카오 페이") }
+                        selected = selectedMethod == "KAKAO",
+                        onClick = { onMethodSelected("KAKAO") }
                     )
                 }
                 Row(

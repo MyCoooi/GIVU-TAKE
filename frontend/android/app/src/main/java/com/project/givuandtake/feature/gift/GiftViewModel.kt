@@ -14,13 +14,13 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class GiftViewModel(application: Application) : AndroidViewModel(application) {
+open class GiftViewModel(application: Application) : AndroidViewModel(application) {
     private val context = getApplication<Application>().applicationContext
     private val giftRepository = GiftRepository(context)
     private val wishlistRepository = WishlistRepository
 
     // 모든 상품 목록
-    val allGiftDetails: StateFlow<List<GiftDetail>> = giftRepository.getAllGiftDetails()
+    open val allGiftDetails: StateFlow<List<GiftDetail>> = giftRepository.getAllGiftDetails()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // 찜한 상품 ID 목록
@@ -37,15 +37,21 @@ class GiftViewModel(application: Application) : AndroidViewModel(application) {
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+
+
+
     // 상품 상세 정보 관리 (MutableStateFlow로 관리)
     private val _giftDetail = MutableStateFlow<GiftDetailData?>(null)
     val giftDetail: StateFlow<GiftDetailData?> get() = _giftDetail.asStateFlow()
-
+    
     // API에서 상품 데이터를 불러와 Room에 저장하는 메서드
     fun fetchGiftsFromApi(token: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             try {
-                giftRepository.fetchGiftsFromApi(token)
+                // withContext로 명시적으로 IO 작업을 처리
+                withContext(Dispatchers.IO) {
+                    giftRepository.fetchGiftsFromApi(token)
+                }
             } catch (e: Exception) {
                 Log.e("GiftViewModel", "Error fetching gifts: ${e.message}", e)
             }
@@ -54,10 +60,12 @@ class GiftViewModel(application: Application) : AndroidViewModel(application) {
 
     // 상품 상세 정보 가져오기
     fun fetchGiftDetail(token: String, giftIdx: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             try {
-                // API 호출을 통해 상품 상세 정보 가져오기
-                val detail = giftRepository.fetchGiftDetailFromApi(token, giftIdx)
+                // withContext로 명시적으로 IO 작업을 처리
+                val detail = withContext(Dispatchers.IO) {
+                    giftRepository.fetchGiftDetailFromApi(token, giftIdx)
+                }
                 if (detail != null) {
                     _giftDetail.value = detail
                 } else {
@@ -78,6 +86,3 @@ class GiftViewModel(application: Application) : AndroidViewModel(application) {
         _cartItemCount.value = newCount
     }
 }
-
-
-

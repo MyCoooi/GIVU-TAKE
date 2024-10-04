@@ -1,9 +1,5 @@
 package com.project.givuandtake.feature.payment
 
-import android.net.Uri
-import android.util.Log
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,10 +14,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,14 +22,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
-import com.project.givuandtake.core.data.KakaoPayReadyRequest
-import com.project.givuandtake.core.data.KakaoPayReadyResponse
-import com.project.givuandtake.core.data.PaymentInfo
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.project.givuandtake.core.data.KakaoPaymentInfo
 
 @Composable
 fun PaymentTotalAndButton() {
@@ -113,7 +100,11 @@ fun PaymentButton() {
 // 답례품 관련 결제 함수
 
 @Composable
-fun PaymentTotalAndButton_gift(paymentInfo: PaymentInfo, navController: NavController) {
+fun PaymentTotalAndButton_gift(
+    kakaoPaymentInfo: KakaoPaymentInfo,
+    navController: NavController,
+    viewModel: PaymentViewModel // ViewModel 추가
+) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = Color(0XFFFAFAFA),
@@ -127,15 +118,20 @@ fun PaymentTotalAndButton_gift(paymentInfo: PaymentInfo, navController: NavContr
             verticalAlignment = Alignment.CenterVertically
         ) {
             // 결제 총 금액을 중앙에 배치
-            PaymentTotal_gift(paymentInfo.amount)
+            PaymentTotal_gift(kakaoPaymentInfo.amount)
 
             Spacer(modifier = Modifier.width(24.dp))
 
-            // 결제하기 버튼을 배치 (paymentInfo와 navController 전달)
-            PaymentButton_gift(paymentInfo = paymentInfo, navController = navController)
+            // 결제하기 버튼에 viewModel을 전달
+            PaymentButton_gift(
+                kakaoPaymentInfo = kakaoPaymentInfo,
+                navController = navController,
+                viewModel = viewModel // ViewModel 전달
+            )
         }
     }
 }
+
 
 
 
@@ -165,19 +161,14 @@ fun PaymentTotal_gift(amount: Int) {
     }
 }
 
-
 @Composable
-fun PaymentButton_gift(paymentInfo: PaymentInfo, navController: NavController) {
+fun PaymentButton_gift(kakaoPaymentInfo: KakaoPaymentInfo, navController: NavController, viewModel: PaymentViewModel) {
     val context = LocalContext.current // 현재 컨텍스트 가져오기
-    val kakaoPayManager = remember { KakaoPayManager() } // KakaoPayManager 객체 생성
 
     Button(
         onClick = {
-            // 결제 준비 함수 호출
-            kakaoPayManager.prepareKakaoPay(
-                navController = navController,
-                context = context,
-                paymentInfo = paymentInfo)
+            // 스프링 서버로 결제 준비 요청을 보냄
+            viewModel.preparePayment(navController = navController, context = context, paymentInfo = kakaoPaymentInfo)
         },
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
@@ -193,6 +184,34 @@ fun PaymentButton_gift(paymentInfo: PaymentInfo, navController: NavController) {
         )
     }
 }
+
+//@Composable
+//fun PaymentButton_gift(kakaoPaymentInfo: KakaoPaymentInfo, navController: NavController) {
+//    val context = LocalContext.current // 현재 컨텍스트 가져오기
+//    val kakaoPayManager = remember { KakaoPayManager() } // KakaoPayManager 객체 생성
+//
+//    Button(
+//        onClick = {
+//            // 결제 준비 함수 호출
+//            kakaoPayManager.prepareKakaoPay(
+//                navController = navController,
+//                context = context,
+//                kakaoPaymentInfo = kakaoPaymentInfo)
+//        },
+//        shape = RoundedCornerShape(8.dp),
+//        modifier = Modifier
+//            .height(50.dp)
+//            .width(150.dp),
+//        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A6CE3))
+//    ) {
+//        Text(
+//            text = "결제하기",
+//            fontSize = 18.sp,
+//            fontWeight = FontWeight.Bold,
+//            color = Color.White
+//        )
+//    }
+//}
 
 
 
