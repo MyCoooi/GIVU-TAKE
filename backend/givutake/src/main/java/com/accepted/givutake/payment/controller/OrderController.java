@@ -66,7 +66,7 @@ public class OrderController {
 
         ApproveResponse approveResponse = kaKaoPayService.payApprove(email, orderIdx,tid, pgToken, type);
 
-        return "성공";
+        return "redirect:/payment/success";
     }
 
     @GetMapping("/cancel")

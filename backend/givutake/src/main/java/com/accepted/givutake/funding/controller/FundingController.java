@@ -31,7 +31,7 @@ public class FundingController {
     private final CheerCommentService cheerCommentService;
     private final FundingService fundingService;
     private final FundingReviewService fundingReviewService;
-    private final FundingStatsService fundingStaticsService;
+    private final FundingStatsService fundingStatsService;
 
     // ========= 펀딩 관련 ===========
     // 자신이 작성한 모든 펀딩 조회
@@ -263,7 +263,11 @@ public class FundingController {
     public ResponseEntity<ResponseDto> getYearStatistics(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int fundingIdx) {
-        FundingParticipateDto data =  fundingService.getFundingParticipateByFundingIdx(userDetails.getUsername(), fundingIdx);
+        FundingStatisticsDto data = FundingStatisticsDto.builder()
+                .fundingDayStatistic(fundingStatsService.getFundingDayStatisticByFundingIdx(userDetails.getUsername(), fundingIdx))
+                .fundingParticipate(fundingStatsService.getFundingParticipateByFundingIdx(userDetails.getUsername(), fundingIdx))
+                .fundingStatsByAgeAndGender(fundingStatsService.getFundingCountByAgeAndGender(userDetails.getUsername(), fundingIdx))
+                .build();
         ResponseDto responseDto = ResponseDto.builder()
                 .data(data)
                 .build();
