@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun WishlistPage(
+fun Wishlist(
     navController: NavController,
     viewModel: GiftViewModel = viewModel(),
     wishlistViewModel: WishlistViewModel = viewModel()
