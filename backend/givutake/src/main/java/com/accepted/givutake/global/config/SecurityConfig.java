@@ -89,6 +89,7 @@ public class SecurityConfig {
                                 "/api/users").hasRole("CORPORATION")
                         .requestMatchers(HttpMethod.DELETE, "api/users").hasRole("CORPORATIONYET")
                         .requestMatchers("/api/users/client/**").hasRole("CLIENT")
+                        .requestMatchers(HttpMethod.POST, "/api/participants").hasRole("CLIENT")
                         .requestMatchers(HttpMethod.DELETE,"/api/users").hasRole("CLIENT")
                         // 이 밖에 모든 요청에 대해서 인증을 필요로 한다는 설정
                         .anyRequest().authenticated()
