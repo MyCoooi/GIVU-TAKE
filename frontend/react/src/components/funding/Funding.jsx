@@ -66,7 +66,9 @@ const Funding = () => {
       <div className="funding-page-content">
         <div className="funding-header">
           <h1>펀딩 관리</h1>
-          <button className="register-button">등록</button>
+          <button className="register-button" onClick={() => navigate("/funding/create-funding")}>
+          등록
+          </button>
         </div>
 
         {/* 필터 버튼 */}
