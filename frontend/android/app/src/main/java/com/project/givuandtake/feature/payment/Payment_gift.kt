@@ -53,7 +53,7 @@ fun PaymentScreen_gift(
     viewModel: PaymentViewModel = viewModel()
 ) {
     var selectedMethod by remember { mutableStateOf("KAKAO") } // 결제 수단 상태
-    var amount by remember { mutableStateOf(price * quantity) } // 결제 금액 설정
+    var amount by remember { mutableStateOf(quantity) } // 결제 금액 설정
     val context = LocalContext.current
 
     Surface(
@@ -89,7 +89,8 @@ fun PaymentScreen_gift(
                     amount = amount
                 ),
                 navController = navController,
-                viewModel = viewModel
+                viewModel = viewModel,
+                price = price
             )
         }
     }
@@ -99,7 +100,8 @@ fun PaymentScreen_gift(
 fun PaymentTotalAndButton2_gift(
     kakaoPaymentInfo: KakaoPaymentInfo,
     navController: NavController,
-    viewModel: PaymentViewModel
+    viewModel: PaymentViewModel,
+    price: Int
 ) {
     Surface(
         modifier = Modifier
@@ -116,7 +118,7 @@ fun PaymentTotalAndButton2_gift(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // 결제 총 금액 표시
-            PaymentTotal_gift(kakaoPaymentInfo.amount)
+            PaymentTotal_gift(kakaoPaymentInfo.amount * price)
 
             // 결제하기 버튼
             PaymentButton_gift(
