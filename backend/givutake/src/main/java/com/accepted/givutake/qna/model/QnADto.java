@@ -16,6 +16,7 @@ public class QnADto {
     private String userProfileImage;
     private String qnaTitle;
     private String qnaContent;
-//    private LocalDateTime createdDate;
-//    private AnswerDto answer;
+    private LocalDateTime createdDate;
+    private AnswerDto answer;
+
 }
