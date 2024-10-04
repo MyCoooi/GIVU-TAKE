@@ -260,7 +260,7 @@ public class FundingController {
     }
 
     @GetMapping("/statistics/{fundingIdx}")
-    public ResponseEntity<ResponseDto> getYearStatistics(
+    public ResponseEntity<FundingStatsByAgeAndGenderDto> getYearStatistics(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int fundingIdx) {
         FundingStatsByAgeAndGenderDto data = fundingStaticsService.getFundingCountByAgeAndGender(fundingIdx);
