@@ -36,6 +36,7 @@ class PaymentViewModel : ViewModel() {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(readyResponse.next_redirect_app_url))
                         context.startActivity(intent)
                         navController.navigate("payment_result")
+
                     }
                 } else {
                     Log.e("Payment", "결제 준비 실패: ${response.code()}")
