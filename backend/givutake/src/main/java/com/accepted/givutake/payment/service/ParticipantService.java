@@ -61,6 +61,14 @@ public class ParticipantService {
         ).toList();
     }
 
+    public void updateFunding(int fundingIdx,int price){
+        Fundings funding = fundingRepository.findByFundingIdx(fundingIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_FUNDING_WITH_IDX_EXCEPTION));
+
+        funding.setTotalMoney(funding.getTotalMoney()+price);
+
+        fundingRepository.save(funding);
+    }
+
     public void deleteParticipant(String email, long participantIdx){
         FundingParticipants participant = fundingParticipantsRepository.findById(participantIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_FUNDING_PARTICIPATE_EXCEPTION));
 
