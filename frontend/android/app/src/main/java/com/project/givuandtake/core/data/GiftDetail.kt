@@ -55,7 +55,7 @@ interface GiftDetailDao {
     suspend fun deleteAll()
 }
 
-@Database(entities = [GiftDetail::class], version = 1, exportSchema = false)
+@Database(entities = [GiftDetail::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun giftDetailDao(): GiftDetailDao
 }
