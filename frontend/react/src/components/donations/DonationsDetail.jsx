@@ -13,7 +13,6 @@ const DonationsDetail = () => {
   const [activeTab, setActiveTab] = useState("소개"); // Active tab state
   const [donation, setDonation] = useState(null); // 기부품 데이터 상태
   const [salesCount, setSalesCount] = useState(0); // 판매량 상태
-  const [loading, setLoading] = useState(true); // 로딩 상태
 
   useEffect(() => {
     const fetchDonationDetail = async () => {
@@ -24,8 +23,6 @@ const DonationsDetail = () => {
         setSalesCount(salesData); // 판매량 설정
       } catch (error) {
         console.error("기부품 상세 정보를 가져오는 데 실패했습니다:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -58,20 +55,12 @@ const DonationsDetail = () => {
   };
 
   const renderContent = () => {
-    if (loading) {
-      return <p>로딩 중...</p>;
-    }
-
-    if (!donation) {
-      return <p>데이터를 불러오는 데 실패했습니다.</p>;
-    }
-
     switch (activeTab) {
       case "소개":
         return (
           <div className="donations-description-section">
             <p className="donations-description">
-              {donation.giftContent}
+              {donation?.giftContent}
             </p>
           </div>
         );
@@ -85,14 +74,6 @@ const DonationsDetail = () => {
         return null;
     }
   };
-
-  if (loading) {
-    return <p>로딩 중...</p>;
-  }
-
-  if (!donation) {
-    return <p>데이터를 불러오는 데 실패했습니다.</p>;
-  }
 
   return (
     <div className="donations-detail-container">
@@ -117,7 +98,7 @@ const DonationsDetail = () => {
             </button>
           </div>
           <div className="donations-button-group">
-            <button className="donations-edit-button" onClick={() => navigate(`/donations/edit/${donation.id}`)}>
+            <button className="donations-edit-button" onClick={() => navigate(`/donations/edit/${donation?.id}`)}>
               수정
             </button>
             <button className="donations-delete-button" onClick={handleDelete}>
@@ -128,7 +109,7 @@ const DonationsDetail = () => {
 
         <div className="donations-detail-body">
           <div className="donations-thumbnail-section">
-            {donation.giftThumbnail ? (
+            {donation?.giftThumbnail ? (
               <img
                 src={donation.giftThumbnail}
                 alt="기부품 썸네일"
@@ -140,12 +121,12 @@ const DonationsDetail = () => {
           </div>
 
           <div className="donations-info-section">
-            <h2 className="donations-title">{donation.giftName}</h2>
-            <p className="donations-category">카테고리: {donation.categoryName}</p>
-            <p className="donations-price">가격: {donation.price.toLocaleString()}원</p>
+            <h2 className="donations-title">{donation?.giftName}</h2>
+            <p className="donations-category">카테고리: {donation?.categoryName}</p>
+            <p className="donations-price">가격: {donation?.price?.toLocaleString()}원</p>
             <p className="donations-stock">판매량: {salesCount}개</p> {/* 판매량을 여기서 표시 */}
-            <p className="donations-corporationName">판매자: {donation.corporationName}</p>
-            <p className="donations-date">등록일: {new Date(donation.createdDate).toLocaleDateString()}</p>
+            <p className="donations-corporationName">판매자: {donation?.corporationName}</p>
+            <p className="donations-date">등록일: {new Date(donation?.createdDate).toLocaleDateString()}</p>
           </div>
         </div>
 
