@@ -72,12 +72,12 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
 
     @Query(nativeQuery = true, value =
             """
-            WITH CategoryGifts AS (
+            WITH category_gifts AS (
                 SELECT g.category_idx
-                FROM Gifts g
+                FROM gifts g
                 WHERE g.gift_idx = :giftIdx
             ),
-            OrderStats AS (
+            order_stats AS (
                 SELECT
                     o.gift_idx,
                     g.gift_name,
@@ -85,12 +85,12 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
                     FLOOR(DATEDIFF(CURDATE(), u.birth) / 365) AS age,
                     o.amount,
                     SUM(o.amount) OVER (PARTITION BY g.category_idx) AS category_total_amount
-                FROM Orders o
-                JOIN Users u ON o.user_idx = u.user_idx
-                JOIN Gifts g ON o.gift_idx = g.gift_idx
-                JOIN CategoryGifts cg ON g.category_idx = cg.category_idx
+                FROM orders o
+                JOIN users u ON o.user_idx = u.user_idx
+                JOIN gifts g ON o.gift_idx = g.gift_idx
+                JOIN category_gifts cg ON g.category_idx = cg.category_idx
             ),
-            GiftStats AS (
+            gift_stats AS (
                 SELECT
                     o.gift_idx,
                     g.gift_name,
@@ -98,9 +98,9 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
                     FLOOR(DATEDIFF(CURDATE(), u.birth) / 365) AS age,
                     o.amount,
                     SUM(o.amount) OVER () AS total_amount
-                FROM Orders o
-                JOIN Users u ON o.user_idx = u.user_idx
-                JOIN Gifts g ON o.gift_idx = g.gift_idx
+                FROM orders o
+                JOIN users u ON o.user_idx = u.user_idx
+                JOIN gifts g ON o.gift_idx = g.gift_idx
                 WHERE g.gift_idx = :giftIdx
             )
             SELECT
@@ -108,7 +108,7 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
                 gift_name AS name,
                 SUM(amount) AS count,
                 SUM(amount) / MAX(category_total_amount) * 100 AS percentage
-            FROM OrderStats
+            FROM order_stats
             GROUP BY gift_idx, gift_name
             
             UNION ALL
@@ -118,7 +118,7 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
                 IF(is_male, 'male', 'female') AS name,
                 SUM(amount) AS count,
                 SUM(amount) / MAX(total_amount) * 100 AS percentage
-            FROM GiftStats
+            FROM gift_stats
             GROUP BY is_male
             
             UNION ALL
@@ -134,7 +134,7 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
                 END AS name,
                 SUM(amount) AS count,
                 SUM(amount) / MAX(total_amount) * 100 AS percentage
-            FROM GiftStats
+            FROM gift_stats
             GROUP BY
                 CASE
                     WHEN age < 30 THEN '20s'
