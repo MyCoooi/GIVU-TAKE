@@ -2,12 +2,9 @@ package com.accepted.givutake.funding.service;
 
 import com.accepted.givutake.funding.entity.Fundings;
 import com.accepted.givutake.funding.model.FundingAddDto;
-import com.accepted.givutake.funding.model.*;
 import com.accepted.givutake.funding.repository.FundingRepository;
-import com.accepted.givutake.gift.model.purchaser;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
-import com.accepted.givutake.payment.entity.FundingParticipants;
 import com.accepted.givutake.payment.repository.FundingParticipantsRepository;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.model.UserDto;
@@ -21,11 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
