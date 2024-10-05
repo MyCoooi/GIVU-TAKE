@@ -8,8 +8,11 @@ import com.accepted.givutake.qna.model.AnswerDto;
 import com.accepted.givutake.qna.model.CreateAnswerDto;
 import com.accepted.givutake.qna.repository.AnswerRepository;
 import com.accepted.givutake.qna.repository.QnARepository;
+import com.accepted.givutake.user.admin.service.AdminService;
 import com.accepted.givutake.user.common.entity.Users;
+import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.repository.UsersRepository;
+import com.accepted.givutake.user.common.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,11 +23,11 @@ import org.springframework.stereotype.Service;
 public class AnswerService {
 
     private final AnswerRepository answerRepository;
-    private final UsersRepository usersRepository;
+    private final AdminService adminService;
     private final QnARepository qnARepository;
 
     public void createAnswer(String authority , String email, int qnaIdx, CreateAnswerDto request){
-        Users admin = usersRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        Users admin = adminService.getUserByEmail(email);
         QnA qna = qnARepository.findById(qnaIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_QNA_EXCEPTION));
         if(!authority.equals("ROLE_ADMIN")){
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);

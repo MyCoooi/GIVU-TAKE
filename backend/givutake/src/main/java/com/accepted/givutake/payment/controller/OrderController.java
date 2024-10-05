@@ -104,8 +104,6 @@ public class OrderController {
         }
     }
 
-
-
     @PatchMapping("/{orderIdx}")
     public ResponseEntity<ResponseDto> updateOrder(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -121,15 +119,6 @@ public class OrderController {
     @GetMapping("/statistics/{giftIdx}")
     public ResponseEntity<ResponseDto> getOrderStatistics(@PathVariable int giftIdx){
         int data = orderService.countGift(giftIdx);
-        ResponseDto responseDto = ResponseDto.builder()
-                .data(data)
-                .build();
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
-    }
-
-    @GetMapping("/price")
-    public ResponseEntity<ResponseDto> getDonation() {
-        int data = orderService.calculateTotalOrderPrice();
         ResponseDto responseDto = ResponseDto.builder()
                 .data(data)
                 .build();
