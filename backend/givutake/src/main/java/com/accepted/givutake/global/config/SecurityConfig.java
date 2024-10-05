@@ -71,7 +71,12 @@ public class SecurityConfig {
                                 "/api/experience-village",
                                 "/api/purchases/completed",
                                 "/api/purchases/cancel",
-                                "/api/purchases/fail").permitAll()
+                                "/api/purchases/fail",
+                                "/api/gifts/**"
+                        ).permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/gifts/review/**"
+                        ).authenticated()
                         .requestMatchers(HttpMethod.POST,"/api/users",
                                 "/api/admin",
                                 "/api/users/password/code",
