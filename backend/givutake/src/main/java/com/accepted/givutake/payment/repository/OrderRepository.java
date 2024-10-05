@@ -20,10 +20,10 @@ public interface OrderRepository extends JpaRepository<Orders, Integer> {
     List<Orders> findByUsersAndCreatedDateBetween(Users users, LocalDateTime startDateTime, LocalDateTime endDateTime);
     int countByGift(Gifts gift);
     @Query("SELECT SUM(o.price) FROM Orders o")
-    Integer getTotalOrderPrice();
+    Long getTotalOrderPrice();
 
     @Query("SELECT SUM(o.price) FROM Orders o WHERE o.users.userIdx = :userIdx")
-    Integer sumPriceByUserIdx(@Param("userIdx") int userIdx);
+    Long sumPriceByUserIdx(@Param("userIdx") int userIdx);
 
 
     @Query("SELECT FUNCTION('MONTH', o.createdDate) as month, SUM(o.amount) as total " +

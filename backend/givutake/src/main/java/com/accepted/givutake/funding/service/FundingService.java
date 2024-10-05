@@ -2,16 +2,12 @@ package com.accepted.givutake.funding.service;
 
 import com.accepted.givutake.funding.entity.Fundings;
 import com.accepted.givutake.funding.model.FundingAddDto;
-import com.accepted.givutake.funding.model.*;
 import com.accepted.givutake.funding.repository.FundingRepository;
-import com.accepted.givutake.gift.model.purchaser;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
-import com.accepted.givutake.payment.entity.FundingParticipants;
 import com.accepted.givutake.payment.repository.FundingParticipantsRepository;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.model.UserDto;
-import com.accepted.givutake.user.common.repository.UsersRepository;
 import com.accepted.givutake.user.common.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,11 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -34,9 +27,7 @@ import java.util.stream.Collectors;
 public class FundingService {
 
     private final FundingRepository fundingRepository;
-    private final UsersRepository userRepository;
     private final UserService userService;
-    private final FundingParticipantsRepository fundingParticipantsRepository;
 
     // 자신이 작성한 모든 펀딩 조회
     public List<Fundings> getMyFundingList(String email, int pageNo, int pageSize) {

@@ -11,6 +11,17 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class GiftPurchaserDto {
-    List<purchaser> purchasers;
+    List<Purchaser> purchasers;
+
+    @Getter
+    @Setter
+    @ToString
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class Purchaser {
+        String name;
+        int price;
+    }
 }
 
