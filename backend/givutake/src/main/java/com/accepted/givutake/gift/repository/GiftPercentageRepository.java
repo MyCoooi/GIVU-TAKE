@@ -38,7 +38,7 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
     
             SELECT
                 'gender' AS stat_type,
-                IF(is_male, 'Male', 'Female') AS name,
+                IF(is_male, 'male', 'female') AS name,
                 SUM(amount) AS count,
                 SUM(amount) / MAX(total_amount) * 100 AS percentage
             FROM OrderStats
@@ -115,7 +115,7 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
             
             SELECT
                 'gender' AS stat_type,
-                IF(is_male, 'Male', 'Female') AS name,
+                IF(is_male, 'male', 'female') AS name,
                 SUM(amount) AS count,
                 SUM(amount) / MAX(total_amount) * 100 AS percentage
             FROM GiftStats

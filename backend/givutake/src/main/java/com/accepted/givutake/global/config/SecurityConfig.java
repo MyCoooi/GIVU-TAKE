@@ -72,7 +72,12 @@ public class SecurityConfig {
                                 "/api/purchases/completed",
                                 "/api/purchases/cancel",
                                 "/api/purchases/fail",
-                                "/api/donations/price").permitAll()
+                                "/api/donations/price",
+                                "/api/gifts/**"
+                        ).permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/gifts/review/**"
+                        ).authenticated()
                         .requestMatchers(HttpMethod.POST,"/api/users",
                                 "/api/admin",
                                 "/api/users/password/code",

@@ -356,12 +356,12 @@ public class GiftService {
         Users user = savedUserDto.toEntity();
         List<Object[]> purchaserData = orderRepository.findPurchasersByGiftIdx(giftIdx, user.getUserIdx());
 
-        List<purchaser> purchasers = purchaserData.stream()
-                .map(data -> new purchaser(
+        List<GiftPurchaserDto.Purchaser> purchasers = purchaserData.stream()
+                .map(data -> new GiftPurchaserDto.Purchaser(
                         (String) data[0],  // name
                         ((Number) data[1]).intValue()  // totalPrice
                 ))
-                .sorted(Comparator.comparingInt(purchaser::getPrice).reversed())
+                .sorted(Comparator.comparingInt(GiftPurchaserDto.Purchaser::getPrice).reversed())
                 .collect(Collectors.toList());
 
         return new GiftPurchaserDto(purchasers);

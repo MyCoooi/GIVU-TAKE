@@ -235,17 +235,26 @@ public class GiftController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
-    @GetMapping("/year/statistics")
+    @GetMapping("/statistics")
     public ResponseEntity<ResponseDto> getYearStatistics(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(required = false) Integer giftIdx) {
-        GiftPercentageDto data = giftStatsService.getGiftPercentage(giftIdx);
+
+        String email = userDetails.getUsername();
+
+        GiftStatisticsDto data = GiftStatisticsDto
+                .builder()
+                .giftYearStatisticsDto(giftService.getGiftYearStatistics(email, giftIdx))
+                .giftPurchaserDto(giftService.getGiftPurchaser(email, giftIdx))
+                .giftPercentageDto(giftStatsService.getGiftPercentage(giftIdx))
+                .build();
+
         ResponseDto responseDto = ResponseDto.builder()
                 .data(data)
                 .build();
+
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
-
 }
 
 
