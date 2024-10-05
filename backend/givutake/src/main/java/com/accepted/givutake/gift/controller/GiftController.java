@@ -235,7 +235,7 @@ public class GiftController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
-    @GetMapping("/year/statistics")
+    @GetMapping("/statistics")
     public ResponseEntity<ResponseDto> getYearStatistics(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(required = false) Integer giftIdx) {
