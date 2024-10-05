@@ -209,12 +209,12 @@ public class ClientService {
     // 나의 기부금 총액 조회
     public long calculateTotalFundingFeeByEmail(String email) {
         // 1. 사용자가 참여한 모든 펀딩의 기부금 조회
-        int fundingPrice = fundingParticipantService.calculateTotalFundingFeeByEmail(email);
+        long fundingPrice = fundingParticipantService.calculateTotalFundingFeeByEmail(email);
 
         // 2. 사용자의 총 답례품 금액 조회
-        int giftPrice = orderService.calculateTotalOrderPriceByEmail(email);
+        long giftPrice = orderService.calculateTotalOrderPriceByEmail(email);
 
-        return (long) fundingPrice + (long) giftPrice;
+        return fundingPrice + giftPrice;
     }
 
     // 카드 등록하기

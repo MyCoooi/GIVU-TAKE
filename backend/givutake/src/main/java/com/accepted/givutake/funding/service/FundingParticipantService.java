@@ -65,13 +65,25 @@ public class FundingParticipantService {
     }
 
     // 자신이 참여한 모든 펀딩의 기부금 조회
-    public int calculateTotalFundingFeeByEmail(String email) {
+    public long calculateTotalFundingFeeByEmail(String email) {
         // 1. DB에서 user 가져오기
         UserDto savedUserDto = userService.getUserByEmail(email);
         Users savedUser = savedUserDto.toEntity();
 
         // 2. 펀딩 기부금 조회
-        Integer sum = fundingParticipantsRepository.sumFundingFeeByUserIdx(savedUser.getUserIdx());
+        Long sum = fundingParticipantsRepository.sumFundingFeeByUserIdx(savedUser.getUserIdx());
+
+        if (sum == null) {
+            return 0;
+        }
+
+        return sum;
+    }
+
+    // 모든 사용자가 참여한 모든 펀딩 기부금 조회
+    public long calculateTotalFundingFee() {
+        // 1. 펀딩 기부금 조회
+        Long sum = fundingParticipantsRepository.sumFundingFee();
 
         if (sum == null) {
             return 0;

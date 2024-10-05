@@ -174,7 +174,7 @@ public class ClientController {
     }
 
     // ============== 카드 관련 ============
-
+    // 카드 리스트 조회
     @GetMapping("/cards")
     public ResponseEntity<ResponseDto> getCardsList(@AuthenticationPrincipal UserDetails userDetails) {
         List<CardViewDto> cardlist = cardService.getCardListByEmail(userDetails.getUsername());
@@ -182,9 +182,9 @@ public class ClientController {
         ResponseDto responseDto = ResponseDto.builder()
                 .data(cardlist)
                 .build();
+
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
-
 
     // 카드 등록
     @PostMapping("/cards")
