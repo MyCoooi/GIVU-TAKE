@@ -12,7 +12,7 @@ import java.util.List;
 public interface GiftPercentageRepository extends JpaRepository<Orders, Integer> {
     @Query(nativeQuery = true, value =
             """
-            WITH OrderStats AS (
+            WITH order_stats AS (
                 SELECT
                     o.gift_idx,
                     g.category_idx,
@@ -21,17 +21,17 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
                     FLOOR(DATEDIFF(CURDATE(), u.birth) / 365) AS age,
                     o.amount,
                     SUM(o.amount) OVER() AS total_amount
-                FROM Orders o
-                JOIN Users u ON o.user_idx = u.user_idx
-                JOIN Gifts g ON o.gift_idx = g.gift_idx
-                JOIN Categories c ON g.category_idx = c.category_idx
+                FROM orders o
+                JOIN users u ON o.user_idx = u.user_idx
+                JOIN gifts g ON o.gift_idx = g.gift_idx
+                JOIN categories c ON g.category_idx = c.category_idx
             )
             SELECT
                 'category' AS stat_type,
                 category_name AS name,
                 SUM(amount) AS count,
                 SUM(amount) / MAX(total_amount) * 100 AS percentage
-            FROM OrderStats
+            FROM order_stats
             GROUP BY category_idx, category_name
     
             UNION ALL
@@ -41,7 +41,7 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
                 IF(is_male, 'male', 'female') AS name,
                 SUM(amount) AS count,
                 SUM(amount) / MAX(total_amount) * 100 AS percentage
-            FROM OrderStats
+            FROM order_stats
             GROUP BY is_male
     
             UNION ALL
@@ -57,7 +57,7 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
                 END AS name,
                 SUM(amount) AS count,
                 SUM(amount) / MAX(total_amount) * 100 AS percentage
-            FROM OrderStats
+            FROM order_stats
             GROUP BY
                 CASE
                     WHEN age < 30 THEN '20s'
