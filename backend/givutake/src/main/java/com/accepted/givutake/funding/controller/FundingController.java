@@ -6,6 +6,7 @@ import com.accepted.givutake.funding.model.*;
 import com.accepted.givutake.funding.service.CheerCommentService;
 import com.accepted.givutake.funding.service.FundingReviewService;
 import com.accepted.givutake.funding.service.FundingService;
+import com.accepted.givutake.funding.service.FundingStatsService;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.model.ResponseDto;
@@ -30,8 +31,30 @@ public class FundingController {
     private final CheerCommentService cheerCommentService;
     private final FundingService fundingService;
     private final FundingReviewService fundingReviewService;
+    private final FundingStatsService fundingStatsService;
 
     // ========= 펀딩 관련 ===========
+    // 자신이 작성한 모든 펀딩 조회
+    @GetMapping("/my-fundings")
+    public ResponseEntity<ResponseDto> getMyFundingList(@AuthenticationPrincipal UserDetails userDetails,
+                                                        @RequestParam(required = false, defaultValue = "0") int pageNo,
+                                                        @RequestParam(required = false, defaultValue = "10") int pageSize) {
+
+        String email = userDetails.getUsername();
+
+        List<FundingViewDto> fundingViewDtoList =
+                fundingService.getMyFundingList(email, pageNo, pageSize)
+                        .stream()
+                        .map(FundingViewDto::toDto)
+                        .collect(Collectors.toList());
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(fundingViewDtoList)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
     // 조건에 해당하는 모든 펀딩 조회
     @GetMapping
     public ResponseEntity<ResponseDto> getFundingList(@RequestParam char type, @RequestParam byte state) {
@@ -198,8 +221,8 @@ public class FundingController {
     // ========= 후기 관련 ===========
     // 특정 펀딩의 펀딩 후기 조회
     @GetMapping("/{fundingIdx}/review")
-    public ResponseEntity<ResponseDto> getFundingReviewListByJwt(@PathVariable int fundingIdx) {
-        FundingReviewViewDto savedFundingReviewDto = fundingReviewService.getFundingReviewListByFundingIdx(fundingIdx);
+    public ResponseEntity<ResponseDto> getFundingReviewByJwt(@PathVariable int fundingIdx) {
+        FundingReviewViewDto savedFundingReviewDto = fundingReviewService.getFundingReviewByFundingIdx(fundingIdx);
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(savedFundingReviewDto)
@@ -235,4 +258,20 @@ public class FundingController {
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
+
+    @GetMapping("/statistics/{fundingIdx}")
+    public ResponseEntity<ResponseDto> getYearStatistics(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable int fundingIdx) {
+        FundingStatisticsDto data = FundingStatisticsDto.builder()
+                .fundingDayStatistic(fundingStatsService.getFundingDayStatisticByFundingIdx(userDetails.getUsername(), fundingIdx))
+                .fundingParticipate(fundingStatsService.getFundingParticipateByFundingIdx(userDetails.getUsername(), fundingIdx))
+                .fundingStatsByAgeAndGender(fundingStatsService.getFundingCountByAgeAndGender(userDetails.getUsername(), fundingIdx))
+                .build();
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(data)
+                .build();
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
 }

@@ -4,6 +4,9 @@ import com.accepted.givutake.gift.entity.Gifts;
 import com.accepted.givutake.gift.repository.GiftRepository;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
+import com.accepted.givutake.user.admin.service.AdminService;
+import com.accepted.givutake.user.common.model.UserDto;
+import com.accepted.givutake.user.common.service.UserService;
 import com.accepted.givutake.wish.entity.Wish;
 import com.accepted.givutake.wish.model.CreateWishDto;
 import com.accepted.givutake.wish.model.WishDto;
@@ -30,11 +33,12 @@ public class WishService {
 
     private final WishRepository wishRepository;
     private final GiftRepository giftRepository;
-    private final UsersRepository userRepository;
+    private final UserService userService;
 
     public void createWish(String email , CreateWishDto request) { // 찜 추가
         Gifts gift = giftRepository.findById(request.getGiftIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
-        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        UserDto userDto = userService.getUserByEmail(email);
+        Users user = userDto.toEntity();
         if(isWish(email,gift.getGiftIdx())){
             throw new ApiException(ExceptionEnum.NOT_ALLOWED_WISH_INSERTION_EXCEPTION);
         }
@@ -48,7 +52,8 @@ public class WishService {
     public List<WishDto> getWishList(String email, int pageNo, int pageSize){
         Pageable pageable = PageRequest.of(pageNo-1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
 
-        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        UserDto userDto = userService.getUserByEmail(email);
+        Users user = userDto.toEntity();
 
         Specification<Wish> spec = (root, query, cb) -> {
             Join<Wish, Gifts> giftJoin = root.join("gift");
@@ -79,7 +84,9 @@ public class WishService {
     }
 
     public boolean isWish(String email, int giftIdx) {
-        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        UserDto userDto = userService.getUserByEmail(email);
+        Users user = userDto.toEntity();
+
         Gifts gift = giftRepository.findById(giftIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
         Optional<Wish> wish = wishRepository.findByUsersAndGift(user,gift);
         if(wish.isPresent()) {

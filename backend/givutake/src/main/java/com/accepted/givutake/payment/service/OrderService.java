@@ -153,20 +153,19 @@ public class OrderService {
         return orderRepository.countByGift(gift);
     }
 
-    public int calculateTotalOrderPrice() {
-        int totalOrderPrice = Optional.ofNullable(orderRepository.getTotalOrderPrice()).orElse(0);
-        return totalOrderPrice;
+    public long calculateTotalOrderPrice() {
+        return Optional.ofNullable(orderRepository.getTotalOrderPrice()).orElse(0L);
     }
 
-    public int calculateTotalOrderPriceByEmail(String email) {
+    public long calculateTotalOrderPriceByEmail(String email) {
         // 1. 유저 조회
         UserDto savedUserDto = userService.getUserByEmail(email);
 
         // 2. 사용자가 구매한 모든 답례품의 총금액 조회
-        Integer sum = orderRepository.sumPriceByUserIdx(savedUserDto.getUserIdx());
+        Long sum = orderRepository.sumPriceByUserIdx(savedUserDto.getUserIdx());
 
         if (sum == null) {
-            return 0;
+            return 0L;
         }
 
         return sum;

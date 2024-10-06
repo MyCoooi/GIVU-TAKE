@@ -9,7 +9,8 @@ import com.accepted.givutake.payment.model.CreateParticipateDto;
 import com.accepted.givutake.payment.model.ParticipantDto;
 import com.accepted.givutake.payment.repository.FundingParticipantsRepository;
 import com.accepted.givutake.user.common.entity.Users;
-import com.accepted.givutake.user.common.repository.UsersRepository;
+import com.accepted.givutake.user.common.model.UserDto;
+import com.accepted.givutake.user.common.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,12 +26,13 @@ import java.util.List;
 @Transactional
 public class ParticipantService {
 
-    private final UsersRepository userRepository;
+    private final UserService userService;
     private final FundingParticipantsRepository fundingParticipantsRepository;
     private final FundingRepository fundingRepository;
 
     public FundingParticipants createParticipants(String email, CreateParticipateDto request){
-        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        UserDto userDto = userService.getUserByEmail(email);
+        Users user = userDto.toEntity();
         Fundings funding = fundingRepository.findByFundingIdx(request.getFundingIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_FUNDING_WITH_IDX_EXCEPTION));
         FundingParticipants newParticipant = FundingParticipants.builder()
                 .fundings(funding)
@@ -45,7 +47,8 @@ public class ParticipantService {
     public List<ParticipantDto> getParticipants(String email, int pageNo, int pageSize){
         Pageable pageable = PageRequest.of(pageNo-1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
 
-        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        UserDto userDto = userService.getUserByEmail(email);
+        Users user = userDto.toEntity();
 
         Page<FundingParticipants> participantList = fundingParticipantsRepository.findByUsers(user, pageable);
 
@@ -59,6 +62,14 @@ public class ParticipantService {
                 .price(participant.getFundingFee())
                 .build()
         ).toList();
+    }
+
+    public void updateFunding(int fundingIdx,int price){
+        Fundings funding = fundingRepository.findByFundingIdx(fundingIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_FUNDING_WITH_IDX_EXCEPTION));
+
+        funding.setTotalMoney(funding.getTotalMoney()+price);
+
+        fundingRepository.save(funding);
     }
 
     public void deleteParticipant(String email, long participantIdx){

@@ -4,10 +4,9 @@ import com.accepted.givutake.funding.model.FundingParticipantViewDto;
 import com.accepted.givutake.funding.service.FundingParticipantService;
 import com.accepted.givutake.global.model.ResponseDto;
 import com.accepted.givutake.user.client.entity.Addresses;
-import com.accepted.givutake.user.client.model.AddressAddDto;
-import com.accepted.givutake.user.client.model.AddressDetailViewDto;
-import com.accepted.givutake.user.client.model.AddressModifyDto;
-import com.accepted.givutake.user.client.model.AddressViewDto;
+import com.accepted.givutake.user.client.entity.Cards;
+import com.accepted.givutake.user.client.model.*;
+import com.accepted.givutake.user.client.service.CardService;
 import com.accepted.givutake.user.client.service.ClientService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +31,7 @@ public class ClientController {
 
     private final ClientService clientService;
     private final FundingParticipantService fundingParticipantService;
+    private final CardService cardService;
 
     // jwt 토큰으로 모든 주소 조회
     @GetMapping("/addresses")
@@ -168,6 +168,64 @@ public class ClientController {
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(map)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // ============== 카드 관련 ============
+    // 카드 리스트 조회
+    @GetMapping("/cards")
+    public ResponseEntity<ResponseDto> getCardsList(@AuthenticationPrincipal UserDetails userDetails) {
+        List<CardViewDto> cardlist = cardService.getCardListByEmail(userDetails.getUsername());
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(cardlist)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // 카드 등록
+    @PostMapping("/cards")
+    public ResponseEntity<ResponseDto> addCard(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody AddCardDto addCardDto) {
+        String email = userDetails.getUsername();
+
+        CardDto savedCardDto = clientService.addCardByEmail(email, addCardDto);
+        CardViewDto cardViewDto = savedCardDto.toCardViewDto();
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(cardViewDto)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+    }
+
+    // 카드 삭제
+    @DeleteMapping("/cards/{cardIdx}")
+    public ResponseEntity<ResponseDto> deleteCard(@AuthenticationPrincipal UserDetails userDetails, @PathVariable int cardIdx) {
+        String email = userDetails.getUsername();
+
+        CardDto deletedCardDto = clientService.deleteCardByCardIdx(email, cardIdx);
+        CardViewDto cardViewDto = deletedCardDto.toCardViewDto();
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(cardViewDto)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // 카드 수정
+    @PatchMapping("/cards/{cardIdx}")
+    public ResponseEntity<ResponseDto> modifyCard(@AuthenticationPrincipal UserDetails userDetails, @PathVariable int cardIdx, @Valid @RequestBody CardModifyDto cardModifyDto) {
+        String email = userDetails.getUsername();
+
+        CardDto modifiedCardDto = clientService.modifyCardByCardIdx(email, cardIdx, cardModifyDto);
+        CardViewDto cardViewDto = modifiedCardDto.toCardViewDto();
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(cardViewDto)
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);

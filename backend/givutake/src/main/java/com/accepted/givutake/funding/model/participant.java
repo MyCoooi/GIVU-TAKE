@@ -1,4 +1,4 @@
-package com.accepted.givutake.gift.model;
+package com.accepted.givutake.funding.model;
 
 import lombok.*;
 
@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class purchaser {
+public class participant {
     String name;
     int price;
 }

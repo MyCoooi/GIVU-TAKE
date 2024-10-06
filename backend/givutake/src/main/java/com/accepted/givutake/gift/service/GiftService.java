@@ -15,9 +15,12 @@ import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.repository.CategoryRepository;
 import com.accepted.givutake.payment.service.OrderService;
 import com.accepted.givutake.user.common.entity.Users;
+import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.repository.UsersRepository;
+import com.accepted.givutake.user.common.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -38,12 +42,14 @@ public class GiftService {
     private final GiftReviewLikedRepository giftReviewLikedRepository;
     private final CategoryRepository categoryRepository;
     private final UsersRepository userRepository;
+    private final UserService userService;
     private final OrderRepository orderRepository;
     private final OrderService orderService;
 
     public Gifts createGift(String email, CreateGiftDto request) {
-        Categories category = categoryRepository.findById(request.getCartegoryIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_CATEGORY_EXCEPTION));
-        Users corporation = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        Categories category = categoryRepository.findById(request.getCategoryIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_CATEGORY_EXCEPTION));
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        Users corporation = savedUserDto.toEntity();
         Gifts newGift = Gifts.builder()
                 .giftName(request.getGiftName())
                 .corporations(corporation)
@@ -55,13 +61,13 @@ public class GiftService {
         return giftRepository.save(newGift);
     }
 
-    public List<GiftDto> getGifts(Integer corporationIdx, String search, Integer categoryIdx ,int pageNo, int pageSize) {
+    public List<GiftDto> getGifts(String corporationEmail, String search, Integer categoryIdx ,int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo-1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
 
         Specification<Gifts> spec = Specification.where((root, query, cb) -> cb.equal(root.get("isDelete"), false)); // 동적 쿼리 생성
 
-        if(corporationIdx != null){
-            Optional<Users> corporation = userRepository.findById(corporationIdx);
+        if(corporationEmail != null){
+            Optional<Users> corporation = userRepository.findByEmail(corporationEmail);
             if (corporation.isPresent()) { // 특정 사용자가 등록한 물품
                 spec = spec.and((root, query, cb) -> cb.equal(root.get("corporations"), corporation.get()));
             }
@@ -73,7 +79,7 @@ public class GiftService {
             }
         }
 
-        if (!search.isEmpty()) { // 검색어 필터링
+        if (search != null) { // 검색어 필터링
             spec = spec.and((root, query, cb) -> cb.like(root.get("giftName"), "%" + search + "%"));
         }
 
@@ -145,7 +151,8 @@ public class GiftService {
 
     public void createGiftReview(String email, CreateGiftReviewDto request) {
         Gifts gift = giftRepository.findById(request.getGiftIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
-        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        Users user = savedUserDto.toEntity();
         Orders order = orderRepository.findById(request.getOrderIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_ORDER_EXCEPTION));
 
         if(IsWriteGiftReview(email, request.getOrderIdx())){
@@ -207,7 +214,8 @@ public class GiftService {
             pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
         }
 
-        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        Users user = savedUserDto.toEntity();
 
         Specification<GiftReviews> spec = (root, query, cb) -> {
             return cb.and(
@@ -276,13 +284,15 @@ public class GiftService {
     }
 
     public boolean isLiked(String email, int reviewIdx) {
-        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        Users user = savedUserDto.toEntity();
         return giftReviewLikedRepository.existsByUserAndGiftReviews_ReviewIdx(user, reviewIdx);
     }
 
 
     public void createLiked(String email, int reviewIdx) {
-        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        Users user = savedUserDto.toEntity();
         GiftReviews review = giftReviewRepository.findById(reviewIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_REVIEW_EXCEPTION));
 
         if(review.isDelete()){
@@ -302,7 +312,8 @@ public class GiftService {
     }
 
     public void deleteLiked(String email, int reviewIdx) {
-        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        Users user = savedUserDto.toEntity();
         GiftReviews review = giftReviewRepository.findById(reviewIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_REVIEW_EXCEPTION));
 
         if(review.isDelete()){
@@ -320,7 +331,8 @@ public class GiftService {
     }
 
     public GiftYearStatisticsDto getGiftYearStatistics(String email, Integer giftIdx) {
-        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        Users user = savedUserDto.toEntity();
         int year = LocalDate.now().getYear();
         int[] arr = new int[13];
         List<Object[]> monthlyAmounts = orderRepository.findMonthlyOrderAmounts(user.getUserIdx(), year, giftIdx);
@@ -340,15 +352,16 @@ public class GiftService {
     }
 
     public GiftPurchaserDto getGiftPurchaser(String email, Integer giftIdx) {
-        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        Users user = savedUserDto.toEntity();
         List<Object[]> purchaserData = orderRepository.findPurchasersByGiftIdx(giftIdx, user.getUserIdx());
 
-        List<purchaser> purchasers = purchaserData.stream()
-                .map(data -> new purchaser(
+        List<GiftPurchaserDto.Purchaser> purchasers = purchaserData.stream()
+                .map(data -> new GiftPurchaserDto.Purchaser(
                         (String) data[0],  // name
                         ((Number) data[1]).intValue()  // totalPrice
                 ))
-                .sorted(Comparator.comparingInt(purchaser::getPrice).reversed())
+                .sorted(Comparator.comparingInt(GiftPurchaserDto.Purchaser::getPrice).reversed())
                 .collect(Collectors.toList());
 
         return new GiftPurchaserDto(purchasers);

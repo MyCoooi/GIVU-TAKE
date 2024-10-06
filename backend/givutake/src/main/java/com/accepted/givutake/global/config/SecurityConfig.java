@@ -60,6 +60,7 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/s3/**"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/government-fundings/my-fundings").hasRole("CORPORATION")
                         .requestMatchers(HttpMethod.GET, "/api/government-fundings/*/review",
                                 "/api/government-fundings/*/comments",
                                 "/api/government-fundings/*/comments/*",
@@ -70,7 +71,13 @@ public class SecurityConfig {
                                 "/api/experience-village",
                                 "/api/purchases/completed",
                                 "/api/purchases/cancel",
-                                "/api/purchases/fail").permitAll()
+                                "/api/purchases/fail",
+                                "/api/donations/price",
+                                "/api/gifts/**"
+                        ).permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/gifts/review/**"
+                        ).authenticated()
                         .requestMatchers(HttpMethod.POST,"/api/users",
                                 "/api/admin",
                                 "/api/users/password/code",
@@ -88,6 +95,7 @@ public class SecurityConfig {
                                 "/api/users").hasRole("CORPORATION")
                         .requestMatchers(HttpMethod.DELETE, "api/users").hasRole("CORPORATIONYET")
                         .requestMatchers("/api/users/client/**").hasRole("CLIENT")
+                        .requestMatchers(HttpMethod.POST, "/api/participants").hasRole("CLIENT")
                         .requestMatchers(HttpMethod.DELETE,"/api/users").hasRole("CLIENT")
                         // 이 밖에 모든 요청에 대해서 인증을 필요로 한다는 설정
                         .anyRequest().authenticated()
