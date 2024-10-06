@@ -55,6 +55,9 @@ android {
 }
 
 dependencies {
+    // 직렬화
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
+
     implementation ("androidx.camera:camera-core:1.1.0")
     implementation ("androidx.camera:camera-camera2:1.1.0")
     implementation ("androidx.camera:camera-lifecycle:1.1.0")
@@ -62,7 +65,7 @@ dependencies {
 
     // Room 추가
     implementation("androidx.room:room-runtime:2.6.1")
-//    kapt("androidx.room:room-compiler:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
 
     implementation("com.naver.maps:map-sdk:3.19.1")
