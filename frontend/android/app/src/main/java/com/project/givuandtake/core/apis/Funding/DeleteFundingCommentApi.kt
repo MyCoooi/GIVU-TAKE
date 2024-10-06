@@ -23,7 +23,6 @@ interface DeleteFundingCommentService {
     ): Call<DeleteCommentResponse>
 }
 
-// Retrofit 인스턴스 생성
 object DeleteFundingCommentApi {
     private const val BASE_URL = "https://j11e202.p.ssafy.io/api/"
 
