@@ -24,6 +24,8 @@
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 700px; /* 기간통계 그래프 크기 조절 */
+  margin: 0 auto; /* 가운데 정렬 */
 }
 
 .user-statistics {
@@ -45,20 +47,24 @@
 
 .gender-statistics {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around; /* 원형 그래프를 가로로 나란히 배치 */
+  align-items: flex-start; /* 원형 그래프가 동일한 높이에서 시작 */
   margin-top: 20px;
-}
-
-.pie-charts {
-  display: flex;
   gap: 20px;
-  justify-content: center;
 }
 
-.pie-charts canvas {
-  max-width: 200px;
+.gender-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.dropdown {
-  min-width: 120px;
+.gender-statistics canvas {
+  max-width: 250px; /* 원형 그래프 크기 조절 */
+  max-height: 250px;
 }
+
+.funding-statistics-buttons .dropdown {
+  min-width: 200px; /* 드롭다운 크기 수정 */
+}
+

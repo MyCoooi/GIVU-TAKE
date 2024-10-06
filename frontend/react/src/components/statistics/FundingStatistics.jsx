@@ -1,30 +1,29 @@
 import React, { useState } from "react";
-import Sidebar from "../Sidebar"; // Assuming you have a Sidebar component
-import { Line, Pie } from "react-chartjs-2"; // Chart.js components
+import Sidebar from "../Sidebar";
+import { Line, Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
-  CategoryScale,  // Register the category scale
+  CategoryScale,  
   LinearScale,
   PointElement,
   LineElement,
   Title,
   Tooltip,
   Legend,
-  ArcElement // for Pie chart
+  ArcElement
 } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels'; // 플러그인 추가
 import {
   MenuItem,
   Select,
-  Button,
   FormControl,
   InputLabel,
   Box,
   Grid,
   Typography,
 } from "@mui/material";
-import "./FundingStatistics.css"; // Import the CSS file for styles
+import "./FundingStatistics.css";
 
-// Register the required components with ChartJS
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -33,106 +32,244 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement
+  ArcElement,
+  ChartDataLabels // 퍼센트 표시를 위한 플러그인 등록
 );
 
 const FundingStatistics = () => {
-  const [selectedType, setSelectedType] = useState("지역펀딩");
-  const [selectedMenu, setSelectedMenu] = useState("통계"); // selectedMenu state 추가
+  const [selectedMenu, setSelectedMenu] = useState("통계");
+  const [selectedFunding, setSelectedFunding] = useState(null);
 
-  // Example data for the charts (replace with your API data)
-  const lineData = {
-    labels: ["1994", "1998", "2002", "2006", "2010", "2014", "2018", "2022"],
-    datasets: [
-      {
-        label: "펀딩 현황",
-        data: [10, 25, 15, 30, 45, 35, 55, 40],
-        fill: true,
-        backgroundColor: "rgba(102, 178, 255, 0.2)",
-        borderColor: "rgba(102, 178, 255, 1)",
+  // 더미 펀딩 데이터
+  const fundingList = [
+    { id: 1, title: "펀딩 A" },
+    { id: 2, title: "펀딩 B" },
+    { id: 3, title: "펀딩 C" }
+  ];
+
+  // 펀딩별 더미 통계 데이터
+  const fundingData = {
+    1: {
+      lineData: {
+        labels: ["10월 1일", "10월 2일", "10월 3일", "10월 4일"],
+        datasets: [
+          {
+            label: "펀딩 A 현황",
+            data: [100000, 200000, 150000, 50000], // 일별 모금액
+            fill: true,
+            backgroundColor: "rgba(102, 178, 255, 0.2)",
+            borderColor: "rgba(102, 178, 255, 1)",
+          },
+        ],
       },
-    ],
-  };
-
-  const pieData = {
-    labels: ["여", "남"],
-    datasets: [
-      {
-        data: [60, 40],
-        backgroundColor: ["#FF6384", "#36A2EB"],
-        hoverBackgroundColor: ["#FF6384", "#36A2EB"],
+      maleData: {
+        "60+": 10,
+        "20s": 15,
+        "30s": 20,
+        "40s": 25,
+        "50s": 30
       },
-    ],
+      femaleData: {
+        "60+": 12,
+        "20s": 18,
+        "30s": 22,
+        "40s": 28,
+        "50s": 35
+      },
+      participants: [
+        { name: "김수로", amount: 200000 },
+        { name: "박영수", amount: 150000 },
+        { name: "이준영", amount: 100000 }
+      ]
+    },
+    2: {
+      lineData: {
+        labels: ["10월 1일", "10월 2일", "10월 3일", "10월 4일"],
+        datasets: [
+          {
+            label: "펀딩 B 현황",
+            data: [50000, 150000, 250000, 0], // 일별 모금액
+            fill: true,
+            backgroundColor: "rgba(255, 159, 64, 0.2)",
+            borderColor: "rgba(255, 159, 64, 1)",
+          },
+        ],
+      },
+      maleData: {
+        "60+": 15,
+        "20s": 20,
+        "30s": 25,
+        "40s": 30,
+        "50s": 35
+      },
+      femaleData: {
+        "60+": 14,
+        "20s": 19,
+        "30s": 24,
+        "40s": 29,
+        "50s": 34
+      },
+      participants: [
+        { name: "최민수", amount: 250000 },
+        { name: "이준기", amount: 200000 },
+        { name: "홍길동", amount: 50000 }
+      ]
+    },
+    3: {
+      lineData: {
+        labels: ["10월 1일", "10월 2일", "10월 3일", "10월 4일"],
+        datasets: [
+          {
+            label: "펀딩 C 현황",
+            data: [80000, 180000, 280000, 380000], // 일별 모금액
+            fill: true,
+            backgroundColor: "rgba(153, 102, 255, 0.2)",
+            borderColor: "rgba(153, 102, 255, 1)",
+          },
+        ],
+      },
+      maleData: {
+        "60+": 20,
+        "20s": 25,
+        "30s": 30,
+        "40s": 35,
+        "50s": 40
+      },
+      femaleData: {
+        "60+": 22,
+        "20s": 28,
+        "30s": 32,
+        "40s": 36,
+        "50s": 38
+      },
+      participants: [
+        { name: "박지성", amount: 300000 },
+        { name: "손흥민", amount: 180000 },
+        { name: "이청용", amount: 80000 }
+      ]
+    }
   };
 
-  const handleTypeChange = (event) => {
-    setSelectedType(event.target.value);
+  const handleFundingChange = (event) => {
+    setSelectedFunding(event.target.value);
   };
+
+  const selectedFundingData = selectedFunding ? fundingData[selectedFunding] : null;
 
   return (
     <div className="funding-statistics-container">
-      <Sidebar selectedMenu={selectedMenu} setSelectedMenu={setSelectedMenu} /> {/* setSelectedMenu 전달 */}
+      <Sidebar selectedMenu={selectedMenu} setSelectedMenu={setSelectedMenu} />
 
       <div className="funding-statistics-content">
         <Typography variant="h4" className="funding-statistics-title">
-          펀딩 통계
+          {selectedFunding ? `펀딩 ${fundingList.find(f => f.id === selectedFunding).title} 통계` : "펀딩 통계입니다."}
         </Typography>
 
         <div className="funding-statistics-buttons">
-        <Button variant={selectedType === "재난재해펀딩" ? "contained" : "outlined"} onClick={() => setSelectedType("재난재해펀딩")}>
-            재난재해
-          </Button>
-          <Button variant={selectedType === "지역펀딩" ? "contained" : "outlined"} onClick={() => setSelectedType("지역펀딩")}>
-            지역기부
-          </Button>
-
-
+          {/* 펀딩 선택 드롭다운 */}
           <FormControl variant="outlined" className="dropdown">
-            <InputLabel>기간</InputLabel>
-            <Select value={selectedType} onChange={handleTypeChange} label="기간">
-              <MenuItem value="7일">7일</MenuItem>
-              <MenuItem value="1개월">1개월</MenuItem>
-              <MenuItem value="1년">1년</MenuItem>
+            <InputLabel>펀딩 선택</InputLabel>
+            <Select value={selectedFunding || ""} onChange={handleFundingChange} label="펀딩 선택">
+              {fundingList.map((funding) => (
+                <MenuItem key={funding.id} value={funding.id}>
+                  {funding.title}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </div>
 
-        <Grid container spacing={4} className="funding-statistics-main">
-          <Grid item xs={12} md={8}>
-            <Box className="chart-container">
-              <Typography variant="h6">기간통계</Typography>
-              <Line data={lineData} />
-            </Box>
-          </Grid>
+        {selectedFundingData ? (
+          <Grid container spacing={4} className="funding-statistics-main">
+            <Grid item xs={12} md={8}>
+              <Box className="chart-container">
+                <Typography variant="h6">기간통계</Typography>
+                <Line data={selectedFundingData.lineData} />
+              </Box>
+            </Grid>
 
-          <Grid item xs={12} md={4}>
-            <Box className="user-statistics">
-              <Typography variant="h6">유저개인통계</Typography>
-              <div className="user-list">
-                <ul>
-                  {["아무개", "아무개", "아무개"].map((name, index) => (
-                    <li key={index}>
-                      <span>{name}</span> <span>금액</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </Box>
-          </Grid>
+            <Grid item xs={12} md={4}>
+              <Box className="user-statistics">
+                <Typography variant="h6">유저개인통계</Typography>
+                <div className="user-list">
+                  <ul>
+                    {selectedFundingData.participants.map((participant, index) => (
+                      <li key={index}>
+                        <span>{participant.name}</span> <span>{participant.amount.toLocaleString()}원</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </Box>
+            </Grid>
 
-          <Grid item xs={12}>
-            <Box className="gender-statistics">
-              <Typography variant="h6">유저남녀통계</Typography>
-              <div className="pie-charts">
-                <Pie data={pieData} />
-                <Pie data={pieData} />
-              </div>
-            </Box>
+            <Grid item xs={12}>
+              <Box className="gender-statistics">
+                <Box className="gender-stat-item">
+                  <Typography variant="h6">남성 연령별 통계</Typography>
+                  <Pie 
+                    data={{
+                      labels: Object.keys(selectedFundingData.maleData),
+                      datasets: [{
+                        data: Object.values(selectedFundingData.maleData),
+                        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"],
+                      }],
+                    }}
+                    options={{
+                      plugins: {
+                        datalabels: {
+                          formatter: (value, context) => {
+                            const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            const percentage = (value / total * 100).toFixed(2) + "%";
+                            return percentage;
+                          },
+                          color: '#fff',
+                          font: {
+                            weight: 'bold'
+                          }
+                        }
+                      }
+                    }}
+                  />
+                </Box>
+                <Box className="gender-stat-item">
+                  <Typography variant="h6">여성 연령별 통계</Typography>
+                  <Pie 
+                    data={{
+                      labels: Object.keys(selectedFundingData.femaleData),
+                      datasets: [{
+                        data: Object.values(selectedFundingData.femaleData),
+                        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"],
+                      }],
+                    }}
+                    options={{
+                      plugins: {
+                        datalabels: {
+                          formatter: (value, context) => {
+                            const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            const percentage = (value / total * 100).toFixed(2) + "%";
+                            return percentage;
+                          },
+                          color: '#fff',
+                          font: {
+                            weight: 'bold'
+                          }
+                        }
+                      }
+                    }}
+                  />
+                </Box>
+              </Box>
+            </Grid>
           </Grid>
-        </Grid>
+        ) : (
+          <Typography variant="h6" className="no-funding-message">
+            펀딩을 선택해 주세요.
+          </Typography>
+        )}
       </div>
     </div>
   );
 };
 
-export default FundingStatistics; 
+export default FundingStatistics;
