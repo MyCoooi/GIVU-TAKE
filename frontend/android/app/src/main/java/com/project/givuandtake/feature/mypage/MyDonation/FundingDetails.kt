@@ -9,7 +9,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.content.contentReceiver
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,7 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
@@ -57,15 +55,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
-import com.project.givuandtake.core.apis.Address.AddressApi
 import com.project.givuandtake.core.apis.Funding.MyFundingApi
-import com.project.givuandtake.core.data.Address.AddressData
-import com.project.givuandtake.core.data.Address.UserAddress
 import com.project.givuandtake.core.data.Funding.FundingData
 import com.project.givuandtake.core.datastore.TokenManager
-import com.project.givuandtake.feature.mypage.MyActivities.AddressViewModel
 import kotlinx.coroutines.launch
-import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.Calendar
 
