@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Sidebar from "../Sidebar"; // Sidebar import
-import "./Statistics.css"; // 공통 CSS 파일
+import "./DonationsStatistics.css"; // 공통 CSS 파일
 
 const Statistics = () => {
     const [selectedMenu, setSelectedMenu] = useState("통계");
