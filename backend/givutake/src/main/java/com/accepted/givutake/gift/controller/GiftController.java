@@ -3,6 +3,7 @@ package com.accepted.givutake.gift.controller;
 import com.accepted.givutake.gift.entity.Gifts;
 import com.accepted.givutake.gift.model.*;
 import com.accepted.givutake.gift.service.GiftService;
+import com.accepted.givutake.gift.service.GiftStatsService;
 import com.accepted.givutake.global.enumType.ActEnum;
 import com.accepted.givutake.global.enumType.ContentTypeEnum;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
@@ -29,15 +30,16 @@ public class GiftController {
 
     private final GiftService giftService;
     private final UserViewLogService userViewLogService;
+    private final GiftStatsService giftStatsService;
 
     @GetMapping // 답례품 조회
     public ResponseEntity<ResponseDto> getGifts(
-            @RequestParam(value = "corporationIdx", defaultValue = "")Integer corporationIdx,
-            @RequestParam(value = "search", defaultValue = "")String search,
-            @RequestParam(value = "categoryIdx", defaultValue = "")Integer categoryIdx,
+            @RequestParam(value = "corporationEmail", required = false)String corporationEmail,
+            @RequestParam(value = "search", required = false)String search,
+            @RequestParam(value = "categoryIdx", required = false)Integer categoryIdx,
             @RequestParam(value = "pageNo", defaultValue = "1")int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10")int pageSize) {
-        List<GiftDto> gifts = giftService.getGifts(corporationIdx, search, categoryIdx,pageNo, pageSize);
+        List<GiftDto> gifts = giftService.getGifts(corporationEmail, search, categoryIdx,pageNo, pageSize);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(gifts)
                 .build();
@@ -233,17 +235,26 @@ public class GiftController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
-//    @GetMapping("/year/statistics")
-//    public ResponseEntity<ResponseDto> getYearStatistics(
-//            @AuthenticationPrincipal UserDetails userDetails,
-//            @RequestParam(required = false) Integer giftIdx) {
-//        GiftPurchaserDto data =  giftService.getGiftPurchaser(userDetails.getUsername(), giftIdx);
-//        ResponseDto responseDto = ResponseDto.builder()
-//                .data(data)
-//                .build();
-//        return new ResponseEntity<>(responseDto, HttpStatus.OK);
-//    }
+    @GetMapping("/statistics")
+    public ResponseEntity<ResponseDto> getYearStatistics(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) Integer giftIdx) {
 
+        String email = userDetails.getUsername();
+
+        GiftStatisticsDto data = GiftStatisticsDto
+                .builder()
+                .giftYearStatisticsDto(giftService.getGiftYearStatistics(email, giftIdx))
+                .giftPurchaserDto(giftService.getGiftPurchaser(email, giftIdx))
+                .giftPercentageDto(giftStatsService.getGiftPercentage(giftIdx))
+                .build();
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(data)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
 }
 
 

@@ -10,6 +10,6 @@ import lombok.*;
 @Builder
 public class GiftYearStatisticsDto {
 
-    private int[] arr = new int[13];
+    private int[] arr;
 
 }

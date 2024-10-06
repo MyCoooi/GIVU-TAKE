@@ -23,5 +23,16 @@ public interface FundingParticipantsRepository extends JpaRepository<FundingPart
     long countByUsers(Users users);
 
     @Query("SELECT SUM(fp.fundingFee) FROM FundingParticipants fp WHERE fp.users.userIdx = :userIdx")
-    Integer sumFundingFeeByUserIdx(@Param("userIdx") int userIdx);
+    Long sumFundingFeeByUserIdx(@Param("userIdx") int userIdx);
+
+    @Query("SELECT SUM(fp.fundingFee) FROM FundingParticipants fp")
+    Long sumFundingFee();
+
+    @Query("SELECT u.name AS name, SUM(p.fundingFee) AS totalPrice " +
+            "FROM FundingParticipants p " +
+            "JOIN p.users u " +
+            "JOIN p.fundings f " +
+            "WHERE f.fundingIdx = :fundingIdx " +
+            "GROUP BY u.name")
+    List<Object[]> findFundingParticipantsByFundingIdx(@Param("fundingIdx") int fundingIdx);
 }

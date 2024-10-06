@@ -9,14 +9,14 @@ import com.accepted.givutake.pdf.DonationReceiptFormDto;
 import com.accepted.givutake.pdf.PdfService;
 import com.accepted.givutake.region.service.RegionService;
 import com.accepted.givutake.user.client.entity.Addresses;
-import com.accepted.givutake.user.client.model.AddressAddDto;
-import com.accepted.givutake.user.client.model.AddressDetailViewDto;
-import com.accepted.givutake.user.client.model.AddressModifyDto;
+import com.accepted.givutake.user.client.entity.Cards;
+import com.accepted.givutake.user.client.model.*;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,10 +32,12 @@ import java.util.stream.Collectors;
 @Transactional
 public class ClientService {
 
+    private final PasswordEncoder passwordEncoder;
     private final AddressService addressService;
     private final UserService userService;
     private final RegionService regionService;
     private final OrderService orderService;
+    private final CardService cardService;
     private final PdfService pdfService;
     private final FundingParticipantService fundingParticipantService;
 
@@ -207,11 +209,100 @@ public class ClientService {
     // 나의 기부금 총액 조회
     public long calculateTotalFundingFeeByEmail(String email) {
         // 1. 사용자가 참여한 모든 펀딩의 기부금 조회
-        int fundingPrice = fundingParticipantService.calculateTotalFundingFeeByEmail(email);
+        long fundingPrice = fundingParticipantService.calculateTotalFundingFeeByEmail(email);
 
         // 2. 사용자의 총 답례품 금액 조회
-        int giftPrice = orderService.calculateTotalOrderPriceByEmail(email);
+        long giftPrice = orderService.calculateTotalOrderPriceByEmail(email);
 
-        return (long) fundingPrice + (long) giftPrice;
+        return fundingPrice + giftPrice;
+    }
+
+    // 카드 등록하기
+    public CardDto addCardByEmail(String email, AddCardDto addCardDto) {
+        // 1. DB에서 사용자 조회
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        Users savedUsers = savedUserDto.toEntity();
+
+        // 2. 카드 중복 등록 여부 확인
+        boolean isExist = cardService.isExistCardByCardNumber(addCardDto.getCardNumber());
+        if (isExist) {
+            throw new ApiException(ExceptionEnum.DUPLICATED_CARD_EXCEPTION);
+        }
+
+        // 3. 대표 카드로 설정한다면, 이전의 대표 카드는 false 처리
+        if (addCardDto.getIsRepresentative()) {
+            cardService.updateRepresentativeCardFalse(savedUsers);
+        }
+
+        // 4. 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(addCardDto.getCardPassword());
+        addCardDto.setCardPassword(encodedPassword);
+
+        // 3. DB에 카드 추가
+        Cards cards = addCardDto.toEntity(savedUsers);
+        return cardService.saveCard(cards);
+    }
+
+    // 카드 삭제하기
+    public CardDto deleteCardByCardIdx(String email, int cardIdx) {
+        // 1. 유저 조회
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        Users savedUsers = savedUserDto.toEntity();
+
+        // 2. cardIdx에 해당하는 카드 가져오기
+        CardDto savedCardDto = cardService.getCardByCardIdx(cardIdx);
+
+        // 3. userIdx값이 일치하지 않는 경우 삭제 불가
+        if (savedUsers.getUserIdx() != savedCardDto.getUsers().getUserIdx()) {
+            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
+        }
+
+        // 4. 삭제
+        cardService.deleteCardByCardIdx(cardIdx);
+
+        return savedCardDto;
+    }
+
+    // 카드 수정
+    public CardDto modifyCardByCardIdx(String email, int cardIdx, CardModifyDto cardModifyDto) {
+        // 1. email로 부터 userIdx값 가져오기
+        UserDto savedUserDto = userService.getUserByEmail(email);
+        Users savedUsers = savedUserDto.toEntity();
+        int userIdx = savedUserDto.getUserIdx();
+
+        // 2. DB에서 카드 조회
+        CardDto savedCardDto = cardService.getCardByCardIdx(cardIdx);
+
+        // 3. userIdx값이 일치하지 않는 경우 수정 불가
+        if (userIdx != savedCardDto.getUsers().getUserIdx()) {
+            throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
+        }
+
+        // 5. 대표 카드로 설정한다면
+        boolean isRepresentative = cardModifyDto.getIsRepresentative();
+        if (isRepresentative) {
+            // 이미 대표 카드로 설정되어 있다면 수정하지 않고 그대로 return
+            if (savedCardDto.isRepresentative()) {
+                return savedCardDto;
+            }
+            // 대표 카드로 설정되어 있지 않다면 이전의 대표 주소는 false 처리
+            else {
+                cardService.updateRepresentativeCardFalse(savedUsers);
+            }
+        }
+        // 6. 대표 카드로 설정하지 않는다면
+        else {
+            // 이미 대표 카드로 설정되어 있지 않다면 수정하지 않고 그대로 return
+            if (!savedCardDto.isRepresentative()) {
+                return savedCardDto;
+            }
+        }
+
+        // 5. 수정
+        Cards cards = savedCardDto.toEntity();
+        cards.setRepresentative(isRepresentative);
+
+        // 6. DB에 저장
+        return cardService.saveCard(cards);
     }
 }

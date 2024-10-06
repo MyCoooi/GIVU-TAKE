@@ -7,6 +7,7 @@ import lombok.*;
 @Setter
 @ToString
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class CreateAnswerDto {
 

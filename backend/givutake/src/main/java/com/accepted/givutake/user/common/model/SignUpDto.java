@@ -56,7 +56,6 @@ public class SignUpDto extends LoginDto {
                 .isMale(this.isMale)
                 .birth(this.birth)
                 .region(region)
-                .cardIdx(null)
                 .profileImageUrl(profileImageUrl)
                 .roles(this.roles)
                 .isSocial(this.isSocial)

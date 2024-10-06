@@ -3,8 +3,10 @@ package com.accepted.givutake.qna.service;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.qna.entity.QnA;
+import com.accepted.givutake.qna.model.AnswerDto;
 import com.accepted.givutake.qna.model.CreateQnADto;
 import com.accepted.givutake.qna.model.QnADto;
+import com.accepted.givutake.qna.repository.AnswerRepository;
 import com.accepted.givutake.qna.repository.QnARepository;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.repository.UsersRepository;
@@ -25,6 +27,7 @@ public class QnAService {
 
     private final QnARepository qnARepository;
     private final UsersRepository usersRepository;
+    private final AnswerRepository answerRepository;
 
     public void createQnA(String email, CreateQnADto request){
         Users user = usersRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
@@ -49,6 +52,11 @@ public class QnAService {
                 .userName(user.getName())
                 .userProfileImage(user.getProfileImageUrl())
                 .qnaTitle(qna.getQnaTitle())
+                .qnaContent(qna.getQnaContent())
+                .createdDate(qna.getCreatedDate())
+                .answer(answerRepository.findByQna(qna)
+                        .map(AnswerDto::toDto)
+                        .orElse(null))
                 .build()
         ).toList();
     }
@@ -64,6 +72,11 @@ public class QnAService {
                 .userName(qna.getUsers().getName())
                 .userProfileImage(qna.getUsers().getProfileImageUrl())
                 .qnaTitle(qna.getQnaTitle())
+                .qnaContent(qna.getQnaContent())
+                .createdDate(qna.getCreatedDate())
+                .answer(answerRepository.findByQna(qna)
+                        .map(AnswerDto::toDto)
+                        .orElse(null))
                 .build()
         ).toList();
     }

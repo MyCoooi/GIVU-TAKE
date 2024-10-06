@@ -27,28 +27,16 @@ public class FundingReviewService {
     private final UserService userService;
     private final FundingService fundingService;
 
-    // fundingIdx에 해당하는 펀딩의 모든 펀딩 후기 조회
-    public FundingReviewViewDto getFundingReviewListByFundingIdx(int fundingIdx) {
+    // fundingIdx에 해당하는 펀딩의 펀딩 후기 조회
+    public FundingReviewViewDto getFundingReviewByFundingIdx(int fundingIdx) {
         Fundings fundings = fundingService.getFundingByFundingIdx(fundingIdx);
 
         FundingReviews fundingReviews = fundings.getFundingReviews();
         if (fundingReviews == null) {
-            throw new ApiException(ExceptionEnum.NOT_FOUND_FUNDING_REVIEW_EXCEPTION);
+            return null;
         }
 
         return FundingReviewViewDto.toDto(fundingReviews);
-    }
-
-    // fundingReviewIdx로 펀딩 후기 조회
-    public FundingReviews getFundingReviewsByFundingReviewIdx(int fundingReviewIdx) {
-        Optional<FundingReviews> optionalFundingReviews = fundingReviewsRepository.findByReviewIdx(fundingReviewIdx);
-
-        if (optionalFundingReviews.isPresent()) {
-            return optionalFundingReviews.get();
-        }
-        else {
-            throw new ApiException(ExceptionEnum.NOT_FOUND_FUNDING_REVIEW_EXCEPTION);
-        }
     }
     
     // jwt 토큰으로 펀딩 후기 추가
@@ -85,8 +73,13 @@ public class FundingReviewService {
         Fundings savedFudings = fundingService.getFundingByFundingIdx(fundingIdx);
         FundingReviews savedFundingReviews = savedFudings.getFundingReviews();
 
+        // 3. 해당 펀딩의 후기가 작성되어 있는지 확인
+        if (savedFundingReviews == null) {
+            throw new ApiException(ExceptionEnum.NOT_FOUND_FUNDING_REVIEW_EXCEPTION);
+        }
+
         // 3. userIdx값이 일치하지 않는 경우 수정 불가
-        if (userIdx != savedFundingReviews.getFundings().getCorporation().getUserIdx()) {
+        if (userIdx != savedFudings.getCorporation().getUserIdx()) {
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
 
