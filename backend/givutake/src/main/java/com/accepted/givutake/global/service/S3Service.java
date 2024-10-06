@@ -1,5 +1,7 @@
 package com.accepted.givutake.global.service;
 
+import com.accepted.givutake.global.enumType.ExceptionEnum;
+import com.accepted.givutake.global.exception.ApiException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -10,6 +12,8 @@ import software.amazon.awssdk.services.s3.model.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.UUID;
 
@@ -57,6 +61,13 @@ public class S3Service {
         return listObjectsV2Response.contents();
     }
 
+    public void deleteProfileImage(String keyName) {
+        s3Client.deleteObject(DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(keyName)
+                .build());
+    }
+
     public String uploadProfileImage(MultipartFile profile) throws IOException {
 
         String fileName = UUID.randomUUID().toString() + getFileExtension(profile.getOriginalFilename());
@@ -70,6 +81,26 @@ public class S3Service {
         s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(profile.getInputStream(), profile.getSize()));
 
         return "https://" + cloudfrontDomain + "/" + keyName;
+    }
+
+    public String parseObjectKeyFromCloudfrontUrl(String cloudfrontUrl) {
+        try {
+            URL url = new URL(cloudfrontUrl);
+            String host = url.getHost();
+            String path = url.getPath();
+
+            if (!host.endsWith(cloudfrontDomain)) {
+                throw new ApiException(ExceptionEnum.ILLEGAL_CLOUDFRONT_URL_EXCEPTION);
+            }
+
+            if (path.startsWith("/")) {
+                path = path.substring(1);
+            }
+
+            return path;
+        } catch (MalformedURLException e) {
+            throw new ApiException(ExceptionEnum.ILLEGAL_CLOUDFRONT_URL_EXCEPTION);
+        }
     }
 
     private String getFileExtension(String fileName) {

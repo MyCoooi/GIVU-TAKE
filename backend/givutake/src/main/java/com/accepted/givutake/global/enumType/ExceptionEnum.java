@@ -34,6 +34,7 @@ public enum ExceptionEnum {
     ILLEGAL_EMAIL_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0004", "이메일 형식이 올바르지 않습니다."),
     ILLEGAL_ISAPPROVED_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0010", "isApproved는 'Y'이거나 'N'이어야 합니다."),
     ILLEGAL_PROFILE_IMAGE_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0011", "잘못된 프로필 이미지 입니다."),
+    ILLEGAL_CLOUDFRONT_URL_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0020", "잘못된 cloudfront url 입니다."),
     ILLEGAL_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.BAD_REQUEST, "EA0001", "대표 주소 정보가 유효하지 않습니다."),
     ILLEGAL_REPRESENTATIVE_CARD_EXCEPTION(HttpStatus.BAD_REQUEST, "EC0001", "대표 카드 정보가 유효하지 않습니다."),
     ILLEGAL_FUNDINGTYPE_EXCEPTION(HttpStatus.BAD_REQUEST, "", "펀딩 종류는 'R' 또는 'D'만 허용됩니다."),
