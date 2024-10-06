@@ -2,28 +2,44 @@ package com.project.givuandtake.feature.mypage.MyDonation
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
@@ -37,6 +53,129 @@ import com.project.givuandtake.feature.gift.GiftViewModel
 
 import com.project.givuandtake.feature.mypage.MyDonation.WishlistViewModel
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.Locale
+
+fun formatPrice(price: Int): String {
+    val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault())
+    return numberFormat.format(price)
+}
+
+@Composable
+fun AddToCartBottomSheet(
+    product: GiftDetail,
+    showBottomSheet: Boolean,
+    onDismiss: () -> Unit,
+    onAddToCart: (Int) -> Unit
+) {
+    var quantity by remember { mutableStateOf(1) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0x20000000))
+            .clickable(onClick = onDismiss),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .background(
+                    color = Color.White,
+                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                )
+                .padding(20.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(40.dp)
+                    .height(4.dp)
+                    .background(Color.Gray, shape = RoundedCornerShape(2.dp))
+                    .align(Alignment.CenterHorizontally)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Image(
+                    painter = rememberImagePainter(data = product.giftThumbnail),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                )
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Column {
+                    Text(
+                        text = product.giftName,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.location),
+                            contentDescription = "Icon",
+                            tint = Color(0xFFA093DE),
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(text = product.location, fontSize = 14.sp, color = Color(0xFF8368DC))
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Spacer(modifier = Modifier.width(0.dp))
+                Row (
+                ){
+                    Text(text = "${formatPrice(product.price)}원", fontSize = 18.sp)
+                }
+                Spacer(modifier = Modifier.width(60.dp))
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { if (quantity > 1) quantity-- }) {
+                        Icon(Icons.Default.KeyboardArrowDown, contentDescription = "수량 감소")
+                    }
+                    Text(text = "$quantity", fontSize = 18.sp) // 기본 수량 1
+                    IconButton(onClick = { quantity++ }) {
+                        Icon(Icons.Default.KeyboardArrowUp, contentDescription = "수량 증가")
+                    }
+                }
+                Spacer(modifier = Modifier.width(0.dp))
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = { onAddToCart(quantity) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFD9E3FF)),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text(text = "${formatPrice(product.price * quantity)}원 장바구니 담기", fontSize = 16.sp)
+            }
+        }
+    }
+}
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -51,112 +190,112 @@ fun Wishlist(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    Scaffold {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White) // 전체 배경색을 흰색으로 설정
-                .padding(16.dp) // 적절한 패딩 추가
+    var showBottomSheet by remember { mutableStateOf(false) }
+    var selectedProduct by remember { mutableStateOf<GiftDetail?>(null) }
+
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.CenterStart
         ) {
-            // 커스텀 TopBar
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.CenterStart // 왼쪽 정렬
-            ) {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.Black)
-                }
-                Text(
-                    text = "찜 목록",
-                    fontSize = 20.sp,
-                    color = Color.Black,
-                    modifier = Modifier.align(Alignment.Center) // 텍스트를 가운데 배치
-                )
-                Box(
-                    modifier = Modifier.align(Alignment.CenterEnd), // 장바구니 아이콘을 오른쪽 끝에 배치
-                ) {
-                    CartIcon(cartItemCount = cartItems.size, onCartClick = {
-                        navController.navigate("cart_page") // 장바구니 페이지로 이동
-                    })
-                }
+            IconButton(onClick = { navController.popBackStack() }) {
+                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.Black)
             }
+            Text(
+                text = "찜 목록",
+                fontSize = 20.sp,
+                color = Color.Black,
+                modifier = Modifier.align(Alignment.Center)
+            )
+            Box(
+                modifier = Modifier.align(Alignment.CenterEnd),
+            ) {
+                CartIcon(cartItemCount = cartItems.size, onCartClick = {
+                    navController.navigate("cart_page")
+                })
+            }
+        }
 
-            Spacer(modifier = Modifier.height(16.dp)) // TopBar와 내용물 사이에 간격 추가
+        Spacer(modifier = Modifier.height(10.dp))
 
-            // 컨텐츠 부분
-            if (wishlistItems.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = "찜 목록에 아이템이 없습니다.", fontSize = 18.sp)
+        if (wishlistItems.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "찜 목록에 아이템이 없습니다.", fontSize = 18.sp)
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                item {
+                    Text(
+                        text = "총 ${wishlistItems.size}개",
+                        fontSize = 17.sp,
+                        modifier = Modifier.padding(10.dp)
+                    )
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    item {
-                        Text(
-                            text = "총 ${wishlistItems.size}개",
-                            fontSize = 20.sp,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
 
-                    items(wishlistItems) { product ->
-                        WishListItem(
-                            product = product,
-                            onRemove = { wishlistViewModel.removeItemFromWishlist(it) }, // 찜 목록에서 아이템 제거
-                            onAddToCart = {
-                                coroutineScope.launch {
-                                    // 장바구니에 이미 있는지 확인
-                                    val isAlreadyInCart = cartItems.any { it.name == product.giftName }
-                                    if (isAlreadyInCart) {
-                                        // 이미 장바구니에 있는 경우 토스트 메시지 표시
-                                        Toast.makeText(context, "이미 장바구니에 있는 상품입니다.", Toast.LENGTH_SHORT).show()
-                                    } else {
-                                        // 장바구니에 상품 추가
-                                        val updatedCartItems = cartItems.toMutableList().apply {
-                                            add(
-                                                CartItem(
-                                                    name = product.giftName,
-                                                    price = product.price,
-                                                    quantity = 1, // 기본 수량을 1로 설정
-                                                    location = product.location
-                                                )
-                                            )
-                                        }
-                                        saveCartItems(context, updatedCartItems) // 업데이트된 장바구니 항목을 저장
-                                    }
-                                }
-                            }
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
+                items(wishlistItems) { product ->
+                    WishListItem(
+                        product = product,
+                        onRemove = { wishlistViewModel.removeItemFromWishlist(it) },
+                        onAddToCartPopUp = {
+                            selectedProduct = product
+                            showBottomSheet = true
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }
+
+    }
+    if (showBottomSheet && selectedProduct != null) {
+        AddToCartBottomSheet(
+            product = selectedProduct!!,
+            showBottomSheet = true,
+            onDismiss = { showBottomSheet = false },
+            onAddToCart = { quantity ->
+                coroutineScope.launch {
+                    val updatedCartItems = cartItems.toMutableList().apply {
+                        add(
+                            CartItem(
+                                name = selectedProduct!!.giftName,
+                                price = selectedProduct!!.price,
+                                quantity = quantity, // 선택한 수량을 반영
+                                location = selectedProduct!!.location
+                            )
+                        )
+                    }
+                    saveCartItems(context, updatedCartItems) // 장바구니 저장
+                    showBottomSheet = false // 바텀 시트 닫기
+//                        navController.navigate("cart_page")
+                }
+            }
+        )
     }
 }
-
-
 
 @Composable
 fun WishListItem(
     product: GiftDetail,
     onRemove: (GiftDetail) -> Unit,
-    onAddToCart: (GiftDetail) -> Unit
+    onAddToCartPopUp: (GiftDetail) -> Unit
 ) {
-    Card(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        elevation = 4.dp
+            .padding(3.dp),
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // 상품 이미지
@@ -164,10 +303,11 @@ fun WishListItem(
                 painter = rememberImagePainter(data = product.giftThumbnail),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(100.dp)
+                    .width(100.dp)
+                    .height(130.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(Color.LightGray),
-                contentScale = ContentScale.Crop
+                    .background(Color.Transparent),
+                contentScale = ContentScale.FillBounds
             )
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -176,45 +316,68 @@ fun WishListItem(
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                Text(text = product.giftName, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(text = product.location, fontSize = 18.sp)
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(text = "${product.price}원", fontSize = 16.sp, color = Color.Gray)
-
-            }
-
-            // 버튼들
-            Column {
-                OutlinedButton(
-                    onClick = { onRemove(product) },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.LightGray),
-                    modifier = Modifier
-                        .height(36.dp)
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Remove to Cart",
-                        tint = Color(0xFFA093DE) // 아이콘 색상 조정
+                        painter = painterResource(id = R.drawable.location),
+                        contentDescription = "Icon",
+                        tint = Color(0xFFA093DE),
+                        modifier = Modifier.size(18.dp)
                     )
-                    Text("삭제")
+                    Text(text = product.location, fontSize = 13.sp)
                 }
+                Spacer(modifier = Modifier.height(4.dp))
 
-                Spacer(modifier = Modifier.height(15.dp))
+                Text(text = product.giftName, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(4.dp))
 
-                OutlinedButton(
-                    onClick = { onAddToCart(product) },
-                    modifier = Modifier.height(36.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ShoppingCart,
-                        contentDescription = "Add to Cart",
-                        tint = Color(0xFFA093DE) // 아이콘 색상 조정
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("담기")
+                Text(text = "${formatPrice(product.price)}원", fontSize = 17.sp, color = Color.Black)
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ){
+                    Box(
+                        modifier = Modifier
+                            .height(30.dp)
+                            .width(70.dp)
+                            .clickable { onAddToCartPopUp(product) }
+                            .border(1.dp, Color(0xFFA093DE), shape = RoundedCornerShape(8.dp)),
+
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ShoppingCart,
+                                contentDescription = "Add to Cart",
+                                tint = Color(0xFFA093DE),
+                                modifier = Modifier.size(16.dp) // Adjusted size for better visibility
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("담기")
+                        }
+                    }
                 }
             }
+        }
+
+        IconButton(
+            onClick = { onRemove(product) },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Clear,
+                contentDescription = "Remove",
+                tint = Color(0xFFFF6F6F)
+            )
         }
     }
 }
