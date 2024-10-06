@@ -41,11 +41,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.project.givuandtake.R
 import com.project.givuandtake.core.apis.Funding.FundingData
 import com.project.givuandtake.core.apis.Funding.FundingResponse
 import com.project.givuandtake.core.apis.Funding.SearchFundingApi
@@ -286,7 +288,7 @@ fun FundingCardComposable(
     endDate: String,
     nowAmount: Float,
     goalAmount: Float,
-    imageUrl: String,
+    imageUrl: String?,
     fundingIdx: Int,  // fundingIdx를 전달받음
     onClick: (Int) -> Unit  // 클릭 시 호출될 콜백
 ) {
@@ -294,6 +296,13 @@ fun FundingCardComposable(
 
     // 금액을 3자리마다 쉼표로 구분
     val formattedGoalAmount = NumberFormat.getNumberInstance(Locale.KOREA).format(goalAmount.toInt())
+
+    // 이미지 로드 (null일 경우 기본 이미지 사용)
+    val imagePainter = if (imageUrl.isNullOrEmpty()) {
+        painterResource(id = R.drawable.hamo)  // res/drawable/hamo.PNG
+    } else {
+        rememberAsyncImagePainter(imageUrl)
+    }
 
     Column(
         modifier = Modifier
@@ -310,7 +319,7 @@ fun FundingCardComposable(
 
         // 이미지 로드 및 표시
         Image(
-            painter = rememberAsyncImagePainter(imageUrl),
+            painter = imagePainter,
             contentDescription = null,
             modifier = Modifier
                 .aspectRatio(1f)
@@ -339,6 +348,7 @@ fun FundingCardComposable(
         }
     }
 }
+
 
 // API 데이터 불러오는 함수
 fun fetchFundingData(type: String, state: Int, onSuccess: (List<FundingData>) -> Unit) {
