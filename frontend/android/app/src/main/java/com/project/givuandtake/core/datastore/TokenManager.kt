@@ -12,6 +12,8 @@ object TokenManager {
     private const val ACCESS_TOKEN_KEY = "accessToken"
     private const val REFRESH_TOKEN_KEY = "refreshToken"
 
+
+
     // 토큰 저장
     fun saveTokens(context: Context, accessToken: String, refreshToken: String) {
         val sharedPref: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

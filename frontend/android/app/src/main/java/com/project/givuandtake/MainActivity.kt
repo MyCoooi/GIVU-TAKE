@@ -3,7 +3,6 @@ package com.project.givuandtake
 import AddressMapSearch
 import AttractionMain
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -19,7 +18,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -32,7 +30,7 @@ import com.project.givuandtake.auth.SignupStep1
 import com.project.givuandtake.auth.SignupStep2
 import com.project.givuandtake.auth.SignupStep3
 import com.project.givuandtake.auth.SignupViewModel
-import com.project.givuandtake.core.data.CartItem
+import com.project.givuandtake.core.data.CartItemData
 import com.project.givuandtake.feature.attraction.FestivalPage
 import com.project.givuandtake.feature.attraction.LocationSelect
 import com.project.givuandtake.feature.attraction.TripPage
@@ -43,6 +41,7 @@ import com.project.givuandtake.feature.fundinig.FundingMainPage
 //import com.project.givuandtake.feature.funding.navigation.MainFundingCard
 //import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.gift.CartPage
+import com.project.givuandtake.feature.gift.GiftListScreen
 import com.project.givuandtake.feature.gift.GiftPage
 import com.project.givuandtake.feature.gift.GiftPageDetail
 import com.project.givuandtake.feature.mainpage.MainPage
@@ -86,7 +85,7 @@ class MainActivity : ComponentActivity() {
             GivuAndTakeTheme {
                 val navController = rememberNavController() // NavController 생성
                 var selectedItem by remember { mutableStateOf(0) } // 선택된 항목 상태 추가
-                val cartItems = remember { mutableStateOf(listOf<CartItem>()) } // 장바구니 상태
+                val cartItems = remember { mutableStateOf(listOf<CartItemData>()) } // 장바구니 상태
                 val currentBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = currentBackStackEntry?.destination?.route
 
@@ -140,7 +139,7 @@ class MainActivity : ComponentActivity() {
                                 arguments = listOf(navArgument("giftIdx") { type = NavType.IntType })
                             ) { backStackEntry ->
                                 val giftIdx = backStackEntry.arguments?.getInt("giftIdx") ?: 0
-                                val cartItems = remember { mutableStateOf(emptyList<CartItem>()) }
+                                val cartItems = remember { mutableStateOf(emptyList<CartItemData>()) }
 
                                 // GiftPageDetail 호출, 필요한 파라미터를 넘김
                                 GiftPageDetail(
@@ -149,6 +148,19 @@ class MainActivity : ComponentActivity() {
                                     navController = navController,
                                 )
                             }
+
+                            // 카테고리 경로 추가
+                            composable(
+                                route = "category/{categoryIdx}",
+                                arguments = listOf(navArgument("categoryIdx") { type = NavType.IntType }) // Int형으로 지정
+                            ) { backStackEntry ->
+                                val categoryIdx = backStackEntry.arguments?.getInt("categoryIdx") ?: 0
+                                GiftListScreen(categoryIdx = categoryIdx, navController = navController) // categoryIdx 전달
+                            }
+
+
+
+
 
                             // 장바구니 페이지
                             composable("cart_page") {
@@ -177,6 +189,8 @@ class MainActivity : ComponentActivity() {
 
                                 PaymentScreen_gift(navController, name, location, price, quantity, thumbnailUrl, giftIdx) // giftIdx 추가하여 전달
                             }
+
+
 
 
 
