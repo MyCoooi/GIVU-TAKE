@@ -296,7 +296,12 @@ fun MiddleContent(
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
-            FilterButtons_category() // 카테고리 버튼
+            // 카테고리 버튼 (onCategorySelected 인자를 전달)
+            FilterButtons_category { selectedCategoryIdx ->
+                // 페이지 이동 처리
+                Log.d("Category", "Selected category: $selectedCategoryIdx")
+                navController.navigate("category/$selectedCategoryIdx") // 카테고리 페이지로 이동
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
             Text(
@@ -551,40 +556,57 @@ fun ProductCard(
 }
 
 @Composable
-fun FilterButtons_category() {
+fun CategoryScreen(navController: NavController) {
+    FilterButtons_category { categoryIdx ->
+        Log.d("category", "Navigating to category/$categoryIdx")
+        navController.navigate("category/$categoryIdx") // 네비게이션 호출
+    }
+}
+
+@Composable
+fun FilterButtons_category(onCategorySelected: (Int) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween // 아이템들이 한 줄에 균등하게 배치되도록 설정
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        CategoryButton(text = "지역상품권", icon = painterResource(id = R.drawable.local_product))
-        CategoryButton(text = "농축산물", icon = painterResource(id = R.drawable.agriculture_product))
-        CategoryButton(text = "수산물", icon = painterResource(id = R.drawable.seafood_product))
-        CategoryButton(text = "가공식품", icon = painterResource(id = R.drawable.processed_food))
-        CategoryButton(text = "공예품", icon = painterResource(id = R.drawable.craft_product))
+        CategoryButton(text = "지역상품권", icon = painterResource(id = R.drawable.local_product)) {
+            onCategorySelected(1) // 선택된 카테고리 인덱스를 전달
+        }
+        CategoryButton(text = "농축산물", icon = painterResource(id = R.drawable.agriculture_product)) {
+            onCategorySelected(2)
+        }
+        CategoryButton(text = "수산물", icon = painterResource(id = R.drawable.seafood_product)) {
+            onCategorySelected(3)
+        }
+        CategoryButton(text = "가공식품", icon = painterResource(id = R.drawable.processed_food)) {
+            onCategorySelected(4)
+        }
+        CategoryButton(text = "공예품", icon = painterResource(id = R.drawable.craft_product)) {
+            onCategorySelected(5)
+        }
     }
 }
 
-
 @Composable
-fun CategoryButton(text: String, icon: Painter) {
+fun CategoryButton(text: String, icon: Painter, onClick: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.padding(4.dp) // 최소한의 여백만 유지
+        modifier = Modifier
+            .padding(4.dp)
+            .clickable { onClick() } // 버튼 클릭 처리
     ) {
-        // Text positioned above the circle
         Text(
             text = text,
             style = MaterialTheme.typography.body2,
-            modifier = Modifier.padding(bottom = 4.dp) // 텍스트와 원형 간 간격 최소화
+            modifier = Modifier.padding(bottom = 4.dp)
         )
 
-        // Icon in a circle
         Box(
             modifier = Modifier
-                .size(64.dp) // 원형 크기 설정
+                .size(64.dp)
                 .clip(CircleShape)
                 .background(Color(0xFFB3C3F4)),
             contentAlignment = Alignment.Center
@@ -592,7 +614,7 @@ fun CategoryButton(text: String, icon: Painter) {
             Icon(
                 painter = icon,
                 contentDescription = null,
-                modifier = Modifier.size(32.dp) // 아이콘 크기
+                modifier = Modifier.size(32.dp)
             )
         }
     }

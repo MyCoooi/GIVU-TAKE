@@ -43,6 +43,8 @@ import com.project.givuandtake.feature.fundinig.FundingMainPage
 //import com.project.givuandtake.feature.funding.navigation.MainFundingCard
 //import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.gift.CartPage
+import com.project.givuandtake.feature.gift.CategoryScreen
+import com.project.givuandtake.feature.gift.GiftListScreen
 import com.project.givuandtake.feature.gift.GiftPage
 import com.project.givuandtake.feature.gift.GiftPageDetail
 import com.project.givuandtake.feature.mainpage.MainPage
@@ -149,6 +151,19 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
 
+                            // 카테고리 경로 추가
+                            composable(
+                                route = "category/{categoryIdx}",
+                                arguments = listOf(navArgument("categoryIdx") { type = NavType.IntType }) // Int형으로 지정
+                            ) { backStackEntry ->
+                                val categoryIdx = backStackEntry.arguments?.getInt("categoryIdx") ?: 0
+                                GiftListScreen(categoryIdx = categoryIdx) // categoryIdx 전달
+                            }
+
+
+
+
+
                             // 장바구니 페이지
                             composable("cart_page") {
                                 val context = LocalContext.current // LocalContext를 사용하여 Context 가져오기
@@ -176,6 +191,8 @@ class MainActivity : ComponentActivity() {
 
                                 PaymentScreen_gift(navController, name, location, price, quantity, thumbnailUrl, giftIdx) // giftIdx 추가하여 전달
                             }
+
+
 
 
 

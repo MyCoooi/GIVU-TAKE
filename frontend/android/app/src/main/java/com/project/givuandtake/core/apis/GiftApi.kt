@@ -13,6 +13,7 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface GiftApiService {
 
@@ -41,6 +42,11 @@ interface GiftApiService {
     suspend fun getCartList(
         @Header("Authorization") token: String,
     ): Response<CartItemDataResponse>  // 서버에서 받은 응답
+
+    // 특정 카테고리 상품 검색 API
+    @GET("/api/gifts")
+    suspend fun getGiftsByCategory(@Query("categoryIdx") categoryIdx: Int): GiftResponse
+
 
 }
 
