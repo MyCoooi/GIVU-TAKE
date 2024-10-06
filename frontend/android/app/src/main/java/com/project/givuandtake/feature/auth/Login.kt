@@ -84,6 +84,10 @@ fun LoginScreen(navController: NavController) {
 
                         // 로그인 성공 후 토큰을 SharedPreferences에 저장
                         saveTokens(context, accessToken, refreshToken)
+                        // 저장 후 바로 SharedPreferences에서 값을 읽어 출력
+                        val storedAccessToken = TokenManager.getAccessToken(context)
+                        Log.d("StoredToken", "저장된 AccessToken: $storedAccessToken")
+
 
                         onResult("로그인 성공")
                     } else {

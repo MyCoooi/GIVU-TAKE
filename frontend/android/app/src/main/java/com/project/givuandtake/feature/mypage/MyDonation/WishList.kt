@@ -28,14 +28,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.project.givuandtake.R
-import com.project.givuandtake.core.data.CartItem
+import com.project.givuandtake.core.data.CartItemData
 import com.project.givuandtake.core.data.GiftDetail
-import com.project.givuandtake.core.datastore.getCartItems
-import com.project.givuandtake.core.datastore.saveCartItems
+import com.project.givuandtake.core.datastore.TokenManager
 import com.project.givuandtake.feature.gift.CartIcon
 import com.project.givuandtake.feature.gift.GiftViewModel
+import com.project.givuandtake.feature.gift.addToCartApi
+import com.project.givuandtake.feature.gift.fetchCartList
 
-import com.project.givuandtake.feature.mypage.MyDonation.WishlistViewModel
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -46,22 +46,33 @@ fun Wishlist(
     wishlistViewModel: WishlistViewModel = viewModel()
 ) {
     val wishlistItems by viewModel.wishlistItems.collectAsState() // GiftViewModel에서 찜 목록 불러옴
-    val cartItemsFlow = getCartItems(LocalContext.current) // 장바구니 아이템 목록 불러옴
-    val cartItems by cartItemsFlow.collectAsState(initial = emptyList()) // 초기 상태는 빈 리스트
+    var cartItems by remember { mutableStateOf<List<CartItemData>>(emptyList()) } // API로부터 장바구니 아이템을 관리
+
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
+
+    // 장바구니 API에서 데이터를 불러오기
+    LaunchedEffect(Unit) {
+        val result = fetchCartList(accessToken)
+        if (result != null) {
+            cartItems = result // 장바구니 데이터 저장
+        } else {
+            Toast.makeText(context, "장바구니 데이터를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Scaffold {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.White) // 전체 배경색을 흰색으로 설정
-                .padding(16.dp) // 적절한 패딩 추가
+                .background(Color.White)
+                .padding(16.dp)
         ) {
             // 커스텀 TopBar
             Box(
                 modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.CenterStart // 왼쪽 정렬
+                contentAlignment = Alignment.CenterStart
             ) {
                 IconButton(onClick = { navController.popBackStack() }) {
                     Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.Black)
@@ -70,32 +81,29 @@ fun Wishlist(
                     text = "찜 목록",
                     fontSize = 20.sp,
                     color = Color.Black,
-                    modifier = Modifier.align(Alignment.Center) // 텍스트를 가운데 배치
+                    modifier = Modifier.align(Alignment.Center)
                 )
                 Box(
-                    modifier = Modifier.align(Alignment.CenterEnd), // 장바구니 아이콘을 오른쪽 끝에 배치
+                    modifier = Modifier.align(Alignment.CenterEnd),
                 ) {
                     CartIcon(cartItemCount = cartItems.size, onCartClick = {
-                        navController.navigate("cart_page") // 장바구니 페이지로 이동
+                        navController.navigate("cart_page")
                     })
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp)) // TopBar와 내용물 사이에 간격 추가
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // 컨텐츠 부분
             if (wishlistItems.isEmpty()) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
+                    modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(text = "찜 목록에 아이템이 없습니다.", fontSize = 18.sp)
                 }
             } else {
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     item {
                         Text(
@@ -108,27 +116,33 @@ fun Wishlist(
                     items(wishlistItems) { product ->
                         WishListItem(
                             product = product,
-                            onRemove = { wishlistViewModel.removeItemFromWishlist(it) }, // 찜 목록에서 아이템 제거
+                            onRemove = { wishlistViewModel.removeItemFromWishlist(it) },
                             onAddToCart = {
                                 coroutineScope.launch {
-                                    // 장바구니에 이미 있는지 확인
-                                    val isAlreadyInCart = cartItems.any { it.name == product.giftName }
+                                    val isAlreadyInCart = cartItems.any { it.giftName == product.giftName }
                                     if (isAlreadyInCart) {
-                                        // 이미 장바구니에 있는 경우 토스트 메시지 표시
                                         Toast.makeText(context, "이미 장바구니에 있는 상품입니다.", Toast.LENGTH_SHORT).show()
                                     } else {
-                                        // 장바구니에 상품 추가
                                         val updatedCartItems = cartItems.toMutableList().apply {
                                             add(
-                                                CartItem(
-                                                    name = product.giftName,
+                                                CartItemData(
+                                                    cartIdx = 0, // 서버에서 받은 cartIdx를 나중에 업데이트
+                                                    giftIdx = product.giftIdx,
+                                                    giftName = product.giftName,
+                                                    giftThumbnail = product.giftThumbnail ?: "",
+                                                    userIdx = 0, // 사용자 ID를 필요 시 할당
+                                                    amount = 1,
                                                     price = product.price,
-                                                    quantity = 1, // 기본 수량을 1로 설정
                                                     location = product.location
                                                 )
                                             )
                                         }
-                                        saveCartItems(context, updatedCartItems) // 업데이트된 장바구니 항목을 저장
+                                        val success = addToCartApi(context, product.giftIdx, 1) // API를 통해 장바구니에 추가
+                                        if (success) {
+                                            cartItems = updatedCartItems // 장바구니 데이터 업데이트
+                                        } else {
+                                            Toast.makeText(context, "장바구니에 추가 실패", Toast.LENGTH_SHORT).show()
+                                        }
                                     }
                                 }
                             }
@@ -140,8 +154,6 @@ fun Wishlist(
         }
     }
 }
-
-
 
 @Composable
 fun WishListItem(
@@ -161,7 +173,11 @@ fun WishListItem(
         ) {
             // 상품 이미지
             Image(
-                painter = rememberImagePainter(data = product.giftThumbnail),
+                painter = if (product.giftThumbnail != null) {
+                    rememberImagePainter(data = product.giftThumbnail)
+                } else {
+                    painterResource(id = R.drawable.placeholder)  // drawable 폴더의 기본 이미지 사용
+                },
                 contentDescription = null,
                 modifier = Modifier
                     .size(100.dp)
@@ -181,7 +197,6 @@ fun WishListItem(
                 Text(text = product.location, fontSize = 18.sp)
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(text = "${product.price}원", fontSize = 16.sp, color = Color.Gray)
-
             }
 
             // 버튼들
@@ -189,13 +204,12 @@ fun WishListItem(
                 OutlinedButton(
                     onClick = { onRemove(product) },
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color.LightGray),
-                    modifier = Modifier
-                        .height(36.dp)
+                    modifier = Modifier.height(36.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Remove to Cart",
-                        tint = Color(0xFFA093DE) // 아이콘 색상 조정
+                        tint = Color(0xFFA093DE)
                     )
                     Text("삭제")
                 }
@@ -209,7 +223,7 @@ fun WishListItem(
                     Icon(
                         imageVector = Icons.Default.ShoppingCart,
                         contentDescription = "Add to Cart",
-                        tint = Color(0xFFA093DE) // 아이콘 색상 조정
+                        tint = Color(0xFFA093DE)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("담기")
@@ -218,4 +232,5 @@ fun WishListItem(
         }
     }
 }
+
 
