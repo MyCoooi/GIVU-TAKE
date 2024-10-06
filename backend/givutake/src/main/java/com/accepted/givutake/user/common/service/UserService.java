@@ -62,7 +62,7 @@ public class UserService {
         this.validator = factory.getValidator();
     }
 
-    public void emailSignUp(SignUpDto signUpDto, AddressAddDto addressAddDto, MultipartFile profileImage) {
+    public void emailSignUp(SignUpDto signUpDto, AddressSignUpDto addressSignUpDto, MultipartFile profileImage) {
         Roles role = signUpDto.getRoles();
 
         // 유효하지 않은 권한정보가 들어온 경우
@@ -245,6 +245,14 @@ public class UserService {
 
             // 수정할 프로필 사진이 있을 경우, 프로필 사진 변경
             if (profileImage != null) {
+
+                // 기존의 프로필 사진 삭제
+                Optional<String> originalProfileImageUrl = userRepository.findProfileImageUrlByEmail(email);
+                originalProfileImageUrl.ifPresent(profileImageUrl -> {
+                    String objectKey = s3Service.parseObjectKeyFromCloudfrontUrl(profileImageUrl);
+                    s3Service.deleteProfileImage(objectKey);
+                });
+
                 try {
                     String modifiedProfileImageUrl = s3Service.uploadProfileImage(profileImage);
                     savedUser.setProfileImageUrl(modifiedProfileImageUrl);
