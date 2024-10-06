@@ -66,7 +66,7 @@ fun MyPageScreen(navController: NavController) {
 
             // 프로필 섹션
             ProfileSection()
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // 공지사항 섹션
             AnnouncementSection()
@@ -118,7 +118,7 @@ fun MyPageScreen(navController: NavController) {
             // 로그아웃 버튼을 가로 중앙에 배치
             Box(
                 modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.TopEnd
             ) {
                 Text(
                     text = "로그아웃",
@@ -128,6 +128,7 @@ fun MyPageScreen(navController: NavController) {
                     modifier = Modifier.clickable {
                         showLogoutDialog = true // 로그아웃 클릭 시 모달 표시
                     }
+                            .padding(end = 20.dp)
                 )
             }
             Spacer(modifier = Modifier.height(24.dp))
