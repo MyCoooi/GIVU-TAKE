@@ -75,16 +75,17 @@ const FundingStatistics = () => {
 
       <div className="funding-statistics-content">
         <Typography variant="h4" className="funding-statistics-title">
-          통계
+          펀딩 통계
         </Typography>
 
         <div className="funding-statistics-buttons">
+        <Button variant={selectedType === "재난재해펀딩" ? "contained" : "outlined"} onClick={() => setSelectedType("재난재해펀딩")}>
+            재난재해
+          </Button>
           <Button variant={selectedType === "지역펀딩" ? "contained" : "outlined"} onClick={() => setSelectedType("지역펀딩")}>
-            지역펀딩
+            지역기부
           </Button>
-          <Button variant={selectedType === "재난재해펀딩" ? "contained" : "outlined"} onClick={() => setSelectedType("재난재해펀딩")}>
-            재난재해펀딩
-          </Button>
+
 
           <FormControl variant="outlined" className="dropdown">
             <InputLabel>기간</InputLabel>

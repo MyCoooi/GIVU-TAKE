@@ -1,5 +1,5 @@
 .sidebar {
-  width: 250px;
+  min-width: 240px;
   background-color: #c2a6f1;
   padding: 20px;
   display: flex;
@@ -52,10 +52,7 @@
   background-color: #d0bdf4;
 }
 
-.submenu-item-active {
-  background-color: #d0bdf4; /* 서브메뉴 선택 시 활성화된 색상 */
-  color: white; /* 활성화된 서브메뉴 글씨 색상 */
-}
+
 
 .submenu-item {
   font-size: 20px;
@@ -68,6 +65,11 @@
   text-align: right; /* 기본 텍스트 정렬 */
   padding-left: 10%; /* 왼쪽에서 10% 떨어지도록 설정 */
   transition: background-color 0.3s ease;
+}
+
+.submenu-item-active {
+  background-color: #d0bdf4; /* 선택된 항목에 대한 배경색 */
+  color: #ffffff; /* 선택된 항목에 대한 텍스트 색상 */
 }
 
 .submenu-item:hover {
