@@ -60,6 +60,7 @@ fun LoginScreen(navController: NavController) {
     // 앱 실행 시 토큰 확인
     LaunchedEffect(Unit) {
         val accessToken = TokenManager.getAccessToken(context)
+        Log.d("Token","token : ${accessToken}")
         if (accessToken != null) {
             // 액세스 토큰이 있으면 메인 페이지로 이동
             navController.navigate("mainpage") {
