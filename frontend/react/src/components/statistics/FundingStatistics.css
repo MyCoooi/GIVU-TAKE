@@ -1,0 +1,64 @@
+.funding-statistics-container {
+  display: flex;
+  height: 100vh;
+}
+
+.funding-statistics-content {
+  flex-grow: 1;
+  padding: 20px;
+  background-color: #fbfaff;
+}
+
+.funding-statistics-title {
+  margin-bottom: 20px;
+}
+
+.funding-statistics-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.chart-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-statistics {
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.user-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.user-list ul li {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+}
+
+.gender-statistics {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.pie-charts {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.pie-charts canvas {
+  max-width: 200px;
+}
+
+.dropdown {
+  min-width: 120px;
+}
