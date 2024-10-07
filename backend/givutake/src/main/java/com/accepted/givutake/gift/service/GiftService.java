@@ -440,4 +440,48 @@ public class GiftService {
         return new GiftPurchaserDto(purchasers);
     }
 
+    public List<GiftDto> getTop10Gifts() {
+        List<Gifts> top10Gifts = giftRepository.findTop10ByIsDeleteFalseOrderByAmountDesc();
+        return top10Gifts.stream()
+                .map(gift -> GiftDto.builder()
+                        .giftIdx(gift.getGiftIdx())
+                        .giftName(gift.getGiftName())
+                        .corporationIdx(gift.getCorporations().getUserIdx())
+                        .corporationName(gift.getCorporations().getName())
+                        .corporationSido(gift.getCorporations().getRegion().getSido())
+                        .corporationSigungu(gift.getCorporations().getRegion().getSigungu())
+                        .categoryIdx(gift.getCategory().getCategoryIdx())
+                        .categoryName(gift.getCategory().getCategoryName())
+                        .giftThumbnail(gift.getGiftThumbnail())
+                        .price(gift.getPrice())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    public List<GiftDto> getRecentGifts(String email) {
+        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        Optional<Orders> order = orderRepository.findTopByUsersOrderByCreatedDateDesc(user);
+
+        if(order.isPresent()){
+            Users corporation = order.get().getGift().getCorporations();
+            Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdDate"));
+            Specification<Gifts> spec = Specification.where((root, query, cb) -> cb.equal(root.get("isDelete"), false));
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("corporations"), corporation));
+            Page<Gifts> giftList = giftRepository.findAll(spec, pageable);
+            return giftList.map(gift -> GiftDto.builder()
+                    .giftIdx(gift.getGiftIdx())
+                    .giftName(gift.getGiftName())
+                    .giftThumbnail(gift.getGiftThumbnail())
+                    .corporationIdx(gift.getCorporations().getUserIdx())
+                    .corporationName(gift.getCorporations().getName())
+                    .corporationSido(gift.getCorporations().getRegion().getSido())
+                    .corporationSigungu(gift.getCorporations().getRegion().getSigungu())
+                    .categoryIdx(gift.getCategory().getCategoryIdx())
+                    .categoryName(gift.getCategory().getCategoryName())
+                    .price(gift.getPrice())
+                    .build()
+            ).toList();
+        }else return null;
+
+    }
 }
