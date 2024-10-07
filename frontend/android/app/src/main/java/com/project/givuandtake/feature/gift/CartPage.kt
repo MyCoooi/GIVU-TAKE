@@ -161,10 +161,10 @@ fun CartItemView(
 
                 IconButton(onClick = {
                     coroutineScope.launch {
-                        val result = deleteCartItem(context, cartItem.cartIdx)
-                        if (result) {
-                            onDeleteItem(cartItem)
-                        }
+//                        val result = deleteCartItem(context, cartItem.cartIdx)
+//                        if (result) {
+                        onDeleteItem(cartItem)
+//                        }
                     }
                 }) {
                     Icon(
