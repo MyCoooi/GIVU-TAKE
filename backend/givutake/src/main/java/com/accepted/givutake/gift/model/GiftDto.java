@@ -19,6 +19,7 @@ public class GiftDto {
     private Integer categoryIdx;
     private String categoryName;
     private String giftThumbnail;
+    private String giftContentImage;
     private String giftContent;
     private Integer price;
     private LocalDateTime createdDate;

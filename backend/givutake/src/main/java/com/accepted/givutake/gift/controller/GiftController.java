@@ -19,6 +19,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -67,8 +68,10 @@ public class GiftController {
     @PostMapping // 답례품 생성
     public ResponseEntity<ResponseDto> createGift(
             @AuthenticationPrincipal UserDetails userDetails,
-            @Valid @RequestBody CreateGiftDto request) {
-        Gifts gift = giftService.createGift(userDetails.getUsername(), request);
+            @Valid @RequestPart(value = "createGiftDto") CreateGiftDto request,
+            @RequestPart(value = "thumbnailImage") MultipartFile thumbnailImage,
+            @RequestPart(value = "contentImage") MultipartFile contentImage) {
+        Gifts gift = giftService.createGift(userDetails.getUsername(), request, thumbnailImage, contentImage);
         CreateLogDto logDto = CreateLogDto.builder()
                 .contentType(ContentTypeEnum.GIFT)
                 .act(ActEnum.CREATE)
@@ -85,8 +88,10 @@ public class GiftController {
     public ResponseEntity<ResponseDto> updateGift(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int giftsIdx,
-            @Valid @RequestBody UpdateGiftDto request) {
-        Gifts gift = giftService.updateGift(userDetails.getUsername(), giftsIdx, request);
+            @Valid @RequestPart(value = "updateGiftDto") UpdateGiftDto request,
+            @RequestPart(value = "thumbnailImage") MultipartFile thumbnailImage,
+            @RequestPart(value = "contentImage") MultipartFile contentImage) {
+        Gifts gift = giftService.updateGift(userDetails.getUsername(), giftsIdx, request, thumbnailImage, contentImage);
         CreateLogDto logDto = CreateLogDto.builder()
                 .contentType(ContentTypeEnum.GIFT)
                 .act(ActEnum.UPDATE)
