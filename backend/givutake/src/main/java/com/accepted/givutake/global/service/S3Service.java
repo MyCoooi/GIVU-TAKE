@@ -83,6 +83,48 @@ public class S3Service {
         return "https://" + cloudfrontDomain + "/" + keyName;
     }
 
+    public void deleteThumbnailImage(String keyName) {
+        s3Client.deleteObject(DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(keyName)
+                .build());
+    }
+
+    public String uploadThumbnailImage(MultipartFile thumbnail) throws IOException {
+        String fileName = UUID.randomUUID().toString() + getFileExtension(thumbnail.getOriginalFilename());
+        String keyName = "public/posts/thumbnails" + fileName;
+
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(keyName)
+                .build();
+
+        s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(thumbnail.getInputStream(), thumbnail.getSize()));
+
+        return "https://" + cloudfrontDomain + "/" + keyName;
+    }
+
+    public void deleteContentImage(String keyName) {
+        s3Client.deleteObject(DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(keyName)
+                .build());
+    }
+
+    public String uploadContentImage(MultipartFile content) throws IOException {
+        String fileName = UUID.randomUUID().toString() + getFileExtension(content.getOriginalFilename());
+        String keyName = "public/posts/contents" + fileName;
+
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(keyName)
+                .build();
+
+        s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(content.getInputStream(), content.getSize()));
+
+        return "https://" + cloudfrontDomain + "/" + keyName;
+    }
+
     public String parseObjectKeyFromCloudfrontUrl(String cloudfrontUrl) {
         try {
             URL url = new URL(cloudfrontUrl);
