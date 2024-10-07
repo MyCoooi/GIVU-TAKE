@@ -36,13 +36,10 @@ public class FundingAddDto {
     @FutureOrPresent(message = "모금 종료일은 현재 날짜 이후여야 합니다.")
     private LocalDate endDate;
 
-    @Size(max = 2048, message = "썸네일 주소는 최대 2048자 입니다.")
-    private String fundingThumbnail;
-
     @NotNull(message = "펀딩 종류는 필수 입력 값 입니다.")
     private Character fundingType;
 
-    public Fundings toEntity(Users users, byte state) {
+    public Fundings toEntity(Users users, byte state, String fundingThumbnail) {
         return Fundings.builder()
                 .corporation(users)
                 .fundingTitle(this.fundingTitle)
@@ -51,7 +48,7 @@ public class FundingAddDto {
                 .totalMoney(0)
                 .startDate(this.startDate)
                 .endDate(this.endDate)
-                .fundingThumbnail(this.fundingThumbnail)
+                .fundingThumbnail(fundingThumbnail)
                 .fundingType(this.fundingType)
                 .isDeleted(false)
                 .state(state)

@@ -5,6 +5,7 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeUtility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cglib.core.Local;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -14,6 +15,8 @@ import software.amazon.awssdk.utils.IoUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.time.LocalDate;
 
 @Slf4j
 @Service
@@ -34,7 +37,7 @@ public class MailService {
         mailSender.send(message);
     }
 
-    public void sendMultipleMessage(String email, String subject, String text) throws MessagingException {
+    public void sendMultipleMessage(String email, String fileName, String subject, String text, byte[] pdfByte) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
@@ -43,15 +46,13 @@ public class MailService {
         helper.setTo(email);
 
         //첨부 파일 설정
-        String fileName = "ex_springboot.pdf";
-        File pdfFile = new File(fileName);
-        try (FileInputStream fis = new FileInputStream(pdfFile)) {
+        try {
             helper.addAttachment(
                     MimeUtility.encodeText(fileName, "UTF-8", "B"),
-                    new ByteArrayResource(IoUtils.toByteArray(fis))
+                    new ByteArrayResource(pdfByte) // pdfByte 배열 사용
             );
-        } catch (IOException e) {
-            log.error(e.getMessage());
+        } catch (UnsupportedEncodingException e) {
+            log.error("첨부 파일 설정 중 오류 발생: {}", e.getMessage());
         }
 
         // 전송

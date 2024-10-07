@@ -28,13 +28,13 @@ import java.util.List;
 @Slf4j
 @Service
 public class PdfService {
-    public static final String SRC = "ex_springboot.pdf";
 
-    public void donationReceiptGenerate(DonationReceiptFormDto donationReceiptFormDto) {
+    public byte[] generateDonationReceipt(DonationReceiptFormDto donationReceiptFormDto) {
         Document document = new Document(PageSize.A4, 50, 50, 50, 50); // 용지 및 여백 설정
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         try{
-            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(SRC)); // 현재상대경로에 ex_springboot.pdf 생성
+            PdfWriter writer = PdfWriter.getInstance(document, byteArrayOutputStream);
             writer.setInitialLeading(12.5f);
 
             document.open(); //생성된 파일을 오픈
@@ -138,5 +138,7 @@ public class PdfService {
         } catch (DocumentException | IOException e) {
             log.error(e.getMessage());
         }
+
+        return byteArrayOutputStream.toByteArray(); // PDF 데이터를 바이트 배열로 반환
     }
 }
