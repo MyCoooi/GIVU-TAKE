@@ -72,6 +72,8 @@ public class GiftService {
             }
         }
 
+        if(contentImage.isEmpty()&&(request.getGiftContent() == null||request.getGiftContent().isEmpty()))throw new ApiException(ExceptionEnum.MISSING_GIFT_CONTENT_EXCEPTION);
+
         Gifts newGift = Gifts.builder()
                 .giftName(request.getGiftName())
                 .corporations(corporation)
@@ -168,6 +170,8 @@ public class GiftService {
                 throw new ApiException(ExceptionEnum.ILLEGAL_GIFT_CONTENT_IMAGE_EXCEPTION);
             }
         }
+
+        if(contentImage.isEmpty()&&(request.getGiftContent() == null||request.getGiftContent().isEmpty()))throw new ApiException(ExceptionEnum.MISSING_GIFT_CONTENT_EXCEPTION);
 
         gift.setGiftName(request.getGiftName());
         gift.setGiftThumbnail(thumbnailImageUrl);
