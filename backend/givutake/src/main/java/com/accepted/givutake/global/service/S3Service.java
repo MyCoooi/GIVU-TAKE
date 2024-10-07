@@ -125,6 +125,27 @@ public class S3Service {
         return "https://" + cloudfrontDomain + "/" + keyName;
     }
 
+    public void deleteReviewImage(String keyName) {
+        s3Client.deleteObject(DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(keyName)
+                .build());
+    }
+
+    public String uploadReviewImage(MultipartFile review) throws IOException {
+        String fileName = UUID.randomUUID().toString() + getFileExtension(review.getOriginalFilename());
+        String keyName = "public/posts/reviews" + fileName;
+
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(keyName)
+                .build();
+
+        s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(review.getInputStream(), review.getSize()));
+
+        return "https://" + cloudfrontDomain + "/" + keyName;
+    }
+
     public String parseObjectKeyFromCloudfrontUrl(String cloudfrontUrl) {
         try {
             URL url = new URL(cloudfrontUrl);
