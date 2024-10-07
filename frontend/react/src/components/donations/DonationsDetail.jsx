@@ -7,7 +7,6 @@ import { apiDonationsDetail } from "../../apis/donations/apiDonationsDetail"; //
 import { apiDonationsSales } from "../../apis/donations/apiDonationsSales"; // 판매량 조회 API 함수 import
 import { apiDeleteDonations } from "../../apis/donations/apiDeleteDonations"; // 삭제 API import
 import { apiUpdateDonations } from "../../apis/donations/apiUpdateDonations"; // 수정 API import
-import { getUserInfo } from "../../apis/auth/apiUserInfo"; // UserInfo 가져오기
 import TokenManager from "../../utils/TokenManager"; // TokenManager import
 
 const DonationsDetail = () => {
@@ -18,17 +17,12 @@ const DonationsDetail = () => {
   const [donation, setDonation] = useState(null); // 기부품 데이터 상태
   const [salesCount, setSalesCount] = useState(0); // 판매량 상태
   const [isEditing, setIsEditing] = useState(false); // 수정 모드 상태
-  const [userInfo, setUserInfo] = useState({
-    sido: "",
-    sigungu: "",
-  }); // 사용자 정보 상태
-
   const [updatedDonation, setUpdatedDonation] = useState({
     giftName: "",
     price: "",
     giftThumbnail: "",
     giftContent: "",
-    categoryName: "", // 카테고리 추가
+    categoryName: "" // 카테고리 추가
   });
 
   const categories = ["지역상품권", "농축산물", "수산물", "가공식품", "공예품"]; // 선택할 수 있는 카테고리 리스트
@@ -43,7 +37,7 @@ const DonationsDetail = () => {
           price: data.price?.toString(),
           giftThumbnail: data.giftThumbnail,
           giftContent: data.giftContent,
-          categoryName: data.categoryName, // 카테고리 데이터를 가져옵니다
+          categoryName: data.categoryName // 카테고리 데이터를 가져옵니다
         });
         const salesData = await apiDonationsSales(giftIdx); // 여기서 giftIdx를 사용하여 판매량 조회
         setSalesCount(salesData); // 판매량 설정
@@ -52,21 +46,43 @@ const DonationsDetail = () => {
       }
     };
 
-    const fetchUserInfo = async () => {
-      try {
-        const userData = await getUserInfo(); // 사용자 정보 가져오기
-        setUserInfo({
-          sido: userData.sido,
-          sigungu: userData.sigungu,
-        });
-      } catch (error) {
-        console.error("사용자 정보를 가져오는 데 실패했습니다:", error);
-      }
-    };
-
     fetchDonationDetail();
-    fetchUserInfo(); // 사용자 정보 가져오기
-  }, [giftIdx]);
+  }, [giftIdx]); // giftIdx가 변경될 때마다 API 요청
+
+  // Delete button handler
+  const handleDelete = () => {
+    Swal.fire({
+      title: '정말 삭제하시겠습니까?',
+      text: "이 작업은 되돌릴 수 없습니다.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: '삭제',
+      cancelButtonText: '취소'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const accessToken = TokenManager.getAccessToken(); // TokenManager로 accessToken 가져오기
+          await apiDeleteDonations(giftIdx, accessToken); // 삭제 API 호출
+          Swal.fire(
+            '삭제되었습니다!',
+            '기부품이 성공적으로 삭제되었습니다.',
+            'success'
+          );
+          // 삭제 후 기부품 목록 페이지로 이동
+          navigate("/donations");
+        } catch (error) {
+          Swal.fire(
+            '삭제 실패',
+            '기부품을 삭제하는 중 문제가 발생했습니다. 다시 시도해주세요.',
+            'error'
+          );
+          console.error("기부품 삭제 실패:", error);
+        }
+      }
+    });
+  };
 
   // Edit button handler
   const handleEditClick = () => {
@@ -78,52 +94,21 @@ const DonationsDetail = () => {
     setIsEditing(false); // 수정 모드 비활성화
   };
 
-  // Delete button handler
-  const handleDelete = () => {
-    Swal.fire({
-      title: "정말 삭제하시겠습니까?",
-      text: "이 작업은 되돌릴 수 없습니다.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "삭제",
-      cancelButtonText: "취소",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const accessToken = TokenManager.getAccessToken(); // TokenManager로 accessToken 가져오기
-          await apiDeleteDonations(giftIdx, accessToken); // 삭제 API 호출
-          Swal.fire("삭제되었습니다!", "기부품이 성공적으로 삭제되었습니다.", "success");
-          // 삭제 후 기부품 목록 페이지로 이동
-          navigate("/donations");
-        } catch (error) {
-          Swal.fire("삭제 실패", "기부품을 삭제하는 중 문제가 발생했습니다. 다시 시도해주세요.", "error");
-          console.error("기부품 삭제 실패:", error);
-        }
-      }
-    });
-  };
-
   // Save button handler
   const handleSaveClick = async () => {
     try {
       const accessToken = TokenManager.getAccessToken(); // accessToken 가져오기
       const cartegoryIdx = categories.indexOf(updatedDonation.categoryName) + 1; // 선택된 카테고리의 인덱스 계산
-
+  
       // 수정된 데이터를 백엔드로 전송하여 저장하는 로직
-      await apiUpdateDonations(
-        giftIdx,
-        {
-          giftName: updatedDonation.giftName,
-          price: parseInt(updatedDonation.price, 10), // 가격을 숫자로 변환
-          giftThumbnail: updatedDonation.giftThumbnail,
-          giftContent: updatedDonation.giftContent,
-          cartegoryIdx: cartegoryIdx, // 'cartegoryIdx'로 수정
-        },
-        accessToken
-      );
-
+      await apiUpdateDonations(giftIdx, {
+        giftName: updatedDonation.giftName,
+        price: parseInt(updatedDonation.price, 10), // 가격을 숫자로 변환
+        giftThumbnail: updatedDonation.giftThumbnail,
+        giftContent: updatedDonation.giftContent,
+        cartegoryIdx: cartegoryIdx // 'cartegoryIdx'로 수정
+      }, accessToken);
+  
       Swal.fire({
         title: "수정되었습니다.",
         text: "기부품 정보가 성공적으로 수정되었습니다.",
@@ -132,7 +117,7 @@ const DonationsDetail = () => {
       }).then(() => {
         window.location.reload(); // 새로고침
       });
-
+  
       setIsEditing(false); // 수정 모드 종료
     } catch (error) {
       Swal.fire({
@@ -144,7 +129,7 @@ const DonationsDetail = () => {
       console.error("기부품 수정 실패:", error);
     }
   };
-
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setUpdatedDonation((prev) => ({
@@ -166,7 +151,9 @@ const DonationsDetail = () => {
                 className="edit-textarea"
               />
             ) : (
-              <p className="donations-description">{donation?.giftContent}</p>
+              <p className="donations-description">
+                {donation?.giftContent}
+              </p>
             )}
           </div>
         );
@@ -184,16 +171,22 @@ const DonationsDetail = () => {
   return (
     <div className="donations-detail-container">
       <Sidebar selectedMenu={selectedMenu} setSelectedMenu={setSelectedMenu} />
-
+      
       <div className="donations-detail-content">
         <h1 className="donations-detail-title">기부품 상세</h1>
 
         <div className="donations-detail-header">
           <div className="donations-tabs">
-            <button className={activeTab === "소개" ? "active" : ""} onClick={() => setActiveTab("소개")}>
+            <button
+              className={activeTab === "소개" ? "active" : ""}
+              onClick={() => setActiveTab("소개")}
+            >
               소개
             </button>
-            <button className={activeTab === "후기" ? "active" : ""} onClick={() => setActiveTab("후기")}>
+            <button
+              className={activeTab === "후기" ? "active" : ""}
+              onClick={() => setActiveTab("후기")}
+            >
               후기
             </button>
           </div>
@@ -201,12 +194,8 @@ const DonationsDetail = () => {
             {isEditing ? (
               <>
                 {/* 수정 모드일 때 저장/취소 버튼 */}
-                <button className="save-button" onClick={handleSaveClick}>
-                  저장
-                </button>
-                <button className="cancel-button" onClick={handleCancelClick}>
-                  취소
-                </button>
+                <button className="save-button" onClick={handleSaveClick}>저장</button>
+                <button className="cancel-button" onClick={handleCancelClick}>취소</button>
               </>
             ) : (
               <>
@@ -232,7 +221,11 @@ const DonationsDetail = () => {
                 className="donations-thumbnail"
               />
             ) : donation?.giftThumbnail ? (
-              <img src={donation.giftThumbnail} alt="기부품 썸네일" className="donations-thumbnail" />
+              <img
+                src={donation.giftThumbnail}
+                alt="기부품 썸네일"
+                className="donations-thumbnail"
+              />
             ) : (
               <div className="donations-thumbnail-placeholder">썸네일</div>
             )}
@@ -288,9 +281,7 @@ const DonationsDetail = () => {
               </>
             )}
             <p className="donations-stock">판매량: {salesCount}개</p> {/* 판매량을 여기서 표시 */}
-            <p className="donations-corporationName">
-              판매자: {userInfo.sido} {userInfo.sigungu} {/* 판매자 정보에 sido와 sigungu 표시 */}
-            </p>
+            <p className="donations-corporationName">판매자: {donation?.corporationSido} {donation?.corporationSigungu} </p>
             <p className="donations-date">등록일: {new Date(donation?.createdDate).toLocaleDateString()}</p>
           </div>
         </div>
