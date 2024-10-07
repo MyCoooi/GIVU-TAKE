@@ -142,6 +142,7 @@ suspend fun deleteCartItem(context: Context, cartIdx: Int): Boolean {
             RetrofitClient.cartApiService.deleteCartItem("Bearer $token", cartIdx)
         }
 
+        Log.d("Cart","delete : ${response}")
         if (response.isSuccessful) {
             Log.d("Cart", "삭제 성공: ${response.body()}")
             response.body()?.success == true

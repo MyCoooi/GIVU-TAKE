@@ -300,7 +300,7 @@ fun GiftInformation(giftDetail: GiftDetailData) {
                 .padding(8.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = "₩${giftDetail.price} 원", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            Text(text = "₩${giftDetail.priceFormatted} 원", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
         }
 
         Row(
@@ -478,7 +478,7 @@ fun ProductIntroduction(giftDetail: GiftDetailData) {
 
         // 가격
         Text(
-            text = "가격: ₩${giftDetail.price}",
+            text = "가격: ₩${giftDetail.priceFormatted}",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Green

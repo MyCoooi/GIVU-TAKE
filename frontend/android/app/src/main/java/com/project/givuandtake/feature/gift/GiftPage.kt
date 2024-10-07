@@ -522,7 +522,7 @@ fun ProductCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "₩${product.price}",
+                        text = "₩${product.priceFormatted}",
                         fontSize = 14.sp,
                         color = Color.Black // 텍스트 색상 설정
                     )
