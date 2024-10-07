@@ -2,6 +2,7 @@ package com.accepted.givutake.user.admin.service;
 
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
+import com.accepted.givutake.global.service.S3Service;
 import com.accepted.givutake.user.admin.model.AdminSignUpDto;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.enumType.Roles;
@@ -13,7 +14,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +29,7 @@ import java.util.Optional;
 public class AdminService {
 
     private final UsersRepository usersRepository;
+    private final S3Service s3Service;
     private final PasswordEncoder passwordEncoder;
 
     // 이메일로 회원 정보 조회
@@ -47,7 +51,7 @@ public class AdminService {
         }
     }
 
-    public Users signUp(AdminSignUpDto adminSignUpDto) {
+    public Users signUp(AdminSignUpDto adminSignUpDto, MultipartFile profileImage) {
         // 1. 관리자 회원가입을 위한 확인 코드가 맞는지 확인
         String code = adminSignUpDto.getCode();
         if (!"싸피 11기 파이팅".equals(code)) {
@@ -62,8 +66,19 @@ public class AdminService {
         String password = adminSignUpDto.getPassword();
         adminSignUpDto.setPassword(passwordEncoder.encode(password));
 
-        // 4. DB에 회원 정보 저장
-        return usersRepository.save(adminSignUpDto.toEntity());
+        // 4. s3에 profile image 업로드
+        String publicProfileImageUrl = null;
+
+        if (!profileImage.isEmpty()) {
+            try {
+                publicProfileImageUrl = s3Service.uploadProfileImage(profileImage);
+            } catch (IOException e) {
+                throw new ApiException(ExceptionEnum.ILLEGAL_PROFILE_IMAGE_EXCEPTION);
+            }
+        }
+
+        // 5. DB에 회원 정보 저장
+        return usersRepository.save(adminSignUpDto.toEntity(publicProfileImageUrl));
     }
 
     // 이메일 중복 검사

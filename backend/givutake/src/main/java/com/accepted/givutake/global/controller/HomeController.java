@@ -1,6 +1,7 @@
 package com.accepted.givutake.global.controller;
 
 import com.accepted.givutake.funding.service.FundingParticipantService;
+import com.accepted.givutake.funding.service.FundingService;
 import com.accepted.givutake.gift.service.GiftService;
 import com.accepted.givutake.global.model.HomeDto;
 import com.accepted.givutake.global.model.ResponseDto;
@@ -27,6 +28,7 @@ public class HomeController {
     private final OrderService orderService;
     private final GiftService giftService;
     private final FundingParticipantService fundingParticipantService;
+    private final FundingService fundingService;
 
     @GetMapping("/price")
     public ResponseEntity<ResponseDto> calculateTotalPrice() {
@@ -47,13 +49,18 @@ public class HomeController {
 
     @GetMapping
     public ResponseEntity<ResponseDto> home(@AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+
         HomeDto data = HomeDto.builder()
                 .top10Gifts(giftService.getTop10Gifts())
-                .recentGifts(giftService.getRecentGifts(userDetails.getUsername()))
+                .recentGifts(giftService.getRecentGifts(email))
+                .deadlineImminentFundings(fundingService.getDeadlineImminentFundings())
                 .build();
+
         ResponseDto responseDto = ResponseDto.builder()
                 .data(data)
                 .build();
+
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
