@@ -35,6 +35,7 @@ public enum ExceptionEnum {
     ILLEGAL_ISAPPROVED_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0010", "isApproved는 'Y'이거나 'N'이어야 합니다."),
     ILLEGAL_PROFILE_IMAGE_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0011", "잘못된 프로필 이미지 입니다."),
     ILLEGAL_FUNDING_THUMBNAIL_IMAGE_EXCEPTION(HttpStatus.BAD_REQUEST, "EF0001", "잘못된 썸네일 이미지 입니다."),
+    ILLEGAL_FUNDING_CONTENT_IMAGE_EXCEPTION(HttpStatus.BAD_REQUEST, "EF0002", "잘못된 컨텐츠 이미지 입니다."),
     ILLEGAL_GIFT_THUMBNAIL_IMAGE_EXCEPTION(HttpStatus.BAD_REQUEST,"EG0011", "잘못된 썸네일 이미지 입니다."),
     ILLEGAL_GIFT_CONTENT_IMAGE_EXCEPTION(HttpStatus.BAD_REQUEST,"EG_0012", "잘못된 컨텐츠 이미지 입니다."),
     ILLEGAL_GIFT_REVIEW_IMAGE_EXCEPTION(HttpStatus.BAD_REQUEST,"EG_0013","잘못된 리뷰 이미지 입니다."),

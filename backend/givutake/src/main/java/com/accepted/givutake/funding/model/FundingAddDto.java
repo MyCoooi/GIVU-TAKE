@@ -39,11 +39,12 @@ public class FundingAddDto {
     @NotNull(message = "펀딩 종류는 필수 입력 값 입니다.")
     private Character fundingType;
 
-    public Fundings toEntity(Users users, byte state, String fundingThumbnail) {
+    public Fundings toEntity(Users users, byte state, String fundingThumbnail, String fundingContentImage) {
         return Fundings.builder()
                 .corporation(users)
                 .fundingTitle(this.fundingTitle)
                 .fundingContent(this.fundingContent)
+                .fundingContentImage(fundingContentImage)
                 .goalMoney(this.goalMoney)
                 .totalMoney(0)
                 .startDate(this.startDate)

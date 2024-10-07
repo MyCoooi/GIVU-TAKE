@@ -91,14 +91,15 @@ public class FundingController {
     @PostMapping
     public ResponseEntity<ResponseDto> addFundingByJwt(@AuthenticationPrincipal UserDetails userDetails,
                                                        @RequestPart(value = "fundingAddDto") @Valid FundingAddDto fundingAddDto,
-                                                       @RequestPart(value = "fundingThumbnail") MultipartFile fundingThumbnail) {
+                                                       @RequestPart(value = "fundingThumbnail", required = false) MultipartFile fundingThumbnail,
+                                                       @RequestPart(value = "contentImage", required = false) MultipartFile contentImage) {
         String email = userDetails.getUsername();
 
         if (!(fundingAddDto.getFundingType() == 'R' || fundingAddDto.getFundingType() == 'D')) {
             throw new ApiException(ExceptionEnum.ILLEGAL_FUNDINGTYPE_EXCEPTION);
         }
 
-        Fundings savedFundings = fundingService.addFundingByEmail(email, fundingAddDto, fundingThumbnail);
+        Fundings savedFundings = fundingService.addFundingByEmail(email, fundingAddDto, fundingThumbnail, contentImage);
         FundingViewDto fundingViewDto = FundingViewDto.toDto(savedFundings);
 
         ResponseDto responseDto = ResponseDto.builder()
@@ -113,14 +114,15 @@ public class FundingController {
     public ResponseEntity<ResponseDto> modifyFundingByJwt(@AuthenticationPrincipal UserDetails userDetails,
                                                           @PathVariable int fundingIdx,
                                                           @Valid @RequestPart(value = "fundingAddDto") FundingAddDto fundingAddDto,
-                                                          @RequestPart(value = "fundingThumbnail") MultipartFile fundingThumbnail) {
+                                                          @RequestPart(value = "fundingThumbnail", required = false) MultipartFile fundingThumbnail,
+                                                          @RequestPart(value = "contentImage", required = false) MultipartFile contentImage) {
         String email = userDetails.getUsername();
 
         if (!(fundingAddDto.getFundingType() == 'R' || fundingAddDto.getFundingType() == 'D')) {
             throw new ApiException(ExceptionEnum.ILLEGAL_FUNDINGTYPE_EXCEPTION);
         }
 
-        Fundings modifiedFundings = fundingService.modifyFundingByFundingIdx(email, fundingIdx, fundingAddDto, fundingThumbnail);
+        Fundings modifiedFundings = fundingService.modifyFundingByFundingIdx(email, fundingIdx, fundingAddDto, fundingThumbnail, contentImage);
         FundingViewDto fundingViewDto = FundingViewDto.toDto(modifiedFundings);
 
         ResponseDto responseDto = ResponseDto.builder()
