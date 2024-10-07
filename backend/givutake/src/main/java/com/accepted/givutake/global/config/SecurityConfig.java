@@ -72,7 +72,7 @@ public class SecurityConfig {
                                 "/api/purchases/completed",
                                 "/api/purchases/cancel",
                                 "/api/purchases/fail",
-                                "/api/donations/price",
+                                "/api/home/price",
                                 "/api/gifts/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET,
