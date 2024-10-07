@@ -144,6 +144,14 @@ public class OrderService {
         orderRepository.save(order);
     }
 
+    public void updateAmount(int giftIdx, int amount){
+        Gifts gift = giftRepository.findById(giftIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
+
+        gift.setAmount(gift.getAmount() + amount);
+
+        giftRepository.save(gift);
+    }
+
     public void deleteOrder(String email, long orderIdx){
         Orders order = orderRepository.findById(orderIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_ORDER_EXCEPTION));
 
