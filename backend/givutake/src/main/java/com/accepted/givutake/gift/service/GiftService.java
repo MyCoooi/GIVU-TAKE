@@ -49,14 +49,13 @@ public class GiftService {
     private final S3Service s3Service;
 
     public Gifts createGift(String email, CreateGiftDto request, MultipartFile thumbnailImage, MultipartFile contentImage) {
-        System.out.println(request.getCategoryIdx());
         Categories category = categoryRepository.findById(request.getCategoryIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_CATEGORY_EXCEPTION));
         UserDto savedUserDto = userService.getUserByEmail(email);
         Users corporation = savedUserDto.toEntity();
         String thumbnailImageUrl = null;
         String contentImageUrl = null;
 
-        if(!thumbnailImage.isEmpty()){
+        if(thumbnailImage != null){
             try{
                 thumbnailImageUrl = s3Service.uploadProfileImage(thumbnailImage);
             } catch(IOException e){
@@ -64,7 +63,7 @@ public class GiftService {
             }
         }
 
-        if(!contentImage.isEmpty()){
+        if(contentImage != null){
             try{
                 contentImageUrl = s3Service.uploadContentImage(contentImage);
             } catch(IOException e){
@@ -72,7 +71,7 @@ public class GiftService {
             }
         }
 
-        if(contentImage.isEmpty()&&(request.getGiftContent() == null||request.getGiftContent().isEmpty()))throw new ApiException(ExceptionEnum.MISSING_GIFT_CONTENT_EXCEPTION);
+        if((contentImage == null || contentImage.isEmpty()) && (request.getGiftContent() == null||request.getGiftContent().isEmpty()))throw new ApiException(ExceptionEnum.MISSING_GIFT_CONTENT_EXCEPTION);
 
         Gifts newGift = Gifts.builder()
                 .giftName(request.getGiftName())
@@ -153,7 +152,7 @@ public class GiftService {
         String thumbnailImageUrl = gift.getGiftThumbnail();
         String contentImageUrl = gift.getGiftContentImage();
 
-        if(!thumbnailImage.isEmpty()){
+        if(thumbnailImage != null){
             try{
                 if(thumbnailImageUrl!=null)s3Service.deleteThumbnailImage(thumbnailImageUrl);
                 thumbnailImageUrl = s3Service.uploadProfileImage(thumbnailImage);
@@ -162,7 +161,7 @@ public class GiftService {
             }
         }
 
-        if(!contentImage.isEmpty()){
+        if(contentImage != null){
             try{
                 if(contentImageUrl!=null)s3Service.deleteContentImage(contentImageUrl);
                 contentImageUrl = s3Service.uploadContentImage(contentImage);
@@ -171,7 +170,7 @@ public class GiftService {
             }
         }
 
-        if(contentImage.isEmpty()&&(request.getGiftContent() == null||request.getGiftContent().isEmpty()))throw new ApiException(ExceptionEnum.MISSING_GIFT_CONTENT_EXCEPTION);
+        if((contentImage == null||contentImage.isEmpty())||(request.getGiftContent() == null||request.getGiftContent().isEmpty()))throw new ApiException(ExceptionEnum.MISSING_GIFT_CONTENT_EXCEPTION);
 
         gift.setGiftName(request.getGiftName());
         gift.setGiftThumbnail(thumbnailImageUrl);
@@ -211,7 +210,7 @@ public class GiftService {
 
         String reviewImageUrl = null;
 
-        if(!reviewImage.isEmpty()){
+        if(reviewImage != null){
             try {
                 reviewImageUrl = s3Service.uploadReviewImage(reviewImage);
             }catch(IOException e){
@@ -338,7 +337,7 @@ public class GiftService {
 
         String reviewImgUrl = review.getReviewImage();
 
-        if(!reviewImage.isEmpty()){
+        if(reviewImage != null){
             try{
                 if(reviewImgUrl!=null)s3Service.deleteThumbnailImage(reviewImgUrl);
                 reviewImgUrl = s3Service.uploadProfileImage(reviewImage);

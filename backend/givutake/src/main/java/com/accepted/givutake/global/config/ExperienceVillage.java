@@ -37,10 +37,6 @@ public class ExperienceVillage {
                 String experienceVillagePhone = row[5].equals("NULL") ? "" : row[5];
                 String experienceVillageHomepageUrl = row[6].equals("NULL") ? "" : row[6];
 
-                System.out.println(String.format("%s, %s, %s, %s, %s, %s, %s",
-                        experienceVillageName, sigunguName, experienceVillageDivision,
-                        experienceVillageProgram, experienceVillageAddress,
-                        experienceVillagePhone, experienceVillageHomepageUrl));
 
                 String regionIdxQuery = "SELECT r.region_idx FROM region r WHERE r.sigungu = ?";
                 try (PreparedStatement pstmt = connection.prepareStatement(regionIdxQuery)) {
