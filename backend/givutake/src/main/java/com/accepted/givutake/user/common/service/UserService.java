@@ -93,11 +93,13 @@ public class UserService {
 
             String publicProfileImageUrl = null;
 
-            try {
-                // s3에 profile image 업로드
-                publicProfileImageUrl = s3Service.uploadProfileImage(profileImage);
-            } catch (IOException e) {
-                throw new ApiException(ExceptionEnum.ILLEGAL_PROFILE_IMAGE_EXCEPTION);
+            if (!profileImage.isEmpty()) {
+                try {
+                    // s3에 profile image 업로드
+                    publicProfileImageUrl = s3Service.uploadProfileImage(profileImage);
+                } catch (IOException e) {
+                    throw new ApiException(ExceptionEnum.ILLEGAL_PROFILE_IMAGE_EXCEPTION);
+                }
             }
 
             // DB에 회원 정보 저장
@@ -116,11 +118,13 @@ public class UserService {
 
             String publicProfileImageUrl = null;
 
-            try {
-                // s3에 profile image 업로드
-                publicProfileImageUrl = s3Service.uploadProfileImage(profileImage);
-            } catch (IOException e) {
-                throw new ApiException(ExceptionEnum.ILLEGAL_PROFILE_IMAGE_EXCEPTION);
+            if (!profileImage.isEmpty()) {
+                try {
+                    // s3에 profile image 업로드
+                    publicProfileImageUrl = s3Service.uploadProfileImage(profileImage);
+                } catch (IOException e) {
+                    throw new ApiException(ExceptionEnum.ILLEGAL_PROFILE_IMAGE_EXCEPTION);
+                }
             }
 
             // DB에 저장
