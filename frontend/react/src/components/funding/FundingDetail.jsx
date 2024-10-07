@@ -328,8 +328,12 @@ const FundingDetail = () => {
           </div>
         )}
 
+        {/* 목록 버튼 */}
+
+
         {/* 현재 선택된 탭에 따라 다른 내용 렌더링 */}
         {renderContent()}
+
       </div>
     </div>
   );
