@@ -59,6 +59,7 @@ public enum ExceptionEnum {
     MISSING_ISMALE_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3001", "성별은 필수 입력 값 입니다."),
     MISSING_BIRTH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU3002", "생년월일은 필수 입력 값 입니다."),
     MISSING_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.BAD_REQUEST, "EA3001", "대표 주소는 필수 입력 값 입니다."),
+    MISSING_GIFT_CONTENT_EXCEPTION(HttpStatus.BAD_REQUEST,"EG3001","답례품 이미지나 설명을 등록해주세요"),
 
     NOT_FOUND_USER_WITH_EMAIL_EXCEPTION(HttpStatus.NOT_FOUND, "EU4000", "해당 이메일을 가진 사용자를 찾을 수 없습니다."),
     NOT_FOUND_REFRESHTOKEN_EXCEPTION(HttpStatus.NOT_FOUND, "EU4020", "토큰 정보를 찾을 수 없습니다."),
