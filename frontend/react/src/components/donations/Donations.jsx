@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom"; // useNavigate import 추가
 
 const Donations = () => {
   const [selectedMenu, setSelectedMenu] = useState("기부품");
-  const [selectedType, setSelectedType] = useState(""); // 필터로 선택된 카테고리를 저장하는 상태값
+  const [selectedType, setSelectedType] = useState("전체"); // 처음 화면에 전체가 선택되도록 설정
   const navigate = useNavigate(); // useNavigate 훅
 
   // 기부품 리스트를 저장하는 state
