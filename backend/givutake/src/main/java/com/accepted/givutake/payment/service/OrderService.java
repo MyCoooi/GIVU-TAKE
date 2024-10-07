@@ -2,6 +2,7 @@ package com.accepted.givutake.payment.service;
 
 import com.accepted.givutake.gift.entity.Gifts;
 import com.accepted.givutake.gift.enumType.DeliveryStatus;
+import com.accepted.givutake.gift.service.GiftService;
 import com.accepted.givutake.payment.entity.Orders;
 import com.accepted.givutake.payment.model.CreateOrderDto;
 import com.accepted.givutake.payment.model.OrderDto;
@@ -37,6 +38,7 @@ public class OrderService {
     private final UsersRepository userRepository;
     private final GiftRepository giftRepository;
     private final UserService userService;
+    private final GiftService giftService;
 
     public Orders createOrder(String email, CreateOrderDto request){
         Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
@@ -63,6 +65,7 @@ public class OrderService {
         return orderList.map(order -> OrderDto.builder()
                 .orderIdx(order.getOrderIdx())
                 .userIdx(user.getUserIdx())
+                .regionName(order.getGift().getCorporations().getRegion().getSigungu())
                 .giftIdx(order.getGift().getGiftIdx())
                 .giftName(order.getGift().getGiftName())
                 .giftThumbnail(order.getGift().getGiftThumbnail())
@@ -70,6 +73,7 @@ public class OrderService {
                 .amount(order.getAmount())
                 .price(order.getPrice())
                 .status(order.getStatus())
+                .isWrite(giftService.IsWriteGiftReview(email,order.getOrderIdx()))
                 .createdDate(order.getCreatedDate())
                 .build()
         ).toList();
@@ -106,7 +110,7 @@ public class OrderService {
         }
     }
 
-    public OrderDto getOrder(String email, int orderIdx){
+    public OrderDto getOrder(String email, long orderIdx){
         Orders order = orderRepository.findById(orderIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_ORDER_EXCEPTION));
 
         if(!order.getUsers().getEmail().equals(email)){
@@ -116,6 +120,7 @@ public class OrderService {
         return OrderDto.builder()
                 .orderIdx(order.getOrderIdx())
                 .userIdx(order.getUsers().getUserIdx())
+                .regionName(order.getGift().getCorporations().getRegion().getSigungu())
                 .giftIdx(order.getGift().getGiftIdx())
                 .giftName(order.getGift().getGiftName())
                 .giftThumbnail(order.getGift().getGiftThumbnail())
@@ -123,11 +128,12 @@ public class OrderService {
                 .amount(order.getAmount())
                 .price(order.getPrice())
                 .status(order.getStatus())
+                .isWrite(giftService.IsWriteGiftReview(email,order.getOrderIdx()))
                 .createdDate(order.getCreatedDate())
                 .build();
     }
 
-    public void updateOrder(String email, int orderIdx, UpdateOrderDto request){
+    public void updateOrder(String email, long orderIdx, UpdateOrderDto request){
         Orders order = orderRepository.findById(orderIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_ORDER_EXCEPTION));
 
         if(!order.getGift().getCorporations().getEmail().equals(email)){ // 지자체만 배송업데이트 가능
@@ -138,7 +144,15 @@ public class OrderService {
         orderRepository.save(order);
     }
 
-    public void deleteOrder(String email, int orderIdx){
+    public void updateAmount(int giftIdx, int amount){
+        Gifts gift = giftRepository.findById(giftIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
+
+        gift.setAmount(gift.getAmount() + amount);
+
+        giftRepository.save(gift);
+    }
+
+    public void deleteOrder(String email, long orderIdx){
         Orders order = orderRepository.findById(orderIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_ORDER_EXCEPTION));
 
         if(!order.getUsers().getEmail().equals(email)){

@@ -129,7 +129,7 @@ public class GiftService {
                 .giftIdx(gift.getGiftIdx())
                 .giftName(gift.getGiftName())
                 .giftThumbnail(gift.getGiftThumbnail())
-                .giftContentImage(gift.getGiftContent())
+                .giftContentImage(gift.getGiftContentImage())
                 .giftContent(gift.getGiftContent())
                 .corporationIdx(gift.getCorporations().getUserIdx())
                 .corporationName(gift.getCorporations().getName())
@@ -148,36 +148,32 @@ public class GiftService {
         if(!gift.getCorporations().getEmail().equals(email)){
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
-        String thumbnailImageUrl = null;
-        String contentImageUrl = null;
+        String thumbnailImageUrl = gift.getGiftThumbnail();
+        String contentImageUrl = gift.getGiftContentImage();
 
         if(!thumbnailImage.isEmpty()){
             try{
-                if(gift.getGiftThumbnail()!=null)s3Service.deleteThumbnailImage(gift.getGiftThumbnail());
+                if(thumbnailImageUrl!=null)s3Service.deleteThumbnailImage(thumbnailImageUrl);
                 thumbnailImageUrl = s3Service.uploadProfileImage(thumbnailImage);
             } catch(IOException e){
                 throw new ApiException(ExceptionEnum.ILLEGAL_GIFT_THUMBNAIL_IMAGE_EXCEPTION);
             }
-        }else{
-            thumbnailImageUrl = gift.getGiftThumbnail();
         }
 
         if(!contentImage.isEmpty()){
             try{
-                if(gift.getGiftContentImage()!=null)s3Service.deleteContentImage(gift.getGiftContentImage());
+                if(contentImageUrl!=null)s3Service.deleteContentImage(contentImageUrl);
                 contentImageUrl = s3Service.uploadContentImage(contentImage);
             } catch(IOException e){
                 throw new ApiException(ExceptionEnum.ILLEGAL_GIFT_CONTENT_IMAGE_EXCEPTION);
             }
-        }else{
-            contentImageUrl = gift.getGiftContentImage();
         }
 
         gift.setGiftName(request.getGiftName());
         gift.setGiftThumbnail(thumbnailImageUrl);
         gift.setGiftContentImage(contentImageUrl);
         gift.setGiftContent(request.getGiftContent());
-        gift.setCategory(categoryRepository.findById(request.getCartegoryIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_CATEGORY_EXCEPTION)));
+        gift.setCategory(categoryRepository.findById(request.getCategoryIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_CATEGORY_EXCEPTION)));
         gift.setPrice(request.getPrice());
         return giftRepository.save(gift);
     }
@@ -191,7 +187,7 @@ public class GiftService {
         return giftRepository.save(gift);
     }
 
-    public boolean IsWriteGiftReview(String email, int orderIdx){
+    public boolean IsWriteGiftReview(String email, Long orderIdx){
         Orders order = orderRepository.findById(orderIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_ORDER_EXCEPTION));
         if(!order.getUsers().getEmail().equals(email)){
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
@@ -199,7 +195,7 @@ public class GiftService {
         return giftReviewRepository.existsByOrdersAndIsDeleteFalse(order);
     }
 
-    public void createGiftReview(String email, CreateGiftReviewDto request) {
+    public void createGiftReview(String email, CreateGiftReviewDto request, MultipartFile reviewImage) {
         Gifts gift = giftRepository.findById(request.getGiftIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
         UserDto savedUserDto = userService.getUserByEmail(email);
         Users user = savedUserDto.toEntity();
@@ -209,7 +205,18 @@ public class GiftService {
             throw new ApiException(ExceptionEnum.NOT_ALLOWED_GIFT_REVIEW_INSERTION_EXCEPTION);
         }
 
+        String reviewImageUrl = null;
+
+        if(!reviewImage.isEmpty()){
+            try {
+                reviewImageUrl = s3Service.uploadReviewImage(reviewImage);
+            }catch(IOException e){
+                throw new ApiException(ExceptionEnum.ILLEGAL_GIFT_REVIEW_IMAGE_EXCEPTION);
+            }
+        }
+
         GiftReviews giftReviews = GiftReviews.builder()
+                .reviewImage(reviewImageUrl)
                 .reviewContent(request.getReviewContent())
                 .gifts(gift)
                 .users(user)
@@ -240,6 +247,7 @@ public class GiftService {
 
         return reviewList.map(review -> GiftReviewDto.builder()
                 .reviewIdx(review.getReviewIdx())
+                .reviewImage(review.getReviewImage())
                 .reviewContent(review.getReviewContent())
                 .giftIdx(review.getGifts().getGiftIdx())
                 .giftName(review.getGifts().getGiftName())
@@ -278,6 +286,7 @@ public class GiftService {
 
         return reviewList.map(review -> GiftReviewDto.builder()
                 .reviewIdx(review.getReviewIdx())
+                .reviewImage(review.getReviewImage())
                 .reviewContent(review.getReviewContent())
                 .giftIdx(review.getGifts().getGiftIdx())
                 .giftName(review.getGifts().getGiftName())
@@ -303,6 +312,7 @@ public class GiftService {
         }
         return GiftReviewDto.builder()
                 .reviewIdx(reviewIdx)
+                .reviewImage(review.getReviewImage())
                 .reviewContent(review.getReviewContent())
                 .giftIdx(review.getGifts().getGiftIdx())
                 .giftName(review.getGifts().getGiftName())
@@ -316,11 +326,24 @@ public class GiftService {
                 .build();
     }
 
-    public void updateGiftReviews(String email, int reviewIdx, UpdateGiftReviewDto request) {
+    public void updateGiftReviews(String email, int reviewIdx, UpdateGiftReviewDto request, MultipartFile reviewImage) {
         GiftReviews review = giftReviewRepository.findById(reviewIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_REVIEW_EXCEPTION));
         if(!review.getUsers().getEmail().equals(email)){
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
+
+        String reviewImgUrl = review.getReviewImage();
+
+        if(!reviewImage.isEmpty()){
+            try{
+                if(reviewImgUrl!=null)s3Service.deleteThumbnailImage(reviewImgUrl);
+                reviewImgUrl = s3Service.uploadProfileImage(reviewImage);
+            } catch(IOException e){
+                throw new ApiException(ExceptionEnum.ILLEGAL_GIFT_THUMBNAIL_IMAGE_EXCEPTION);
+            }
+        }
+
+        review.setReviewImage(reviewImgUrl);
         review.setReviewContent(request.getReviewContent());
         giftReviewRepository.save(review);
     }
@@ -417,4 +440,48 @@ public class GiftService {
         return new GiftPurchaserDto(purchasers);
     }
 
+    public List<GiftDto> getTop10Gifts() {
+        List<Gifts> top10Gifts = giftRepository.findTop10ByIsDeleteFalseOrderByAmountDesc();
+        return top10Gifts.stream()
+                .map(gift -> GiftDto.builder()
+                        .giftIdx(gift.getGiftIdx())
+                        .giftName(gift.getGiftName())
+                        .corporationIdx(gift.getCorporations().getUserIdx())
+                        .corporationName(gift.getCorporations().getName())
+                        .corporationSido(gift.getCorporations().getRegion().getSido())
+                        .corporationSigungu(gift.getCorporations().getRegion().getSigungu())
+                        .categoryIdx(gift.getCategory().getCategoryIdx())
+                        .categoryName(gift.getCategory().getCategoryName())
+                        .giftThumbnail(gift.getGiftThumbnail())
+                        .price(gift.getPrice())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    public List<GiftDto> getRecentGifts(String email) {
+        Users user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+        Optional<Orders> order = orderRepository.findTopByUsersOrderByCreatedDateDesc(user);
+
+        if(order.isPresent()){
+            Users corporation = order.get().getGift().getCorporations();
+            Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdDate"));
+            Specification<Gifts> spec = Specification.where((root, query, cb) -> cb.equal(root.get("isDelete"), false));
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("corporations"), corporation));
+            Page<Gifts> giftList = giftRepository.findAll(spec, pageable);
+            return giftList.map(gift -> GiftDto.builder()
+                    .giftIdx(gift.getGiftIdx())
+                    .giftName(gift.getGiftName())
+                    .giftThumbnail(gift.getGiftThumbnail())
+                    .corporationIdx(gift.getCorporations().getUserIdx())
+                    .corporationName(gift.getCorporations().getName())
+                    .corporationSido(gift.getCorporations().getRegion().getSido())
+                    .corporationSigungu(gift.getCorporations().getRegion().getSigungu())
+                    .categoryIdx(gift.getCategory().getCategoryIdx())
+                    .categoryName(gift.getCategory().getCategoryName())
+                    .price(gift.getPrice())
+                    .build()
+            ).toList();
+        }else return null;
+
+    }
 }

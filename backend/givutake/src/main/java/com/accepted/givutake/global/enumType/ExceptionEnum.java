@@ -37,6 +37,7 @@ public enum ExceptionEnum {
     ILLEGAL_FUNDING_THUMBNAIL_IMAGE_EXCEPTION(HttpStatus.BAD_REQUEST, "EF0001", "잘못된 썸네일 이미지 입니다."),
     ILLEGAL_GIFT_THUMBNAIL_IMAGE_EXCEPTION(HttpStatus.BAD_REQUEST,"EG0011", "잘못된 썸네일 이미지 입니다."),
     ILLEGAL_GIFT_CONTENT_IMAGE_EXCEPTION(HttpStatus.BAD_REQUEST,"EG_0012", "잘못된 컨텐츠 이미지 입니다."),
+    ILLEGAL_GIFT_REVIEW_IMAGE_EXCEPTION(HttpStatus.BAD_REQUEST,"EG_0013","잘못된 리뷰 이미지 입니다."),
     ILLEGAL_CLOUDFRONT_URL_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0020", "잘못된 cloudfront url 입니다."),
     ILLEGAL_REPRESENTATIVE_ADDRESS_EXCEPTION(HttpStatus.BAD_REQUEST, "EA0001", "대표 주소 정보가 유효하지 않습니다."),
     ILLEGAL_REPRESENTATIVE_CARD_EXCEPTION(HttpStatus.BAD_REQUEST, "EC0001", "대표 카드 정보가 유효하지 않습니다."),

@@ -11,9 +11,11 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
-public interface OrderRepository extends JpaRepository<Orders, Integer> {
+public interface OrderRepository extends JpaRepository<Orders, Long> {
     Page<Orders> findByUsers(Users user, Pageable pageable);
+    Optional<Orders> findTopByUsersOrderByCreatedDateDesc(Users user);
     List<Orders> findByUsers(Users users);
     List<Orders> findByUsersAndCreatedDateBefore(Users users, LocalDateTime endDateTime);
     List<Orders> findByUsersAndCreatedDateAfter(Users users, LocalDateTime startDateTime);
