@@ -15,9 +15,9 @@ const SignupPage = () => {
     landlinePhone: "",
     sido: "",
     sigungu: "",
-    profileImageUrl: "", // 프로필 이미지 URL 필드 추가
   });
 
+  const [profileImage, setProfileImage] = useState(null); // 프로필 이미지 파일 상태 추가
   const [passwordValid, setPasswordValid] = useState(null); // 비밀번호 유효성 상태 추가
   const [passwordMatch, setPasswordMatch] = useState(null); // 비밀번호 일치 여부 상태 추가
   const [sidoOptions, setSidoOptions] = useState([]); // 시도 옵션 데이터
@@ -31,6 +31,7 @@ const SignupPage = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    console.log(`입력 변경됨 - 필드: ${name}, 값: ${value}`); // 입력값 디버깅 로그 추가
     setFormData({ ...formData, [name]: value });
 
     if (name === "password") {
@@ -64,8 +65,8 @@ const SignupPage = () => {
   // 시도를 선택할 때 시군구 데이터를 가져오는 함수
   const handleSidoChange = async (e) => {
     const selectedSido = e.target.value;
-    setFormData({ ...formData, sido: selectedSido });
-
+    setFormData({ ...formData, sido: selectedSido, sigungu: "" }); // 시도 변경 시 시군구 초기화
+  
     try {
       const response = await getSigungu(selectedSido);
       if (response.success) {
@@ -75,43 +76,44 @@ const SignupPage = () => {
       console.error("Failed to fetch 시군구 data:", error);
     }
   };
-
-  // 회원가입 처리 함수
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (passwordValid && passwordMatch) {
-      try {
-        const response = await signUp(formData); // signUp API 호출
-        console.log("회원가입 성공:", response);
-
-        // 회원가입 성공 시 SweetAlert 모달 창 띄우기
-        Swal.fire({
-          icon: "success",
-          title: "회원가입이 완료되었습니다!",
-          confirmButtonText: "확인",
-        }).then(() => {
-          // 확인 버튼 클릭 시 메인 페이지로 이동
-          navigate("/login");
-        });
-      } catch (error) {
-        console.error("회원가입 실패:", error);
-
-        // 회원가입 실패 시 SweetAlert 모달 창 띄우기
-        Swal.fire({
-          icon: "error",
-          title: "회원가입이 실패하였습니다.",
-          text: "다시 시도해주세요.",
-          confirmButtonText: "확인",
-        });
-      }
-    } else {
-      console.log("유효하지 않은 입력입니다.");
-    }
-  };
-
   
+// 회원가입 처리 함수
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-  return (
+  console.log("SignupPage에서 전송할 formData:", formData); // formData 확인
+  console.log("SignupPage에서 전송할 profileImage:", profileImage); // profileImage 확인
+
+  // 프로필 이미지가 null일 경우 빈 문자열로 처리
+  const processedProfileImage = profileImage || ""; // null 또는 undefined일 경우 빈 문자열로 대체
+
+  if (passwordValid && passwordMatch) {
+    try {
+      const response = await signUp(formData, processedProfileImage); // 빈 문자열로 처리된 프로필 이미지 전달
+      console.log("회원가입 성공:", response);
+      
+      Swal.fire({
+        icon: "success",
+        title: "회원가입이 완료되었습니다!",
+        confirmButtonText: "확인",
+      }).then(() => {
+        navigate("/login");
+      });
+    } catch (error) {
+      console.error("회원가입 실패:", error);
+      Swal.fire({
+        icon: "error",
+        title: "회원가입이 실패하였습니다.",
+        text: "다시 시도해주세요.",
+        confirmButtonText: "확인",
+      });
+    }
+  } else {
+    console.log("유효하지 않은 입력입니다.");
+  }
+};
+
+return (
     <div className="signup-container">
       <h2>회원가입</h2>
       <form onSubmit={handleSubmit}>
@@ -262,6 +264,19 @@ const SignupPage = () => {
                 ))}
               </select>
             </div>
+          </div>
+        </div>
+
+        <div className="form-group">
+          <div className="label-container">
+            <label>프로필 이미지</label>
+          </div>
+          <div className="input-container">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setProfileImage(e.target.files[0])} // 이미지 선택
+            />
           </div>
         </div>
 
