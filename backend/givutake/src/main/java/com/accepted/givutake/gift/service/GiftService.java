@@ -129,7 +129,7 @@ public class GiftService {
                 .giftIdx(gift.getGiftIdx())
                 .giftName(gift.getGiftName())
                 .giftThumbnail(gift.getGiftThumbnail())
-                .giftContentImage(gift.getGiftContent())
+                .giftContentImage(gift.getGiftContentImage())
                 .giftContent(gift.getGiftContent())
                 .corporationIdx(gift.getCorporations().getUserIdx())
                 .corporationName(gift.getCorporations().getName())
@@ -187,7 +187,7 @@ public class GiftService {
         return giftRepository.save(gift);
     }
 
-    public boolean IsWriteGiftReview(String email, int orderIdx){
+    public boolean IsWriteGiftReview(String email, Long orderIdx){
         Orders order = orderRepository.findById(orderIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_ORDER_EXCEPTION));
         if(!order.getUsers().getEmail().equals(email)){
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
