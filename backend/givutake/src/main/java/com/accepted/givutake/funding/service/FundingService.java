@@ -38,7 +38,7 @@ public class FundingService {
     // 종료가 임박한 순서대로 펀딩 10개 조회
     public List<FundingViewDto> getDeadlineImminentFundings() {
         List<FundingViewDto> deadlineImminentFundingViewDtos =
-                fundingRepository.findTop10ByOrderByEndDate()
+                fundingRepository.findTop10ByStateOrderByEndDate((byte) 1)
                         .stream()
                         .map(fundings -> FundingViewDto.toDto(fundings))
                         .collect(Collectors.toList());
