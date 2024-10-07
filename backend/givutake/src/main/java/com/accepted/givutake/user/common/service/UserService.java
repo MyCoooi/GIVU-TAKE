@@ -4,8 +4,6 @@ import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.region.entity.Region;
 import com.accepted.givutake.region.service.RegionService;
-import com.accepted.givutake.user.client.model.AddressAddDto;
-import com.accepted.givutake.user.client.model.AddressDto;
 import com.accepted.givutake.user.client.model.AddressSignUpDto;
 import com.accepted.givutake.user.client.service.AddressService;
 import com.accepted.givutake.user.common.entity.EmailCode;
@@ -18,7 +16,6 @@ import com.accepted.givutake.user.common.repository.UsersRepository;
 import jakarta.mail.MessagingException;
 import jakarta.validation.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -395,5 +392,4 @@ public class UserService {
         // 4. 변경되었다면, redis에서 이메일 코드 삭제
         emailCodeRepository.deleteByEmail(email);
     }
-
 }

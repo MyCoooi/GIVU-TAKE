@@ -13,13 +13,16 @@ import com.accepted.givutake.user.client.entity.Cards;
 import com.accepted.givutake.user.client.model.*;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.model.UserDto;
+import com.accepted.givutake.user.common.service.MailService;
 import com.accepted.givutake.user.common.service.UserService;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,6 +36,7 @@ import java.util.stream.Collectors;
 public class ClientService {
 
     private final PasswordEncoder passwordEncoder;
+    private final MailService mailService;
     private final AddressService addressService;
     private final UserService userService;
     private final RegionService regionService;
@@ -165,12 +169,38 @@ public class ClientService {
         return addressService.deleteAddressByAddressIdx(savedAddresses);
     }
 
-    public void sendEmailDonationReceipt(String email) {
+    // 이메일로 기부금 영수증 보내기
+    public void sendEmailDonationReceipt(String email) throws MessagingException {
         // 1. DB에서 유저 조회
         UserDto savedUserDto = userService.getUserByEmail(email);
         Users savedUsers = savedUserDto.toEntity();
 
-        // 2. 사용자의 펀딩 내역 가져오기(현재 연도 기록만)
+        // 2. 기부금 영수증 생성
+        this.generateDonationReceipt(savedUsers);
+
+        // 3. 메일로 전송
+        int nowYear =  LocalDate.now().getYear();
+        String subject = "[GIVU&TAKE]" + nowYear + "기부금 영수증 발급 메일";
+        StringBuilder htmlContent = new StringBuilder();
+        htmlContent.append("<h1>")
+                .append(nowYear)
+                .append("년 기부금 영수증 발급 안내</h1><br>")
+                .append("<p>")
+                .append(nowYear)
+                .append("년 힘든 한 해 동안에도 GIVE&TAKE와 함께 해주셔서 진심으로 감사드립니다.</p>")
+                .append("<p>덕분에 사라져가는 많은 지역들이 힘차게 도약하여 새롭고 희망찬 미래를 만들어갈 수 있는 힘을 얻게 되었습니다.</p><br>")
+                .append("<p>후원자님의 소중한 후원금에 대한 ")
+                .append(nowYear)
+                .append("년도분 기부금 영수증을 발급해드립니다.</p>");
+
+        mailService.sendMultipleMessage(email, subject, htmlContent.toString());
+    }
+
+    // 기부금 영수증 생성
+    public void generateDonationReceipt(Users users) {
+        String email = users.getEmail();
+
+        // 1. 사용자의 펀딩 내역 가져오기(현재 연도 기록만)
         int nowYear = LocalDate.now().getYear();
         LocalDate startDate = LocalDate.of(nowYear, 1, 1);
         LocalDate endDate = LocalDate.of(nowYear, 12, 31);
@@ -179,27 +209,27 @@ public class ClientService {
                 .map(participant -> DonationParticipantsDto.fundingPariticipantsToDto(participant, ""))
                 .collect(Collectors.toList());
 
-        // 3. 답례품 구매 내역 가져오기(현재 연도 기록만)
+        // 2. 답례품 구매 내역 가져오기(현재 연도 기록만)
         List<DonationParticipantsDto> orderDonationParticipantsDtoList = orderService.getOrdersCreatedDateBetweenByEmail(email, startDate, endDate)
                 .stream()
                 .map(orders -> DonationParticipantsDto.ordersToDto(orders, ""))
                 .collect(Collectors.toList());
 
-        // 4. 두 리스트 합치기
+        // 3. 두 리스트 합치기
         List<DonationParticipantsDto> combinedList = new ArrayList<>(fundingDonationParticipantsDtoList);
         combinedList.addAll(orderDonationParticipantsDtoList);
-        
-        // 5. 최신 순으로 정렬
+
+        // 4. 최신 순으로 정렬
         Collections.sort(combinedList);
 
-        // 6. 대표 주소 가져오기
-        Addresses savedAddresses = addressService.getRepresentativeAddressesByUsers(savedUsers);
+        // 5. 대표 주소 가져오기
+        Addresses savedAddresses = addressService.getRepresentativeAddressesByUsers(users);
 
-        // 7. PDF 파일로 생성
+        // 6. PDF 파일로 생성
         DonationReceiptFormDto donationReceiptFormDto = DonationReceiptFormDto.builder()
-                .userName(savedUserDto.getName())
+                .userName(users.getName())
                 .userAddress(savedAddresses.getRoadAddress() + savedAddresses.getDetailAddress())
-                .userPhone(savedUserDto.getMobilePhone())
+                .userPhone(users.getMobilePhone())
                 .donationParticipantsDtoList(combinedList)
                 .build();
 
