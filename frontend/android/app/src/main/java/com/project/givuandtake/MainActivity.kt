@@ -62,6 +62,8 @@ import com.project.givuandtake.feature.mypage.MyDonation.DonationDetails
 import com.project.givuandtake.feature.mypage.MyDonation.DonationReceipt
 import com.project.givuandtake.feature.mypage.MyDonation.FundingDetails
 import com.project.givuandtake.feature.mypage.MyDonation.Wishlist
+import com.project.givuandtake.feature.mypage.MyDonation.WriteGiftReview
+//import com.project.givuandtake.feature.mypage.MyDonation.Wishlist
 import com.project.givuandtake.feature.mypage.MyManagement.MyComment
 import com.project.givuandtake.feature.mypage.MyManagement.MyReview
 import com.project.givuandtake.feature.mypage.MyPageScreen
@@ -253,6 +255,9 @@ class MainActivity : ComponentActivity() {
                             composable("donationreceipt") { DonationReceipt(navController) }
                             composable("fundingdetails") { FundingDetails(navController) }
                             composable("wishlist") { Wishlist(navController) }
+                            composable("writegiftreview/{gift}") { navBackStackEntry ->
+                                WriteGiftReview(navController, navBackStackEntry)
+                            }
 
                             composable("mycomment") { MyComment(navController) }
                             composable("myreview") { MyReview(navController) }
@@ -306,7 +311,8 @@ class MainActivity : ComponentActivity() {
                             currentDestination != "cardcustomregistration/{cardNumber}/{validThru}" &&
                             currentDestination != "addressbookupdate" &&
                             currentDestination != "personalinquirywrite" &&
-                            currentDestination != "cardbookupdate"
+                            currentDestination != "cardbookupdate" &&
+                            currentDestination != "writegiftreview"
                         ) {
                             BottomNavBar(navController, selectedItem) { newIndex ->
                                 selectedItem = newIndex
