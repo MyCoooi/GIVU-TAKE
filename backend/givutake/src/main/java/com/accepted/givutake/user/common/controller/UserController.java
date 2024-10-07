@@ -4,9 +4,6 @@ import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.model.ResponseDto;
 import com.accepted.givutake.user.admin.model.AdminDetailViewDto;
-import com.accepted.givutake.user.admin.model.AdminSignUpDto;
-import com.accepted.givutake.user.admin.model.AdminUserViewDto;
-import com.accepted.givutake.user.client.model.AddressAddDto;
 import com.accepted.givutake.user.client.model.AddressSignUpDto;
 import com.accepted.givutake.user.client.model.ClientViewDto;
 import com.accepted.givutake.user.common.enumType.Roles;
@@ -24,8 +21,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import javax.management.relation.Role;
-import java.nio.file.AccessDeniedException;
 import java.util.Collection;
 
 @Slf4j
