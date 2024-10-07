@@ -26,7 +26,4 @@ public class ModifyUserDto {
 
     @Pattern(regexp = "^\\d{2,3}-\\d{3,4}-\\d{4}$", message = "일반 전화 번호 형식이 올바르지 않습니다.")
     private String landlinePhone;
-
-    @Pattern(regexp = "^(http|https)://[\\w.-]+(:\\d+)?(/\\S*)?$", message = "URL 형식이 올바르지 않습니다.")
-    private String profileImageUrl;
 }

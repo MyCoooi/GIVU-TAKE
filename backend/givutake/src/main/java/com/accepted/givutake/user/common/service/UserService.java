@@ -2,6 +2,7 @@ package com.accepted.givutake.user.common.service;
 
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
+import com.accepted.givutake.global.service.S3Service;
 import com.accepted.givutake.region.entity.Region;
 import com.accepted.givutake.region.service.RegionService;
 import com.accepted.givutake.user.client.model.AddressSignUpDto;
@@ -16,10 +17,14 @@ import com.accepted.givutake.user.common.repository.UsersRepository;
 import jakarta.mail.MessagingException;
 import jakarta.validation.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -36,25 +41,26 @@ public class UserService {
     private final AddressService addressService;
     private final PasswordEncoder passwordEncoder;
     private final Validator validator;
+    private final S3Service s3Service;
 
     // 1800(초) == 30분
     private static final long EMAIL_CODE_EXPIRATION_TIME = 1800;
 
-    public UserService(UsersRepository userRepository, RegionService regionService, PasswordEncoder passwordEncoder, EmailCodeRepository emailCodeRepository, MailService mailService, AddressService addressService) {
+    public UserService(UsersRepository userRepository, RegionService regionService, PasswordEncoder passwordEncoder, EmailCodeRepository emailCodeRepository, MailService mailService, AddressService addressService, S3Service s3Service) {
         this.userRepository = userRepository;
         this.regionService = regionService;
         this.emailCodeRepository = emailCodeRepository;
         this.mailService = mailService;
         this.addressService = addressService;
         this.passwordEncoder = passwordEncoder;
+        this.s3Service = s3Service;
 
         // ValidatorFactory와 Validator 초기화
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         this.validator = factory.getValidator();
     }
 
-    // 이메일 사용자 회원가입
-    public void emailSignUp(SignUpDto signUpDto, AddressSignUpDto addressSignUpDto) {
+    public void emailSignUp(SignUpDto signUpDto, AddressSignUpDto addressSignUpDto, MultipartFile profileImage) {
         Roles role = signUpDto.getRoles();
 
         // 유효하지 않은 권한정보가 들어온 경우
@@ -83,8 +89,19 @@ public class UserService {
             String sigungu = signUpDto.getSigungu();
             Region region = regionService.findRegionBySidoAndSigungu(sido, sigungu);
 
+            String publicProfileImageUrl = null;
+
+            if (!profileImage.isEmpty()) {
+                try {
+                    // s3에 profile image 업로드
+                    publicProfileImageUrl = s3Service.uploadProfileImage(profileImage);
+                } catch (IOException e) {
+                    throw new ApiException(ExceptionEnum.ILLEGAL_PROFILE_IMAGE_EXCEPTION);
+                }
+            }
+
             // DB에 회원 정보 저장
-            userRepository.save(signUpDto.toEntity(region));
+            userRepository.save(signUpDto.toEntity(region, publicProfileImageUrl));
         }
         // 2. 사용자 회원가입 관련 입력값 검증 및 처리
         else {
@@ -97,8 +114,19 @@ public class UserService {
             // 대표 주소 DTO의 유효성을 수동으로 검증
             validateAddressSignUpDto(addressSignUpDto);
 
-            // 회원 정보를 DB에 저장
-            Users savedUser = userRepository.save(signUpDto.toEntity(null));
+            String publicProfileImageUrl = null;
+
+            if (!profileImage.isEmpty()) {
+                try {
+                    // s3에 profile image 업로드
+                    publicProfileImageUrl = s3Service.uploadProfileImage(profileImage);
+                } catch (IOException e) {
+                    throw new ApiException(ExceptionEnum.ILLEGAL_PROFILE_IMAGE_EXCEPTION);
+                }
+            }
+
+            // DB에 저장
+            Users savedUser = userRepository.save(signUpDto.toEntity(null, publicProfileImageUrl));
 
             // 지역 코드 넣기
             String sido = addressSignUpDto.getSido();
@@ -206,7 +234,7 @@ public class UserService {
     }
 
     // JWT 토큰으로 회원 정보 수정
-    public UserDto modifyUserByEmail(String email, ModifyUserDto modifyUserDto) {
+    public UserDto modifyUserByEmail(String email, ModifyUserDto modifyUserDto, MultipartFile profileImage) {
         Optional<Users> optionalExistingUsers = userRepository.findByEmail(email);
 
         if (!optionalExistingUsers.isEmpty()) {
@@ -217,13 +245,30 @@ public class UserService {
                 throw new ApiException(ExceptionEnum.USER_ALREADY_WITHDRAWN_EXCEPTION);
             }
 
+            // 수정할 프로필 사진이 있을 경우, 프로필 사진 변경
+            if (profileImage != null) {
+
+                // 기존의 프로필 사진 삭제
+                Optional<String> originalProfileImageUrl = userRepository.findProfileImageUrlByEmail(email);
+                originalProfileImageUrl.ifPresent(profileImageUrl -> {
+                    String objectKey = s3Service.parseObjectKeyFromCloudfrontUrl(profileImageUrl);
+                    s3Service.deleteProfileImage(objectKey);
+                });
+
+                try {
+                    String modifiedProfileImageUrl = s3Service.uploadProfileImage(profileImage);
+                    savedUser.setProfileImageUrl(modifiedProfileImageUrl);
+                } catch (IOException e) {
+                    throw new ApiException(ExceptionEnum.ILLEGAL_PROFILE_IMAGE_EXCEPTION);
+                }
+            }
+
             // 사용자 정보 수정
             savedUser.setName(modifyUserDto.getName());
             savedUser.setIsMale(modifyUserDto.getIsMale());
             savedUser.setBirth(modifyUserDto.getBirth());
             savedUser.setMobilePhone(modifyUserDto.getMobilePhone());
             savedUser.setLandlinePhone(modifyUserDto.getLandlinePhone());
-            savedUser.setProfileImageUrl(modifyUserDto.getProfileImageUrl());
 
             // 변경된 정보 저장
             Users modifiedUser = userRepository.save(savedUser);
