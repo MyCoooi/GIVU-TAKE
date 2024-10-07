@@ -52,7 +52,9 @@ const Donations = () => {
 
   // 선택된 필터에 맞는 기부품 목록을 필터링
   const filteredDonations = selectedType
-    ? donationList.filter((donation) => donation.categoryName === selectedType)
+    ? selectedType === "전체"
+      ? donationList
+      : donationList.filter((donation) => donation.categoryName === selectedType)
     : donationList;
 
   // 현재 페이지에서 보여줄 데이터 계산
@@ -75,6 +77,12 @@ const Donations = () => {
         </div>
         <div className="donations-category-and-dropdown">
           <div className="donations-type-buttons">
+            <button
+              className={`filter-button ${selectedType === "전체" ? "active" : ""}`}
+              onClick={() => handleFilterChange("전체")}
+            >
+              전체
+            </button>
             <button
               className={`filter-button ${selectedType === "지역상품권" ? "active" : ""}`}
               onClick={() => handleFilterChange("지역상품권")}

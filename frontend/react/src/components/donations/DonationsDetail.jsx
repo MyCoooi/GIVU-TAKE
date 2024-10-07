@@ -5,6 +5,8 @@ import "./DonationsDetail.css"; // CSS import
 import Swal from "sweetalert2"; // SweetAlert2 for alerts
 import { apiDonationsDetail } from "../../apis/donations/apiDonationsDetail"; // API 함수 import
 import { apiDonationsSales } from "../../apis/donations/apiDonationsSales"; // 판매량 조회 API 함수 import
+import { apiDeleteDonations } from "../../apis/donations/apiDeleteDonations"; // 삭제 API import
+import TokenManager from "../../utils/TokenManager"; // TokenManager import
 
 const DonationsDetail = () => {
   const navigate = useNavigate();
@@ -40,16 +42,26 @@ const DonationsDetail = () => {
       cancelButtonColor: '#3085d6',
       confirmButtonText: '삭제',
       cancelButtonText: '취소'
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        // 삭제 로직 추가 필요
-        Swal.fire(
-          '삭제되었습니다!',
-          '기부품이 성공적으로 삭제되었습니다.',
-          'success'
-        );
-        // 삭제 후 기부품 목록 페이지로 이동
-        navigate("/donations");
+        try {
+          const accessToken = TokenManager.getAccessToken(); // TokenManager로 accessToken 가져오기
+          await apiDeleteDonations(giftIdx, accessToken); // 삭제 API 호출
+          Swal.fire(
+            '삭제되었습니다!',
+            '기부품이 성공적으로 삭제되었습니다.',
+            'success'
+          );
+          // 삭제 후 기부품 목록 페이지로 이동
+          navigate("/donations");
+        } catch (error) {
+          Swal.fire(
+            '삭제 실패',
+            '기부품을 삭제하는 중 문제가 발생했습니다. 다시 시도해주세요.',
+            'error'
+          );
+          console.error("기부품 삭제 실패:", error);
+        }
       }
     });
   };
