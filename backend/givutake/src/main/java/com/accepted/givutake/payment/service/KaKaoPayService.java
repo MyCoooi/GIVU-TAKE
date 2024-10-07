@@ -90,8 +90,6 @@ public class KaKaoPayService {
 
     public ApproveResponse payApprove(String email, long idx, String tid, String pgToken, String type){
 
-        System.out.println(email);
-
         Map<String, String> parameters = new HashMap<>();
         parameters.put("cid", "TC0ONETIME");              // 가맹점 코드(테스트용)
         parameters.put("tid", tid);                       // 결제 고유번호
