@@ -328,11 +328,13 @@ const FundingDetail = () => {
           </div>
         )}
 
-        {/* 목록 버튼 */}
-
-
         {/* 현재 선택된 탭에 따라 다른 내용 렌더링 */}
         {renderContent()}
+
+        {/* 목록 버튼 추가 */}
+        <div className="back-to-list">
+          <button className="back-list-button" onClick={() => navigate(-1)}>목록</button>
+        </div>
 
       </div>
     </div>
