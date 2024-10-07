@@ -37,9 +37,9 @@ public class UpdateStateTaskJob implements Job {
         // 모금 중인 펀딩 리스트 조회
         List<Fundings> inProgressFundingList = fundingRepository.findByIsDeletedFalseAndState((byte) 1);
 
-        // 현재 날짜가 모금 종료일이거나 이후일 때 모금 종료 상태로 변경
+        // 현재 날짜가 모금 종료일 이후일 때 모금 종료 상태로 변경
         for (Fundings fundings : inProgressFundingList) {
-            if (fundings.getEndDate().isBefore(LocalDate.now()) || fundings.getEndDate().equals(LocalDate.now())) {
+            if (fundings.getEndDate().isBefore(LocalDate.now())) {
                 fundings.setState((byte) 2);
                 fundingRepository.save(fundings);
             }
