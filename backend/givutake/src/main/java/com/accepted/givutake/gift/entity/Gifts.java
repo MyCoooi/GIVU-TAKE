@@ -36,7 +36,10 @@ public class Gifts extends BaseTimeEntity{
     @Column(name = "gift_thumbnail", length = 2048) // 답례품 썸네일
     private String giftThumbnail = ""; // 기본 이미지 설정(해야할 일)
 
-    @Column(name = "gift_content", nullable = false, length = 6000) // 답례품 설명
+    @Column(name = "gift_content_image", length = 2048)
+    private String giftContentImage = "";
+
+    @Column(name = "gift_content", length = 6000) // 답례품 설명
     private String giftContent;
 
     @Column(name = "price", nullable = false)
