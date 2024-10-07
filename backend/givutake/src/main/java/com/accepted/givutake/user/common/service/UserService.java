@@ -17,8 +17,6 @@ import com.accepted.givutake.user.common.repository.UsersRepository;
 import jakarta.mail.MessagingException;
 import jakarta.validation.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
