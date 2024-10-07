@@ -435,5 +435,4 @@ public class UserService {
         // 4. 변경되었다면, redis에서 이메일 코드 삭제
         emailCodeRepository.deleteByEmail(email);
     }
-
 }

@@ -4,9 +4,6 @@ import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.model.ResponseDto;
 import com.accepted.givutake.user.admin.model.AdminDetailViewDto;
-import com.accepted.givutake.user.admin.model.AdminSignUpDto;
-import com.accepted.givutake.user.admin.model.AdminUserViewDto;
-import com.accepted.givutake.user.client.model.AddressAddDto;
 import com.accepted.givutake.user.client.model.AddressSignUpDto;
 import com.accepted.givutake.user.client.model.ClientViewDto;
 import com.accepted.givutake.user.common.enumType.Roles;
@@ -25,8 +22,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.management.relation.Role;
-import java.nio.file.AccessDeniedException;
 import java.util.Collection;
 
 @Slf4j
@@ -40,10 +35,10 @@ public class  UserController {
     @PostMapping
     public ResponseEntity<ResponseDto> emailSignUp(
             @RequestPart(value = "signUpDto") @Valid SignUpDto signUpDto,
-            @RequestPart(value = "addressAddDto", required = false) AddressAddDto addressAddDto,
+            @RequestPart(value = "addressSignUpDto", required = false) AddressSignUpDto addressSignUpDto,
             @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
 
-        userService.emailSignUp(signUpDto, addressAddDto, profileImage);
+        userService.emailSignUp(signUpDto, addressSignUpDto, profileImage);
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)

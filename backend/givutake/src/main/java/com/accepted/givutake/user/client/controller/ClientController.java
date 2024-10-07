@@ -8,6 +8,7 @@ import com.accepted.givutake.user.client.entity.Cards;
 import com.accepted.givutake.user.client.model.*;
 import com.accepted.givutake.user.client.service.CardService;
 import com.accepted.givutake.user.client.service.ClientService;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -144,7 +146,7 @@ public class ClientController {
 
     // 이메일로 기부금 영수증 보내기
     @GetMapping("/donation/receipt")
-    public ResponseEntity<ResponseDto> sendEmailDonationReceipt(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<ResponseDto> sendEmailDonationReceipt(@AuthenticationPrincipal UserDetails userDetails) throws MessagingException, IOException {
         String email = userDetails.getUsername();
         
         clientService.sendEmailDonationReceipt(email);
@@ -230,4 +232,5 @@ public class ClientController {
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
+
 }
