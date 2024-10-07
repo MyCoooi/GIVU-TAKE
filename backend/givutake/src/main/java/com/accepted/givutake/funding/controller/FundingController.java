@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -88,14 +89,16 @@ public class FundingController {
 
     // jwt 토큰으로 펀딩 등록
     @PostMapping
-    public ResponseEntity<ResponseDto> addFundingByJwt(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody FundingAddDto fundingAddDto) {
+    public ResponseEntity<ResponseDto> addFundingByJwt(@AuthenticationPrincipal UserDetails userDetails,
+                                                       @RequestPart(value = "fundingAddDto") @Valid FundingAddDto fundingAddDto,
+                                                       @RequestPart(value = "fundingThumbnail") MultipartFile fundingThumbnail) {
         String email = userDetails.getUsername();
 
         if (!(fundingAddDto.getFundingType() == 'R' || fundingAddDto.getFundingType() == 'D')) {
             throw new ApiException(ExceptionEnum.ILLEGAL_FUNDINGTYPE_EXCEPTION);
         }
 
-        Fundings savedFundings = fundingService.addFundingByEmail(email, fundingAddDto);
+        Fundings savedFundings = fundingService.addFundingByEmail(email, fundingAddDto, fundingThumbnail);
         FundingViewDto fundingViewDto = FundingViewDto.toDto(savedFundings);
 
         ResponseDto responseDto = ResponseDto.builder()
@@ -107,14 +110,17 @@ public class FundingController {
 
     // jwt 토큰으로 펀딩 수정
     @PatchMapping("/{fundingIdx}")
-    public ResponseEntity<ResponseDto> modifyFundingByJwt(@AuthenticationPrincipal UserDetails userDetails, @PathVariable int fundingIdx, @Valid @RequestBody FundingAddDto fundingAddDto) {
+    public ResponseEntity<ResponseDto> modifyFundingByJwt(@AuthenticationPrincipal UserDetails userDetails,
+                                                          @PathVariable int fundingIdx,
+                                                          @Valid @RequestPart(value = "fundingAddDto") FundingAddDto fundingAddDto,
+                                                          @RequestPart(value = "fundingThumbnail") MultipartFile fundingThumbnail) {
         String email = userDetails.getUsername();
 
         if (!(fundingAddDto.getFundingType() == 'R' || fundingAddDto.getFundingType() == 'D')) {
             throw new ApiException(ExceptionEnum.ILLEGAL_FUNDINGTYPE_EXCEPTION);
         }
 
-        Fundings modifiedFundings = fundingService.modifyFundingByFundingIdx(email, fundingIdx, fundingAddDto);
+        Fundings modifiedFundings = fundingService.modifyFundingByFundingIdx(email, fundingIdx, fundingAddDto, fundingThumbnail);
         FundingViewDto fundingViewDto = FundingViewDto.toDto(modifiedFundings);
 
         ResponseDto responseDto = ResponseDto.builder()

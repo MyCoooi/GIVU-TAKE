@@ -36,7 +36,7 @@ public class  UserController {
     public ResponseEntity<ResponseDto> emailSignUp(
             @RequestPart(value = "signUpDto") @Valid SignUpDto signUpDto,
             @RequestPart(value = "addressSignUpDto", required = false) AddressSignUpDto addressSignUpDto,
-            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+            @RequestPart(value = "profileImage") MultipartFile profileImage) {
 
         userService.emailSignUp(signUpDto, addressSignUpDto, profileImage);
 
@@ -81,7 +81,7 @@ public class  UserController {
     public ResponseEntity<ResponseDto> modifyUserByToken(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestPart(value = "modifyUserDto") ModifyUserDto modifyUserDto,
-            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+            @RequestPart(value = "profileImage") MultipartFile profileImage) {
         String email = userDetails.getUsername();
         Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
 
@@ -92,7 +92,7 @@ public class  UserController {
 
         // 입력값 유효성 검사
         // 수혜자는 isMale, birth 값을 가질 수 없다
-        if ("ROLE_CORPORATION".equals(role) || "ROLE_CORPORATION_YET".equals(role)) {
+        if ("ROLE_CORPORATION".equals(role) || "ROLE_CORPORATIONYET".equals(role)) {
             if (modifyUserDto.getIsMale() != null) {
                 throw new ApiException(ExceptionEnum.UNEXPECTED_ISMALE_EXCEPTION);
             }
