@@ -36,7 +36,6 @@ import com.project.givuandtake.core.apis.UserInfoApi
 import com.project.givuandtake.core.apis.UserInfoResponse
 import com.project.givuandtake.core.data.Gift.GiftSumPriceData
 import com.project.givuandtake.core.datastore.TokenManager
-import com.project.givuandtake.feature.mypage.MyDonation.formatPrice
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
