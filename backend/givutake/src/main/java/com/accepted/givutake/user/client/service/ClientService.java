@@ -176,11 +176,12 @@ public class ClientService {
         Users savedUsers = savedUserDto.toEntity();
 
         // 2. 기부금 영수증 생성
-        this.generateDonationReceipt(savedUsers);
+        byte [] pdfByte = this.generateDonationReceipt(savedUsers);
 
         // 3. 메일로 전송
         int nowYear =  LocalDate.now().getYear();
         String subject = "[GIVU&TAKE] " + nowYear + " 기부금 영수증 발급 메일";
+        String fileName = nowYear + "년도_기부금_영수증_" + savedUsers.getName() + ".pdf";
         StringBuilder htmlContent = new StringBuilder();
         htmlContent.append("<h1>")
                 .append(nowYear)
@@ -191,11 +192,11 @@ public class ClientService {
                 .append(nowYear)
                 .append("년도분 기부금 영수증을 발급해드립니다.</p>");
 
-        mailService.sendMultipleMessage(email, subject, htmlContent.toString());
+        mailService.sendMultipleMessage(email, fileName, subject, htmlContent.toString(), pdfByte);
     }
 
     // 기부금 영수증 생성
-    public void generateDonationReceipt(Users users) {
+    public byte[] generateDonationReceipt(Users users) {
         String email = users.getEmail();
 
         // 1. 사용자의 펀딩 내역 가져오기(현재 연도 기록만)
@@ -231,7 +232,7 @@ public class ClientService {
                 .donationParticipantsDtoList(combinedList)
                 .build();
 
-        pdfService.donationReceiptGenerate(donationReceiptFormDto);
+        return pdfService.generateDonationReceipt(donationReceiptFormDto);
     }
 
     // 나의 기부금 총액 조회
