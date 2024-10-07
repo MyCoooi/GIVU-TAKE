@@ -59,8 +59,11 @@ import com.project.givuandtake.core.apis.Funding.MyFundingApi
 import com.project.givuandtake.core.data.Funding.FundingData
 import com.project.givuandtake.core.datastore.TokenManager
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
+
 
 class MyFundingViewModel : ViewModel() {
 
