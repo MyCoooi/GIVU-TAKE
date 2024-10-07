@@ -20,6 +20,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collection;
 
@@ -31,14 +32,13 @@ public class  UserController {
 
     private final UserService userService;
 
-    // 이메일 유저 회원가입
     @PostMapping
-    public ResponseEntity<ResponseDto> emailSignUp(@Valid @RequestBody CompositionSignUpDto compositionSignUpDto) {
+    public ResponseEntity<ResponseDto> emailSignUp(
+            @RequestPart(value = "signUpDto") @Valid SignUpDto signUpDto,
+            @RequestPart(value = "addressSignUpDto", required = false) AddressSignUpDto addressSignUpDto,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
 
-        SignUpDto signUpDto = compositionSignUpDto.getSignUpDto();
-        AddressSignUpDto addressSignUpDto = compositionSignUpDto.getAddressSignUpDto();
-
-        userService.emailSignUp(signUpDto, addressSignUpDto);
+        userService.emailSignUp(signUpDto, addressSignUpDto, profileImage);
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
@@ -78,7 +78,10 @@ public class  UserController {
 
     // JWT 토큰으로 회원 정보 수정
     @PatchMapping
-    public ResponseEntity<ResponseDto> modifyUserByToken(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody ModifyUserDto modifyUserDto) {
+    public ResponseEntity<ResponseDto> modifyUserByToken(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestPart(value = "modifyUserDto") ModifyUserDto modifyUserDto,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
         String email = userDetails.getUsername();
         Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
 
@@ -125,7 +128,7 @@ public class  UserController {
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
 
-        UserDto savedUserDto = userService.modifyUserByEmail(email, modifyUserDto);
+        UserDto savedUserDto = userService.modifyUserByEmail(email, modifyUserDto, profileImage);
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)

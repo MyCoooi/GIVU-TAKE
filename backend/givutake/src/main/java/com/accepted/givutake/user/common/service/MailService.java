@@ -1,16 +1,15 @@
 package com.accepted.givutake.user.common.service;
 
-import com.amazonaws.util.IOUtils;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeUtility;
-import jakarta.mail.util.ByteArrayDataSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.utils.IoUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -49,7 +48,7 @@ public class MailService {
         try (FileInputStream fis = new FileInputStream(pdfFile)) {
             helper.addAttachment(
                     MimeUtility.encodeText(fileName, "UTF-8", "B"),
-                    new ByteArrayResource(IOUtils.toByteArray(fis))
+                    new ByteArrayResource(IoUtils.toByteArray(fis))
             );
         } catch (IOException e) {
             log.error(e.getMessage());
