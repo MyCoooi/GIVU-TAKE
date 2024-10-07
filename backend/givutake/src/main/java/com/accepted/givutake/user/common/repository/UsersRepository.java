@@ -30,4 +30,7 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
     @Transactional
     @Query("UPDATE Users u SET u.password = :password WHERE u.email = :email")
     void updatePasswordByEmail(@Param("email") String email, @Param("password") String password);
+
+    @Query("SELECT u.profileImageUrl FROM Users u WHERE u.email = :email")
+    Optional<String> findProfileImageUrlByEmail(@Param("email") String email);
 }

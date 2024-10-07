@@ -14,13 +14,10 @@ public class UpdateGiftDto {
     @NotBlank(message = "답례품 이름은 필수 입력 값입니다.")
     private String giftName;
 
-    private String giftThumbnail;
-
-    @NotBlank(message = "답례품 설명은 필수 입력 값입니다.")
     private String giftContent;
 
     @NotNull
-    private int cartegoryIdx;
+    private int categoryIdx;
 
     @NotNull
     private int price;

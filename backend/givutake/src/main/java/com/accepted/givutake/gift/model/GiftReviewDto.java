@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 public class GiftReviewDto {
     private Integer reviewIdx;
+    private String reviewImage;
     private String reviewContent;
     private Integer giftIdx;
     private String giftName;
