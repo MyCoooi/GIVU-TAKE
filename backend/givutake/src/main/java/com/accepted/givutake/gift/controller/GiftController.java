@@ -65,6 +65,15 @@ public class GiftController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
+    @GetMapping("/recent")
+    public ResponseEntity<ResponseDto> getRecentGifts(@AuthenticationPrincipal UserDetails userDetails) {
+        List<GiftDto> data = giftService.getRecentGifts(userDetails.getUsername());
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(data)
+                .build();
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
     @PostMapping // 답례품 생성
     public ResponseEntity<ResponseDto> createGift(
             @AuthenticationPrincipal UserDetails userDetails,
