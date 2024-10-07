@@ -148,36 +148,32 @@ public class GiftService {
         if(!gift.getCorporations().getEmail().equals(email)){
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
-        String thumbnailImageUrl = null;
-        String contentImageUrl = null;
+        String thumbnailImageUrl = gift.getGiftThumbnail();
+        String contentImageUrl = gift.getGiftContentImage();
 
         if(!thumbnailImage.isEmpty()){
             try{
-                if(gift.getGiftThumbnail()!=null)s3Service.deleteThumbnailImage(gift.getGiftThumbnail());
+                if(thumbnailImageUrl!=null)s3Service.deleteThumbnailImage(thumbnailImageUrl);
                 thumbnailImageUrl = s3Service.uploadProfileImage(thumbnailImage);
             } catch(IOException e){
                 throw new ApiException(ExceptionEnum.ILLEGAL_GIFT_THUMBNAIL_IMAGE_EXCEPTION);
             }
-        }else{
-            thumbnailImageUrl = gift.getGiftThumbnail();
         }
 
         if(!contentImage.isEmpty()){
             try{
-                if(gift.getGiftContentImage()!=null)s3Service.deleteContentImage(gift.getGiftContentImage());
+                if(contentImageUrl!=null)s3Service.deleteContentImage(contentImageUrl);
                 contentImageUrl = s3Service.uploadContentImage(contentImage);
             } catch(IOException e){
                 throw new ApiException(ExceptionEnum.ILLEGAL_GIFT_CONTENT_IMAGE_EXCEPTION);
             }
-        }else{
-            contentImageUrl = gift.getGiftContentImage();
         }
 
         gift.setGiftName(request.getGiftName());
         gift.setGiftThumbnail(thumbnailImageUrl);
         gift.setGiftContentImage(contentImageUrl);
         gift.setGiftContent(request.getGiftContent());
-        gift.setCategory(categoryRepository.findById(request.getCartegoryIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_CATEGORY_EXCEPTION)));
+        gift.setCategory(categoryRepository.findById(request.getCategoryIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_CATEGORY_EXCEPTION)));
         gift.setPrice(request.getPrice());
         return giftRepository.save(gift);
     }
@@ -199,7 +195,7 @@ public class GiftService {
         return giftReviewRepository.existsByOrdersAndIsDeleteFalse(order);
     }
 
-    public void createGiftReview(String email, CreateGiftReviewDto request) {
+    public void createGiftReview(String email, CreateGiftReviewDto request, MultipartFile reviewImage) {
         Gifts gift = giftRepository.findById(request.getGiftIdx()).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
         UserDto savedUserDto = userService.getUserByEmail(email);
         Users user = savedUserDto.toEntity();
@@ -209,7 +205,18 @@ public class GiftService {
             throw new ApiException(ExceptionEnum.NOT_ALLOWED_GIFT_REVIEW_INSERTION_EXCEPTION);
         }
 
+        String reviewImageUrl = null;
+
+        if(!reviewImage.isEmpty()){
+            try {
+                reviewImageUrl = s3Service.uploadReviewImage(reviewImage);
+            }catch(IOException e){
+                throw new ApiException(ExceptionEnum.ILLEGAL_GIFT_REVIEW_IMAGE_EXCEPTION);
+            }
+        }
+
         GiftReviews giftReviews = GiftReviews.builder()
+                .reviewImage(reviewImageUrl)
                 .reviewContent(request.getReviewContent())
                 .gifts(gift)
                 .users(user)
@@ -240,6 +247,7 @@ public class GiftService {
 
         return reviewList.map(review -> GiftReviewDto.builder()
                 .reviewIdx(review.getReviewIdx())
+                .reviewImage(review.getReviewImage())
                 .reviewContent(review.getReviewContent())
                 .giftIdx(review.getGifts().getGiftIdx())
                 .giftName(review.getGifts().getGiftName())
@@ -278,6 +286,7 @@ public class GiftService {
 
         return reviewList.map(review -> GiftReviewDto.builder()
                 .reviewIdx(review.getReviewIdx())
+                .reviewImage(review.getReviewImage())
                 .reviewContent(review.getReviewContent())
                 .giftIdx(review.getGifts().getGiftIdx())
                 .giftName(review.getGifts().getGiftName())
@@ -303,6 +312,7 @@ public class GiftService {
         }
         return GiftReviewDto.builder()
                 .reviewIdx(reviewIdx)
+                .reviewImage(review.getReviewImage())
                 .reviewContent(review.getReviewContent())
                 .giftIdx(review.getGifts().getGiftIdx())
                 .giftName(review.getGifts().getGiftName())
@@ -316,11 +326,24 @@ public class GiftService {
                 .build();
     }
 
-    public void updateGiftReviews(String email, int reviewIdx, UpdateGiftReviewDto request) {
+    public void updateGiftReviews(String email, int reviewIdx, UpdateGiftReviewDto request, MultipartFile reviewImage) {
         GiftReviews review = giftReviewRepository.findById(reviewIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_REVIEW_EXCEPTION));
         if(!review.getUsers().getEmail().equals(email)){
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
+
+        String reviewImgUrl = review.getReviewImage();
+
+        if(!reviewImage.isEmpty()){
+            try{
+                if(reviewImgUrl!=null)s3Service.deleteThumbnailImage(reviewImgUrl);
+                reviewImgUrl = s3Service.uploadProfileImage(reviewImage);
+            } catch(IOException e){
+                throw new ApiException(ExceptionEnum.ILLEGAL_GIFT_THUMBNAIL_IMAGE_EXCEPTION);
+            }
+        }
+
+        review.setReviewImage(reviewImgUrl);
         review.setReviewContent(request.getReviewContent());
         giftReviewRepository.save(review);
     }
