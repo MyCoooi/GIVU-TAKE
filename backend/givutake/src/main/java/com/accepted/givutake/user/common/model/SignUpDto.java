@@ -36,9 +36,6 @@ public class SignUpDto extends LoginDto {
     @Pattern(regexp = "^\\d{2,3}-\\d{3,4}-\\d{4}$", message = "일반 전화 번호 형식이 올바르지 않습니다.")
     private String landlinePhone;
 
-    @Pattern(regexp = "^(http|https)://[\\w.-]+(:\\d+)?(/\\S*)?$", message = "URL 형식이 올바르지 않습니다.")
-    private String profileImageUrl;
-
     @NotNull(message = "권한은 필수 입력 값 입니다.")
     private Roles roles;
 
@@ -49,7 +46,7 @@ public class SignUpDto extends LoginDto {
 
     private String socialSerialNum;
 
-    public Users toEntity(Region region) {
+    public Users toEntity(Region region, String profileImageUrl) {
         Users ret = Users.builder()
                 .name(this.name)
                 .email(this.email)
@@ -59,7 +56,7 @@ public class SignUpDto extends LoginDto {
                 .isMale(this.isMale)
                 .birth(this.birth)
                 .region(region)
-                .profileImageUrl(this.profileImageUrl)
+                .profileImageUrl(profileImageUrl)
                 .roles(this.roles)
                 .isSocial(this.isSocial)
                 .socialType(this.socialType)
