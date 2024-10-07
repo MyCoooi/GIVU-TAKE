@@ -34,19 +34,19 @@ public class PdfService {
         Document document = new Document(PageSize.A4, 50, 50, 50, 50); // 용지 및 여백 설정
 
         try{
-            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(SRC)); //현재상대경로에 ex_springboot.pdf 생성
+            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(SRC)); // 현재상대경로에 ex_springboot.pdf 생성
             writer.setInitialLeading(12.5f);
 
             document.open(); //생성된 파일을 오픈
             XMLWorkerHelper helper = XMLWorkerHelper.getInstance();
 
-            // 사용할 CSS 를 준비한다.
+            // 사용할 CSS 준비
             CSSResolver cssResolver = new StyleAttrCSSResolver();
             CssFile cssFile = null;
             try {
                 cssFile = helper.getCSS(new FileInputStream("givutake/src/main/resources/pdf.css"));
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                log.error("PdfService - donationReceiptGenerate의 CSS 파일 읽어 들이기 실패: {}", e.getMessage());
             }
             cssResolver.addCss(cssFile);
 

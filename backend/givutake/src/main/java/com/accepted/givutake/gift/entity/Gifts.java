@@ -32,12 +32,11 @@ public class Gifts extends BaseTimeEntity{
     @JoinColumn(name = "category_idx", referencedColumnName = "category_idx") // 카테고리 ID 외래키 설정
     private Categories category;
 
-    @Builder.Default
     @Column(name = "gift_thumbnail", length = 2048) // 답례품 썸네일
-    private String giftThumbnail = ""; // 기본 이미지 설정(해야할 일)
+    private String giftThumbnail; // 기본 이미지 설정
 
     @Column(name = "gift_content_image", length = 2048)
-    private String giftContentImage = "";
+    private String giftContentImage;
 
     @Column(name = "gift_content", length = 6000) // 답례품 설명
     private String giftContent;
