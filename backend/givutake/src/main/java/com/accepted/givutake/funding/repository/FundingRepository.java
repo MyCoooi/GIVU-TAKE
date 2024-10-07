@@ -20,6 +20,7 @@ public interface FundingRepository extends JpaRepository<Fundings, Integer> {
     List<Fundings> findByFundingTypeAndStateAndIsDeletedFalse(char fundingType, byte state);
     List<Fundings> findByIsDeletedFalseAndState(byte state);
     Page<Fundings> findByCorporation(Users corporation, Pageable pageable);
+    List<Fundings> findTop10ByOrderByEndDate();
 
     @Modifying
     @Transactional
