@@ -6,12 +6,14 @@ import com.accepted.givutake.user.admin.model.AdminSignUpDto;
 import com.accepted.givutake.user.admin.model.AdminUserViewDto;
 import com.accepted.givutake.user.admin.service.AdminService;
 import com.accepted.givutake.user.common.entity.Users;
+import com.accepted.givutake.user.common.model.SignUpDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,8 +28,9 @@ public class AdminController {
 
     // 관리자 회원가입
     @PostMapping
-    public ResponseEntity<ResponseDto> signUp(@Valid @RequestBody AdminSignUpDto adminSignUpDto) {
-        Users savedUsers = adminService.signUp(adminSignUpDto);
+    public ResponseEntity<ResponseDto> signUp(@RequestPart(value = "adminSignUpDto") @Valid AdminSignUpDto adminSignUpDto,
+                                              @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+        Users savedUsers = adminService.signUp(adminSignUpDto, profileImage);
         AdminUserViewDto adminUserViewDto = AdminUserViewDto.toDto(savedUsers);
 
         ResponseDto responseDto = ResponseDto.builder()
