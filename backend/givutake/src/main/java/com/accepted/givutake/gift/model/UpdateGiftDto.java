@@ -17,7 +17,7 @@ public class UpdateGiftDto {
     private String giftContent;
 
     @NotNull
-    private int cartegoryIdx;
+    private int categoryIdx;
 
     @NotNull
     private int price;
