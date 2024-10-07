@@ -44,7 +44,7 @@ public class PdfService {
             CSSResolver cssResolver = new StyleAttrCSSResolver();
             CssFile cssFile = null;
             try {
-                cssFile = helper.getCSS(new FileInputStream("givutake/src/main/resources/pdf.css"));
+                cssFile = helper.getCSS(new FileInputStream("src/main/resources/pdf.css"));
             } catch (FileNotFoundException e) {
                 log.error("PdfService - donationReceiptGenerate의 CSS 파일 읽어 들이기 실패: {}", e.getMessage());
             }
