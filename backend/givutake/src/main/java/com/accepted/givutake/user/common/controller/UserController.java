@@ -92,7 +92,7 @@ public class  UserController {
 
         // 입력값 유효성 검사
         // 수혜자는 isMale, birth 값을 가질 수 없다
-        if ("ROLE_CORPORATION".equals(role) || "ROLE_CORPORATION_YET".equals(role)) {
+        if ("ROLE_CORPORATION".equals(role) || "ROLE_CORPORATIONYET".equals(role)) {
             if (modifyUserDto.getIsMale() != null) {
                 throw new ApiException(ExceptionEnum.UNEXPECTED_ISMALE_EXCEPTION);
             }
