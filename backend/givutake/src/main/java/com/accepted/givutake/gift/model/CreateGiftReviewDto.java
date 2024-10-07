@@ -18,5 +18,5 @@ public class CreateGiftReviewDto {
     private int giftIdx;
 
     @NotNull
-    private int orderIdx;
+    private long orderIdx;
 }

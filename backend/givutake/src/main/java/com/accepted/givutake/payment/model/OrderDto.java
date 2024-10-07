@@ -13,12 +13,14 @@ import java.time.LocalDateTime;
 public class OrderDto {
     private Long orderIdx;
     private Integer userIdx;
+    private String regionName;
     private Integer giftIdx;
     private String giftName;
     private String giftThumbnail;
     private String paymentMethod;
     private Integer amount;
     private Integer price;
+    private Boolean isWrite;
     private DeliveryStatus status;
     private LocalDateTime createdDate;
 }

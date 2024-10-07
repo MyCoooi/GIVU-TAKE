@@ -96,8 +96,10 @@ public class OrderController {
             ReadyResponse readyResponse = kaKaoPayService.payGiftReady(userDetails.getUsername(), order.getOrderIdx(),request);
             SessionUtils.addAttribute("tid", readyResponse.getTid());
             readyResponse.setStatus("success");
+            orderService.updateAmount(order.getGift().getGiftIdx(), order.getAmount());
             return readyResponse;
         }else{
+            orderService.updateAmount(order.getGift().getGiftIdx(), order.getAmount());
             return ReadyResponse.builder()
                     .status("success")
                     .build();
