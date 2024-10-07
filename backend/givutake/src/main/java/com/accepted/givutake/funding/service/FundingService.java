@@ -2,6 +2,7 @@ package com.accepted.givutake.funding.service;
 
 import com.accepted.givutake.funding.entity.Fundings;
 import com.accepted.givutake.funding.model.FundingAddDto;
+import com.accepted.givutake.funding.model.FundingViewDto;
 import com.accepted.givutake.funding.repository.FundingRepository;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -32,6 +34,17 @@ public class FundingService {
     private final FundingRepository fundingRepository;
     private final UserService userService;
     private final S3Service s3Service;
+
+    // 종료가 임박한 순서대로 펀딩 10개 조회
+    public List<FundingViewDto> getDeadlineImminentFundings() {
+        List<FundingViewDto> deadlineImminentFundingViewDtos =
+                fundingRepository.findTop10ByOrderByEndDate()
+                        .stream()
+                        .map(fundings -> FundingViewDto.toDto(fundings))
+                        .collect(Collectors.toList());
+
+        return deadlineImminentFundingViewDtos;
+    }
 
     // 자신이 작성한 모든 펀딩 조회
     public List<Fundings> getMyFundingList(String email, int pageNo, int pageSize) {
