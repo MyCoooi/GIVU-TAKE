@@ -174,8 +174,9 @@ public class GiftController {
     @PostMapping("/review") // 리뷰 작성
     public ResponseEntity<ResponseDto> createGiftReview(
             @AuthenticationPrincipal UserDetails userDetails ,
-            @Valid @RequestBody CreateGiftReviewDto request) {
-        giftService.createGiftReview(userDetails.getUsername(), request);
+            @Valid @RequestPart(value = "createGiftReviewDto") CreateGiftReviewDto request,
+            @RequestPart(value = "reviewImage") MultipartFile reviewImage) {
+        giftService.createGiftReview(userDetails.getUsername(), request, reviewImage);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
                 .build();
@@ -186,9 +187,10 @@ public class GiftController {
     public ResponseEntity<ResponseDto> updateGiftReview(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int reviewIdx,
-            @Valid @RequestBody UpdateGiftReviewDto request) {
+            @Valid @RequestPart(value = "updateGiftReviewDto") UpdateGiftReviewDto request,
+            @RequestPart(value = "reviewImage") MultipartFile reviewImage) {
         System.out.println(request.getReviewContent());
-        giftService.updateGiftReviews(userDetails.getUsername(), reviewIdx, request);
+        giftService.updateGiftReviews(userDetails.getUsername(), reviewIdx, request, reviewImage);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
                 .build();
