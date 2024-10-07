@@ -163,7 +163,7 @@ public class GiftController {
     @GetMapping("/review/order/{orderIdx}")
     public ResponseEntity<ResponseDto> getUserReviewOrder(
             @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable int orderIdx){
+            @PathVariable long orderIdx){
         boolean data = giftService.IsWriteGiftReview(userDetails.getUsername(), orderIdx);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(data)
