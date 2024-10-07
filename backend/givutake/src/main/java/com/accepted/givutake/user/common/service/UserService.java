@@ -244,14 +244,14 @@ public class UserService {
             }
 
             // 수정할 프로필 사진이 있을 경우, 프로필 사진 변경
-            if (profileImage != null) {
+            if (!profileImage.isEmpty()) {
 
                 // 기존의 프로필 사진 삭제
-                Optional<String> originalProfileImageUrl = userRepository.findProfileImageUrlByEmail(email);
-                originalProfileImageUrl.ifPresent(profileImageUrl -> {
-                    String objectKey = s3Service.parseObjectKeyFromCloudfrontUrl(profileImageUrl);
+                String originalProfileImageUrl = savedUser.getProfileImageUrl();
+                if (originalProfileImageUrl != null) {
+                    String objectKey = s3Service.parseObjectKeyFromCloudfrontUrl(originalProfileImageUrl);
                     s3Service.deleteProfileImage(objectKey);
-                });
+                }
 
                 try {
                     String modifiedProfileImageUrl = s3Service.uploadProfileImage(profileImage);

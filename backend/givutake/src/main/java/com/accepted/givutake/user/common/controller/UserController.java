@@ -36,7 +36,7 @@ public class  UserController {
     public ResponseEntity<ResponseDto> emailSignUp(
             @RequestPart(value = "signUpDto") @Valid SignUpDto signUpDto,
             @RequestPart(value = "addressSignUpDto", required = false) AddressSignUpDto addressSignUpDto,
-            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+            @RequestPart(value = "profileImage") MultipartFile profileImage) {
 
         userService.emailSignUp(signUpDto, addressSignUpDto, profileImage);
 
@@ -81,7 +81,7 @@ public class  UserController {
     public ResponseEntity<ResponseDto> modifyUserByToken(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestPart(value = "modifyUserDto") ModifyUserDto modifyUserDto,
-            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+            @RequestPart(value = "profileImage") MultipartFile profileImage) {
         String email = userDetails.getUsername();
         Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
 
