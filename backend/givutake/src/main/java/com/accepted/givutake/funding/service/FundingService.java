@@ -5,6 +5,7 @@ import com.accepted.givutake.funding.model.FundingAddDto;
 import com.accepted.givutake.funding.repository.FundingRepository;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
+import com.accepted.givutake.global.service.S3Service;
 import com.accepted.givutake.payment.repository.FundingParticipantsRepository;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.model.UserDto;
@@ -15,7 +16,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +31,7 @@ public class FundingService {
 
     private final FundingRepository fundingRepository;
     private final UserService userService;
+    private final S3Service s3Service;
 
     // 자신이 작성한 모든 펀딩 조회
     public List<Fundings> getMyFundingList(String email, int pageNo, int pageSize) {
@@ -65,7 +69,7 @@ public class FundingService {
     }
 
     // email 사용자의 펀딩 추가
-    public Fundings addFundingByEmail(String email, FundingAddDto fundingAddDto) {
+    public Fundings addFundingByEmail(String email, FundingAddDto fundingAddDto, MultipartFile fundingThumbnail) {
         // 1. DB에서 user 조회하기
         UserDto savedUserDto = userService.getUserByEmail(email);
         Users savedUsers = savedUserDto.toEntity();
@@ -73,8 +77,20 @@ public class FundingService {
         // 2. state 값 지정
         byte state = this.calculateState(fundingAddDto.getStartDate());
 
+        // 3. s3에 funding thumbnail image 업로드
+        String publicThumbnailImageUrl = null;
+
+        if (!fundingThumbnail.isEmpty()) {
+            try {
+                publicThumbnailImageUrl = s3Service.uploadThumbnailImage(fundingThumbnail);
+                log.info("publicThumbnailImageUrl: {}", publicThumbnailImageUrl);
+            } catch (IOException e) {
+                throw new ApiException(ExceptionEnum.ILLEGAL_FUNDING_THUMBNAIL_IMAGE_EXCEPTION);
+            }
+        }
+
         // 3. DB에 저장
-        return fundingRepository.save(fundingAddDto.toEntity(savedUsers, state));
+        return fundingRepository.save(fundingAddDto.toEntity(savedUsers, state, publicThumbnailImageUrl));
     }
 
     // 현재 시간과 모금 시작일을 비교하여 상태값 반환
@@ -87,7 +103,7 @@ public class FundingService {
     }
 
     // fundingIdx에 해당하는 펀딩 수정
-    public Fundings modifyFundingByFundingIdx(String email, int fundingIdx, FundingAddDto fundingAddDto) {
+    public Fundings modifyFundingByFundingIdx(String email, int fundingIdx, FundingAddDto fundingAddDto, MultipartFile fundingThumbnail) {
         // 1. user 정보 조회
         UserDto savedUserDto = userService.getUserByEmail(email);
         Users savedUsers = savedUserDto.toEntity();
@@ -109,8 +125,26 @@ public class FundingService {
             throw new ApiException(ExceptionEnum.NOT_ALLOWED_FUNDING_IN_PROGRESS_MODIFICATION_EXCEPTION);
         }
 
+        // 수정할 썸네일 사진이 있을 경우, 썸네일 사진 변경
+        if (!fundingThumbnail.isEmpty()) {
 
-        // 5. 수정
+            // 기존의 썸네일 사진 삭제
+            String thumbnailImageUrl = savedFundings.getFundingThumbnail();
+            if (thumbnailImageUrl != null) {
+                String objectKey = s3Service.parseObjectKeyFromCloudfrontUrl(thumbnailImageUrl);
+                s3Service.deleteThumbnailImage(objectKey);
+            }
+
+            // 새로운 썸네일 사진 업로드
+            try {
+                String modifiedThumbnailImageUrl = s3Service.uploadThumbnailImage(fundingThumbnail);
+                savedFundings.setFundingThumbnail(modifiedThumbnailImageUrl);
+            } catch (IOException e) {
+                throw new ApiException(ExceptionEnum.ILLEGAL_FUNDING_THUMBNAIL_IMAGE_EXCEPTION);
+            }
+        }
+
+        // 5. 펀딩 정보 수정
         // state 값 지정
         byte state = this.calculateState(fundingAddDto.getStartDate());
 
@@ -120,7 +154,6 @@ public class FundingService {
         savedFundings.setGoalMoney(fundingAddDto.getGoalMoney());
         savedFundings.setStartDate(fundingAddDto.getStartDate());
         savedFundings.setEndDate(fundingAddDto.getEndDate());
-        savedFundings.setFundingThumbnail(fundingAddDto.getFundingThumbnail());
         savedFundings.setFundingType(fundingAddDto.getFundingType());
 
         // 6. DB에 저장
