@@ -161,7 +161,7 @@ public class GiftService {
             }
         }
 
-        if(contentImage != null && contentImage.isEmpty()){
+        if(contentImage != null && !contentImage.isEmpty()){
             try{
                 if(contentImageUrl!=null)s3Service.deleteContentImage(contentImageUrl);
                 contentImageUrl = s3Service.uploadContentImage(contentImage);
