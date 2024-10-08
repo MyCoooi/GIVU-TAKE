@@ -8,12 +8,17 @@ import com.accepted.givutake.funding.model.FundingReviewViewDto;
 import com.accepted.givutake.funding.repository.FundingReviewsRepository;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
+import com.accepted.givutake.global.service.S3Service;
 import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -24,6 +29,7 @@ public class FundingReviewService {
     private final FundingReviewsRepository fundingReviewsRepository;
     private final UserService userService;
     private final FundingService fundingService;
+    private final S3Service s3Service;
 
     // fundingIdx에 해당하는 펀딩의 펀딩 후기 조회
     public FundingReviewViewDto getFundingReviewByFundingIdx(int fundingIdx) {
@@ -38,7 +44,7 @@ public class FundingReviewService {
     }
     
     // jwt 토큰으로 펀딩 후기 추가
-    public FundingReviewViewDto addFundingReviewByEmail(String email, int fundingIdx, FundingReviewAddDto fundingReviewAddDto) {
+    public FundingReviewViewDto addFundingReviewByEmail(String email, int fundingIdx, FundingReviewAddDto fundingReviewAddDto, MultipartFile contentImage) {
         // 1. email로 부터 userIdx값 가져오기
         UserDto savedUserDto = userService.getUserByEmail(email);
         int userIdx = savedUserDto.getUserIdx();
@@ -56,13 +62,24 @@ public class FundingReviewService {
             throw new ApiException(ExceptionEnum.NOT_ALLOWED_FUNDING_REVIEW_INSERTION_EXCEPTION);
         }
 
-        // 4. 해당 펀딩의 후기가 작성되어 있지 않다면 DB에 펀딩 후기 추가
-        FundingReviews fundingReviews = fundingReviewAddDto.toEntity(fundings);
+        // 4. 해당 펀딩의 후기가 작성되어 있지 않다면 s3에 review content image 업로드
+        String publicContentImageUrl = null;
+
+        if (contentImage != null && !contentImage.isEmpty()) {
+            try {
+                publicContentImageUrl = s3Service.uploadContentImage(contentImage);
+            } catch (IOException e) {
+                throw new ApiException(ExceptionEnum.ILLEGAL_FUNDING_CONTENT_IMAGE_EXCEPTION);
+            }
+        }
+
+        // 4. DB에 펀딩 후기 추가
+        FundingReviews fundingReviews = fundingReviewAddDto.toEntity(fundings, publicContentImageUrl);
         return FundingReviewViewDto.toDto(fundingReviewsRepository.save(fundingReviews));
     }
 
     // jwt 토큰으로 펀딩 후기 수정
-    public FundingReviewViewDto modifyFundingReviewByEmail(String email, int fundingIdx, FundingReviewUpdateDto fundingReviewUpdateDto) {
+    public FundingReviewViewDto modifyFundingReviewByEmail(String email, int fundingIdx, FundingReviewUpdateDto fundingReviewUpdateDto, MultipartFile contentImage) {
         // 1. email로 부터 userIdx값 가져오기
         UserDto savedUserDto = userService.getUserByEmail(email);
         int userIdx = savedUserDto.getUserIdx();
@@ -81,7 +98,26 @@ public class FundingReviewService {
             throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
         }
 
-        // 4. 수정
+        // 4. 수정할 컨텐츠 사진이 있을 경우, 컨텐츠 사진 변경
+        if (contentImage != null && !contentImage.isEmpty()) {
+
+            // 기존의 컨텐츠 사진 삭제
+            String originalContentImageUrl = savedFundingReviews.getReviewContentImage();
+            if (originalContentImageUrl != null) {
+                String objectKey = s3Service.parseObjectKeyFromCloudfrontUrl(originalContentImageUrl);
+                s3Service.deleteContentImage(objectKey);
+            }
+
+            // 새로운 컨텐츠 사진 업로드
+            try {
+                String modifiedContentImageUrl = s3Service.uploadContentImage(contentImage);
+                savedFundingReviews.setReviewContentImage(modifiedContentImageUrl);
+            } catch (IOException e) {
+                throw new ApiException(ExceptionEnum.ILLEGAL_FUNDING_CONTENT_IMAGE_EXCEPTION);
+            }
+        }
+
+        // 5. 수정
         savedFundingReviews.setReviewContent(fundingReviewUpdateDto.getReviewContent());
 
         // 6. DB에 저장
