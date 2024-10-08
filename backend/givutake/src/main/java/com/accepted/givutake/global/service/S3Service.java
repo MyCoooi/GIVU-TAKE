@@ -112,7 +112,7 @@ public class S3Service {
     }
 
     public String uploadContentImage(MultipartFile content) throws IOException {
-        String fileName = UUID.randomUUID().toString() + getFileExtension(Objects.requireNonNull(content.getOriginalFilename()));
+        String fileName = UUID.randomUUID() + getFileExtension(Objects.requireNonNull(content.getOriginalFilename()));
         String keyName = "public/posts/contents/" + fileName;
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
@@ -133,7 +133,7 @@ public class S3Service {
     }
 
     public String uploadReviewImage(MultipartFile review) throws IOException {
-        String fileName = UUID.randomUUID().toString() + getFileExtension(Objects.requireNonNull(review.getOriginalFilename()));
+        String fileName = UUID.randomUUID() + getFileExtension(Objects.requireNonNull(review.getOriginalFilename()));
         String keyName = "public/posts/reviews/" + fileName;
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()

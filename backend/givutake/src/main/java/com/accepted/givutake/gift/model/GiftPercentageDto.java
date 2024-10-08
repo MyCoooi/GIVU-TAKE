@@ -27,28 +27,3 @@ public class GiftPercentageDto {
     }
 
 }
-
-//@Getter
-//@Setter
-//@Builder
-//@NoArgsConstructor
-//@AllArgsConstructor
-//@ToString
-//public class GiftPercentageDto {
-//
-//    // Map<type, Map<name, StatDto>>
-//    private Map<String, List<StatDto>> statistics;
-//
-//    @Getter
-//    @Setter
-//    @Builder
-//    @ToString
-//    @NoArgsConstructor
-//    @AllArgsConstructor
-//    public static class StatDto {
-//        private String name;
-//        private Long count;
-//        private Double percentage;
-//    }
-//
-//}
