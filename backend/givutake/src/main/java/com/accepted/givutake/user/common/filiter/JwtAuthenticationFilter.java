@@ -1,15 +1,10 @@
 package com.accepted.givutake.user.common.filiter;
 
 import com.accepted.givutake.global.enumType.ExceptionEnum;
-import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.exception.JwtAuthenticationException;
 import com.accepted.givutake.global.model.ExceptionDto;
 import com.accepted.givutake.user.common.JwtTokenProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;

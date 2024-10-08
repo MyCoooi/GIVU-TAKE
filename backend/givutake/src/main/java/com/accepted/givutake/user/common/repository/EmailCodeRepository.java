@@ -1,8 +1,6 @@
 package com.accepted.givutake.user.common.repository;
 
 import com.accepted.givutake.user.common.entity.EmailCode;
-import com.accepted.givutake.user.common.model.EmailCodeDto;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;

@@ -6,7 +6,6 @@ import com.accepted.givutake.user.admin.model.AdminSignUpDto;
 import com.accepted.givutake.user.admin.model.AdminUserViewDto;
 import com.accepted.givutake.user.admin.service.AdminService;
 import com.accepted.givutake.user.common.entity.Users;
-import com.accepted.givutake.user.common.model.SignUpDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
