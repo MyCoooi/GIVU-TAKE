@@ -107,10 +107,9 @@ public class SecurityConfig {
                 // 예외 처리 설정
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         // 인증되지 않은 사용자에 대한 처리
-                        //.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                         // 인가되지 않은 사용자에 대한 처리
-                        //.accessDeniedHandler(customAccessDeniedHandler)
-                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/"))
+                        .accessDeniedHandler(customAccessDeniedHandler)
                 );
 
         return http.build();
