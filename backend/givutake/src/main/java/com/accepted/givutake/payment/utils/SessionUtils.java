@@ -5,7 +5,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 
 import java.util.Objects;
 
-public class SessionUtils {
+public enum SessionUtils {
+    ;
 
     public static void addAttribute(String name, Object value) {
         Objects.requireNonNull(RequestContextHolder.getRequestAttributes()).setAttribute(name, value, RequestAttributes.SCOPE_SESSION);

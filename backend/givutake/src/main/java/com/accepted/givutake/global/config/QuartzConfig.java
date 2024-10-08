@@ -31,12 +31,10 @@ public class QuartzConfig {
     @Bean
     public Trigger startupTrigger() {
         // 서버 시작 시 실행
-        Trigger startupTrigger = TriggerBuilder.newTrigger()
+        return TriggerBuilder.newTrigger()
                 .forJob(dailyTaskJobDetail())
                 .withIdentity("startupTrigger")
                 .startNow() // 서버 시작 시 즉시 실행
                 .build();
-
-        return startupTrigger;
     }
 }

@@ -233,7 +233,7 @@ public class GiftService {
 
     public List<GiftReviewDto> getGiftReviews(int giftIdx, boolean isOrderLiked, int pageNo, int pageSize) {
 
-        Pageable pageable = null;
+        Pageable pageable;
 
         if(isOrderLiked){
             pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "likedCount"));
@@ -242,12 +242,10 @@ public class GiftService {
         }
         Gifts gifts = giftRepository.findById(giftIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
 
-        Specification<GiftReviews> spec = (root, query, cb) -> {
-            return cb.and(
-                    cb.equal(root.get("gifts"), gifts),
-                    cb.equal(root.get("isDelete"), false)
-            );
-        };
+        Specification<GiftReviews> spec = (root, query, cb) -> cb.and(
+                cb.equal(root.get("gifts"), gifts),
+                cb.equal(root.get("isDelete"), false)
+        );
 
         Page<GiftReviews> reviewList = giftReviewRepository.findAll(spec, pageable);
 
@@ -271,7 +269,7 @@ public class GiftService {
     }
 
     public List<GiftReviewDto> getUserReviews(String email, boolean isOrderLiked, int pageNo, int pageSize) {
-        Pageable pageable = null;
+        Pageable pageable;
 
         if(isOrderLiked){
             pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "likedCount"));
@@ -282,12 +280,10 @@ public class GiftService {
         UserDto savedUserDto = userService.getUserByEmail(email);
         Users user = savedUserDto.toEntity();
 
-        Specification<GiftReviews> spec = (root, query, cb) -> {
-            return cb.and(
-                    cb.equal(root.get("users"), user),
-                    cb.equal(root.get("isDelete"), false)
-            );
-        };
+        Specification<GiftReviews> spec = (root, query, cb) -> cb.and(
+                cb.equal(root.get("users"), user),
+                cb.equal(root.get("isDelete"), false)
+        );
 
         Page<GiftReviews> reviewList = giftReviewRepository.findAll(spec, pageable);
 
