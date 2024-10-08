@@ -7,7 +7,6 @@ import com.accepted.givutake.funding.repository.FundingRepository;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.service.S3Service;
-import com.accepted.givutake.payment.repository.FundingParticipantsRepository;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.service.UserService;

@@ -13,7 +13,6 @@ import com.accepted.givutake.user.common.enumType.Roles;
 import com.accepted.givutake.user.common.model.*;
 import com.accepted.givutake.user.common.repository.EmailCodeRepository;
 import com.accepted.givutake.user.common.repository.UsersRepository;
-
 import jakarta.mail.MessagingException;
 import jakarta.validation.*;
 import lombok.extern.slf4j.Slf4j;

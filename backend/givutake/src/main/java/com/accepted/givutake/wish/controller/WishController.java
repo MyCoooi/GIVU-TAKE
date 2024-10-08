@@ -1,7 +1,6 @@
 package com.accepted.givutake.wish.controller;
 
 import com.accepted.givutake.global.model.ResponseDto;
-import com.accepted.givutake.wish.entity.Wish;
 import com.accepted.givutake.wish.model.CreateWishDto;
 import com.accepted.givutake.wish.model.WishDto;
 import com.accepted.givutake.wish.service.WishService;
