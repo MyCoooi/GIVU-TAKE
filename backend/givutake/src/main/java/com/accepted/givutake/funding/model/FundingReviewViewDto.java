@@ -14,10 +14,12 @@ import java.time.LocalDateTime;
 public class FundingReviewViewDto {
 
     private String reviewContent;
+    private String reviewContentImage;
 
     public static FundingReviewViewDto toDto(FundingReviews fundingReviews) {
         return FundingReviewViewDto.builder()
                 .reviewContent(fundingReviews.getReviewContent())
+                .reviewContentImage(fundingReviews.getReviewContentImage())
                 .build();
     }
 }

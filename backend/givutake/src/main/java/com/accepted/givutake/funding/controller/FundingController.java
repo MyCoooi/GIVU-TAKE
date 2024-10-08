@@ -241,10 +241,13 @@ public class FundingController {
 
     // jwt 토큰으로 펀딩 후기 추가
     @PostMapping("/{fundingIdx}/review")
-    public ResponseEntity<ResponseDto> addFundingReviewByJwt(@AuthenticationPrincipal UserDetails userDetails, @PathVariable int fundingIdx, @Valid @RequestBody FundingReviewAddDto fundingReviewAddDto) {
+    public ResponseEntity<ResponseDto> addFundingReviewByJwt(@AuthenticationPrincipal UserDetails userDetails,
+                                                             @PathVariable int fundingIdx,
+                                                             @Valid @RequestPart(value = "fundingReviewAddDto") FundingReviewAddDto fundingReviewAddDto,
+                                                             @RequestPart(value = "contentImage", required = false) MultipartFile contentImage) {
         String email = userDetails.getUsername();
 
-        FundingReviewViewDto savedFundingReviewDto = fundingReviewService.addFundingReviewByEmail(email, fundingIdx, fundingReviewAddDto);
+        FundingReviewViewDto savedFundingReviewDto = fundingReviewService.addFundingReviewByEmail(email, fundingIdx, fundingReviewAddDto, contentImage);
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(savedFundingReviewDto)
@@ -255,10 +258,13 @@ public class FundingController {
 
     // jwt 토큰으로 펀딩 후기 수정
     @PatchMapping("/{fundingIdx}/review")
-    public ResponseEntity<ResponseDto> modifyFundingReviewByJwt(@AuthenticationPrincipal UserDetails userDetails, @PathVariable int fundingIdx, @Valid @RequestBody FundingReviewUpdateDto fundingReviewUpdateDto) {
+    public ResponseEntity<ResponseDto> modifyFundingReviewByJwt(@AuthenticationPrincipal UserDetails userDetails,
+                                                                @PathVariable int fundingIdx,
+                                                                @Valid @RequestPart(value = "fundingReviewUpdateDto") FundingReviewUpdateDto fundingReviewUpdateDto,
+                                                                @RequestPart(value = "contentImage", required = false) MultipartFile contentImage) {
         String email = userDetails.getUsername();
 
-        FundingReviewViewDto modifiedFundingReviewDetailViewDto = fundingReviewService.modifyFundingReviewByEmail(email, fundingIdx, fundingReviewUpdateDto);
+        FundingReviewViewDto modifiedFundingReviewDetailViewDto = fundingReviewService.modifyFundingReviewByEmail(email, fundingIdx, fundingReviewUpdateDto, contentImage);
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(modifiedFundingReviewDetailViewDto)
