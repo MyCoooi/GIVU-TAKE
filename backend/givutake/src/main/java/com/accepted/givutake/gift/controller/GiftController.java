@@ -78,8 +78,8 @@ public class GiftController {
     public ResponseEntity<ResponseDto> createGift(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestPart(value = "createGiftDto") CreateGiftDto request,
-            @RequestPart(value = "thumbnailImage") MultipartFile thumbnailImage,
-            @RequestPart(value = "contentImage") MultipartFile contentImage) {
+            @RequestPart(value = "thumbnailImage", required = false) MultipartFile thumbnailImage,
+            @RequestPart(value = "contentImage", required = false) MultipartFile contentImage) {
         Gifts gift = giftService.createGift(userDetails.getUsername(), request, thumbnailImage, contentImage);
         CreateLogDto logDto = CreateLogDto.builder()
                 .contentType(ContentTypeEnum.GIFT)
@@ -98,8 +98,8 @@ public class GiftController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int giftsIdx,
             @Valid @RequestPart(value = "updateGiftDto") UpdateGiftDto request,
-            @RequestPart(value = "thumbnailImage") MultipartFile thumbnailImage,
-            @RequestPart(value = "contentImage") MultipartFile contentImage) {
+            @RequestPart(value = "thumbnailImage", required = false) MultipartFile thumbnailImage,
+            @RequestPart(value = "contentImage", required = false) MultipartFile contentImage) {
         Gifts gift = giftService.updateGift(userDetails.getUsername(), giftsIdx, request, thumbnailImage, contentImage);
         CreateLogDto logDto = CreateLogDto.builder()
                 .contentType(ContentTypeEnum.GIFT)
@@ -184,7 +184,7 @@ public class GiftController {
     public ResponseEntity<ResponseDto> createGiftReview(
             @AuthenticationPrincipal UserDetails userDetails ,
             @Valid @RequestPart(value = "createGiftReviewDto") CreateGiftReviewDto request,
-            @RequestPart(value = "reviewImage") MultipartFile reviewImage) {
+            @RequestPart(value = "reviewImage", required = false) MultipartFile reviewImage) {
         giftService.createGiftReview(userDetails.getUsername(), request, reviewImage);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)
@@ -197,8 +197,7 @@ public class GiftController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int reviewIdx,
             @Valid @RequestPart(value = "updateGiftReviewDto") UpdateGiftReviewDto request,
-            @RequestPart(value = "reviewImage") MultipartFile reviewImage) {
-        System.out.println(request.getReviewContent());
+            @RequestPart(value = "reviewImage", required = false) MultipartFile reviewImage) {
         giftService.updateGiftReviews(userDetails.getUsername(), reviewIdx, request, reviewImage);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(null)

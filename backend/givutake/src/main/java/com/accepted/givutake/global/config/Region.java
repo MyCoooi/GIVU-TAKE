@@ -61,8 +61,6 @@ public class Region {
                                         insertStmt.setString(4, formattedDateTime);
                                         insertStmt.executeUpdate();
                                     }
-                                } else {
-                                    System.out.println("'" + sido + ", " + sigungu + "' already exists in the database.");
                                 }
                             }
                         }
