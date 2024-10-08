@@ -16,6 +16,7 @@ public class GiftReviewDto {
     private Integer giftIdx;
     private String giftName;
     private String giftThumbnail;
+    private String corporationName;
     private Integer userIdx;
     private String userName;
     private String userProfileImage;
