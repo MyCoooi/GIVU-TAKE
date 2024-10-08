@@ -146,6 +146,27 @@ public class S3Service {
         return "https://" + cloudfrontDomain + "/" + keyName;
     }
 
+    public String uploadCertificateImage(MultipartFile certificateImage) throws IOException {
+        String fileName = UUID.randomUUID().toString() + getFileExtension(certificateImage.getOriginalFilename());
+        String keyName = "public/certificates/" + fileName;
+
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(keyName)
+                .build();
+
+        s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(certificateImage.getInputStream(), certificateImage.getSize()));
+
+        return "https://" + cloudfrontDomain + "/" + keyName;
+    }
+
+    public void deleteCertificateImage(String keyName) {
+        s3Client.deleteObject(DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(keyName)
+                .build());
+    }
+
     public String parseObjectKeyFromCloudfrontUrl(String cloudfrontUrl) {
         try {
             URL url = new URL(cloudfrontUrl);
