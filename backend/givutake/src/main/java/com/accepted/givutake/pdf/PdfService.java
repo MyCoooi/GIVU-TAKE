@@ -34,9 +34,6 @@ import java.util.List;
 @Service
 public class PdfService {
 
-//    @Value("${path.ttf}")
-//    private String ttfPath;
-
     public byte[] generateDonationReceipt(DonationReceiptFormDto donationReceiptFormDto) {
         Document document = new Document(PageSize.A4, 50, 50, 50, 50); // 용지 및 여백 설정
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -63,7 +60,6 @@ public class PdfService {
             // HTML 과 폰트준비
             XMLWorkerFontProvider fontProvider = new XMLWorkerFontProvider(XMLWorkerFontProvider.DONTLOOKFORFONTS);
             try {
-                // 절대 경로로 가져오기
                 ClassPathResource cssResource = new ClassPathResource("malgun.ttf");
                 fontProvider.register(cssResource.getPath(), "MalgunGothic"); // 'MalgunGothic'은 폰트 별칭
             } catch (Exception e) {
