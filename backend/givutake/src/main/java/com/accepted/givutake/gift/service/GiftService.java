@@ -7,13 +7,13 @@ import com.accepted.givutake.gift.model.*;
 import com.accepted.givutake.gift.repository.GiftRepository;
 import com.accepted.givutake.gift.repository.GiftReviewLikedRepository;
 import com.accepted.givutake.gift.repository.GiftReviewRepository;
-import com.accepted.givutake.global.service.S3Service;
-import com.accepted.givutake.payment.entity.Orders;
-import com.accepted.givutake.payment.repository.OrderRepository;
 import com.accepted.givutake.global.entity.Categories;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.repository.CategoryRepository;
+import com.accepted.givutake.global.service.S3Service;
+import com.accepted.givutake.payment.entity.Orders;
+import com.accepted.givutake.payment.repository.OrderRepository;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.repository.UsersRepository;
@@ -21,7 +21,10 @@ import com.accepted.givutake.user.common.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -55,7 +58,7 @@ public class GiftService {
         String thumbnailImageUrl = null;
         String contentImageUrl = null;
 
-        if(thumbnailImage != null && thumbnailImage.isEmpty()){
+        if(thumbnailImage != null && !thumbnailImage.isEmpty()){
             try{
                 thumbnailImageUrl = s3Service.uploadProfileImage(thumbnailImage);
             } catch(IOException e){
@@ -63,7 +66,7 @@ public class GiftService {
             }
         }
 
-        if(contentImage != null && contentImage.isEmpty()){
+        if(contentImage != null && !contentImage.isEmpty()){
             try{
                 contentImageUrl = s3Service.uploadContentImage(contentImage);
             } catch(IOException e){
@@ -152,7 +155,7 @@ public class GiftService {
         String thumbnailImageUrl = gift.getGiftThumbnail();
         String contentImageUrl = gift.getGiftContentImage();
 
-        if(thumbnailImage != null && thumbnailImage.isEmpty()){
+        if(thumbnailImage != null && !thumbnailImage.isEmpty()){
             try{
                 if(thumbnailImageUrl!=null)s3Service.deleteThumbnailImage(thumbnailImageUrl);
                 thumbnailImageUrl = s3Service.uploadProfileImage(thumbnailImage);
@@ -161,7 +164,7 @@ public class GiftService {
             }
         }
 
-        if(contentImage != null && contentImage.isEmpty()){
+        if(contentImage != null && !contentImage.isEmpty()){
             try{
                 if(contentImageUrl!=null)s3Service.deleteContentImage(contentImageUrl);
                 contentImageUrl = s3Service.uploadContentImage(contentImage);
@@ -210,7 +213,7 @@ public class GiftService {
 
         String reviewImageUrl = null;
 
-        if(reviewImage != null && reviewImage.isEmpty()){
+        if(reviewImage != null && !reviewImage.isEmpty()){
             try {
                 reviewImageUrl = s3Service.uploadReviewImage(reviewImage);
             }catch(IOException e){

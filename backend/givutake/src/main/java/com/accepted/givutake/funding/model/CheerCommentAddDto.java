@@ -4,7 +4,6 @@ import com.accepted.givutake.funding.entity.CheerComments;
 import com.accepted.givutake.funding.entity.Fundings;
 import com.accepted.givutake.user.common.entity.Users;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 

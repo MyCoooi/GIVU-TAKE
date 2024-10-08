@@ -5,7 +5,6 @@ import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.user.client.entity.Addresses;
 import com.accepted.givutake.user.client.repository.AddressRepository;
 import com.accepted.givutake.user.common.entity.Users;
-import com.accepted.givutake.user.common.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

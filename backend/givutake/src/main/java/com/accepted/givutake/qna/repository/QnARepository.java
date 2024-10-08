@@ -1,6 +1,5 @@
 package com.accepted.givutake.qna.repository;
 
-import com.accepted.givutake.gift.entity.GiftReviews;
 import com.accepted.givutake.qna.entity.QnA;
 import com.accepted.givutake.user.common.entity.Users;
 import org.springframework.data.domain.Page;

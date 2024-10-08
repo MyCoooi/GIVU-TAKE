@@ -2,7 +2,6 @@ package com.accepted.givutake.global.config;
 
 import com.accepted.givutake.funding.UpdateStateTaskJob;
 import org.quartz.*;
-import org.quartz.listeners.SchedulerListenerSupport;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

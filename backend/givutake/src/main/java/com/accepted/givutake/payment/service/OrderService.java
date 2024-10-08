@@ -2,16 +2,15 @@ package com.accepted.givutake.payment.service;
 
 import com.accepted.givutake.gift.entity.Gifts;
 import com.accepted.givutake.gift.enumType.DeliveryStatus;
+import com.accepted.givutake.gift.repository.GiftRepository;
 import com.accepted.givutake.gift.service.GiftService;
+import com.accepted.givutake.global.enumType.ExceptionEnum;
+import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.payment.entity.Orders;
 import com.accepted.givutake.payment.model.CreateOrderDto;
 import com.accepted.givutake.payment.model.OrderDto;
 import com.accepted.givutake.payment.model.UpdateOrderDto;
-import com.accepted.givutake.gift.repository.GiftRepository;
-import com.accepted.givutake.gift.repository.GiftReviewRepository;
 import com.accepted.givutake.payment.repository.OrderRepository;
-import com.accepted.givutake.global.enumType.ExceptionEnum;
-import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.repository.UsersRepository;
@@ -26,8 +25,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
