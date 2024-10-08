@@ -13,6 +13,7 @@ import lombok.experimental.SuperBuilder;
 public class FundingDetailViewDto extends FundingViewDto {
 
     private String fundingContent;
+    private String fundingContentImage;
     private byte state;
 
     public static FundingDetailViewDto toDto(Fundings fundings) {
@@ -22,6 +23,7 @@ public class FundingDetailViewDto extends FundingViewDto {
                 .sigungu(fundings.getCorporation().getRegion().getSigungu())
                 .fundingTitle(fundings.getFundingTitle())
                 .fundingContent(fundings.getFundingContent())
+                .fundingContentImage(fundings.getFundingContentImage())
                 .goalMoney(fundings.getGoalMoney())
                 .totalMoney(fundings.getTotalMoney())
                 .startDate(fundings.getStartDate())
