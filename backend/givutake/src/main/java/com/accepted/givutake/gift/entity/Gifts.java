@@ -45,7 +45,7 @@ public class Gifts extends BaseTimeEntity{
     private int price;
 
     @Builder.Default
-    @Column(name = "isDelete")
+    @Column(name = "is_delete")
     private boolean isDelete = false;
 
     @Builder.Default

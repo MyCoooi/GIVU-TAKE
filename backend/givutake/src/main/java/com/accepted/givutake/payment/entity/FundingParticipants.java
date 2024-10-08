@@ -32,7 +32,7 @@ public class FundingParticipants extends BaseTimeEntity {
     @Column(name = "funding_fee", nullable = false)
     private int fundingFee;
 
-    @Column(name = "payment_method", nullable = false, length = 255) // 결제 수단
+    @Column(name = "payment_method", nullable = false) // 결제 수단
     private String paymentMethod;
 
     @Column(name = "card_number", length = 20)
