@@ -195,9 +195,4 @@ public class JwtTokenProvider {
         return null;
     }
 
-//    // Request Parameter에서 토큰 정보 추출
-//    public String resolveTokenFromRequestParam(HttpServletRequest request) {
-//        String token = request.getParameter("token");
-//        return token;
-//    }
 }

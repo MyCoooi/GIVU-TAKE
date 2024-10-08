@@ -202,13 +202,13 @@ public class ClientService {
         List<DonationParticipantsDto> fundingDonationParticipantsDtoList = fundingParticipantService.getFundingParticipantsListByEmail(email, startDate, endDate)
                 .stream()
                 .map(participant -> DonationParticipantsDto.fundingPariticipantsToDto(participant, ""))
-                .collect(Collectors.toList());
+                .toList();
 
         // 2. 답례품 구매 내역 가져오기(현재 연도 기록만)
         List<DonationParticipantsDto> orderDonationParticipantsDtoList = orderService.getOrdersCreatedDateBetweenByEmail(email, startDate, endDate)
                 .stream()
                 .map(orders -> DonationParticipantsDto.ordersToDto(orders, ""))
-                .collect(Collectors.toList());
+                .toList();
 
         // 3. 두 리스트 합치기
         List<DonationParticipantsDto> combinedList = new ArrayList<>(fundingDonationParticipantsDtoList);
