@@ -3,8 +3,6 @@ package com.accepted.givutake.funding.model;
 import com.accepted.givutake.funding.entity.FundingReviews;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @ToString

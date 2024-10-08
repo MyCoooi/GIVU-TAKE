@@ -4,7 +4,6 @@ import com.accepted.givutake.global.entity.BaseTimeEntity;
 import com.accepted.givutake.user.common.entity.Users;
 import jakarta.persistence.*;
 import lombok.*;
-import org.apache.catalina.User;
 
 @Table(name="Gift_review_liked")
 @Entity

@@ -4,8 +4,6 @@ import lombok.Getter;
 import lombok.ToString;
 import org.springframework.http.HttpStatus;
 
-import java.util.HashMap;
-
 @Getter
 @ToString
 public enum ExceptionEnum {
