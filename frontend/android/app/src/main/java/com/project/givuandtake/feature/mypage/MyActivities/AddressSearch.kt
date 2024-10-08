@@ -103,19 +103,19 @@ class AddressPostViewModel : ViewModel() {
 fun fetchAddressResults(keyword: String, onResult: (List<Juso>) -> Unit) {
     val client = OkHttpClient()
     val request = Request.Builder()
-        .url("https://business.juso.go.kr/addrlink/addrLinkApi.do?confmKey=devU01TX0FVVEgyMDI0MDkyNTAwNDMyOTExNTEwODQ=&currentPage=1&countPerPage=15&keyword=$keyword&resultType=json&firstSort=road")
+        .url("https://business.juso.go.kr/addrlink/addrLinkApi.do?confmKey=devU01TX0FVVEgyMDI0MTAwOTAwMDM1MDExNTE0Mjg=&currentPage=1&countPerPage=15&keyword=$keyword&resultType=json&firstSort=road")
         .build()
 
     client.newCall(request).enqueue(object : Callback {
         override fun onFailure(call: Call, e: IOException) {
-            // 실패 시 빈 리스트 반환
+            Log.d("도로명주소", "실패")
             onResult(emptyList())
         }
 
         override fun onResponse(call: Call, response: Response) {
             response.use {
                 if (!response.isSuccessful) {
-                    // 실패 시 빈 리스트 반환
+                    Log.d("도로명주소 실패", "실패")
                     onResult(emptyList())
                     return
                 }
@@ -124,15 +124,20 @@ fun fetchAddressResults(keyword: String, onResult: (List<Juso>) -> Unit) {
                 val responseBody = response.body?.string()
                 if (responseBody != null) {
                     try {
+                        Log.d("도로명주소 응답", "Raw JSON 응답: $responseBody")  // 응답을 먼저 로깅
                         val gson = Gson()
                         val jusoResponse = gson.fromJson(responseBody, JusoResponse::class.java)
 
-                        // 결과 리스트 반환
+                        Log.d("도로명주소", "JSON 파싱 성공: ${jusoResponse.results.juso.size}개의 주소")
                         onResult(jusoResponse.results.juso)
                     } catch (e: Exception) {
-                        // JSON 파싱 오류 시 빈 리스트 반환
+                        Log.e("도로명주소", "JSON 파싱 오류: ${e.message}", e)
+                        Log.d("도로명주소 불러오기2", "실패: $responseBody")  // 실패 시 Raw JSON 응답 로깅
                         onResult(emptyList())
                     }
+                } else {
+                    Log.e("도로명주소 실패", "응답 본문이 비어 있음")
+                    onResult(emptyList())
                 }
             }
         }
