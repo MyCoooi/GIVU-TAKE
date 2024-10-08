@@ -10,16 +10,20 @@ import com.accepted.givutake.global.service.S3Service;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.service.UserService;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -46,14 +50,30 @@ public class FundingService {
     }
 
     // 자신이 작성한 모든 펀딩 조회
-    public List<Fundings> getMyFundingList(String email, int pageNo, int pageSize) {
+    public List<Fundings> getMyFundingList(String email, Byte state, int pageNo, int pageSize) {
         // 1. DB에서 유저 조회
         UserDto savedUserDto = userService.getUserByEmail(email);
         Users savedUsers = savedUserDto.toEntity();
 
         Pageable pageable = PageRequest.of(pageNo, pageSize);
 
-        return fundingRepository.findByCorporation(savedUsers, pageable).getContent();
+        // 람다식으로 동적 쿼리 설정
+        Specification<Fundings> spec = (root, query, criteriaBuilder) -> {
+            var predicates = new ArrayList<Predicate>();
+
+            // 유저 조건
+            predicates.add(criteriaBuilder.equal(root.get("corporation"), savedUsers));
+
+            // 상태 조건 (state가 null이 아닌 경우에만 추가)
+            if (state != null) {
+                predicates.add(criteriaBuilder.equal(root.get("state"), state));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Page<Fundings> fundingsPage = fundingRepository.findAll(spec, pageable);
+        return fundingsPage.getContent();
     }
 
     // 조건에 해당하는 모든 펀딩 조회(삭제된 펀딩은 조회 불가)

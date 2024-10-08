@@ -38,13 +38,14 @@ public class FundingController {
     // 자신이 작성한 모든 펀딩 조회
     @GetMapping("/my-fundings")
     public ResponseEntity<ResponseDto> getMyFundingList(@AuthenticationPrincipal UserDetails userDetails,
+                                                        @RequestParam(required = false) Byte state,
                                                         @RequestParam(required = false, defaultValue = "0") int pageNo,
                                                         @RequestParam(required = false, defaultValue = "10") int pageSize) {
 
         String email = userDetails.getUsername();
 
         List<FundingViewDto> fundingViewDtoList =
-                fundingService.getMyFundingList(email, pageNo, pageSize)
+                fundingService.getMyFundingList(email, state, pageNo, pageSize)
                         .stream()
                         .map(FundingViewDto::toDto)
                         .collect(Collectors.toList());
