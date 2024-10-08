@@ -87,10 +87,6 @@ public class WishService {
 
         Gifts gift = giftRepository.findById(giftIdx).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_GIFT_EXCEPTION));
         Optional<Wish> wish = wishRepository.findByUsersAndGift(user,gift);
-        if(wish.isPresent()) {
-            return true;
-        }else{
-            return false;
-        }
+        return wish.isPresent();
     }
 }

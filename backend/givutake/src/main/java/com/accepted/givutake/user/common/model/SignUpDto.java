@@ -50,7 +50,7 @@ public class SignUpDto extends LoginDto {
     private String socialSerialNum;
 
     public Users toEntity(Region region, String profileImageUrl) {
-        Users ret = Users.builder()
+        return Users.builder()
                 .name(this.name)
                 .email(this.email)
                 .password(this.password)
@@ -66,8 +66,6 @@ public class SignUpDto extends LoginDto {
                 .socialSerialNum(this.socialSerialNum)
                 .isWithdraw(false)
                 .build();
-
-        return ret;
     }
 
 }

@@ -18,7 +18,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -159,7 +158,7 @@ public class ClientController {
 
     // 이메일로 기부금 영수증 보내기
     @GetMapping("/donation/receipt")
-    public ResponseEntity<ResponseDto> sendEmailDonationReceipt(@AuthenticationPrincipal UserDetails userDetails) throws MessagingException, IOException {
+    public ResponseEntity<ResponseDto> sendEmailDonationReceipt(@AuthenticationPrincipal UserDetails userDetails) throws MessagingException {
         String email = userDetails.getUsername();
         
         clientService.sendEmailDonationReceipt(email);

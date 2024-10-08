@@ -33,26 +33,26 @@ public class Users extends BaseTimeEntity {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "mobile_phone", nullable = true)
+    @Column(name = "mobile_phone")
     private String mobilePhone;
 
-    @Column(name = "landline_phone", nullable = true)
+    @Column(name = "landline_phone")
     private String landlinePhone;
 
     // 사용자만 해당
-    @Column(name = "is_male", nullable = true)
+    @Column(name = "is_male")
     private Boolean isMale;
 
     // 사용자만 해당
-    @Column(name = "birth", nullable = true)
+    @Column(name = "birth")
     private LocalDate birth;
 
     // 수혜자만 해당
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "region_idx", nullable = true)
+    @JoinColumn(name = "region_idx")
     private Region region;
 
-    @Column(name = "profile_image_url", nullable = true)
+    @Column(name = "profile_image_url")
     private String profileImageUrl;
 
     @Column(name = "roles", nullable = false)
@@ -62,11 +62,11 @@ public class Users extends BaseTimeEntity {
     @Column(name = "is_social", nullable = false)
     private boolean isSocial;
 
-    @Column(name = "social_type", nullable = true)
+    @Column(name = "social_type")
     @Enumerated(EnumType.STRING)
     private SocialType socialType;
 
-    @Column(name = "social_serial_num", nullable = true)
+    @Column(name = "social_serial_num")
     private String socialSerialNum;
 
     @Column(name = "is_withdraw", nullable = false)

@@ -48,7 +48,7 @@ public class PdfService {
             CssFile cssFile = null;
             try {
                 ClassPathResource cssResource = new ClassPathResource("pdf.css");
-                cssFile = helper.getCSS(cssResource.getInputStream());
+                cssFile = XMLWorkerHelper.getCSS(cssResource.getInputStream());
             } catch (FileNotFoundException e) {
                 log.error("PdfService - donationReceiptGenerate의 CSS 파일 읽어 들이기 실패: {}", e.getMessage());
             }
