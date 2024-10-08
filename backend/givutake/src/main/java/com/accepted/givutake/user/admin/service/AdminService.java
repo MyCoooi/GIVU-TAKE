@@ -69,7 +69,7 @@ public class AdminService {
         // 4. s3에 profile image 업로드
         String publicProfileImageUrl = null;
 
-        if (!profileImage.isEmpty()) {
+        if (profileImage != null && !profileImage.isEmpty()) {
             try {
                 publicProfileImageUrl = s3Service.uploadProfileImage(profileImage);
             } catch (IOException e) {
