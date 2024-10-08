@@ -55,7 +55,7 @@ public class GiftService {
         String thumbnailImageUrl = null;
         String contentImageUrl = null;
 
-        if(thumbnailImage != null){
+        if(thumbnailImage != null && thumbnailImage.isEmpty()){
             try{
                 thumbnailImageUrl = s3Service.uploadProfileImage(thumbnailImage);
             } catch(IOException e){
@@ -63,7 +63,7 @@ public class GiftService {
             }
         }
 
-        if(contentImage != null){
+        if(contentImage != null && contentImage.isEmpty()){
             try{
                 contentImageUrl = s3Service.uploadContentImage(contentImage);
             } catch(IOException e){
@@ -152,7 +152,7 @@ public class GiftService {
         String thumbnailImageUrl = gift.getGiftThumbnail();
         String contentImageUrl = gift.getGiftContentImage();
 
-        if(thumbnailImage != null){
+        if(thumbnailImage != null && thumbnailImage.isEmpty()){
             try{
                 if(thumbnailImageUrl!=null)s3Service.deleteThumbnailImage(thumbnailImageUrl);
                 thumbnailImageUrl = s3Service.uploadProfileImage(thumbnailImage);
@@ -161,7 +161,7 @@ public class GiftService {
             }
         }
 
-        if(contentImage != null){
+        if(contentImage != null && contentImage.isEmpty()){
             try{
                 if(contentImageUrl!=null)s3Service.deleteContentImage(contentImageUrl);
                 contentImageUrl = s3Service.uploadContentImage(contentImage);
@@ -170,7 +170,7 @@ public class GiftService {
             }
         }
 
-        if((contentImage == null||contentImage.isEmpty())||(request.getGiftContent() == null||request.getGiftContent().isEmpty()))throw new ApiException(ExceptionEnum.MISSING_GIFT_CONTENT_EXCEPTION);
+        if((contentImage == null||contentImage.isEmpty())&&(request.getGiftContent() == null||request.getGiftContent().isEmpty()))throw new ApiException(ExceptionEnum.MISSING_GIFT_CONTENT_EXCEPTION);
 
         gift.setGiftName(request.getGiftName());
         gift.setGiftThumbnail(thumbnailImageUrl);
@@ -255,6 +255,7 @@ public class GiftService {
                 .giftIdx(review.getGifts().getGiftIdx())
                 .giftName(review.getGifts().getGiftName())
                 .giftThumbnail(review.getGifts().getGiftThumbnail())
+                .corporationName(review.getGifts().getCorporations().getName())
                 .userIdx(review.getUsers().getUserIdx())
                 .userName(review.getUsers().getName())
                 .userProfileImage(review.getUsers().getProfileImageUrl())
@@ -294,6 +295,7 @@ public class GiftService {
                 .giftIdx(review.getGifts().getGiftIdx())
                 .giftName(review.getGifts().getGiftName())
                 .giftThumbnail(review.getGifts().getGiftThumbnail())
+                .corporationName(review.getGifts().getCorporations().getName())
                 .userIdx(review.getUsers().getUserIdx())
                 .userName(review.getUsers().getName())
                 .userProfileImage(review.getUsers().getProfileImageUrl())
@@ -320,6 +322,7 @@ public class GiftService {
                 .giftIdx(review.getGifts().getGiftIdx())
                 .giftName(review.getGifts().getGiftName())
                 .giftThumbnail(review.getGifts().getGiftThumbnail())
+                .corporationName(review.getGifts().getCorporations().getName())
                 .userIdx(review.getUsers().getUserIdx())
                 .userName(review.getUsers().getName())
                 .userProfileImage(review.getUsers().getProfileImageUrl())
