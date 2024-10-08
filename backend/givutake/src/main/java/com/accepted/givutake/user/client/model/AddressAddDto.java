@@ -2,9 +2,7 @@ package com.accepted.givutake.user.client.model;
 
 import com.accepted.givutake.user.client.entity.Addresses;
 import com.accepted.givutake.user.common.entity.Users;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 

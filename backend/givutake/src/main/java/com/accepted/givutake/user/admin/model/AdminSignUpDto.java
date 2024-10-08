@@ -1,11 +1,9 @@
 package com.accepted.givutake.user.admin.model;
 
-import com.accepted.givutake.region.entity.Region;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.enumType.Roles;
 import com.accepted.givutake.user.common.model.LoginDto;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 

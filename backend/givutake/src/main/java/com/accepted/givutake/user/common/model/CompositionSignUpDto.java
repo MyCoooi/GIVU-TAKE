@@ -1,7 +1,5 @@
 package com.accepted.givutake.user.common.model;
 
-import com.accepted.givutake.user.client.model.AddressAddDto;
-import com.accepted.givutake.user.client.model.AddressDto;
 import com.accepted.givutake.user.client.model.AddressSignUpDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;

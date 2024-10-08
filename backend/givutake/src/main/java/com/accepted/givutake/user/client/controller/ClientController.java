@@ -4,7 +4,6 @@ import com.accepted.givutake.funding.model.FundingParticipantViewDto;
 import com.accepted.givutake.funding.service.FundingParticipantService;
 import com.accepted.givutake.global.model.ResponseDto;
 import com.accepted.givutake.user.client.entity.Addresses;
-import com.accepted.givutake.user.client.entity.Cards;
 import com.accepted.givutake.user.client.model.*;
 import com.accepted.givutake.user.client.service.CardService;
 import com.accepted.givutake.user.client.service.ClientService;

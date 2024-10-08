@@ -2,7 +2,8 @@ package com.accepted.givutake.user.common.controller;
 
 import com.accepted.givutake.global.model.ResponseDto;
 import com.accepted.givutake.user.common.JwtTokenProvider;
-import com.accepted.givutake.user.common.model.*;
+import com.accepted.givutake.user.common.model.JwtTokenDto;
+import com.accepted.givutake.user.common.model.LoginDto;
 import com.accepted.givutake.user.common.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;

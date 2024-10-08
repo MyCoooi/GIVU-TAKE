@@ -3,7 +3,6 @@ package com.accepted.givutake.funding;
 import com.accepted.givutake.funding.model.FundingAddDto;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 public class DateRangeValidator implements ConstraintValidator<ValidFundingAddDtoDates, FundingAddDto> {
 
