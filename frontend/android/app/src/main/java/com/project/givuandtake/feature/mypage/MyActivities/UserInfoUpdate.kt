@@ -57,6 +57,7 @@ fun UserInfoUpdate(navController: NavController) {
 
     // 프로필 이미지 URI 상태
     var profileImageUri by remember { mutableStateOf<Uri?>(null) }
+    Log.d("adfadadf", "$profileImageUri")
 
     // 사진첩에서 이미지 선택을 처리하는 launcher
     val launcher = rememberLauncherForActivityResult(
