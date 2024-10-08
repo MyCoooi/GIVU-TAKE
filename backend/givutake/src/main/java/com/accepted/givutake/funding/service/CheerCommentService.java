@@ -83,9 +83,7 @@ public class CheerCommentService {
         Fundings fundings = fundingService.getFundingByFundingIdx(fundingIdx);
 
         // 3. DB에 저장
-        CheerComments savedCheerComments = cheerCommentsRepository.save(cheerCommentAddDto.toEntity(fundings, savedUserDto.toEntity()));
-
-        return savedCheerComments;
+        return cheerCommentsRepository.save(cheerCommentAddDto.toEntity(fundings, savedUserDto.toEntity()));
     }
 
     // 댓글 삭제
