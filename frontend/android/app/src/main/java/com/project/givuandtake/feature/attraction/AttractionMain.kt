@@ -334,7 +334,6 @@ fun AttractionMain(navController: NavController, city: String?) {
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .heightIn(min = 540.dp)
                 .background(
                     color = Color.White,
                     shape = RoundedCornerShape(
@@ -346,7 +345,9 @@ fun AttractionMain(navController: NavController, city: String?) {
                 )
                 .padding(20.dp)
         ) {
-            Column {
+            Column(
+                modifier = Modifier.fillMaxHeight()
+            ){
                 when (selectedTabIndex) {
                     0 -> {
                         MainMarketTab(displayedCity)
@@ -364,6 +365,7 @@ fun AttractionMain(navController: NavController, city: String?) {
                         MainVillageTab(navController = navController, displayedCity = displayedCity)
                     }
                 }
+                Spacer(modifier = Modifier.weight(1f))
             }
         }
     }
