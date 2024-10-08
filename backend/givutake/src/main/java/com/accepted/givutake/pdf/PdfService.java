@@ -19,6 +19,7 @@ import com.itextpdf.tool.xml.pipeline.end.PdfWriterPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -46,7 +47,8 @@ public class PdfService {
             CSSResolver cssResolver = new StyleAttrCSSResolver();
             CssFile cssFile = null;
             try {
-                cssFile = helper.getCSS(new FileInputStream("src/main/resources/pdf.css"));
+                ClassPathResource cssResource = new ClassPathResource("pdf.css");
+                cssFile = helper.getCSS(cssResource.getInputStream());
             } catch (FileNotFoundException e) {
                 log.error("PdfService - donationReceiptGenerate의 CSS 파일 읽어 들이기 실패: {}", e.getMessage());
             }
