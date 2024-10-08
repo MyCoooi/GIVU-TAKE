@@ -143,13 +143,12 @@ public class JwtTokenProvider {
     }
     
     // 토큰 정보를 검증하는 메서드
-    public boolean validateToken(String token) {
+    public void validateToken(String token) {
         try {
             Jwts.parser()
                     .setSigningKey(key)
                     .build()
                     .parseClaimsJws(token);
-            return true;
         } catch (SecurityException e) {
             log.error("보안 관련 예외 발생: {}", e.getMessage());
             throw new JwtAuthenticationException(ExceptionEnum.SECURITY_EXCEPTION);

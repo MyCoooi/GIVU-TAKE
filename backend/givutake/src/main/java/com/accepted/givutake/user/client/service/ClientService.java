@@ -181,17 +181,16 @@ public class ClientService {
         int nowYear =  LocalDate.now().getYear();
         String subject = "[GIVU&TAKE] " + nowYear + " 기부금 영수증 발급 메일";
         String fileName = nowYear + "년도_기부금_영수증_" + savedUsers.getName() + ".pdf";
-        StringBuilder htmlContent = new StringBuilder();
-        htmlContent.append("<h1>")
-                .append(nowYear)
-                .append("년도 기부금 영수증 발급 안내</h1><br>")
-                .append("<p>힘든 한 해 동안에도 GIVE&TAKE와 함께 해주셔서 진심으로 감사드립니다.</p>")
-                .append("<p>덕분에 사라져가는 많은 지역들이 힘차게 도약하여 새롭고 희망찬 미래를 만들어갈 수 있는 힘을 얻게 되었습니다.</p><br>")
-                .append("<p>후원자님의 소중한 후원금에 대한 ")
-                .append(nowYear)
-                .append("년도분 기부금 영수증을 발급해드립니다.</p>");
+        String htmlContent = "<h1>" +
+                nowYear +
+                "년도 기부금 영수증 발급 안내</h1><br>" +
+                "<p>힘든 한 해 동안에도 GIVE&TAKE와 함께 해주셔서 진심으로 감사드립니다.</p>" +
+                "<p>덕분에 사라져가는 많은 지역들이 힘차게 도약하여 새롭고 희망찬 미래를 만들어갈 수 있는 힘을 얻게 되었습니다.</p><br>" +
+                "<p>후원자님의 소중한 후원금에 대한 " +
+                nowYear +
+                "년도분 기부금 영수증을 발급해드립니다.</p>";
 
-        mailService.sendMultipleMessage(email, fileName, subject, htmlContent.toString(), pdfByte);
+        mailService.sendMultipleMessage(email, fileName, subject, htmlContent, pdfByte);
     }
 
     // 기부금 영수증 생성
@@ -205,13 +204,13 @@ public class ClientService {
         List<DonationParticipantsDto> fundingDonationParticipantsDtoList = fundingParticipantService.getFundingParticipantsListByEmail(email, startDate, endDate)
                 .stream()
                 .map(participant -> DonationParticipantsDto.fundingPariticipantsToDto(participant, ""))
-                .collect(Collectors.toList());
+                .toList();
 
         // 2. 답례품 구매 내역 가져오기(현재 연도 기록만)
         List<DonationParticipantsDto> orderDonationParticipantsDtoList = orderService.getOrdersCreatedDateBetweenByEmail(email, startDate, endDate)
                 .stream()
                 .map(orders -> DonationParticipantsDto.ordersToDto(orders, ""))
-                .collect(Collectors.toList());
+                .toList();
 
         // 3. 두 리스트 합치기
         List<DonationParticipantsDto> combinedList = new ArrayList<>(fundingDonationParticipantsDtoList);
