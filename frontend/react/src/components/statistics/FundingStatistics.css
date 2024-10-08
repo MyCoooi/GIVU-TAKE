@@ -24,7 +24,7 @@
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  max-width: 700px; /* 기간통계 그래프 크기 조절 */
+  max-width: 700px; /* 기간 통계 그래프 크기 조절 */
   margin: 0 auto; /* 가운데 정렬 */
 }
 
@@ -32,6 +32,8 @@
   background-color: #f0f0f0;
   padding: 20px;
   border-radius: 10px;
+  max-height: 380px;
+  overflow-y: auto; /* 스크롤 추가 */
 }
 
 .user-list ul {
@@ -47,10 +49,9 @@
 
 .gender-statistics {
   display: flex;
-  justify-content: space-around; /* 원형 그래프를 가로로 나란히 배치 */
-  align-items: flex-start; /* 원형 그래프가 동일한 높이에서 시작 */
-  margin-top: 20px;
-  gap: 20px;
+  flex-direction: column; /* 세로 배치로 변경 */
+  align-items: center; /* 중앙 정렬 */
+  margin-bottom: 20px;
 }
 
 .gender-stat-item {
@@ -67,4 +68,3 @@
 .funding-statistics-buttons .dropdown {
   min-width: 200px; /* 드롭다운 크기 수정 */
 }
-
