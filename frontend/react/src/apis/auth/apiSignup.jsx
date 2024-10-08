@@ -32,7 +32,7 @@ export const getSigungu = async (sido) => {
 export const signUp = async (formData, profileImage) => {
   // 전달된 formData 확인 로그 추가
   console.log("signUp 함수에서 받은 formData:", formData); 
-  console.log("signUp 함수에서 받은 profileImage:", profileImage);
+  console.log("signUp 함수에서 받은 profileImage:", profileImage); // profileImage 값이 없을 때 명확히 표시
 
   const signUpDto = {
     name: formData.name,
