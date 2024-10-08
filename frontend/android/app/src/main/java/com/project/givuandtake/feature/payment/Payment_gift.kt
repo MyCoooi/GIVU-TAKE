@@ -293,7 +293,6 @@ import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.project.givuandtake.core.data.KakaoPaymentInfo
 import com.project.givuandtake.feature.payment.PaymentMethods_gift
-import com.project.givuandtake.feature.payment.PaymentTotalAndButton_gift
 import com.project.givuandtake.feature.payment.PaymentViewModel
 
 @Composable
