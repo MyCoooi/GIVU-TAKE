@@ -85,8 +85,8 @@ public class OrderService {
         Users savedUsers = savedUserDto.toEntity();
 
         // 2. 특정 일자의 구매 내역 가져오기
-        LocalDateTime startDateTime = null;
-        LocalDateTime endDateTime = null;
+        LocalDateTime startDateTime;
+        LocalDateTime endDateTime;
 
         // startDate와 endDate가 null이면 모든 데이터 조회
         if (startDate == null && endDate == null) {

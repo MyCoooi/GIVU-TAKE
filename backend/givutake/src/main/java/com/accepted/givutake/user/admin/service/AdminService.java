@@ -36,7 +36,7 @@ public class AdminService {
     public Users getUserByEmail(String email) {
         Optional<Users> optionalExistingUsers =  usersRepository.findByEmail(email);
 
-        if (!optionalExistingUsers.isEmpty()) {
+        if (optionalExistingUsers.isPresent()) {
             Users savedUser = optionalExistingUsers.get();
 
             // 이미 탈퇴한 회원일 경우 회원 정보 조회 불가
@@ -85,7 +85,7 @@ public class AdminService {
     public void emailDuplicatedCheck(String email) {
         Optional<Users> optionalExistingUsers =  usersRepository.findByEmail(email);
 
-        if (!optionalExistingUsers.isEmpty()) {
+        if (optionalExistingUsers.isPresent()) {
             Users savedUser = optionalExistingUsers.get();
 
             // 이미 탈퇴한 회원일 경우 회원 정보 조회 불가

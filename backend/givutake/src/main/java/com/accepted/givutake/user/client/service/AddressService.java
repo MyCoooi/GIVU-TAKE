@@ -48,7 +48,7 @@ public class AddressService {
         Optional<Addresses> optionalExistingAddresses = addressRepository.findByAddressIdx(addressIdx);
 
         // DB에 존재하지 않을 경우
-        if (!optionalExistingAddresses.isPresent()) {
+        if (optionalExistingAddresses.isEmpty()) {
             throw new ApiException(ExceptionEnum.NOT_FOUND_ADDRESSES_EXCEPTION);
         }
 

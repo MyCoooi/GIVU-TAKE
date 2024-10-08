@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 public class UnexpectedDataException extends RuntimeException {
 
-    private ExceptionEnum error;
+    private final ExceptionEnum error;
 
     public UnexpectedDataException(ExceptionEnum e) {
         super(e.getMessage());
