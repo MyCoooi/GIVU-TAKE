@@ -53,8 +53,9 @@ public class UserService {
         this.s3Service = s3Service;
 
         // ValidatorFactory와 Validator 초기화
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        this.validator = factory.getValidator();
+        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+            this.validator = factory.getValidator();
+        }
     }
 
     public void emailSignUp(SignUpDto signUpDto, AddressSignUpDto addressSignUpDto, MultipartFile profileImage) {

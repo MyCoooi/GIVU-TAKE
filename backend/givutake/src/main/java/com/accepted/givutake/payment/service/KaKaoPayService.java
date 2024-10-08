@@ -102,7 +102,7 @@ public class KaKaoPayService {
         RestTemplate template = new RestTemplate();
         String url = "https://open-api.kakaopay.com/online/v1/payment/approve";
         ApproveResponse approveResponse = template.postForObject(url, requestEntity, ApproveResponse.class);
-        log.info("결제승인 응답객체: " + approveResponse);
+        log.info("결제승인 응답객체: {}", approveResponse);
 
         return approveResponse;
     }

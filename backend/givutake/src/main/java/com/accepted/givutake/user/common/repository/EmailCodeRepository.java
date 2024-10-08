@@ -13,8 +13,11 @@ import java.util.Optional;
 @Repository
 public class EmailCodeRepository {
 
-    @Autowired
-    private RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
+
+    public EmailCodeRepository(RedisTemplate<String, String> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
 
     // 이메일을 Key로, 인증 코드를 Value로 저장
     public void save(EmailCode emailCode) {

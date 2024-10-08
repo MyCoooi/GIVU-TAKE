@@ -13,8 +13,11 @@ import java.util.Optional;
 @Repository
 public class RefreshTokenRepository {
 
-    @Autowired
-    private RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
+
+    public RefreshTokenRepository(RedisTemplate<String, String> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
 
     // 이메일을 Key로, 리프레시 토큰을 Value로 저장
     public void save(RefreshToken refreshToken) {
