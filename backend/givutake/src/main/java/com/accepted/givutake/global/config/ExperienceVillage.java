@@ -4,8 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
-import java.sql.*;
-import java.io.*;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 @Component
 public class ExperienceVillage {
@@ -37,10 +43,6 @@ public class ExperienceVillage {
                 String experienceVillagePhone = row[5].equals("NULL") ? "" : row[5];
                 String experienceVillageHomepageUrl = row[6].equals("NULL") ? "" : row[6];
 
-                System.out.println(String.format("%s, %s, %s, %s, %s, %s, %s",
-                        experienceVillageName, sigunguName, experienceVillageDivision,
-                        experienceVillageProgram, experienceVillageAddress,
-                        experienceVillagePhone, experienceVillageHomepageUrl));
 
                 String regionIdxQuery = "SELECT r.region_idx FROM region r WHERE r.sigungu = ?";
                 try (PreparedStatement pstmt = connection.prepareStatement(regionIdxQuery)) {

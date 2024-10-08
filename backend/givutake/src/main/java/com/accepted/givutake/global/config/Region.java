@@ -4,8 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
-import java.sql.*;
-import java.io.*;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -61,8 +67,6 @@ public class Region {
                                         insertStmt.setString(4, formattedDateTime);
                                         insertStmt.executeUpdate();
                                     }
-                                } else {
-                                    System.out.println("'" + sido + ", " + sigungu + "' already exists in the database.");
                                 }
                             }
                         }

@@ -1,6 +1,5 @@
 package com.accepted.givutake.global.entity;
 
-import com.accepted.givutake.gift.enumType.DeliveryStatus;
 import com.accepted.givutake.global.enumType.ActEnum;
 import com.accepted.givutake.global.enumType.ContentTypeEnum;
 import com.accepted.givutake.user.common.entity.Users;

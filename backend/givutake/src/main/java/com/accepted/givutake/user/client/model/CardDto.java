@@ -2,7 +2,6 @@ package com.accepted.givutake.user.client.model;
 
 import com.accepted.givutake.user.client.entity.Cards;
 import com.accepted.givutake.user.common.entity.Users;
-import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
