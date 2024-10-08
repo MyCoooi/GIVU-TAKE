@@ -25,7 +25,6 @@ public enum ExceptionEnum {
     INTERNAL_AUTHENTICATION_SERVICE_EXCEPTION(HttpStatus.BAD_REQUEST, "ES0015"),
 
     // Custom Exception
-//    ILLEGAL_REGION_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0001", "지역 정보가 유효하지 않습니다."),
     ILLEGAL_ISMALE_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0001", "성별 정보가 유효하지 않습니다."),
     ILLEGAL_BIRTH_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0002", "생년월일 정보가 유효하지 않습니다."),
     ILLEGAL_STATUS_EXCEPTION(HttpStatus.BAD_REQUEST, "EU0003", "상태 정보가 유효하지 않습니다"),
@@ -104,6 +103,7 @@ public enum ExceptionEnum {
     NOT_ALLOWED_UPDATE_CORPORATIONYET_EXCEPTION(HttpStatus.BAD_REQUEST, "ES7081", "이미 수혜자 자격이 승인되지 않은 사용자입니다."),
 
     FAILED_CARD_DELETION_EXCEPTION(HttpStatus.OK, "EC8001", "카드 정보 삭제에 실패했습니다."),
+    FAILED_DONATION_RECEIPT_GENERATE_EXCEPTION(HttpStatus.BAD_REQUEST, "EU8009", "기부금 영수증 생성에 실패했습니다."),
 
     NOT_FOUND_CATEGORY_EXCEPTION(HttpStatus.NOT_FOUND, "EC0001", "해당 카테고리를 찾을 수 없습니다."),
     NOT_FOUND_GIFT_EXCEPTION(HttpStatus.NOT_FOUND,"EG0001", "해당 답례품을 찾을 수 없습니다."),

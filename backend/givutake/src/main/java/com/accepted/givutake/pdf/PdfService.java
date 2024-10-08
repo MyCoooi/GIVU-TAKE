@@ -1,5 +1,7 @@
 package com.accepted.givutake.pdf;
 
+import com.accepted.givutake.global.enumType.ExceptionEnum;
+import com.accepted.givutake.global.exception.ApiException;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.PageSize;
@@ -49,18 +51,22 @@ public class PdfService {
             try {
                 ClassPathResource cssResource = new ClassPathResource("pdf.css");
                 cssFile = helper.getCSS(cssResource.getInputStream());
-            } catch (FileNotFoundException e) {
+            } catch (Exception e) {
                 log.error("PdfService - donationReceiptGenerate의 CSS 파일 읽어 들이기 실패: {}", e.getMessage());
+                throw new ApiException(ExceptionEnum.FAILED_DONATION_RECEIPT_GENERATE_EXCEPTION);
             }
             cssResolver.addCss(cssFile);
 
             // HTML 과 폰트준비
             XMLWorkerFontProvider fontProvider = new XMLWorkerFontProvider(XMLWorkerFontProvider.DONTLOOKFORFONTS);
             try {
-                ClassPathResource fontResource = new ClassPathResource("malgun.ttf");
-                fontProvider.register(fontResource.getURL().getPath(), "MalgunGothic"); // 'MalgunGothic'은 폰트 별칭
-            } catch (IOException e) {
+//                ClassPathResource fontResource = new ClassPathResource("malgun.ttf");
+//                fontProvider.register(fontResource.getURL().getPath(), "MalgunGothic"); // 'MalgunGothic'은 폰트 별칭
+                String absolutePath = System.getProperty("user.dir") + "/backend/givutake/src/main/resources/malgun.ttf";
+                fontProvider.register(absolutePath, "MalgunGothic"); // 'MalgunGothic'은 폰트 별칭
+            } catch (Exception e) {
                 log.error("PdfService - 폰트 파일 로드 실패: {}", e.getMessage());
+                throw new ApiException(ExceptionEnum.FAILED_DONATION_RECEIPT_GENERATE_EXCEPTION);
             }
 
             CssAppliers cssAppliers = new CssAppliersImpl(fontProvider);
@@ -145,8 +151,9 @@ public class PdfService {
             document.close();
             writer.close();
 
-        } catch (DocumentException | IOException e) {
+        } catch (Exception e) {
             log.error(e.getMessage());
+            throw new ApiException(ExceptionEnum.FAILED_DONATION_RECEIPT_GENERATE_EXCEPTION);
         }
 
         return byteArrayOutputStream.toByteArray(); // PDF 데이터를 바이트 배열로 반환
