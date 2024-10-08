@@ -6,6 +6,16 @@ data class KakaoPaymentInfo(
     val amount: Int
 )
 
+
+data class KakaoPaymentInfo_funding(
+    val fundingIdx: Int,
+    val paymentMethod: String,
+    val price: Int
+)
+
+
+
+
 data class KakaoPayReadyResponse2(
     val status: String,
     val tid: String,
