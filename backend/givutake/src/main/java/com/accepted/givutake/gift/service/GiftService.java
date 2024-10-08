@@ -210,7 +210,7 @@ public class GiftService {
 
         String reviewImageUrl = null;
 
-        if(reviewImage != null){
+        if(reviewImage != null && reviewImage.isEmpty()){
             try {
                 reviewImageUrl = s3Service.uploadReviewImage(reviewImage);
             }catch(IOException e){
@@ -340,7 +340,7 @@ public class GiftService {
 
         String reviewImgUrl = review.getReviewImage();
 
-        if(reviewImage != null){
+        if(reviewImage != null && !reviewImage.isEmpty()){
             try{
                 if(reviewImgUrl!=null)s3Service.deleteThumbnailImage(reviewImgUrl);
                 reviewImgUrl = s3Service.uploadProfileImage(reviewImage);
