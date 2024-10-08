@@ -196,7 +196,7 @@ fun DonationDetails(navController: NavController) {
     var selectedCategory by remember { mutableStateOf(2) }
     val context = LocalContext.current
     val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
-    Log.d("accesstoken", "$accessToken")
+    Log.d("adfadsf", "$accessToken")
 
     val viewModel: MyGiftViewModel = viewModel()
 
@@ -399,7 +399,9 @@ fun DonationDetails(navController: NavController) {
                                     Text(
                                         text = gift.giftName,
                                         fontSize = 15.sp,
-                                        modifier = Modifier.align(Alignment.TopStart)
+                                        modifier = Modifier
+                                            .align(Alignment.TopStart)
+                                            .clickable { navController.navigate("gift_page_detail/${gift.giftIdx}") }
                                     )
                                     Row(
                                         modifier = Modifier
@@ -412,24 +414,19 @@ fun DonationDetails(navController: NavController) {
                                             fontSize = 15.sp
                                         )
                                         Spacer(modifier = Modifier.weight(1f))
-                                        Text(
-                                            text = "후기쓰기 >",
-                                            modifier = Modifier
-                                                .clickable {
-                                                    val giftJson = gson.toJson(gift) // gift 객체를 JSON으로 변환
-                                                    val encodedGiftJson = URLEncoder.encode(giftJson, StandardCharsets.UTF_8.toString()) // URL 인코딩
-                                                    navController.navigate("writegiftreview/$encodedGiftJson")
-                                                }
-                                            ,
-                                            color = Color.Blue
-                                        )
-//                                        Text(
-//                                            text = "후기보기 >",
-//                                            modifier = Modifier
-//                                                .clickable { navController.navigate("gift_page_detail/${gift.giftIdx}") }
-//                                                ,
-//                                            color = Color.Blue
-//                                        )
+                                        if (!gift.isWrite) {
+                                            Text(
+                                                text = "후기쓰기 >",
+                                                modifier = Modifier
+                                                    .clickable {
+                                                        val giftJson = gson.toJson(gift) // gift 객체를 JSON으로 변환
+                                                        val encodedGiftJson = URLEncoder.encode(giftJson, StandardCharsets.UTF_8.toString()) // URL 인코딩
+                                                        navController.navigate("writegiftreview/$encodedGiftJson")
+                                                    }
+                                                ,
+                                                color = Color.Blue
+                                            )
+                                        }
                                     }
                                 }
                             }

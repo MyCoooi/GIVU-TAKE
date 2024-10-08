@@ -1,26 +1,25 @@
-package com.project.givuandtake.core.apis.Qna
+package com.project.givuandtake.core.apis.GiftComment
 
-import QnaData
-import com.project.givuandtake.core.data.Address.AddressData
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.GET
+import retrofit2.http.DELETE
 import retrofit2.http.Header
+import retrofit2.http.Path
 
-interface QnaApiService {
-    @GET("qna")
-    suspend fun getQnaData(
-        @Header("Authorization") token: String
-    ): Response<QnaData>
+interface GiftCommentDeleteApiService {
+    @DELETE("gifts/review/{reviewIdx}")
+    suspend fun deleteGiftComment(
+        @Header("Authorization") token: String,
+        @Path("reviewIdx") reviewIdx: Int
+    ): Response<Void>
 }
 
-object QnaApi {
+object GiftCommentDeleteApi {
     private const val BASE_URL = "https://j11e202.p.ssafy.io/api/"
-
-    val api: QnaApiService by lazy {
+    val api: GiftCommentDeleteApiService by lazy {
         // HttpLoggingInterceptor 추가
         val logging = HttpLoggingInterceptor()
         logging.setLevel(HttpLoggingInterceptor.Level.BODY)
@@ -34,6 +33,6 @@ object QnaApi {
             .client(client)  // OkHttpClient 설정
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(QnaApiService::class.java)
+            .create(GiftCommentDeleteApiService::class.java)
     }
 }
