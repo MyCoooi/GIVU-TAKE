@@ -30,8 +30,8 @@ public class FundingParticipantService {
         Users savedUsers = savedUserDto.toEntity();
 
         // 2. startDate, endDate를 LocalDateTime으로 변경
-        LocalDateTime startDateTime = null;
-        LocalDateTime endDateTime = null;
+        LocalDateTime startDateTime;
+        LocalDateTime endDateTime;
 
         // 2. startDate와 endDate 값이 빈 값일 경우 전체조회
         if (endDate == null && startDate == null) {

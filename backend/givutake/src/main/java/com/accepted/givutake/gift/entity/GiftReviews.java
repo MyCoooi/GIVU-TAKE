@@ -40,10 +40,10 @@ public class GiftReviews extends BaseTimeEntity {
     private Orders orders;
 
     @Builder.Default
-    @Column(name = "isDelete")
+    @Column(name = "is_delete")
     private boolean isDelete = false;
 
     @Builder.Default
-    @Column(name = "likedCount")
+    @Column(name = "liked_count")
     private int likedCount = 0;
 }

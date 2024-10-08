@@ -57,7 +57,7 @@ public class Fundings extends BaseTimeEntity {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
-    @Column(name = "funding_thumbnail", nullable = true, length = 2048)
+    @Column(name = "funding_thumbnail", length = 2048)
     private String fundingThumbnail;
 
     @Column(name = "funding_type", nullable = false, length = 1)

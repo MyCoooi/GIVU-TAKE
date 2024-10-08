@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -21,7 +20,7 @@ public class UpdateStateTaskJob implements Job {
     private final FundingRepository fundingRepository;
 
     @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {
+    public void execute(JobExecutionContext context) {
         log.info("펀딩 state 변경 작업이 {}에 시작되었습니다.", LocalDateTime.now());
         // 모금 대기 중인 펀딩 리스트 조회
         List<Fundings> watingFundingList = fundingRepository.findByIsDeletedFalseAndState((byte) 0);

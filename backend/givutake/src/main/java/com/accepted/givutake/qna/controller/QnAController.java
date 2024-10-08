@@ -30,7 +30,7 @@ public class QnAController {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(value = "pageNo", defaultValue = "1")int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10")int pageSize){
-        List<QnADto> qnaList = null;
+        List<QnADto> qnaList;
         GrantedAuthority firstAuthority = userDetails.getAuthorities().stream().findFirst().orElseThrow(() -> new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION));
         if(firstAuthority.getAuthority().equals("ROLE_ADMIN")){
             qnaList = qnAService.getQnAadminList(pageNo, pageSize);

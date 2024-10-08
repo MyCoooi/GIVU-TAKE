@@ -32,9 +32,7 @@ public class GiftStatsService {
         statistics.get("gender").put("male", new GiftPercentageDto.StatDto(0L, 0.0));
         statistics.get("gender").put("female", new GiftPercentageDto.StatDto(0L, 0.0));
 
-        List.of("20s", "30s", "40s", "50s", "60+").forEach( age -> {
-            statistics.get("age").put(age, new GiftPercentageDto.StatDto(0L, 0.0));
-        } );
+        List.of("20s", "30s", "40s", "50s", "60+").forEach( age -> statistics.get("age").put(age, new GiftPercentageDto.StatDto(0L, 0.0)));
 
         for (Object[] row : results) {
             String statType = (String) row[0];
