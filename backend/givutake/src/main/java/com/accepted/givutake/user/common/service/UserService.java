@@ -53,8 +53,9 @@ public class UserService {
         this.s3Service = s3Service;
 
         // ValidatorFactory와 Validator 초기화
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        this.validator = factory.getValidator();
+        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+            this.validator = factory.getValidator();
+        }
     }
 
     public void emailSignUp(SignUpDto signUpDto, AddressSignUpDto addressSignUpDto, MultipartFile profileImage) {
@@ -148,10 +149,10 @@ public class UserService {
         // sido, sigungu 값은 필수!
         String sido = signUpDto.getSido();
         String sigungu = signUpDto.getSigungu();
-        if (sido == null || sido.equals("")) {
+        if (sido == null || sido.isEmpty()) {
             throw new ApiException(ExceptionEnum.MISSING_SIDO_EXCEPTION);
         }
-        if (sigungu == null || sigungu.equals("")) {
+        if (sigungu == null || sigungu.isEmpty()) {
             throw new ApiException(ExceptionEnum.MISSING_SIGUNGU_EXCEPTION);
         }
 
@@ -193,7 +194,7 @@ public class UserService {
     public void emailDuplicatedCheck(String email) {
         Optional<Users> optionalExistingUsers =  userRepository.findByEmail(email);
 
-        if (!optionalExistingUsers.isEmpty()) {
+        if (optionalExistingUsers.isPresent()) {
             Users savedUser = optionalExistingUsers.get();
 
             // 이미 탈퇴한 회원일 경우 회원 정보 조회 불가
@@ -215,7 +216,7 @@ public class UserService {
     public UserDto getUserByEmail(String email) {
         Optional<Users> optionalExistingUsers =  userRepository.findByEmail(email);
 
-        if (!optionalExistingUsers.isEmpty()) {
+        if (optionalExistingUsers.isPresent()) {
             Users savedUser = optionalExistingUsers.get();
 
             // 이미 탈퇴한 회원일 경우 회원 정보 조회 불가
@@ -234,7 +235,7 @@ public class UserService {
     public UserDto modifyUserByEmail(String email, ModifyUserDto modifyUserDto, MultipartFile profileImage) {
         Optional<Users> optionalExistingUsers = userRepository.findByEmail(email);
 
-        if (!optionalExistingUsers.isEmpty()) {
+        if (optionalExistingUsers.isPresent()) {
             Users savedUser = optionalExistingUsers.get();
 
             // 이미 탈퇴한 회원일 경우 회원 정보 수정 불가
@@ -281,7 +282,7 @@ public class UserService {
     public void withdrawUserByEmail(String email) {
         Optional<Users> optionalExistingUsers = userRepository.findByEmail(email);
 
-        if (!optionalExistingUsers.isEmpty()) {
+        if (optionalExistingUsers.isPresent()) {
             Users savedUser = optionalExistingUsers.get();
 
             // 이미 탈퇴한 회원일 경우 회원 탈퇴 불가
@@ -302,7 +303,7 @@ public class UserService {
     public boolean existUserWithEmail(String email) {
         Optional<Users> optionalExistingUsers = userRepository.findByEmail(email);
 
-        if (!optionalExistingUsers.isEmpty()) {
+        if (optionalExistingUsers.isPresent()) {
             Users savedUser = optionalExistingUsers.get();
 
             // 이미 탈퇴한 회원일 경우 회원 탈퇴 불가
@@ -353,36 +354,35 @@ public class UserService {
 
         // 3. 해당 이메일로 인증 코드 발송
         String subject = "[GIVU&TAKE] 비밀번호 재설정 요청 메일입니다.";
-        StringBuilder htmlContent = new StringBuilder();
-        htmlContent.append("<h1>비밀번호 재설정을 요청하셨습니다.</h1><br>")
-                .append("<p>안녕하세요.</p>")
-                .append("<p>GIVU&TAKE 계정의 비밀번호 재설정을 요청하셨습니다.</p><br>")
-                .append("<p>비밀번호를 재설정하시려면 아래 인증코드를 입력해주세요.</p>")
-                .append("<p><b>인증코드는 30분 후에 만료됩니다.</b></p><br>")
-                .append("<div style=\"")
-                .append("display: flex; align-items: center; justify-content: center;")
-                .append("margin: 2em 0; padding: 1em; border: solid 2px #A5A19A;")
-                .append("background-image: repeating-linear-gradient(-45deg, #f2f3f7 0, #f2f3f7 3px, transparent 3px, transparent 6px);")
-                .append("width: fit-content; height: fit-content; min-width: 120px; min-height: 60px;")
-                .append("text-align: center; font-size: 1.2em;")
-                .append("position: relative; left: 0;")
-                .append("\"><b>")
-                .append(code)
-                .append("</b></div>");
+        String htmlContent = "<h1>비밀번호 재설정을 요청하셨습니다.</h1><br>" +
+                "<p>안녕하세요.</p>" +
+                "<p>GIVU&TAKE 계정의 비밀번호 재설정을 요청하셨습니다.</p><br>" +
+                "<p>비밀번호를 재설정하시려면 아래 인증코드를 입력해주세요.</p>" +
+                "<p><b>인증코드는 30분 후에 만료됩니다.</b></p><br>" +
+                "<div style=\"" +
+                "display: flex; align-items: center; justify-content: center;" +
+                "margin: 2em 0; padding: 1em; border: solid 2px #A5A19A;" +
+                "background-image: repeating-linear-gradient(-45deg, #f2f3f7 0, #f2f3f7 3px, transparent 3px, transparent 6px);" +
+                "width: fit-content; height: fit-content; min-width: 120px; min-height: 60px;" +
+                "text-align: center; font-size: 1.2em;" +
+                "position: relative; left: 0;" +
+                "\"><b>" +
+                code +
+                "</b></div>";
 
-        mailService.sendEmail(email, subject, htmlContent.toString());
+        mailService.sendEmail(email, subject, htmlContent);
     }
 
     // 비밀번호 재설정을 위한 인증 코드 생성
     private String createRandomNumber() {
         Random rand = new Random();
-        String randomNum = "";
+        StringBuilder randomNum = new StringBuilder();
         for (int i = 0; i < 6; i++) {
             String random = Integer.toString(rand.nextInt(10));
-            randomNum += random;
+            randomNum.append(random);
         }
 
-        return randomNum;
+        return randomNum.toString();
     }
 
     // 비밀번호 인증 코드 검증

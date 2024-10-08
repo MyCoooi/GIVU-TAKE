@@ -30,7 +30,7 @@ public class Orders extends BaseTimeEntity {
     @JoinColumn(name = "gift_idx", referencedColumnName = "gift_idx") // 답례품 ID 외래키 설정
     private Gifts gift;
 
-    @Column(name = "payment_method", nullable = false, length = 255) // 결제 수단
+    @Column(name = "payment_method", nullable = false) // 결제 수단
     private String paymentMethod;
 
     @Column(name = "amount", nullable = false, length = 3) // 주문량

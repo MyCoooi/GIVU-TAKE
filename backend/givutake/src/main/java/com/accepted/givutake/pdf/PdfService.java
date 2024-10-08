@@ -1,7 +1,8 @@
 package com.accepted.givutake.pdf;
 
+import com.accepted.givutake.global.enumType.ExceptionEnum;
+import com.accepted.givutake.global.exception.ApiException;
 import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.tool.xml.XMLWorker;
@@ -19,6 +20,7 @@ import com.itextpdf.tool.xml.pipeline.end.PdfWriterPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +33,9 @@ import java.util.List;
 @Slf4j
 @Service
 public class PdfService {
+
+    @Value("${path.ttf}")
+    private String ttfPath;
 
     public byte[] generateDonationReceipt(DonationReceiptFormDto donationReceiptFormDto) {
         Document document = new Document(PageSize.A4, 50, 50, 50, 50); // 용지 및 여백 설정
@@ -48,19 +53,22 @@ public class PdfService {
             CssFile cssFile = null;
             try {
                 ClassPathResource cssResource = new ClassPathResource("pdf.css");
-                cssFile = helper.getCSS(cssResource.getInputStream());
+                cssFile = XMLWorkerHelper.getCSS(cssResource.getInputStream());
             } catch (FileNotFoundException e) {
                 log.error("PdfService - donationReceiptGenerate의 CSS 파일 읽어 들이기 실패: {}", e.getMessage());
+                throw new ApiException(ExceptionEnum.FAILED_DONATION_RECEIPT_GENERATE_EXCEPTION);
             }
             cssResolver.addCss(cssFile);
 
             // HTML 과 폰트준비
             XMLWorkerFontProvider fontProvider = new XMLWorkerFontProvider(XMLWorkerFontProvider.DONTLOOKFORFONTS);
             try {
-                ClassPathResource fontResource = new ClassPathResource("malgun.ttf");
-                fontProvider.register(fontResource.getURL().getPath(), "MalgunGothic"); // 'MalgunGothic'은 폰트 별칭
-            } catch (IOException e) {
+                // 절대 경로로 가져오기
+                String absolutePath = System.getProperty("user.dir") + ttfPath;
+                fontProvider.register(absolutePath, "MalgunGothic"); // 'MalgunGothic'은 폰트 별칭
+            } catch (Exception e) {
                 log.error("PdfService - 폰트 파일 로드 실패: {}", e.getMessage());
+                throw new ApiException(ExceptionEnum.FAILED_DONATION_RECEIPT_GENERATE_EXCEPTION);
             }
 
             CssAppliers cssAppliers = new CssAppliersImpl(fontProvider);
@@ -145,8 +153,9 @@ public class PdfService {
             document.close();
             writer.close();
 
-        } catch (DocumentException | IOException e) {
+        } catch (Exception e) {
             log.error(e.getMessage());
+            throw new ApiException(ExceptionEnum.FAILED_DONATION_RECEIPT_GENERATE_EXCEPTION);
         }
 
         return byteArrayOutputStream.toByteArray(); // PDF 데이터를 바이트 배열로 반환

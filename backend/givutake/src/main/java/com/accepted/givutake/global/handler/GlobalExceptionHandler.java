@@ -62,7 +62,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionDto> handleValidationExceptions(MethodArgumentNotValidException exp) {
         // 여러 필드에서 유효성 검증이 실패했더라도, 첫 번째 오류에 대한 메세지만 반환
-        String message = "";
+        String message;
         FieldError fieldError = exp.getBindingResult().getFieldError();
         if (fieldError == null) {
             message = exp.getBindingResult().getAllErrors().stream()

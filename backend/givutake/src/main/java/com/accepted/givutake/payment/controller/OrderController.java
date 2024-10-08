@@ -61,8 +61,8 @@ public class OrderController {
             ) {
 
         String tid = SessionUtils.getStringAttributeValue("tid");
-        log.info("결제승인 요청을 인증하는 토큰: " + pgToken);
-        log.info("결제 고유번호: " + tid);
+        log.info("결제승인 요청을 인증하는 토큰: {}", pgToken);
+        log.info("결제 고유번호: {}", tid);
 
         ApproveResponse approveResponse = kaKaoPayService.payApprove(email, orderIdx,tid, pgToken, type);
 
