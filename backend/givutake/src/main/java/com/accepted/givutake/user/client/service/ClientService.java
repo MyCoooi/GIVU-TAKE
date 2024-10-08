@@ -193,6 +193,33 @@ public class ClientService {
         mailService.sendMultipleMessage(email, fileName, subject, htmlContent, pdfByte);
     }
 
+    public List<DonationParticipantsDto> generateDonationYear(String email){
+
+        // 1. 사용자의 펀딩 내역 가져오기(현재 연도 기록만)
+        int nowYear = LocalDate.now().getYear();
+        LocalDate startDate = LocalDate.of(nowYear, 1, 1);
+        LocalDate endDate = LocalDate.of(nowYear, 12, 31);
+        List<DonationParticipantsDto> fundingDonationParticipantsDtoList = fundingParticipantService.getFundingParticipantsListByEmail(email, startDate, endDate)
+                .stream()
+                .map(participant -> DonationParticipantsDto.fundingPariticipantsToDto(participant, ""))
+                .collect(Collectors.toList());
+
+        // 2. 답례품 구매 내역 가져오기(현재 연도 기록만)
+        List<DonationParticipantsDto> orderDonationParticipantsDtoList = orderService.getOrdersCreatedDateBetweenByEmail(email, startDate, endDate)
+                .stream()
+                .map(orders -> DonationParticipantsDto.ordersToDto(orders, ""))
+                .collect(Collectors.toList());
+
+        // 3. 두 리스트 합치기
+        List<DonationParticipantsDto> combinedList = new ArrayList<>(fundingDonationParticipantsDtoList);
+        combinedList.addAll(orderDonationParticipantsDtoList);
+
+        // 4. 최신 순으로 정렬
+        Collections.sort(combinedList);
+
+        return combinedList;
+    }
+
     // 기부금 영수증 생성
     public byte[] generateDonationReceipt(Users users) {
         String email = users.getEmail();
