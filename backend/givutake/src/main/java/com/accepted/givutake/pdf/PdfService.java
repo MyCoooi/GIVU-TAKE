@@ -56,7 +56,13 @@ public class PdfService {
 
             // HTML 과 폰트준비
             XMLWorkerFontProvider fontProvider = new XMLWorkerFontProvider(XMLWorkerFontProvider.DONTLOOKFORFONTS);
-            fontProvider.register("MALGUN.ttf","MalgunGothic"); // MalgunGothic 은 alias,
+            try {
+                ClassPathResource fontResource = new ClassPathResource("malgun.ttf");
+                fontProvider.register(fontResource.getURL().getPath(), "MalgunGothic"); // 'MalgunGothic'은 폰트 별칭
+            } catch (IOException e) {
+                log.error("PdfService - 폰트 파일 로드 실패: {}", e.getMessage());
+            }
+
             CssAppliers cssAppliers = new CssAppliersImpl(fontProvider);
 
             HtmlPipelineContext htmlContext = new HtmlPipelineContext(cssAppliers);
