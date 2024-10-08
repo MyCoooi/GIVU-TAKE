@@ -3,8 +3,8 @@ package com.accepted.givutake.funding.service;
 import com.accepted.givutake.funding.entity.FundingReviews;
 import com.accepted.givutake.funding.entity.Fundings;
 import com.accepted.givutake.funding.model.FundingReviewAddDto;
-import com.accepted.givutake.funding.model.FundingReviewViewDto;
 import com.accepted.givutake.funding.model.FundingReviewUpdateDto;
+import com.accepted.givutake.funding.model.FundingReviewViewDto;
 import com.accepted.givutake.funding.repository.FundingReviewsRepository;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
@@ -14,8 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Slf4j
 @Service
