@@ -1,7 +1,7 @@
-package com.project.givuandtake.core.apis.Qna
+package com.project.givuandtake.core.apis.Funding
 
-import QnaData
-import com.project.givuandtake.core.data.Address.AddressData
+import com.project.givuandtake.core.data.Funding.MyFundingSumData
+import com.project.givuandtake.core.data.Gift.MyGiftSumPriceData
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
@@ -10,17 +10,17 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Header
 
-interface QnaApiService {
-    @GET("qna")
-    suspend fun getQnaData(
+interface MyFundingSumApiService {
+    @GET("users/client/funding-participants/count")
+    suspend fun getMyFundingSumData(
         @Header("Authorization") token: String
-    ): Response<QnaData>
+    ): Response<MyFundingSumData>
 }
 
-object QnaApi {
+object MyFundingSumApi {
     private const val BASE_URL = "https://j11e202.p.ssafy.io/api/"
 
-    val api: QnaApiService by lazy {
+    val api: MyFundingSumApiService by lazy {
         // HttpLoggingInterceptor 추가
         val logging = HttpLoggingInterceptor()
         logging.setLevel(HttpLoggingInterceptor.Level.BODY)
@@ -34,6 +34,6 @@ object QnaApi {
             .client(client)  // OkHttpClient 설정
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(QnaApiService::class.java)
+            .create(MyFundingSumApiService::class.java)
     }
 }

@@ -124,7 +124,6 @@ fun Wishlist(
                             modifier = Modifier.padding(16.dp)
                         )
                     }
-
                     items(wishlistItems) { product ->
                         WishListItem(
                             product = product,
@@ -175,14 +174,13 @@ fun WishListItem(
     accessToken: String
 ) {
     val context = LocalContext.current // 함수 내부에서 LocalContext 사용
-    Card(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        elevation = 4.dp
+            .padding(3.dp),
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Product image
@@ -194,10 +192,11 @@ fun WishListItem(
                 },
                 contentDescription = null,
                 modifier = Modifier
-                    .size(100.dp)
+                    .width(100.dp)
+                    .height(130.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(Color.LightGray),
-                contentScale = ContentScale.Crop
+                    .background(Color.Transparent),
+                 contentScale = ContentScale.FillBounds
             )
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -215,15 +214,6 @@ fun WishListItem(
 
             // Buttons for remove and add to cart
             Column {
-                OutlinedButton(
-                    onClick = { onRemove(product) },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.LightGray),
-                    modifier = Modifier.height(36.dp)
-                ) {
-                    Icon(imageVector = Icons.Default.Delete, contentDescription = "Remove", tint = Color(0xFFA093DE))
-                    Text("삭제")
-                }
-
                 Spacer(modifier = Modifier.height(15.dp))
 
                 OutlinedButton(
@@ -243,6 +233,19 @@ fun WishListItem(
                 }
             }
         }
+        IconButton(
+            onClick = { onRemove(product) },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Clear,
+                contentDescription = "Remove",
+                tint = Color(0xFFFF6F6F)
+            )
+        }
+
     }
 }
 
