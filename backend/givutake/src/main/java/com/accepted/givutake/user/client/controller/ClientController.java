@@ -3,6 +3,7 @@ package com.accepted.givutake.user.client.controller;
 import com.accepted.givutake.funding.model.FundingParticipantViewDto;
 import com.accepted.givutake.funding.service.FundingParticipantService;
 import com.accepted.givutake.global.model.ResponseDto;
+import com.accepted.givutake.pdf.DonationParticipantsDto;
 import com.accepted.givutake.user.client.entity.Addresses;
 import com.accepted.givutake.user.client.model.*;
 import com.accepted.givutake.user.client.service.CardService;
@@ -17,7 +18,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -143,9 +143,22 @@ public class ClientController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
+    @GetMapping("/donation")
+    public ResponseEntity<ResponseDto> getDonationYear(@AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+
+        List<DonationParticipantsDto> data = clientService.generateDonationYear(email);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(data)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
     // 이메일로 기부금 영수증 보내기
     @GetMapping("/donation/receipt")
-    public ResponseEntity<ResponseDto> sendEmailDonationReceipt(@AuthenticationPrincipal UserDetails userDetails) throws MessagingException, IOException {
+    public ResponseEntity<ResponseDto> sendEmailDonationReceipt(@AuthenticationPrincipal UserDetails userDetails) throws MessagingException {
         String email = userDetails.getUsername();
         
         clientService.sendEmailDonationReceipt(email);
