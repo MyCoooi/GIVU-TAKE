@@ -46,8 +46,7 @@ public class SecurityConfig {
                                 "/api/auth",
                                 "/api/swagger-ui/**",
                                 "/api/v3/api-docs/**",
-                                "/api/swagger-resources/**",
-                                "/s3/**"
+                                "/api/swagger-resources/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/government-fundings/my-fundings").hasRole("CORPORATION")
                         .requestMatchers(HttpMethod.GET, "/api/government-fundings/*/review",
