@@ -25,4 +25,7 @@ public class FundingReviews extends BaseTimeEntity {
 
     @Column(name = "review_content", nullable = false, length = 6000)
     private String reviewContent;
+
+    @Column(name = "review_content_Image", length = 2048)
+    private String reviewContentImage;
 }
