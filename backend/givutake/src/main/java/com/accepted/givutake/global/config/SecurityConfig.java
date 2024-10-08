@@ -43,19 +43,10 @@ public class SecurityConfig {
                 // 경로별 인가 작업
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/",
-                                // static 관련 파일들
-                                "/*.html",
-                                "/*.css",
-                                "/*.js",
-                                "/assets/*",
-                                "/favicon.ico",
-                                "/vite.svg",
-                                "/*.jpg",
-
                                 "/api/auth",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/swagger-resources/**",
+                                "/api/swagger-ui/**",
+                                "/api/v3/api-docs/**",
+                                "/api/swagger-resources/**",
                                 "/s3/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/government-fundings/my-fundings").hasRole("CORPORATION")
