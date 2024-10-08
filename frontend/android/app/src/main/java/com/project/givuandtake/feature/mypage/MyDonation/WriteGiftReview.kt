@@ -100,7 +100,7 @@ class WriteGiftReviewViewModel : ViewModel() {
                     Log.d("WriteGiftReview", "API 호출 성공 - 응답 코드: ${response.code()}")
                     Log.d("adfadf", "$giftIdx")
                     withContext(Dispatchers.Main) {
-                        navController.navigate("next_screen") // 메인 스레드에서 네비게이션 수행
+                        navController.navigate("mypage") // 메인 스레드에서 네비게이션 수행
                     }
                 } else {
                     Log.d("WriteGiftReview", "API 호출 실패 - 응답 코드: ${response.code()}, 메시지: ${response.message()}")

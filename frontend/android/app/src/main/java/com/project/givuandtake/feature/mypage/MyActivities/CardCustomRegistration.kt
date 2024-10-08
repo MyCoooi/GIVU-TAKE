@@ -359,7 +359,8 @@ fun CardCustomRegistration(cardNumber: String, validThru: String, navController:
             listOf("", "")
         }
     }
-    var cardNumber by remember { mutableStateOf("") }
+    var cardNumber by remember { mutableStateOf(cardNumber) }
+    val formattedCardNumber = cardNumber.chunked(4).joinToString("-")
 
     var expiryMonth by remember { mutableStateOf(validThruParts[0]) }
     var expiryYear by remember { mutableStateOf(validThruParts[1]) }
@@ -377,7 +378,7 @@ fun CardCustomRegistration(cardNumber: String, validThru: String, navController:
 
     val cardRequest =  CardPostData(
         cardCompany = "${selectedBank?.name}",
-        cardNumber = cardNumber,
+        cardNumber = formattedCardNumber,
         cardCVC = cvcCode,
         cardExpiredDate = "20$expiryYear-$expiryMonth-28",
         cardPassword = password,
@@ -663,6 +664,7 @@ fun CardCustomRegistration(cardNumber: String, validThru: String, navController:
                 // 카드 등록 버튼
                 Button(
                     onClick = {
+                        Log.d("134qer134qewr", "$cardRequest")
                         scope.launch {
                             viewModel.postCardData(accessToken, cardRequest, context, navController)
                         }

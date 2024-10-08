@@ -70,6 +70,7 @@ class RecieptPostViewModel : ViewModel() {
                 val response = ReceiptApi.api.postReceiptData("$token")
                 if (response.isSuccessful) {
                     Log.e("ReceiptPost", "이메일 발송 성공")
+                    Toast.makeText(context, "이메일 발송에 성공하였습니다.", Toast.LENGTH_LONG).show()
                 } else {
                     Log.e("ReceiptPost", "이메일 발송 실패: ${response.errorBody()?.string()}")
                     Toast.makeText(context, "이메일 발송에 실패하였습니다.", Toast.LENGTH_LONG).show()
