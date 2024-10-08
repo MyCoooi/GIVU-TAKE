@@ -44,9 +44,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/",
                                 "/api/auth",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/swagger-resources/**",
+                                "/api/swagger-ui/**",
+                                "/api/v3/api-docs/**",
+                                "/api/swagger-resources/**",
                                 "/s3/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/government-fundings/my-fundings").hasRole("CORPORATION")
