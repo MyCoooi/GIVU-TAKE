@@ -3,7 +3,6 @@ package com.accepted.givutake.pdf;
 import com.accepted.givutake.global.enumType.ExceptionEnum;
 import com.accepted.givutake.global.exception.ApiException;
 import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.tool.xml.XMLWorker;
@@ -21,6 +20,7 @@ import com.itextpdf.tool.xml.pipeline.end.PdfWriterPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +33,9 @@ import java.util.List;
 @Slf4j
 @Service
 public class PdfService {
+
+    @Value("${path.ttf}")
+    private String ttfPath;
 
     public byte[] generateDonationReceipt(DonationReceiptFormDto donationReceiptFormDto) {
         Document document = new Document(PageSize.A4, 50, 50, 50, 50); // 용지 및 여백 설정
@@ -60,9 +63,8 @@ public class PdfService {
             // HTML 과 폰트준비
             XMLWorkerFontProvider fontProvider = new XMLWorkerFontProvider(XMLWorkerFontProvider.DONTLOOKFORFONTS);
             try {
-//                ClassPathResource fontResource = new ClassPathResource("malgun.ttf");
-//                fontProvider.register(fontResource.getURL().getPath(), "MalgunGothic"); // 'MalgunGothic'은 폰트 별칭
-                String absolutePath = System.getProperty("user.dir") + "/backend/givutake/src/main/resources/malgun.ttf";
+                // 절대 경로로 가져오기
+                String absolutePath = System.getProperty("user.dir") + ttfPath;
                 fontProvider.register(absolutePath, "MalgunGothic"); // 'MalgunGothic'은 폰트 별칭
             } catch (Exception e) {
                 log.error("PdfService - 폰트 파일 로드 실패: {}", e.getMessage());
