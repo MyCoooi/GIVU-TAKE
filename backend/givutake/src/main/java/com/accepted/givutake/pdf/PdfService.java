@@ -19,6 +19,7 @@ import com.itextpdf.tool.xml.pipeline.end.PdfWriterPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -46,7 +47,8 @@ public class PdfService {
             CSSResolver cssResolver = new StyleAttrCSSResolver();
             CssFile cssFile = null;
             try {
-                cssFile = helper.getCSS(new FileInputStream("src/main/resources/pdf.css"));
+                ClassPathResource cssResource = new ClassPathResource("pdf.css");
+                cssFile = helper.getCSS(cssResource.getInputStream());
             } catch (FileNotFoundException e) {
                 log.error("PdfService - donationReceiptGenerate의 CSS 파일 읽어 들이기 실패: {}", e.getMessage());
             }
@@ -54,7 +56,13 @@ public class PdfService {
 
             // HTML 과 폰트준비
             XMLWorkerFontProvider fontProvider = new XMLWorkerFontProvider(XMLWorkerFontProvider.DONTLOOKFORFONTS);
-            fontProvider.register("MALGUN.ttf","MalgunGothic"); // MalgunGothic 은 alias,
+            try {
+                ClassPathResource fontResource = new ClassPathResource("malgun.ttf");
+                fontProvider.register(fontResource.getURL().getPath(), "MalgunGothic"); // 'MalgunGothic'은 폰트 별칭
+            } catch (IOException e) {
+                log.error("PdfService - 폰트 파일 로드 실패: {}", e.getMessage());
+            }
+
             CssAppliers cssAppliers = new CssAppliersImpl(fontProvider);
 
             HtmlPipelineContext htmlContext = new HtmlPipelineContext(cssAppliers);
