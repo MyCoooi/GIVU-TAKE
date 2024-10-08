@@ -44,7 +44,7 @@ public class KaKaoPayService {
 
         Map<String, String> parameters = new HashMap<>();
         parameters.put("cid", "TC0ONETIME");                                    // 가맹점 코드(테스트용)
-        parameters.put("partner_order_id", "Gift" + String.valueOf(orderIdx));                       // 주문번호
+        parameters.put("partner_order_id", "Gift" + orderIdx);                       // 주문번호
         parameters.put("partner_user_id", email);                          // 회원 아이디
         parameters.put("item_name", gift.getGiftName());                                      // 상품명
         parameters.put("quantity", String.valueOf(request.getAmount()));                                        // 상품 수량
@@ -69,7 +69,7 @@ public class KaKaoPayService {
 
         Map<String, String> parameters = new HashMap<>();
         parameters.put("cid", "TC0ONETIME");                                    // 가맹점 코드(테스트용)
-        parameters.put("partner_order_id", "Funding" + String.valueOf(participantIdx));                       // 주문번호
+        parameters.put("partner_order_id", "Funding" + participantIdx);                       // 주문번호
         parameters.put("partner_user_id", email);                          // 회원 아이디
         parameters.put("item_name", funding.getFundingTitle());                                      // 상품명
         parameters.put("quantity", String.valueOf(1));                                        // 상품 수량
@@ -93,7 +93,7 @@ public class KaKaoPayService {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("cid", "TC0ONETIME");              // 가맹점 코드(테스트용)
         parameters.put("tid", tid);                       // 결제 고유번호
-        parameters.put("partner_order_id", type + String.valueOf(idx)); // 주문번호
+        parameters.put("partner_order_id", type + idx); // 주문번호
         parameters.put("partner_user_id", email);    // 회원 아이디
         parameters.put("pg_token", pgToken);              // 결제승인 요청을 인증하는 토큰
 

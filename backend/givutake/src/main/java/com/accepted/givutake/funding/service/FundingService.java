@@ -82,7 +82,7 @@ public class FundingService {
     public Fundings getFundingByFundingIdx(int fundingIdx) {
         Optional<Fundings> optionalExistingFundings =  fundingRepository.findByFundingIdx(fundingIdx);
 
-        if (!optionalExistingFundings.isEmpty()) {
+        if (optionalExistingFundings.isPresent()) {
             Fundings savedFundings = optionalExistingFundings.get();
 
             // 이미 삭제된 펀딩일 경우 조회 불가

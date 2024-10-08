@@ -233,7 +233,7 @@ public class GiftService {
 
     public List<GiftReviewDto> getGiftReviews(int giftIdx, boolean isOrderLiked, int pageNo, int pageSize) {
 
-        Pageable pageable = null;
+        Pageable pageable;
 
         if(isOrderLiked){
             pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "likedCount"));
@@ -269,7 +269,7 @@ public class GiftService {
     }
 
     public List<GiftReviewDto> getUserReviews(String email, boolean isOrderLiked, int pageNo, int pageSize) {
-        Pageable pageable = null;
+        Pageable pageable;
 
         if(isOrderLiked){
             pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "likedCount"));
