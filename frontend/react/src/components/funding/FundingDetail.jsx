@@ -1,29 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // useNavigate 추가
+import { useParams, useNavigate } from "react-router-dom";
 import Sidebar from "../Sidebar";
 import { apiFundingDetail } from "../../apis/funding/apiFundingDetail"; 
-import { apiUpdateFunding } from "../../apis/funding/apiUpdateFunding"; // Update API import
-import { apiDeleteFunding } from "../../apis/funding/apiDeleteFunding"; // Delete API import
+import { apiUpdateFunding } from "../../apis/funding/apiUpdateFunding";
+import { apiDeleteFunding } from "../../apis/funding/apiDeleteFunding";
 import FundingReviews from "./FundingReviews";
 import FundingComments from "./FundingComments";
 import "./FundingDetail.css";
-import TokenManager from "../../utils/TokenManager"; // TokenManager import
-import Swal from 'sweetalert2'; // SweetAlert2 import
+import TokenManager from "../../utils/TokenManager";
+import Swal from 'sweetalert2';
 
 const FundingDetail = () => {
   const { fundingIdx } = useParams();
-  const navigate = useNavigate(); // useNavigate for redirecting after deletion
+  const navigate = useNavigate();
   const [funding, setFunding] = useState(null);
   const [selectedMenu, setSelectedMenu] = useState("펀딩");
-  const [activeTab, setActiveTab] = useState("소개"); // 선택된 탭을 관리하는 state 추가
-  const [isEditing, setIsEditing] = useState(false); // 수정 모드 여부를 관리하는 state
+  const [activeTab, setActiveTab] = useState("소개");
+  const [isEditing, setIsEditing] = useState(false);
   const [updatedFunding, setUpdatedFunding] = useState({
     fundingTitle: "",
     fundingContent: "",
     goalMoney: "",
     startDate: "",
     endDate: "",
-    fundingType: "", // 펀딩 유형 추가
+    fundingType: "",
   });
 
   useEffect(() => {
@@ -34,10 +34,10 @@ const FundingDetail = () => {
         setUpdatedFunding({
           fundingTitle: data.fundingTitle,
           fundingContent: data.fundingContent,
-          goalMoney: formatNumberWithCommas(data.goalMoney.toString()), // 쉼표가 적용된 목표 금액
+          goalMoney: formatNumberWithCommas(data.goalMoney.toString()),
           startDate: data.startDate,
           endDate: data.endDate,
-          fundingType: data.fundingType
+          fundingType: data.fundingType,
         });
       } catch (error) {
         console.error("펀딩 상세 정보를 가져오는 데 실패했습니다:", error);
@@ -48,11 +48,11 @@ const FundingDetail = () => {
   }, [fundingIdx]);
 
   const handleEditClick = () => {
-    setIsEditing(true); // 수정 모드 활성화
+    setIsEditing(true);
   };
 
   const handleCancelClick = () => {
-    setIsEditing(false); // 수정 모드 비활성화
+    setIsEditing(false);
   };
 
   const handleDeleteClick = async () => {
@@ -61,8 +61,8 @@ const FundingDetail = () => {
       text: "이 작업은 되돌릴 수 없습니다.",
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#6a5acd', // 보라색
-      cancelButtonColor: '#ffffff', // 하얀색 배경
+      confirmButtonColor: '#6a5acd',
+      cancelButtonColor: '#ffffff',
       confirmButtonText: '삭제',
       cancelButtonText: '취소',
       customClass: {
@@ -89,31 +89,29 @@ const FundingDetail = () => {
     });
   };
 
-  // 숫자에 쉼표를 추가하는 함수
   const formatNumberWithCommas = (number) => {
     return number.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
-  // 쉼표를 제거하는 함수
   const removeCommas = (number) => {
     return number.replace(/,/g, "");
   };
 
   const handleSaveClick = async () => {
     try {
-      const accessToken = TokenManager.getAccessToken(); // AccessToken from TokenManager
+      const accessToken = TokenManager.getAccessToken();
       const updatedData = {
         ...updatedFunding,
-        goalMoney: parseInt(removeCommas(updatedFunding.goalMoney)), // 쉼표 제거 후 숫자로 변환
+        goalMoney: parseInt(removeCommas(updatedFunding.goalMoney)),
       };
 
-      await apiUpdateFunding(fundingIdx, updatedData, accessToken); // API 호출하여 수정 내용 저장
+      await apiUpdateFunding(fundingIdx, updatedData, accessToken);
       Swal.fire({
         title: "펀딩이 수정되었습니다.",
         icon: "success",
         confirmButtonText: "확인",
       }).then(() => {
-        window.location.reload(); // 확인 버튼 누르면 새로고침
+        window.location.reload();
       });
       
     } catch (error) {
@@ -146,7 +144,7 @@ const FundingDetail = () => {
   const handleTypeChange = (e) => {
     setUpdatedFunding((prev) => ({
       ...prev,
-      fundingType: e.target.value, // 펀딩 유형 수정
+      fundingType: e.target.value,
     }));
   };
 
@@ -155,29 +153,34 @@ const FundingDetail = () => {
       case "소개":
         return (
           <div className="funding-description">
-            <h2>펀딩 소개</h2>
-            {isEditing ? (
-              <textarea
-                name="fundingContent"
-                value={updatedFunding.fundingContent}
-                onChange={handleChange}
-                className="edit-textarea"
-              />
-            ) : (
-              <p style={{ whiteSpace: "pre-wrap" }}>
-                {funding?.fundingContent}
-              </p>
-            )}
-          </div>
-        );
+          <h2>펀딩 소개</h2>
+          {funding?.fundingContentImage && (
+            <img 
+              src={funding.fundingContentImage} 
+              alt="펀딩 내용 이미지" 
+              className="funding-content-image"
+              style={{ width: '100%', maxHeight: '400px', objectFit: 'cover', marginBottom: '20px' }}
+            />
+          )}
+          {isEditing ? (
+            <textarea
+              name="fundingContent"
+              value={updatedFunding.fundingContent}
+              onChange={handleChange}
+              className="edit-textarea"
+              style={{ marginTop: '10px' }}  // 설명을 이미지 아래로 배치
+            />
+          ) : (
+            <p style={{ whiteSpace: "pre-wrap", marginTop: '10px' }}>
+              {funding?.fundingContent}
+            </p>
+          )}
+        </div>
+      );
       case "응원댓글":
         return <FundingComments fundingIdx={fundingIdx} />;
       case "후기":
-        return (
-          <div>
-            <FundingReviews fundingIdx={fundingIdx} />
-          </div>
-        );
+        return <FundingReviews fundingIdx={fundingIdx} />;
       default:
         return null;
     }
@@ -212,7 +215,6 @@ const FundingDetail = () => {
             </button>
           </div>
 
-          {/* 수정 및 삭제 버튼 표시 */}
           {isEditing ? (
             <div className="edit-buttons">
               <button className="save-button" onClick={handleSaveClick}>저장</button>
@@ -228,7 +230,6 @@ const FundingDetail = () => {
           )}
         </div>
 
-        {/* 응원댓글 클릭 시 펀딩 상세 정보 숨기기 */}
         {activeTab === "소개" && (
           <div className="funding-detail-body">
             <div className="funding-thumbnail">
@@ -239,7 +240,6 @@ const FundingDetail = () => {
               )}
             </div>
 
-            {/* 모든 input-row를 감싸는 큰 div */}
             <div className="funding-info-wrapper">
               <div className="funding-info">
                 {isEditing ? (
