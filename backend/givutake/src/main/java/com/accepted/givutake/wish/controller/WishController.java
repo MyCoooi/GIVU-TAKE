@@ -29,7 +29,6 @@ public class WishController {
             @RequestParam(value = "pageNo", defaultValue = "1")int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10")int pageSize) {
         List<WishDto> wishList = wishService.getWishList(userDetails.getUsername(), pageNo, pageSize);
-        System.out.println(wishList);
         ResponseDto responseDto = ResponseDto.builder()
                 .data(wishList)
                 .build();
