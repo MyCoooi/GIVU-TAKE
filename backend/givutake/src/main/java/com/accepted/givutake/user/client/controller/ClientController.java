@@ -3,6 +3,7 @@ package com.accepted.givutake.user.client.controller;
 import com.accepted.givutake.funding.model.FundingParticipantViewDto;
 import com.accepted.givutake.funding.service.FundingParticipantService;
 import com.accepted.givutake.global.model.ResponseDto;
+import com.accepted.givutake.pdf.DonationParticipantsDto;
 import com.accepted.givutake.user.client.entity.Addresses;
 import com.accepted.givutake.user.client.model.*;
 import com.accepted.givutake.user.client.service.CardService;
@@ -138,6 +139,19 @@ public class ClientController {
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(map)
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    @GetMapping("/donation")
+    public ResponseEntity<ResponseDto> getDonationYear(@AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+
+        List<DonationParticipantsDto> data = clientService.generateDonationYear(email);
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(data)
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
