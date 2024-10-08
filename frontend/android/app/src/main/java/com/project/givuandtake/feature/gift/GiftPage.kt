@@ -56,8 +56,12 @@ import com.project.givuandtake.core.datastore.TokenManager
 import com.project.givuandtake.feature.gift.GiftViewModel
 import com.project.givuandtake.feature.gift.addToFavorites
 import com.project.givuandtake.feature.mypage.MyDonation.WishlistViewModel
+import com.project.givuandtake.ui.theme.CustomTypography
+import com.project.givuandtake.ui.theme.GivuAndTakeTheme
+import com.project.givuandtake.ui.theme.gmarketSans
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import java.time.format.TextStyle
 
 
 @Composable
@@ -173,7 +177,8 @@ fun TopBar(navController: NavController, cartItemCount: Int) {
             Text(
                 text = "GIVU & TAKE",
                 color = Color(0xFF8E8EBD), // 연한 보라색 텍스트 색상
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                style = CustomTypography.titleLarge // CustomTypography 적용
             )
         }
 
@@ -188,7 +193,8 @@ fun TopBar(navController: NavController, cartItemCount: Int) {
             Text(
                 text = "우리 고향 기부하기",
                 fontWeight = FontWeight.Bold,
-                fontSize = 25.sp
+                fontSize = 25.sp,
+                style = CustomTypography.bodyLarge // CustomTypography 적용
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // WishList 아이콘 추가
@@ -284,38 +290,21 @@ fun MiddleContent(
                 Text(
                     text = "상품종류 순",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 25.sp
+                    fontSize = 25.sp,
+                    style = CustomTypography.bodyLarge // CustomTypography 적용
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
-            // 카테고리 버튼 (onCategorySelected 인자를 전달)
-            FilterButtons_category { selectedCategoryIdx ->
-                // 페이지 이동 처리
-                Log.d("Category", "Selected category: $selectedCategoryIdx")
-                navController.navigate("category/$selectedCategoryIdx") // 카테고리 페이지로 이동
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // 맞춤 추천상품 텍스트
             Text(
                 text = "맞춤 추천상품",
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
+                fontSize = 25.sp,
+                style = CustomTypography.bodyLarge, // CustomTypography 적용
                 modifier = Modifier.padding(vertical = 16.dp)
             )
-            ProductGrid(
-                navController = navController,
-                products = products,
-                wishlistItems = wishlistItems,
-                onFavoriteToggle = onFavoriteToggle
-            )
-            Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "맞춤 추천상품",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                modifier = Modifier.padding(vertical = 16.dp)
-            )
             ProductGrid(
                 navController = navController,
                 products = products,
@@ -324,25 +313,10 @@ fun MiddleContent(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "맞춤 추천상품",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                modifier = Modifier.padding(vertical = 16.dp)
-            )
-            ProductGrid(
-                navController = navController,
-                products = products,
-                wishlistItems  = wishlistItems,
-                onFavoriteToggle = { product ->
-                    coroutineScope.launch {
-                        addToFavorites(context, product)
-                    }
-                }
-            )
         }
     }
 }
+
 
 
 @Composable
@@ -466,7 +440,6 @@ fun ProductCard(
                         .size(200.dp),
                     contentScale = ContentScale.Crop
                 )
-
             }
 
             // 상품명과 찜 아이콘
@@ -478,7 +451,7 @@ fun ProductCard(
                 Text(
                     text = product.giftName,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp, // 텍스트 크기를 설정
+                    style = CustomTypography.bodyLarge, // CustomTypography 적용
                     color = Color.Black // 텍스트 색상 설정
                 )
             }
@@ -499,6 +472,7 @@ fun ProductCard(
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = location,
+                        style = CustomTypography.bodyLarge, // CustomTypography 적용
                         fontSize = 12.sp,
                         color = Color.Gray
                     )
@@ -523,6 +497,7 @@ fun ProductCard(
                 ) {
                     Text(
                         text = "₩${product.priceFormatted}",
+                        style = CustomTypography.bodyLarge, // CustomTypography 적용
                         fontSize = 14.sp,
                         color = Color.Black // 텍스트 색상 설정
                     )
@@ -546,6 +521,7 @@ fun ProductCard(
         }
     }
 }
+
 
 @Composable
 fun CategoryScreen(navController: NavController) {
@@ -592,7 +568,7 @@ fun CategoryButton(text: String, icon: Painter, onClick: () -> Unit) {
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.body2,
+            style = CustomTypography.bodyLarge,
             modifier = Modifier.padding(bottom = 4.dp)
         )
 

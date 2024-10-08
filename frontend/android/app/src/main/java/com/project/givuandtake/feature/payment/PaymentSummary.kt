@@ -22,11 +22,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.project.givuandtake.core.data.KakaoPaymentInfo
+import com.project.givuandtake.core.data.KakaoPaymentInfo_funding
 
 @Composable
-fun PaymentTotalAndButton() {
+fun PaymentTotalAndButton(
+    currentAmount: Int,
+    kakaoPaymentInfo_funding: KakaoPaymentInfo_funding,
+    navController: NavController,
+    viewModel: PaymentViewModel = viewModel()
+) {
     Surface(
         modifier = Modifier
             .fillMaxWidth(),
@@ -41,19 +48,18 @@ fun PaymentTotalAndButton() {
             verticalAlignment = Alignment.CenterVertically // 수직 가운데 정렬
         ) {
             // 결제 총 금액을 중앙에 배치
-            PaymentTotal()
+            PaymentTotal(currentAmount)
 
             Spacer(modifier = Modifier.width(24.dp)) // 총 금액과 버튼 사이 간격 조정
 
-            // 결제하기 버튼을 배치
-            PaymentButton()
+            // 결제하기 버튼을 배치, viewModel을 전달
+            PaymentButton(kakaoPaymentInfo_funding = kakaoPaymentInfo_funding, navController = navController, viewModel = viewModel)
         }
     }
 }
 
-
 @Composable
-fun PaymentTotal() {
+fun PaymentTotal(currentAmount: Int) {
     // 결제 총 금액 부분을 중앙으로 배치
     Column(
         horizontalAlignment = Alignment.CenterHorizontally, // 중앙 정렬
@@ -68,7 +74,7 @@ fun PaymentTotal() {
         )
         Spacer(modifier = Modifier.height(4.dp)) // 텍스트 사이 간격
         Text(
-            text = "50,000 원",
+            text = "${String.format("%,d", currentAmount)} 원",  // 금액을 문자열로 변환하여 출력
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold, // 굵은 텍스트
             color = Color(0xFF000000) // 검정색
@@ -77,10 +83,18 @@ fun PaymentTotal() {
 }
 
 @Composable
-fun PaymentButton() {
-    // 결제하기 버튼
+fun PaymentButton(kakaoPaymentInfo_funding: KakaoPaymentInfo_funding, navController: NavController, viewModel: PaymentViewModel) {
+    val context = LocalContext.current // 현재 컨텍스트 가져오기
+
     Button(
-        onClick = { /* 결제 처리 동작 */ },
+        onClick = {
+            // 스프링 서버로 결제 준비 요청을 보냄
+            viewModel.preparePayment_funding(
+                navController = navController,
+                context = context,
+                paymentInfo = kakaoPaymentInfo_funding
+            )
+        },
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
             .height(50.dp) // 버튼 높이 설정
@@ -95,6 +109,7 @@ fun PaymentButton() {
         )
     }
 }
+
 
 
 // 답례품 관련 결제 함수

@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.gson.Gson
 import com.project.givuandtake.core.data.KakaoPaymentInfo
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -26,19 +27,25 @@ import kotlinx.coroutines.launch
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun PaymentResultPage(
-    navController: NavController
+    navController: NavController,
+    paymentInfo: KakaoPaymentInfo // 전달받은 결제 정보
 ) {
     val context = LocalContext.current
     val intent = (context as? Activity)?.intent
     val uri = intent?.data
+
+    // Gson 객체 생성
+    val gson = remember { Gson() }
+    // paymentInfo 객체를 JSON 문자열로 변환
+    val paymentInfoJson = gson.toJson(paymentInfo)
 
     LaunchedEffect(uri) {
 
         delay(5000L) // 5초 대기
         Log.d("uri_pay:","uri : ${uri}")
         Log.d("uri_pay:","intent : ${intent}")
-        // 결제 성공 페이지로 이동
-        navController.navigate("payment_success")
+        // 결제 성공 페이지로 이동하면서 paymentInfoJson 전달
+        navController.navigate("payment_success/$paymentInfoJson")
     }
 
     Scaffold(
