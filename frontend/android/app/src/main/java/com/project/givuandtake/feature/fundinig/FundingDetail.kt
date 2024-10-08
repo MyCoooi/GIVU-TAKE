@@ -38,15 +38,19 @@ import com.project.givuandtake.core.apis.Funding.WriteCommentRequest
 import com.project.givuandtake.core.apis.Funding.WriteCommentResponse
 import com.project.givuandtake.core.apis.Funding.WriteFundingCommentApi
 import androidx.compose.ui.res.painterResource
+import com.google.gson.Gson
 import com.project.givuandtake.R
 import com.project.givuandtake.core.apis.Funding.DeleteCommentResponse
 import com.project.givuandtake.core.apis.Funding.DeleteFundingCommentApi
+import com.project.givuandtake.core.apis.TourismIdRetrofitInstance.gson
 import com.project.givuandtake.core.datastore.TokenManager
 import com.project.givuandtake.core.datastore.TokenManager.getUserIdFromToken
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -62,6 +66,7 @@ fun FundingDetailPage(
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
     val tabs = listOf("사업소개", "응원메시지", "기부후기")
+    val gson = Gson() // Gson 객체 생성
 
     // 응원 메시지 데이터를 위한 상태 변수
     var comments by remember { mutableStateOf<List<CommentData>>(emptyList()) }
@@ -124,6 +129,8 @@ fun FundingDetailPage(
         )
     }
 
+    Log.d("fundingDetail","${fundingDetail}")
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -137,7 +144,12 @@ fun FundingDetailPage(
         },
         bottomBar = {
             Button(
-                onClick = { navController.navigate("payment") },
+                onClick = {
+                    // fundingDetail을 JSON으로 변환하여 넘김
+                    val fundingDetailJson = gson.toJson(fundingDetail)
+                    val encodedFundingDetailJson = URLEncoder.encode(fundingDetailJson, StandardCharsets.UTF_8.toString())
+                    navController.navigate("payment/$encodedFundingDetailJson")
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
@@ -166,7 +178,7 @@ fun FundingDetailPage(
                             color = Color.Gray,
                             shape = RoundedCornerShape(8.dp)
                         ),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Fit
                 )
 
                 Column(
