@@ -40,13 +40,10 @@ public class FundingService {
 
     // 종료가 임박한 순서대로 펀딩 10개 조회
     public List<FundingViewDto> getDeadlineImminentFundings() {
-        List<FundingViewDto> deadlineImminentFundingViewDtos =
-                fundingRepository.findTop10ByStateOrderByEndDate((byte) 1)
-                        .stream()
-                        .map(fundings -> FundingViewDto.toDto(fundings))
-                        .collect(Collectors.toList());
-
-        return deadlineImminentFundingViewDtos;
+        return fundingRepository.findTop10ByStateOrderByEndDate((byte) 1)
+                .stream()
+                .map(FundingViewDto::toDto)
+                .collect(Collectors.toList());
     }
 
     // 자신이 작성한 모든 펀딩 조회
@@ -85,7 +82,7 @@ public class FundingService {
     public Fundings getFundingByFundingIdx(int fundingIdx) {
         Optional<Fundings> optionalExistingFundings =  fundingRepository.findByFundingIdx(fundingIdx);
 
-        if (!optionalExistingFundings.isEmpty()) {
+        if (optionalExistingFundings.isPresent()) {
             Fundings savedFundings = optionalExistingFundings.get();
 
             // 이미 삭제된 펀딩일 경우 조회 불가

@@ -2,7 +2,6 @@ package com.accepted.givutake.user.common.repository;
 
 import com.accepted.givutake.user.common.entity.RefreshToken;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -13,8 +12,11 @@ import java.util.Optional;
 @Repository
 public class RefreshTokenRepository {
 
-    @Autowired
-    private RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
+
+    public RefreshTokenRepository(RedisTemplate<String, String> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
 
     // 이메일을 Key로, 리프레시 토큰을 Value로 저장
     public void save(RefreshToken refreshToken) {
