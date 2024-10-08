@@ -88,7 +88,7 @@ public class UserService {
 
             String publicProfileImageUrl = null;
 
-            if (!profileImage.isEmpty()) {
+            if (profileImage != null && !profileImage.isEmpty()) {
                 try {
                     // s3에 profile image 업로드
                     publicProfileImageUrl = s3Service.uploadProfileImage(profileImage);
@@ -113,7 +113,7 @@ public class UserService {
 
             String publicProfileImageUrl = null;
 
-            if (!profileImage.isEmpty()) {
+            if (profileImage != null && !profileImage.isEmpty()) {
                 try {
                     // s3에 profile image 업로드
                     publicProfileImageUrl = s3Service.uploadProfileImage(profileImage);
@@ -243,7 +243,7 @@ public class UserService {
             }
 
             // 수정할 프로필 사진이 있을 경우, 프로필 사진 변경
-            if (!profileImage.isEmpty()) {
+            if (profileImage != null && !profileImage.isEmpty()) {
 
                 // 기존의 프로필 사진 삭제
                 String originalProfileImageUrl = savedUser.getProfileImageUrl();
@@ -291,6 +291,7 @@ public class UserService {
             
             // TODO: 회원과 관련된 다른 모든 데이터도 삭제 처리(refresh 토큰 등등..)
             userRepository.updateIsWithdrawByEmail(email, true);
+
         }
         else {
             throw new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION);

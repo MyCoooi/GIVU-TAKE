@@ -32,8 +32,11 @@ public class Fundings extends BaseTimeEntity {
     @Column(name = "funding_title", length = 30, nullable = false)
     private String fundingTitle;
 
-    @Column(name = "funding_content", length = 6000, nullable = false)
+    @Column(name = "funding_content", length = 6000)
     private String fundingContent;
+
+    @Column(name = "funding_content_image", length = 2048)
+    private String fundingContentImage;
 
     @OneToOne(mappedBy = "fundings", orphanRemoval = true, fetch = FetchType.EAGER)
     private FundingReviews fundingReviews;

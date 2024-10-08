@@ -5,6 +5,7 @@ import com.accepted.givutake.user.common.entity.Users;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,11 +16,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface FundingRepository extends JpaRepository<Fundings, Integer> {
+public interface FundingRepository extends JpaRepository<Fundings, Integer>, JpaSpecificationExecutor<Fundings> {
     Optional<Fundings> findByFundingIdx(int fundingIdx);
     List<Fundings> findByFundingTypeAndStateAndIsDeletedFalse(char fundingType, byte state);
     List<Fundings> findByIsDeletedFalseAndState(byte state);
-    Page<Fundings> findByCorporation(Users corporation, Pageable pageable);
     List<Fundings> findTop10ByStateOrderByEndDate(byte state);
 
     @Modifying

@@ -38,13 +38,14 @@ public class FundingController {
     // 자신이 작성한 모든 펀딩 조회
     @GetMapping("/my-fundings")
     public ResponseEntity<ResponseDto> getMyFundingList(@AuthenticationPrincipal UserDetails userDetails,
+                                                        @RequestParam(required = false) Byte state,
                                                         @RequestParam(required = false, defaultValue = "0") int pageNo,
                                                         @RequestParam(required = false, defaultValue = "10") int pageSize) {
 
         String email = userDetails.getUsername();
 
         List<FundingViewDto> fundingViewDtoList =
-                fundingService.getMyFundingList(email, pageNo, pageSize)
+                fundingService.getMyFundingList(email, state, pageNo, pageSize)
                         .stream()
                         .map(FundingViewDto::toDto)
                         .collect(Collectors.toList());
@@ -91,14 +92,15 @@ public class FundingController {
     @PostMapping
     public ResponseEntity<ResponseDto> addFundingByJwt(@AuthenticationPrincipal UserDetails userDetails,
                                                        @RequestPart(value = "fundingAddDto") @Valid FundingAddDto fundingAddDto,
-                                                       @RequestPart(value = "fundingThumbnail") MultipartFile fundingThumbnail) {
+                                                       @RequestPart(value = "fundingThumbnail", required = false) MultipartFile fundingThumbnail,
+                                                       @RequestPart(value = "contentImage", required = false) MultipartFile contentImage) {
         String email = userDetails.getUsername();
 
         if (!(fundingAddDto.getFundingType() == 'R' || fundingAddDto.getFundingType() == 'D')) {
             throw new ApiException(ExceptionEnum.ILLEGAL_FUNDINGTYPE_EXCEPTION);
         }
 
-        Fundings savedFundings = fundingService.addFundingByEmail(email, fundingAddDto, fundingThumbnail);
+        Fundings savedFundings = fundingService.addFundingByEmail(email, fundingAddDto, fundingThumbnail, contentImage);
         FundingViewDto fundingViewDto = FundingViewDto.toDto(savedFundings);
 
         ResponseDto responseDto = ResponseDto.builder()
@@ -113,14 +115,15 @@ public class FundingController {
     public ResponseEntity<ResponseDto> modifyFundingByJwt(@AuthenticationPrincipal UserDetails userDetails,
                                                           @PathVariable int fundingIdx,
                                                           @Valid @RequestPart(value = "fundingAddDto") FundingAddDto fundingAddDto,
-                                                          @RequestPart(value = "fundingThumbnail") MultipartFile fundingThumbnail) {
+                                                          @RequestPart(value = "fundingThumbnail", required = false) MultipartFile fundingThumbnail,
+                                                          @RequestPart(value = "contentImage", required = false) MultipartFile contentImage) {
         String email = userDetails.getUsername();
 
         if (!(fundingAddDto.getFundingType() == 'R' || fundingAddDto.getFundingType() == 'D')) {
             throw new ApiException(ExceptionEnum.ILLEGAL_FUNDINGTYPE_EXCEPTION);
         }
 
-        Fundings modifiedFundings = fundingService.modifyFundingByFundingIdx(email, fundingIdx, fundingAddDto, fundingThumbnail);
+        Fundings modifiedFundings = fundingService.modifyFundingByFundingIdx(email, fundingIdx, fundingAddDto, fundingThumbnail, contentImage);
         FundingViewDto fundingViewDto = FundingViewDto.toDto(modifiedFundings);
 
         ResponseDto responseDto = ResponseDto.builder()
@@ -239,10 +242,13 @@ public class FundingController {
 
     // jwt 토큰으로 펀딩 후기 추가
     @PostMapping("/{fundingIdx}/review")
-    public ResponseEntity<ResponseDto> addFundingReviewByJwt(@AuthenticationPrincipal UserDetails userDetails, @PathVariable int fundingIdx, @Valid @RequestBody FundingReviewAddDto fundingReviewAddDto) {
+    public ResponseEntity<ResponseDto> addFundingReviewByJwt(@AuthenticationPrincipal UserDetails userDetails,
+                                                             @PathVariable int fundingIdx,
+                                                             @Valid @RequestPart(value = "fundingReviewAddDto") FundingReviewAddDto fundingReviewAddDto,
+                                                             @RequestPart(value = "contentImage", required = false) MultipartFile contentImage) {
         String email = userDetails.getUsername();
 
-        FundingReviewViewDto savedFundingReviewDto = fundingReviewService.addFundingReviewByEmail(email, fundingIdx, fundingReviewAddDto);
+        FundingReviewViewDto savedFundingReviewDto = fundingReviewService.addFundingReviewByEmail(email, fundingIdx, fundingReviewAddDto, contentImage);
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(savedFundingReviewDto)
@@ -253,10 +259,13 @@ public class FundingController {
 
     // jwt 토큰으로 펀딩 후기 수정
     @PatchMapping("/{fundingIdx}/review")
-    public ResponseEntity<ResponseDto> modifyFundingReviewByJwt(@AuthenticationPrincipal UserDetails userDetails, @PathVariable int fundingIdx, @Valid @RequestBody FundingReviewUpdateDto fundingReviewUpdateDto) {
+    public ResponseEntity<ResponseDto> modifyFundingReviewByJwt(@AuthenticationPrincipal UserDetails userDetails,
+                                                                @PathVariable int fundingIdx,
+                                                                @Valid @RequestPart(value = "fundingReviewUpdateDto") FundingReviewUpdateDto fundingReviewUpdateDto,
+                                                                @RequestPart(value = "contentImage", required = false) MultipartFile contentImage) {
         String email = userDetails.getUsername();
 
-        FundingReviewViewDto modifiedFundingReviewDetailViewDto = fundingReviewService.modifyFundingReviewByEmail(email, fundingIdx, fundingReviewUpdateDto);
+        FundingReviewViewDto modifiedFundingReviewDetailViewDto = fundingReviewService.modifyFundingReviewByEmail(email, fundingIdx, fundingReviewUpdateDto, contentImage);
 
         ResponseDto responseDto = ResponseDto.builder()
                 .data(modifiedFundingReviewDetailViewDto)

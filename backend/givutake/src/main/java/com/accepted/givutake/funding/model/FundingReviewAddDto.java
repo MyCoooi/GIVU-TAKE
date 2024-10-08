@@ -18,9 +18,10 @@ public class FundingReviewAddDto {
     @NotNull(message = "내용은 필수 입력 값 입니다.")
     private String reviewContent;
 
-    public FundingReviews toEntity(Fundings fundings) {
+    public FundingReviews toEntity(Fundings fundings, String reviewContentImage) {
         return FundingReviews.builder()
                 .reviewContent(this.reviewContent)
+                .reviewContentImage(reviewContentImage)
                 .fundings(fundings)
                 .build();
     }

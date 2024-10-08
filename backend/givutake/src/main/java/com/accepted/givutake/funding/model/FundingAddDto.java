@@ -32,21 +32,22 @@ public class FundingAddDto {
     private Integer goalMoney;
 
     @NotNull(message = "모금 시작일은 필수 입력 값 입니다.")
-    @FutureOrPresent(message = "모금 시작일은 현재 날짜 이후여야 합니다.")
+//    @FutureOrPresent(message = "모금 시작일은 현재 날짜 이후여야 합니다.")
     private LocalDate startDate;
 
     @NotNull(message = "모금 종료일은 필수 입력 값 입니다.")
-    @FutureOrPresent(message = "모금 종료일은 현재 날짜 이후여야 합니다.")
+//    @FutureOrPresent(message = "모금 종료일은 현재 날짜 이후여야 합니다.")
     private LocalDate endDate;
 
     @NotNull(message = "펀딩 종류는 필수 입력 값 입니다.")
     private Character fundingType;
 
-    public Fundings toEntity(Users users, byte state, String fundingThumbnail) {
+    public Fundings toEntity(Users users, byte state, String fundingThumbnail, String fundingContentImage) {
         return Fundings.builder()
                 .corporation(users)
                 .fundingTitle(this.fundingTitle)
                 .fundingContent(this.fundingContent)
+                .fundingContentImage(fundingContentImage)
                 .goalMoney(this.goalMoney)
                 .totalMoney(0)
                 .startDate(this.startDate)

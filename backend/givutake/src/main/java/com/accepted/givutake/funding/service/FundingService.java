@@ -10,16 +10,20 @@ import com.accepted.givutake.global.service.S3Service;
 import com.accepted.givutake.user.common.entity.Users;
 import com.accepted.givutake.user.common.model.UserDto;
 import com.accepted.givutake.user.common.service.UserService;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -46,14 +50,30 @@ public class FundingService {
     }
 
     // 자신이 작성한 모든 펀딩 조회
-    public List<Fundings> getMyFundingList(String email, int pageNo, int pageSize) {
+    public List<Fundings> getMyFundingList(String email, Byte state, int pageNo, int pageSize) {
         // 1. DB에서 유저 조회
         UserDto savedUserDto = userService.getUserByEmail(email);
         Users savedUsers = savedUserDto.toEntity();
 
         Pageable pageable = PageRequest.of(pageNo, pageSize);
 
-        return fundingRepository.findByCorporation(savedUsers, pageable).getContent();
+        // 람다식으로 동적 쿼리 설정
+        Specification<Fundings> spec = (root, query, criteriaBuilder) -> {
+            var predicates = new ArrayList<Predicate>();
+
+            // 유저 조건
+            predicates.add(criteriaBuilder.equal(root.get("corporation"), savedUsers));
+
+            // 상태 조건 (state가 null이 아닌 경우에만 추가)
+            if (state != null) {
+                predicates.add(criteriaBuilder.equal(root.get("state"), state));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Page<Fundings> fundingsPage = fundingRepository.findAll(spec, pageable);
+        return fundingsPage.getContent();
     }
 
     // 조건에 해당하는 모든 펀딩 조회(삭제된 펀딩은 조회 불가)
@@ -81,7 +101,7 @@ public class FundingService {
     }
 
     // email 사용자의 펀딩 추가
-    public Fundings addFundingByEmail(String email, FundingAddDto fundingAddDto, MultipartFile fundingThumbnail) {
+    public Fundings addFundingByEmail(String email, FundingAddDto fundingAddDto, MultipartFile fundingThumbnail, MultipartFile contentImage) {
         // 1. DB에서 user 조회하기
         UserDto savedUserDto = userService.getUserByEmail(email);
         Users savedUsers = savedUserDto.toEntity();
@@ -92,17 +112,27 @@ public class FundingService {
         // 3. s3에 funding thumbnail image 업로드
         String publicThumbnailImageUrl = null;
 
-        if (!fundingThumbnail.isEmpty()) {
+        if (fundingThumbnail != null && !fundingThumbnail.isEmpty()) {
             try {
                 publicThumbnailImageUrl = s3Service.uploadThumbnailImage(fundingThumbnail);
-                log.info("publicThumbnailImageUrl: {}", publicThumbnailImageUrl);
             } catch (IOException e) {
                 throw new ApiException(ExceptionEnum.ILLEGAL_FUNDING_THUMBNAIL_IMAGE_EXCEPTION);
             }
         }
 
-        // 3. DB에 저장
-        return fundingRepository.save(fundingAddDto.toEntity(savedUsers, state, publicThumbnailImageUrl));
+        // 4. s3에 funding content image 업로드
+        String publicContentImageUrl = null;
+
+        if (contentImage != null && !contentImage.isEmpty()) {
+            try {
+                publicContentImageUrl = s3Service.uploadContentImage(contentImage);
+            } catch (IOException e) {
+                throw new ApiException(ExceptionEnum.ILLEGAL_FUNDING_CONTENT_IMAGE_EXCEPTION);
+            }
+        }
+
+        // 5. DB에 저장
+        return fundingRepository.save(fundingAddDto.toEntity(savedUsers, state, publicThumbnailImageUrl, publicContentImageUrl));
     }
 
     // 현재 시간과 모금 시작일을 비교하여 상태값 반환
@@ -115,7 +145,7 @@ public class FundingService {
     }
 
     // fundingIdx에 해당하는 펀딩 수정
-    public Fundings modifyFundingByFundingIdx(String email, int fundingIdx, FundingAddDto fundingAddDto, MultipartFile fundingThumbnail) {
+    public Fundings modifyFundingByFundingIdx(String email, int fundingIdx, FundingAddDto fundingAddDto, MultipartFile fundingThumbnail, MultipartFile contentImage) {
         // 1. user 정보 조회
         UserDto savedUserDto = userService.getUserByEmail(email);
         Users savedUsers = savedUserDto.toEntity();
@@ -138,7 +168,7 @@ public class FundingService {
         }
 
         // 수정할 썸네일 사진이 있을 경우, 썸네일 사진 변경
-        if (!fundingThumbnail.isEmpty()) {
+        if (fundingThumbnail != null && !fundingThumbnail.isEmpty()) {
 
             // 기존의 썸네일 사진 삭제
             String thumbnailImageUrl = savedFundings.getFundingThumbnail();
@@ -153,6 +183,25 @@ public class FundingService {
                 savedFundings.setFundingThumbnail(modifiedThumbnailImageUrl);
             } catch (IOException e) {
                 throw new ApiException(ExceptionEnum.ILLEGAL_FUNDING_THUMBNAIL_IMAGE_EXCEPTION);
+            }
+        }
+
+        // 수정할 컨텐츠 사진이 있을 경우, 컨텐츠 사진 변경
+        if (contentImage != null && !contentImage.isEmpty()) {
+
+            // 기존의 컨텐츠 사진 삭제
+            String contentImageUrl = savedFundings.getFundingContentImage();
+            if (contentImageUrl != null) {
+                String objectKey = s3Service.parseObjectKeyFromCloudfrontUrl(contentImageUrl);
+                s3Service.deleteContentImage(objectKey);
+            }
+
+            // 새로운 컨텐츠 사진 업로드
+            try {
+                String modifiedContentImageUrl = s3Service.uploadContentImage(contentImage);
+                savedFundings.setFundingContentImage(modifiedContentImageUrl);
+            } catch (IOException e) {
+                throw new ApiException(ExceptionEnum.ILLEGAL_FUNDING_CONTENT_IMAGE_EXCEPTION);
             }
         }
 
