@@ -72,6 +72,7 @@ public class SecurityConfig {
                                 "/api/users/password/code/verification").permitAll()
                         .requestMatchers(HttpMethod.PATCH,"/api/users/password").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/users/corporations/certificates").hasAnyRole("CORPORATIONYET", "CORPORATION")
                         .requestMatchers(HttpMethod.POST,
                                 "/api/government-fundings",
                                 "/api/government-fundings/*/review")
