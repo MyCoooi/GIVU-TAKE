@@ -1,6 +1,7 @@
 package com.project.givuandtake.feature.mypage.MyDonation
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,13 +30,16 @@ import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.project.givuandtake.R
 import com.project.givuandtake.core.data.CartItemData
+import com.project.givuandtake.core.data.Gift.WishlistItem
 import com.project.givuandtake.core.data.GiftDetail
+import com.project.givuandtake.core.data.GiftDetailData
 import com.project.givuandtake.core.datastore.TokenManager
 import com.project.givuandtake.feature.gift.CartIcon
 import com.project.givuandtake.feature.gift.GiftViewModel
 import com.project.givuandtake.feature.gift.addToCartApi
 import com.project.givuandtake.feature.gift.fetchCartList
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
@@ -50,18 +54,19 @@ fun formatPrice(price: Int): String {
 @Composable
 fun Wishlist(
     navController: NavController,
-    viewModel: GiftViewModel = viewModel(),
-    wishlistViewModel: WishlistViewModel = viewModel()
+    viewModel: GiftViewModel = viewModel()
 ) {
     val wishlistItems by viewModel.wishlistItems.collectAsState()
     var cartItems by remember { mutableStateOf<List<CartItemData>>(emptyList()) }
-
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
+    var showBottomSheet by remember { mutableStateOf(false) }
+    var selectedProduct by remember { mutableStateOf<GiftDetailData?>(null) }
 
-    // Fetch cart list from API
+    // 찜한 상품의 상세 정보를 불러오는 로직 추가
     LaunchedEffect(Unit) {
+        viewModel.fetchWishlist(accessToken) // 찜 목록 가져오기
         val result = fetchCartList(accessToken)
         if (result != null) {
             cartItems = result
@@ -69,9 +74,6 @@ fun Wishlist(
             Toast.makeText(context, "장바구니 데이터를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
         }
     }
-
-    var showBottomSheet by remember { mutableStateOf(false) }
-    var selectedProduct by remember { mutableStateOf<GiftDetail?>(null) }
 
     Scaffold {
         Column(
@@ -124,19 +126,31 @@ fun Wishlist(
                             modifier = Modifier.padding(16.dp)
                         )
                     }
-                    items(wishlistItems) { product ->
-                        WishListItem(
-                            product = product,
-                            onRemove = { wishlistViewModel.removeItemFromWishlist(it) },
-                            onAddToCartPopUp = {
-                                selectedProduct = product
-                                showBottomSheet = true
-                            },
-                            cartItems = cartItems,
-                            coroutineScope = coroutineScope,
-                            accessToken = accessToken
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
+
+                    // 각 wishlistItem의 상세 정보를 불러와 레이아웃에 표시
+                    items(wishlistItems) { wishlistItem ->
+                        // giftDetail 값은 remember가 필요하지 않으므로 바로 collectAsState로 사용
+                        val giftDetail by viewModel.getGiftDetailForItem(wishlistItem.giftIdx).collectAsState(initial = null)
+
+                        LaunchedEffect(wishlistItem.giftIdx) {
+                            viewModel.fetchGiftDetails(accessToken, wishlistItem.giftIdx)
+                        }
+
+                        // giftDetail이 로드되면 WishListItem으로 표시
+                        if (giftDetail != null) {
+                            WishListItem(
+                                product = giftDetail!!,
+                                onRemove = { viewModel.removeFromWishlist(accessToken, wishlistItem.wishIdx) },
+                                onAddToCartPopUp = {
+                                    selectedProduct = giftDetail
+                                    showBottomSheet = true
+                                },
+                                cartItems = cartItems, // 추가된 인자
+                                coroutineScope = coroutineScope, // 추가된 인자
+                                accessToken = accessToken // 추가된 인자
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
                     }
                 }
             }
@@ -153,7 +167,6 @@ fun Wishlist(
                         val success = addToCartApi(context, selectedProduct!!.giftIdx, quantity)
                         if (success) {
                             Toast.makeText(context, "장바구니에 추가되었습니다.", Toast.LENGTH_SHORT).show()
-                            wishlistViewModel.removeItemFromWishlist(selectedProduct!!)
                             showBottomSheet = false
                         } else {
                             Toast.makeText(context, "장바구니 추가에 실패했습니다.", Toast.LENGTH_SHORT).show()
@@ -167,9 +180,9 @@ fun Wishlist(
 
 @Composable
 fun WishListItem(
-    product: GiftDetail,
-    onRemove: (GiftDetail) -> Unit,
-    onAddToCartPopUp: (GiftDetail) -> Unit,
+    product: GiftDetailData,
+    onRemove: (GiftDetailData) -> Unit,
+    onAddToCartPopUp: (GiftDetailData) -> Unit,
     cartItems: List<CartItemData>,
     coroutineScope: CoroutineScope,
     accessToken: String
@@ -203,16 +216,34 @@ fun WishListItem(
                 modifier = Modifier.weight(1f)
             ) {
                 Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.location),
-                        contentDescription = "Icon",
-                        tint = Color(0xFFA093DE),
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Text(text = product.location, fontSize = 13.sp)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically // 아이콘과 텍스트를 세로로 중앙 정렬
+                    ){
+                        Icon(
+                            painter = painterResource(id = R.drawable.location),
+                            contentDescription = "Icon",
+                            tint = Color(0xFFA093DE),
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(text = product.location, fontSize = 13.sp)
+                    }
+
+                    IconButton(
+                        onClick = { onRemove(product) },
+                        modifier = Modifier
+//                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = "Remove",
+                            tint = Color(0xFFFF6F6F)
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.height(4.dp))
 
@@ -225,15 +256,14 @@ fun WishListItem(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
-                ){
+                ) {
                     Box(
                         modifier = Modifier
                             .height(30.dp)
                             .width(70.dp)
                             .clickable { onAddToCartPopUp(product) }
                             .border(1.dp, Color(0xFFA093DE), shape = RoundedCornerShape(8.dp)),
-
-                        ) {
+                    ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxSize(),
@@ -243,7 +273,7 @@ fun WishListItem(
                                 imageVector = Icons.Default.ShoppingCart,
                                 contentDescription = "Add to Cart",
                                 tint = Color(0xFFA093DE),
-                                modifier = Modifier.size(16.dp) // Adjusted size for better visibility
+                                modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text("담기")
@@ -253,24 +283,13 @@ fun WishListItem(
             }
         }
 
-        IconButton(
-            onClick = { onRemove(product) },
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(8.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Clear,
-                contentDescription = "Remove",
-                tint = Color(0xFFFF6F6F)
-            )
-        }
+
     }
 }
 
 @Composable
 fun AddToCartBottomSheet(
-    product: GiftDetail,
+    product: GiftDetailData,
     showBottomSheet: Boolean,
     onDismiss: () -> Unit,
     onAddToCart: (Int) -> Unit
@@ -321,19 +340,6 @@ fun AddToCartBottomSheet(
                 Column {
                     Text(text = product.giftName, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                     Spacer(modifier = Modifier.height(4.dp))
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.location),
-                            contentDescription = "Icon",
-                            tint = Color(0xFFA093DE),
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Text(text = product.location, fontSize = 14.sp, color = Color(0xFF8368DC))
-                    }
-
                 }
             }
 
@@ -346,8 +352,7 @@ fun AddToCartBottomSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Spacer(modifier = Modifier.width(0.dp))
-                Row (
-                ){
+                Row {
                     Text(text = "${formatPrice(product.price)}원", fontSize = 18.sp)
                 }
                 Spacer(modifier = Modifier.width(60.dp))
@@ -370,7 +375,9 @@ fun AddToCartBottomSheet(
 
             Button(
                 onClick = { onAddToCart(quantity) },
-                modifier = Modifier.fillMaxWidth().height(50.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFD9E3FF)),
                 shape = RoundedCornerShape(16.dp)
             ) {
