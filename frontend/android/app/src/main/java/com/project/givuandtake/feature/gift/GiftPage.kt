@@ -73,8 +73,8 @@ fun GiftPage(
 ) {
     val context = LocalContext.current
     val allProducts by viewModel.allGiftDetails.collectAsState()
-    val wishlistItems by viewModel.wishlistItemsIds.collectAsState()
-
+//    val wishlistItems by viewModel.wishlistItemsIds.collectAsState()
+    val wishlistItems by viewModel.wishlistItems.collectAsState()
     // 토큰 불러오기
     val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
 
@@ -139,10 +139,15 @@ fun GiftPage(
                 MiddleContent(
                     navController = navController,
                     products = allProducts,
-                    wishlistItems = wishlistItems,
+                    wishlistItems = wishlistItems.map { it.giftIdx.toString() }.toSet(), // wishlistItems를 Set<String>으로 변환
                     onFavoriteToggle = { product ->
-                        wishlistViewModel.toggleWishlistItem(product) // 찜 상태 토글
-                    }
+                        if (wishlistItems.map { it.giftIdx }.contains(product.giftIdx)) {
+                            viewModel.removeFromWishlist(accessToken, wishlistItems.first { it.giftIdx == product.giftIdx }.wishIdx) // 찜 상태에서 제거
+                        } else {
+                            viewModel.addToWishlist(accessToken, product.giftIdx) // 찜 상태로 추가
+                        }
+                    },
+                    token = accessToken
                 )
             }
         }
@@ -237,41 +242,47 @@ fun TopBar(
 
         // 검색창
         Spacer(modifier = Modifier.height(8.dp)) // 텍스트와 검색창 사이에 간격 추가
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .background(Color.White, shape = RoundedCornerShape(24.dp)) // 검색창 둥근 테두리 적용
-                .border(1.dp, Color.Black, shape = RoundedCornerShape(24.dp)) // 테두리
-                .padding(horizontal = 16.dp), // 내부 패딩
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_search_24), // 검색 아이콘 리소스
-                    contentDescription = "Search Icon",
-                    tint = Color.Gray,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp)) // 검색 아이콘과 텍스트 필드 사이 간격
-                TextField(
-                    value = searchText,
-                    onValueChange = { newText -> searchText = newText },
-                    placeholder = { Text("검색어를 입력하세요") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    colors = TextFieldDefaults.textFieldColors(
-                        backgroundColor = Color.Transparent, // 배경 투명
-                        focusedIndicatorColor = Color.Transparent, // 포커스 시 인디케이터 제거
-                        unfocusedIndicatorColor = Color.Transparent // 포커스 해제 시 인디케이터 제거
-                    ),
-                    singleLine = true
-                )
-            }
-        }
+        SearchBar(
+            searchText = searchText,
+            onSearchTextChange = { newText -> searchText = newText }
+        )
+//        Box(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .height(56.dp)
+//                .background(Color.White, shape = RoundedCornerShape(24.dp)) // 검색창 둥근 테두리 적용
+//                .border(1.dp, Color.Black, shape = RoundedCornerShape(24.dp)) // 테두리
+//                .padding(horizontal = 16.dp), // 내부 패딩
+//            contentAlignment = Alignment.CenterStart
+//        ) {
+
+//            Row(
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                Icon(
+//                    painter = painterResource(id = R.drawable.baseline_search_24), // 검색 아이콘 리소스
+//                    contentDescription = "Search Icon",
+//                    tint = Color.Gray,
+//                    modifier = Modifier.size(24.dp)
+//                )
+//                Spacer(modifier = Modifier.width(8.dp)) // 검색 아이콘과 텍스트 필드 사이 간격
+//
+//                TextField(
+//                    value = searchText,
+//                    onValueChange = { newText -> searchText = newText },
+//                    placeholder = { Text("검색어를 입력하세요") },
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .height(56.dp),
+//                    colors = TextFieldDefaults.textFieldColors(
+//                        backgroundColor = Color.Transparent, // 배경 투명
+//                        focusedIndicatorColor = Color.Transparent, // 포커스 시 인디케이터 제거
+//                        unfocusedIndicatorColor = Color.Transparent // 포커스 해제 시 인디케이터 제거
+//                    ),
+//                    singleLine = true
+//                )
+//            }
+//        }
     }
 }
 
@@ -281,7 +292,8 @@ fun MiddleContent(
     navController: NavController,
     products: List<GiftDetail>,
     wishlistItems: Set<String>,
-    onFavoriteToggle: (GiftDetail) -> Unit
+    onFavoriteToggle: (GiftDetail) -> Unit,
+    token: String
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -318,11 +330,13 @@ fun MiddleContent(
                     style = CustomTypography.bodyLarge // CustomTypography 적용
                 )
             }
+            Spacer(modifier = Modifier.height(8.dp))
+            CategoryScreen(navController)
             Spacer(modifier = Modifier.height(16.dp))
 
             // 맞춤 추천상품 텍스트
             Text(
-                text = "맞춤 추천상품",
+                text = "최신상품",
                 fontWeight = FontWeight.Bold,
                 fontSize = 25.sp,
                 style = CustomTypography.bodyLarge, // CustomTypography 적용
@@ -337,6 +351,16 @@ fun MiddleContent(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "최근 구매한 지역상품",
+                fontWeight = FontWeight.Bold,
+                fontSize = 25.sp,
+                style = CustomTypography.bodyLarge, // CustomTypography 적용
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
+            RecentGiftPage(navController = navController, token = token )
+            
         }
     }
 }
@@ -560,7 +584,7 @@ fun FilterButtons_category(onCategorySelected: (Int) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(4.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         CategoryButton(text = "지역상품권", icon = painterResource(id = R.drawable.local_product)) {

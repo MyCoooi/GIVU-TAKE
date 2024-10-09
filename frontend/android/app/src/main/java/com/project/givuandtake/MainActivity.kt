@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.Typography
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -51,6 +53,7 @@ import com.project.givuandtake.feature.fundinig.FundingMainPage
 //import com.project.givuandtake.feature.funding.navigation.MainFundingCard
 //import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.gift.CartPage
+import com.project.givuandtake.feature.gift.CartViewModel
 import com.project.givuandtake.feature.gift.GiftListScreen
 import com.project.givuandtake.feature.gift.GiftPage
 import com.project.givuandtake.feature.gift.GiftPageDetail
@@ -85,7 +88,7 @@ import com.project.givuandtake.ui.theme.CustomTypography
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
 import com.project.payment.PaymentScreen
 import com.project.payment.PaymentScreen_gift
-
+import kotlinx.serialization.json.Json
 
 
 class MainActivity : ComponentActivity() {
@@ -181,6 +184,19 @@ class MainActivity : ComponentActivity() {
                                 val context = LocalContext.current // LocalContext를 사용하여 Context 가져오기
                                 CartPage(navController = navController, context = context) // context 전달
                             }
+
+//                            // 결제 페이지_답례품
+//                            composable(
+//                                route = "payment_page_gift"
+//                            ) {
+//                                val cartViewModel: CartViewModel = viewModel()
+//
+//                                // StateFlow를 collectAsState로 감지하여 cartItems를 관찰
+//                                val cartItems = cartViewModel.cartItems.collectAsState()
+//                                Log.d("cartItems","cartItems 확인 : ${cartItems}")
+//                                // 결제 화면으로 넘김
+//                                PaymentScreen_gift(navController, cartItems.value)
+//                            }
 
                             // 결제 페이지_답례품
                             composable(

@@ -1,5 +1,6 @@
 package com.project.givuandtake.core.data
 
+// 사용안함
 data class WishlistItem(
     val id: Int,
     val name: String,
