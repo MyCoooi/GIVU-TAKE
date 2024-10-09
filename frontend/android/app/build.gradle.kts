@@ -5,7 +5,7 @@ plugins {
     id ("com.google.firebase.crashlytics")
     id("kotlin-parcelize")
     id("kotlin-kapt")
-    id("com.google.devtools.ksp")
+//    id("com.google.devtools.ksp")
 
 }
 
