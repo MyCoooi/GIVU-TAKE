@@ -1,8 +1,13 @@
 package com.project.givuandtake.feature.mypage.CustomerService
 
+import QnaData
+import UserQna
 import android.util.Log
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +25,8 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -41,8 +48,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.project.givuandtake.core.apis.Qna.QnaApi
-import com.project.givuandtake.core.data.Qna.QnaData
-import com.project.givuandtake.core.data.Qna.UserQna
+
 import com.project.givuandtake.core.datastore.TokenManager
 import kotlinx.coroutines.launch
 import retrofit2.Response
@@ -81,7 +87,7 @@ fun QnaItem(qna: UserQna) {
             .clickable { isExpanded = !isExpanded }
     ) {
         Text(
-            text = qna.qnaTitle,
+            text = "$qna",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black,
@@ -193,13 +199,137 @@ fun PersonalInquiry(navController: NavController) {
                     .fillMaxWidth()
             ) {
                 items(Qnas) { qna ->
-                    QnaItem(qna)
+                    var expanded by remember { mutableStateOf(false) }
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { expanded = !expanded }
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
+                        ) {
+                            Column() {
+                                Text(
+                                    text = qna.qnaTitle,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 20.sp,
+                                )
+                                Text(
+                                    text = qna.createdDate.substring(0, 10)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.weight(1f))
+
+                            if (qna.answer == null) {
+                                Box(
+                                ) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "답변 작성중",
+                                            color = Color.Red
+                                        )
+                                        if (expanded) {
+                                            Icon(
+                                                imageVector = Icons.Default.KeyboardArrowUp,
+                                                contentDescription = "Back",
+                                                tint = Color.Red,
+                                                modifier = Modifier
+                                                    .size(20.dp),
+                                            )
+                                        } else {
+                                            Icon(
+                                                imageVector = Icons.Default.KeyboardArrowDown,
+                                                contentDescription = "Back",
+                                                tint = Color.Red,
+                                                modifier = Modifier
+                                                    .size(20.dp),
+                                            )
+                                        }
+                                    }
+                                }
+                            } else {
+                                Box() {
+                                    Row(
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "답변 완료",
+                                            color = Color.Blue
+                                        )
+                                        if (expanded) {
+                                            Icon(
+                                                imageVector = Icons.Default.KeyboardArrowUp,
+                                                contentDescription = "Back",
+                                                tint = Color.Blue,
+                                                modifier = Modifier
+                                                    .size(20.dp),
+                                            )
+                                        } else {
+                                            Icon(
+                                                imageVector = Icons.Default.KeyboardArrowDown,
+                                                contentDescription = "Back",
+                                                tint = Color.Blue,
+                                                modifier = Modifier
+                                                    .size(20.dp),
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (expanded) {
+                            Column(
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
+                            ) {
+                                Text(
+                                    text = qna.qnaContent,
+                                    fontSize = 18.sp
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            if (qna.answer != null) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp)
+                                        .border(
+                                            width = 2.dp,
+                                            color = Color(0xFFA093DE),
+                                            shape = RoundedCornerShape(8.dp)
+                                        )
+                                        .padding(20.dp)
+                                ) {
+                                    Text(
+                                        text = qna.answer.answerContent,
+                                        fontSize = 16.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    Divider(
+                        color = Color(0xFFF2F2F2),
+                        thickness = 5.dp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                    )
                 }
             }
         } else {
             Text(text = "등록된 문의가 없습니다.", modifier = Modifier.padding(16.dp))
         }
-
     }
 }
 

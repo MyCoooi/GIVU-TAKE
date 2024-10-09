@@ -423,6 +423,7 @@ fun CardRegistration(navController: NavController) {
                                                         val (number, validThruDate) = parseCreditCardResponse(response)
                                                         cardNumber = number ?: ""
                                                         validThru = Uri.encode(validThruDate) ?: ""
+                                                        Log.d("adfadf", "$cardNumber")
                                                         CoroutineScope(Dispatchers.Main).launch {
                                                             navController.navigate("cardcustomregistration/${cardNumber}/${validThru}")
                                                         }

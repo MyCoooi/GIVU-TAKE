@@ -18,6 +18,10 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,18 +30,56 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.google.gson.Gson
+import com.project.givuandtake.core.apis.Address.AddressApi
+import com.project.givuandtake.core.data.Address.AddressData
+import com.project.givuandtake.core.data.Address.UserAddress
+import com.project.givuandtake.core.data.KakaoPaymentInfo
+import com.project.givuandtake.core.datastore.TokenManager
+import com.project.givuandtake.feature.mypage.MyActivities.AddressViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import retrofit2.Response
 
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun PaymentSuccessPage(
-    navController: NavController
+    navController: NavController,
+    paymentInfoJson: String // JSON 형태로 전달받은 paymentInfo
 ) {
     val currentDestination = navController.currentDestination
     Log.d("Current Destination", "Current Destination: ${currentDestination?.label}")
+
+    // paymentInfoJson을 KakaoPaymentInfo 객체로 변환
+    val paymentInfo = if (paymentInfoJson.isNotEmpty()) {
+        remember {
+            Gson().fromJson(paymentInfoJson, KakaoPaymentInfo::class.java)
+        }
+    } else {
+        null // deep link로 들어온 경우
+    }
+    Log.d("sucesspage","paymentInfo : ${paymentInfo}")
+
+
+    val context = LocalContext.current
+    val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
+
+    val viewModel: AddressViewModel = viewModel()
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchUserAddresses(accessToken)
+    }
+
+    val addresses by viewModel.addresses
+
+    Log.d("sucesspage","sussess_addresses : ${addresses}")
+
+
     Scaffold(
         topBar = {
             TopAppBar(
