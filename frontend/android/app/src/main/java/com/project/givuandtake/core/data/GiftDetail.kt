@@ -92,6 +92,12 @@ data class GiftDetailResponse(
     val data: GiftDetailData
 )
 
+data class GiftRecentResponse(
+    val success: Boolean,
+    val data: List<GiftDetailData>
+)
+
+
 data class GiftDetailData(
     val giftIdx: Int,               // 상품 ID
     val giftName: String,           // 상품 이름
