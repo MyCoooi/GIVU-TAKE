@@ -70,7 +70,7 @@ const Funding = () => {
       <Sidebar selectedMenu={selectedMenu} setSelectedMenu={setSelectedMenu} />
       <div className="funding-page-content">
         <div className="funding-header">
-          <h1>내 펀딩 관리</h1>
+          <h1>펀딩 관리</h1>
           {/* 등록 버튼 추가 */}
           <button
             className="register-button"
