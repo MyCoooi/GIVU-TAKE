@@ -27,7 +27,9 @@ const MainPage = () => {
         <div className="download-qr-container">
           <div className="download-button">
             <a href="https://j11e202.p.ssafy.io/download/app.apk" className="app-download">
-              <img src={download} className="downloadImg" alt="앱 다운로드" />
+              <img src={download} className="downloadImg" alt="앱 다운로드"
+                style={{ cursor: 'pointer' }} /* 이미지에도 커서를 설정 */
+                />
             </a>
           </div>
 

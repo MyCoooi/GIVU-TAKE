@@ -9,6 +9,10 @@ const IntroPage = () => {
 
   return (
     <div className="intro-page">
+      <div className="title-container">
+        <h1 className="intro-title">GIVU<br />&nbsp;&amp;<br />TAKE</h1>
+      </div>
+
       <div className="auth-cards">
         {/* 로그인 아이콘 */}
         <div className="auth-card" onClick={() => navigate('/login')}>
