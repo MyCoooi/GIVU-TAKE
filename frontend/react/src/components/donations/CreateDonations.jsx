@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom"; // 페이지 이동을 위한 useNavigate import
 import Sidebar from "../Sidebar"; // Sidebar component import
 import "./CreateDonations.css"; // CSS import
@@ -10,21 +10,21 @@ const CreateDonations = () => {
   const [donationName, setDonationName] = useState("");
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
-  const [description, setDescription] = useState("");
-  const [thumbnail, setThumbnail] = useState(null); // 이미지 상태 추가
+  const [description, setDescription] = useState(""); // 설명 텍스트 상태
+  const [thumbnail, setThumbnail] = useState(null); // 대표 이미지 상태 추가
+  const [contentImage, setContentImage] = useState(null); // 내용 이미지 상태 추가
   const [selectedMenu, setSelectedMenu] = useState("기부품");
   const navigate = useNavigate(); // 페이지 이동을 위한 useNavigate 훅
+  const descriptionRef = useRef(null); // 텍스트 상태를 저장할 ref
 
-  // 이미지 선택 핸들러
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setThumbnail(reader.result); // 선택한 이미지 파일을 미리보기로 표시
-      };
-      reader.readAsDataURL(file);
-    }
+  // 대표 이미지 선택 핸들러
+  const handleThumbnailChange = (e) => {
+    setThumbnail(e.target.files[0]); // 선택한 파일을 상태에 저장
+  };
+
+  // 내용 이미지 선택 핸들러
+  const handleContentImageChange = (e) => {
+    setContentImage(e.target.files[0]); // 선택한 파일을 상태에 저장
   };
 
   // 숫자 포맷 함수: 입력된 숫자를 천 단위로 쉼표를 추가하는 함수
@@ -45,15 +45,14 @@ const CreateDonations = () => {
 
     const donationData = {
       giftName: donationName,
-      cartegoryIdx: parseInt(category.replace("category", "")), // category가 예를 들어 'category1'이므로 숫자로 변환
-      giftThumbnail: thumbnail,
+      categoryIdx: parseInt(category.replace("category", "")), // category가 예를 들어 'category1'이므로 숫자로 변환
       giftContent: description,
       price: parseInt(price.replace(/,/g, "")), // 쉼표 제거 후 숫자로 변환
     };
 
     try {
       // API 호출
-      const result = await apiCreateDonations(donationData, accessToken);
+      const result = await apiCreateDonations(donationData, thumbnail, contentImage, accessToken);
       console.log("기부품 등록 성공:", result);
 
       // 성공 알림 및 페이지 이동
@@ -94,7 +93,7 @@ const CreateDonations = () => {
           <div className="donations-thumbnail-section-unique">
             {thumbnail ? (
               <img
-                src={thumbnail}
+                src={URL.createObjectURL(thumbnail)}
                 alt="썸네일 미리보기"
                 className="donations-thumbnail-unique"
               />
@@ -133,23 +132,42 @@ const CreateDonations = () => {
               onChange={handlePriceChange} // 가격 입력 핸들러
               className="donations-input-unique"
             />
-            <div className="donations-image-upload">
-              <label htmlFor="thumbnail" className="donations-custom-file-upload">
-                이미지 선택
-              </label>
-              <input type="file" id="thumbnail" accept="image/*" onChange={handleImageChange} />
-            </div>
 
+            <div className="donations-image-upload">
+              {/* 대표 이미지 업로드 */}
+              <label htmlFor="thumbnail" className="donations-custom-file-upload">
+                대표 이미지
+              </label>
+              <input type="file" id="thumbnail" accept="image/*" onChange={handleThumbnailChange} />
+              
+              {/* 내용 이미지 업로드 */}
+              <label htmlFor="contentImage" className="donations-content-file-upload">
+                내용 이미지
+              </label>
+              <input type="file" id="contentImage" accept="image/*" onChange={handleContentImageChange} />
+            </div>
           </div>
         </div>
 
         <div className="donations-description-section-unique">
           <textarea
-            placeholder="설명 (스크롤)"
+            placeholder="설명을 입력하세요"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="donations-description-textarea-unique"
+            ref={descriptionRef}
           />
+
+          {/* 내용 이미지 미리보기 섹션 */}
+          {contentImage && (
+            <div className="donations-content-image-section-unique">
+              <img
+                src={URL.createObjectURL(contentImage)}
+                alt="내용 이미지 미리보기"
+                className="donations-content-image-inside"
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
