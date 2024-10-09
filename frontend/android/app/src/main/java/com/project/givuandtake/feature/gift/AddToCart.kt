@@ -1,25 +1,16 @@
 package com.project.givuandtake.feature.gift
 
 import android.content.Context
-import android.net.http.HttpResponseCache.install
 import android.util.Log
 
-import com.google.firebase.crashlytics.internal.network.HttpResponse
-import com.project.givuandtake.core.apis.GiftApiService
 import com.project.givuandtake.core.apis.RetrofitClient
-import com.project.givuandtake.core.data.CartItem
+import com.project.givuandtake.core.data.CartItemData
 import com.project.givuandtake.core.data.CartRequest
-import com.project.givuandtake.core.datastore.getCartItems
-import com.project.givuandtake.core.datastore.saveCartItems
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
-import com.project.givuandtake.core.data.GiftDetail
 import com.project.givuandtake.core.datastore.TokenDataStore
 import com.project.givuandtake.core.datastore.TokenManager
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 
 // DataStore에서 cartItems를 관리하는 함수 (GiftDetail을 추가할 수 있도록 수정)
@@ -54,13 +45,30 @@ import retrofit2.converter.gson.GsonConverterFactory
 //    // DataStore에 업데이트된 장바구니 저장
 //    saveCartItems(context, updatedCartItems)
 //}
+suspend fun fetchCartList(token: String): List<CartItemData>? {
+    return try {
+        val response = RetrofitClient.cartApiService.getCartList(token)
+        if (response.isSuccessful) {
+            response.body()?.data  // 성공 시 장바구니 데이터를 반환
+        } else {
+            println("HTTP 에러: ${response.code()} - ${response.message()}")
+            null
+        }
+    } catch (e: Exception) {
+        println("Error: ${e.localizedMessage}")
+        null
+    }
+}
+
 suspend fun addToCartApi(context: Context, giftIdx: Int, amount: Int): Boolean {
     val tokenDataStore = TokenDataStore(context)
 
     return try {
         // 토큰 가져오기 (Flow에서 첫 번째 값만 가져옴)
-        val token = tokenDataStore.token.first()
+        val storedAccessToken = TokenManager.getAccessToken(context)
+        val token = "Bearer ${TokenManager.getAccessToken(context)}"
         Log.d("Cart", "token : ${token}")
+        Log.d("Cart", "storedAccessToken : ${storedAccessToken}")
 
         // 토큰이 null인 경우 처리
         if (token.isNullOrEmpty()) {
@@ -72,7 +80,7 @@ suspend fun addToCartApi(context: Context, giftIdx: Int, amount: Int): Boolean {
         val cartRequest = CartRequest(giftIdx, amount)
         Log.d("Cart", "request : ${cartRequest}")
         val response = withContext(Dispatchers.IO) {
-            RetrofitClient.giftApiService.addToCart("$token", cartRequest)
+            RetrofitClient.cartApiService.addToCart("$token", cartRequest)
         }
         Log.d("Cart","response : ${response}")
 
@@ -93,8 +101,60 @@ suspend fun addToCartApi(context: Context, giftIdx: Int, amount: Int): Boolean {
     }
 }
 
+// 수량 변경
+suspend fun updateCartItemQuantity(context: Context, cartIdx: Int, newAmount: Int): Boolean {
+    val token = TokenManager.getAccessToken(context)
+    return try {
+        if (token.isNullOrEmpty()) {
+            Log.e("Cart", "토큰이 없습니다. 로그인 필요.")
+            return false
+        }
+
+        val cartRequest = CartRequest(cartIdx, newAmount)
+        val response = withContext(Dispatchers.IO) {
+            RetrofitClient.cartApiService.updateCartItemQuantity("Bearer $token", cartIdx, cartRequest)
+        }
+
+        if (response.isSuccessful) {
+            Log.d("Cart", "수량 업데이트 성공: ${response.body()}")
+            response.body()?.success == true
+        } else {
+            Log.e("Cart", "수량 업데이트 실패 - 코드: ${response.code()}, 오류: ${response.errorBody()?.string()}")
+            false
+        }
+    } catch (e: Exception) {
+        Log.e("Cart", "수량 업데이트 실패: ${e.localizedMessage}")
+        false
+    }
+}
 
 
+// 장바구니 삭제
+suspend fun deleteCartItem(context: Context, cartIdx: Int): Boolean {
+    val token = TokenManager.getAccessToken(context)
+    return try {
+        if (token.isNullOrEmpty()) {
+            Log.e("Cart", "토큰이 없습니다. 로그인 필요.")
+            return false
+        }
+
+        val response = withContext(Dispatchers.IO) {
+            RetrofitClient.cartApiService.deleteCartItem("Bearer $token", cartIdx)
+        }
+
+        Log.d("Cart","delete : ${response}")
+        if (response.isSuccessful) {
+            Log.d("Cart", "삭제 성공: ${response.body()}")
+            response.body()?.success == true
+        } else {
+            Log.e("Cart", "삭제 실패 - 코드: ${response.code()}, 오류: ${response.errorBody()?.string()}")
+            false
+        }
+    } catch (e: Exception) {
+        Log.e("Cart", "삭제 실패: ${e.localizedMessage}")
+        false
+    }
+}
 
 
 
