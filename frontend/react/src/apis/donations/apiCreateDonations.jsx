@@ -3,25 +3,41 @@ import axios from "axios";
 const apiUrl = "https://j11e202.p.ssafy.io/api";
 
 // 기부품 등록 요청을 보내는 함수
-export const apiCreateDonations = async (donationData, accessToken) => {
+export const apiCreateDonations = async (donationData, thumbnail, contentImage, accessToken) => {
   try {
-    // API 요청
-    const response = await axios.post(
-      `${apiUrl}/gifts`,
-      {
-        giftName: donationData.giftName,
-        cartegoryIdx: donationData.cartegoryIdx,
-        giftThumbnail: donationData.giftThumbnail, // 이미지 URL
-        giftContent: donationData.giftContent,
-        price: donationData.price,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`, // 인증 토큰 추가
-          "Content-Type": "application/json", // JSON 형식으로 요청
-        },
-      }
+    // FormData 객체 생성
+    const formData = new FormData();
+
+    // JSON 데이터를 Blob으로 변환하여 추가
+    const createGiftDto = {
+      giftName: donationData.giftName,
+      categoryIdx: donationData.categoryIdx,
+      giftContent: donationData.giftContent,
+      price: donationData.price,
+    };
+
+    formData.append(
+      "createGiftDto",
+      new Blob([JSON.stringify(createGiftDto)], { type: "application/json" })
     );
+
+    // 대표 이미지 파일 추가 (multipart/form-data)
+    if (thumbnail) {
+      formData.append("thumbnailImage", thumbnail);
+    }
+
+    // 내용 이미지 파일 추가 (multipart/form-data)
+    if (contentImage) {
+      formData.append("contentImage", contentImage);
+    }
+
+    // API 요청
+    const response = await axios.post(`${apiUrl}/gifts`, formData, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`, // 인증 토큰 추가
+        "Content-Type": "multipart/form-data", // 파일 업로드를 위한 헤더
+      },
+    });
 
     // 응답 확인
     if (response.data.success) {
