@@ -11,6 +11,8 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import android.content.Context
 import androidx.room.Room
+import java.text.NumberFormat
+import java.util.Locale
 
 data class GiftResponse(
     val success: Boolean,
@@ -36,6 +38,10 @@ data class GiftDetail(
     // 커스텀 getter로 location 값을 계산
     val location: String
         get() = "$corporationSido $corporationSigungu"
+
+    // 가격을 "10,000" 형식으로 반환하는 커스텀 getter
+    val priceFormatted: String
+        get() = NumberFormat.getNumberInstance(Locale.KOREA).format(price)
 }
 
 
@@ -55,7 +61,7 @@ interface GiftDetailDao {
     suspend fun deleteAll()
 }
 
-@Database(entities = [GiftDetail::class], version = 1, exportSchema = false)
+@Database(entities = [GiftDetail::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun giftDetailDao(): GiftDetailDao
 }
@@ -110,4 +116,6 @@ data class GiftDetailData(
             val parts = giftContent?.split(",") ?: listOf(null, null)
             return Pair(parts.getOrNull(0), parts.getOrNull(1))
         }
+    val priceFormatted: String
+        get() = NumberFormat.getNumberInstance(Locale.KOREA).format(price)
 }

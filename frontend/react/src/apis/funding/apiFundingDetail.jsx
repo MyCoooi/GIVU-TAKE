@@ -23,7 +23,9 @@ export const apiFundingDetail = async (fundingIdx) => {
         thumbnail: fundingDetail.fundingThumbnail, // 썸네일 이미지
         location: `${fundingDetail.sido} ${fundingDetail.sigungu}`, // 시도와 시군구 정보
         fundingContent: fundingDetail.fundingContent, // 상세 내용
-        fundingType: fundingDetail.fundingType // 펀딩 유형
+        fundingContentImage: fundingDetail.fundingContentImage, // 내용 이미지 추가
+        fundingType: fundingDetail.fundingType, // 펀딩 유형
+        state: fundingDetail.state // 펀딩 상태
       };
 
       console.log("펀딩 상세 조회 성공:", formattedDetail);

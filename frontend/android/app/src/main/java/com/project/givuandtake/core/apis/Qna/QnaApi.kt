@@ -1,7 +1,7 @@
 package com.project.givuandtake.core.apis.Qna
 
+import QnaData
 import com.project.givuandtake.core.data.Address.AddressData
-import com.project.givuandtake.core.data.Qna.QnaData
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response

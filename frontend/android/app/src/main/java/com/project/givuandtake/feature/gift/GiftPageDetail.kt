@@ -1,6 +1,7 @@
 package com.project.givuandtake.feature.gift
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,29 +24,21 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.project.givuandtake.R
-import com.project.givuandtake.core.data.CartItem
+import com.project.givuandtake.core.data.CartItemData
 import com.project.givuandtake.core.data.Review
 import kotlinx.coroutines.launch
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.project.givuandtake.core.data.GiftDetail
 import com.project.givuandtake.core.data.GiftDetailData
-import com.project.givuandtake.core.datastore.TokenDataStore
 import com.project.givuandtake.core.datastore.TokenManager
-import com.project.givuandtake.core.datastore.getCartItems
-import com.project.givuandtake.core.datastore.saveCartItems
-import com.project.givuandtake.feature.gift.GiftViewModel
 
-import kotlinx.coroutines.runBlocking
 
 
 object TabState {
@@ -55,7 +48,7 @@ object TabState {
 @Composable
 fun GiftPageDetail(
     giftIdx: Int,  // 상품 ID
-    cartItems: MutableState<List<CartItem>>,  // 장바구니 항목 상태
+    cartItems: MutableState<List<CartItemData>>,  // 장바구니 항목 상태
     navController: NavController,  // 네비게이션 컨트롤러
     GiftViewModel : GiftViewModel = viewModel()  // 뷰 모델
 ) {
@@ -65,24 +58,22 @@ fun GiftPageDetail(
     val scope = rememberCoroutineScope()  // 코루틴 스코프
     val context = LocalContext.current  // 현재 Context
     val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
+
     // 페이지 로드 시 상품 상세 정보를 API로부터 불러옴
     LaunchedEffect(giftIdx) {
-//        val tokenDataStore = TokenDataStore(context)  // DataStore 초기화
-
-        // 저장된 토큰을 Flow로 수집하여 사용
         GiftViewModel.fetchGiftDetail(token = accessToken, giftIdx = giftIdx)
-//        tokenDataStore.token.collect { token ->
-//            token?.let {
-//                // 불러온 토큰을 사용하여 API 호출
-//                GiftViewModel.fetchGiftDetail(token = it, giftIdx = giftIdx)
-//            }
-//        }
     }
 
-    // 장바구니 항목 불러오기
+    // 장바구니 항목 API로 불러오기
     LaunchedEffect(Unit) {
-        getCartItems(context).collect { savedItems ->
-            cartItems.value = savedItems  // 저장된 장바구니 항목 반영
+        scope.launch {
+            val result = fetchCartList(accessToken)
+            if (result != null) {
+                cartItems.value = result
+            } else {
+                // 에러 처리: 스낵바나 로그 추가 가능
+                Log.d("cart","Failed to load cart items")
+            }
         }
     }
 
@@ -98,25 +89,40 @@ fun GiftPageDetail(
             )
         },
         bottomBar = {
-            // 상품 상세 정보가 있을 때 하단바 컴포넌트 표시
             giftDetail?.let { detail ->
                 GiftBottomBar(
                     onAddToCart = {
                         scope.launch {
-                            val updatedCartItems = cartItems.value.toMutableList()
-
                             // 이미 같은 상품이 장바구니에 있는지 확인
-                            val existingItemIndex = updatedCartItems.indexOfFirst { it.name == detail.giftName }
+                            val updatedCartItems = cartItems.value.toMutableList()
+                            val existingItemIndex = updatedCartItems.indexOfFirst { it.giftName == detail.giftName }
                             if (existingItemIndex != -1) {
-                                // 수량 증가
+                                // 수량 증가 API 호출
                                 val existingItem = updatedCartItems[existingItemIndex]
-                                updatedCartItems[existingItemIndex] = existingItem.copy(quantity = existingItem.quantity + 1)
+                                val updatedQuantity = existingItem.amount + 1
+                                val success = updateCartItemQuantity(context, existingItem.giftIdx, updatedQuantity)
+                                if (success) {
+                                    updatedCartItems[existingItemIndex] = existingItem.copy(amount = updatedQuantity)
+                                }
                             } else {
-                                // 새로 추가
-                                updatedCartItems.add(CartItem(detail.giftName, detail.price, 1, detail.location))
+                                // 새로 추가 API 호출
+                                val success = addToCartApi(context, detail.giftIdx, 1)
+                                if (success) {
+                                    // 이미 addToCartApi에서 장바구니에 추가가 되었으므로, 중복 추가를 피하기 위해 UI 갱신만
+                                    updatedCartItems.add(
+                                        CartItemData(
+                                            cartIdx = 0,  // 서버에서 할당된 값을 나중에 받아야 함
+                                            giftIdx = detail.giftIdx,
+                                            giftName = detail.giftName,
+                                            giftThumbnail = detail.giftThumbnail ?: "",  // null일 경우 기본값 빈 문자열
+                                            userIdx = 0,  // 필요 시 수정
+                                            amount = 1,
+                                            price = detail.price,
+                                            location = detail.location
+                                        )
+                                    )
+                                }
                             }
-
-                            saveCartItems(context, updatedCartItems)  // 장바구니 업데이트
                             cartItems.value = updatedCartItems  // UI 갱신
                         }
                     },
@@ -125,6 +131,7 @@ fun GiftPageDetail(
                 )
             }
         }
+
     ) { innerPadding ->
         // 상품 상세 정보를 보여주는 컨텐츠 부분
         LazyColumn(
@@ -173,6 +180,7 @@ fun GiftBottomBar(
     giftDetail: GiftDetailData
 ) {
     val coroutineScope = rememberCoroutineScope()
+    var isAddingToCart by remember { mutableStateOf(false) } // 장바구니 추가 중인지 확인하는 상태
 
     Box(
         modifier = Modifier
@@ -189,18 +197,22 @@ fun GiftBottomBar(
             val context = LocalContext.current  // 현재 Context 가져오기
             Button(
                 onClick = {
-                    coroutineScope.launch {
-                        // 장바구니에 추가하는 API 호출
-                        val result = addToCartApi(context, giftDetail.giftIdx, 1)
-                        if (result) {
-                            // 성공 시 행동
-                            onAddToCart()
-                        } else {
-                            // 실패 시 행동
-                            println("장바구니 추가 실패")
+                    if (!isAddingToCart) { // 장바구니 추가 중이 아니면 실행
+                        coroutineScope.launch {
+                            isAddingToCart = true // 장바구니 추가 시작
+
+                            // 장바구니 추가 로직 호출
+                            try {
+                                onAddToCart()  // UI 업데이트 및 장바구니 추가 담당
+                            } catch (e: Exception) {
+                                println("장바구니 추가 실패: ${e.localizedMessage}")
+                            } finally {
+                                isAddingToCart = false // 요청 완료 후 다시 버튼 활성화
+                            }
                         }
                     }
                 },
+                enabled = !isAddingToCart, // 요청 중일 때 버튼 비활성화
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 4.dp),
@@ -227,6 +239,9 @@ fun GiftBottomBar(
         }
     }
 }
+
+
+
 
 
 @Composable
@@ -285,7 +300,7 @@ fun GiftInformation(giftDetail: GiftDetailData) {
                 .padding(8.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = "₩${giftDetail.price} 원", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            Text(text = "₩${giftDetail.priceFormatted} 원", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
         }
 
         Row(
@@ -463,7 +478,7 @@ fun ProductIntroduction(giftDetail: GiftDetailData) {
 
         // 가격
         Text(
-            text = "가격: ₩${giftDetail.price}",
+            text = "가격: ₩${giftDetail.priceFormatted}",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Green

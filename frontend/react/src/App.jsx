@@ -15,7 +15,11 @@ import FundingDetail from './components/funding/FundingDetail';
 import CreateFunding from "./components/funding/CreateFunding";
 // import UpdateFunding from './components/funding/UpdateFunding';
 
-import Statistics from './components/statistics/Statistics';
+// import Statistics from './components/statistics/Statistics';
+import FundingStatistics from './components/statistics/FundingStatistics';
+import DonationsStatistics from './components/statistics/DonationsStatistics';
+
+
 
 import UserInfo from './components/userinfo/UserInfo';
 import UserInfoUpdate from './components/userinfo/UserInfoUpdate';
@@ -24,8 +28,10 @@ import UserInfoUpdate from './components/userinfo/UserInfoUpdate';
 import React from 'react';
 
 const App = () => {
+  
   return (
     <Router>
+      
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="/signup" element={<SignupPage />} />
@@ -46,7 +52,11 @@ const App = () => {
         {/* <Route path="/funding/update/:fundingIdx" element={<UpdateFunding />} /> */}
 
 
-        <Route path="/statistics" element={<Statistics />} />
+        {/* <Route path="/statistics" element={<Statistics />} /> */}
+        <Route path="/funding-statistics" element={<FundingStatistics />} />
+        <Route path="/donation-statistics" element={<DonationsStatistics />} />
+
+
       </Routes>
     </Router>
   );

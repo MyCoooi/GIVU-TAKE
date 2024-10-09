@@ -46,7 +46,6 @@ import com.project.givuandtake.R
 import com.project.givuandtake.core.apis.Address.AddressApi
 import com.project.givuandtake.core.data.Address.AddressData
 import com.project.givuandtake.core.data.Address.UserAddress
-import com.project.givuandtake.core.data.Qna.UserQna
 import com.project.givuandtake.core.datastore.TokenManager
 import kotlinx.coroutines.launch
 import retrofit2.Response

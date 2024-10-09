@@ -37,13 +37,14 @@ open class GiftViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-
-
-
     // 상품 상세 정보 관리 (MutableStateFlow로 관리)
     private val _giftDetail = MutableStateFlow<GiftDetailData?>(null)
     val giftDetail: StateFlow<GiftDetailData?> get() = _giftDetail.asStateFlow()
-    
+
+    // 카테고리별 상품 목록 관리 (MutableStateFlow로 관리)
+    private val _categoryGiftDetails = MutableStateFlow<List<GiftDetail>>(emptyList())
+    val categoryGiftDetails: StateFlow<List<GiftDetail>> get() = _categoryGiftDetails.asStateFlow()
+
     // API에서 상품 데이터를 불러와 Room에 저장하는 메서드
     fun fetchGiftsFromApi(token: String) {
         viewModelScope.launch {
@@ -54,6 +55,34 @@ open class GiftViewModel(application: Application) : AndroidViewModel(applicatio
                 }
             } catch (e: Exception) {
                 Log.e("GiftViewModel", "Error fetching gifts: ${e.message}", e)
+            }
+        }
+    }
+
+    // 카테고리별 상품 목록을 API에서 불러오는 메서드
+    private val _loading = MutableStateFlow(false)
+    val loading: StateFlow<Boolean> = _loading
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
+    fun fetchGiftsByCategory(categoryIdx: Int) {
+        viewModelScope.launch {
+            _loading.value = true
+            _error.value = null
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    RetrofitClient.giftApiService.getGiftsByCategory(categoryIdx)
+                }
+                if (response.success) {
+                    _categoryGiftDetails.value = response.data
+                } else {
+                    _error.value = "Error fetching category gifts"
+                }
+            } catch (e: Exception) {
+                _error.value = e.message
+            } finally {
+                _loading.value = false
             }
         }
     }
@@ -86,3 +115,4 @@ open class GiftViewModel(application: Application) : AndroidViewModel(applicatio
         _cartItemCount.value = newCount
     }
 }
+
