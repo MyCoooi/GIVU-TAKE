@@ -3,6 +3,7 @@ import MainPage from './components/mainPage/MainPage';
 import SignupPage from './components/auth/SignupPage';
 import LoginPage from './components/auth/LoginPage';
 import MyPage from './components/myPage/MyPage';
+import IntroPage from './components/auth/IntroPage';
 
 import Donations from './components/donations/Donations';
 import CreateDonations from './components/donations/CreateDonations';
@@ -37,6 +38,8 @@ const App = () => {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/mypage" element={<MyPage />} />
+        <Route path="/intro" element={<IntroPage />} />
+
 
         <Route path="/userinfo" element={<UserInfo />} />
         <Route path="/userinfoupdate" element={<UserInfoUpdate />} />

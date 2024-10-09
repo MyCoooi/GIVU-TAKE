@@ -22,6 +22,7 @@ export const apiDonationsDetail = async (giftIdx) => {
         categoryName: giftDetail.categoryName,
         giftThumbnail: giftDetail.giftThumbnail, // 썸네일 이미지
         giftContent: giftDetail.giftContent, // 기부품 상세 내용
+        giftContentImage: giftDetail.giftContentImage, // 추가된 내용 이미지
         price: giftDetail.price, // 가격
         createdDate: giftDetail.createdDate, // 생성일
         modifiedDate: giftDetail.modifiedDate // 수정일

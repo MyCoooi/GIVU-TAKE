@@ -185,3 +185,10 @@
   justify-content: flex-end;
   align-items: center;
 }
+
+.donations-content-image {
+  max-width: 600px;
+  max-height: 400px;
+  height: auto;
+  border-radius: 8px;
+}
