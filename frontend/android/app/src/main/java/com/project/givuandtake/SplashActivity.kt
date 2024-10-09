@@ -2,6 +2,7 @@ package com.project.givuandtake
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.animateIntAsState
@@ -20,33 +21,69 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.project.givuandtake.core.apis.Mainpage.TotalGivuApi
+import com.project.givuandtake.core.data.MainPage.TotalGivu
+import com.project.givuandtake.feature.mainpage.MainPageViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
+class SplashViewModel : ViewModel() {
+
+    private val _totalgivu = mutableStateOf<TotalGivu?>(null)
+    val totalgivu: State<TotalGivu?> = _totalgivu
+
+    fun fetchTotalGivu() {
+        viewModelScope.launch {
+            try {
+                val response = TotalGivuApi.api.getTotalGivuData()
+                if (response.isSuccessful) {
+                    val totalgivu = response.body()?.data
+                    totalgivu?.let {
+                        _totalgivu.value = it
+                    }
+                } else {
+                    Log.e("totalgivu", "Error: ${response.code()} ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e("totalgivu", "Exception: ${e.message}")
+            }
+        }
+    }
+}
 class SplashActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            // 목표 금액
-            val targetAmount = 18342462726
-
-            // 기부 금액 애니메이션 상태
-            var animatedAmount by remember { mutableStateOf(0) }
-
-            // 애니메이션 효과 설정 (2초 동안 숫자가 올라가도록)
-            val displayedAmount by animateIntAsState(
-                targetValue = animatedAmount,
-                animationSpec = tween(durationMillis = 1300) // 1.5초 동안 애니메이션
-            )
+            val viewModel: SplashViewModel = viewModel()
+            val totalgivu by viewModel.totalgivu
 
             LaunchedEffect(Unit) {
-                // 1.5초 동안 기부 금액 애니메이션
-                animatedAmount = targetAmount.toInt()
+                viewModel.fetchTotalGivu()
+            }
 
-                // 기부 금액 애니메이션이 끝나면 1.5초 후 MainActivity로 전환
-                delay(1700L)
-                startActivity(Intent(this@SplashActivity, MainActivity::class.java))
-                finish() // SplashActivity 종료
+            val targetAmount = totalgivu?.price ?: 18342462726
+            var animatedAmount by remember { mutableStateOf(0) }
+
+            val displayedAmount by animateIntAsState(
+                targetValue = animatedAmount,
+                animationSpec = tween(durationMillis = 1300)
+            )
+
+            if (totalgivu != null) {
+                LaunchedEffect(totalgivu) {
+                    // 애니메이션된 금액 설정
+                    animatedAmount = targetAmount.toInt()
+
+                    // 기부 금액 애니메이션이 끝나면 1.5초 후 MainActivity로 전환
+                    delay(1700L)
+                    startActivity(Intent(this@SplashActivity, MainActivity::class.java))
+                    finish() // SplashActivity 종료
+                }
             }
 
             // 하얀 배경을 설정한 Surface
@@ -67,7 +104,7 @@ class SplashActivity : ComponentActivity() {
                             .size(150.dp),
                         contentScale = ContentScale.Fit
                     )
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(100.dp))
 
                     // 기부액 텍스트
                     Text(
@@ -78,7 +115,7 @@ class SplashActivity : ComponentActivity() {
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // 애니메이션된 기부액 텍스트
+                    // 애니메이션된 기부액 텍스트 (데이터 로드 전에는 0으로 표시됨)
                     Text(
                         text = "%,d원".format(displayedAmount), // 기부 금액을 쉼표로 포맷팅 후 '원' 추가
                         fontSize = 32.sp,
@@ -90,3 +127,4 @@ class SplashActivity : ComponentActivity() {
         }
     }
 }
+
