@@ -176,10 +176,6 @@ class MainActivity : ComponentActivity() {
                                 GiftListScreen(categoryIdx = categoryIdx, navController = navController) // categoryIdx 전달
                             }
 
-
-
-
-
                             // 장바구니 페이지
                             composable("cart_page") {
                                 val context = LocalContext.current // LocalContext를 사용하여 Context 가져오기
@@ -208,10 +204,6 @@ class MainActivity : ComponentActivity() {
                                 PaymentScreen_gift(navController, name, location, price, quantity, thumbnailUrl, giftIdx) // giftIdx 추가하여 전달
                             }
 
-
-
-
-
                             composable("payment_result/{paymentInfoJson}",
                                 arguments = listOf(navArgument("paymentInfoJson") { type = NavType.StringType })
                             ) { backStackEntry ->
@@ -237,7 +229,11 @@ class MainActivity : ComponentActivity() {
 
 
 
-                            // 마이 페이지
+                            // 관광 페이지
+                            composable("attraction/{city}") { backStackEntry ->
+                                val city = backStackEntry.arguments?.getString("city")
+                                AttractionMain(navController, city ?: "영도")
+                            }
                             composable("locationSelection") {
                                 LocationSelect(navController)
                             }
