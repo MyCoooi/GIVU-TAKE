@@ -1,12 +1,11 @@
 import axios from "axios";
 
 const apiUrl = "https://j11e202.p.ssafy.io/api";
-// const apiUrl = "/dev/api";
 
 // 시도 데이터를 가져오는 함수
 export const getSido = async () => {
   try {
-    const response = await axios.get(`${apiUrl}/regions/sido`); // 백틱 사용
+    const response = await axios.get(`${apiUrl}/regions/sido`);
     return response.data;
   } catch (error) {
     console.error("Failed to fetch 시도 data:", error);
@@ -17,9 +16,9 @@ export const getSido = async () => {
 // 시군구 데이터를 가져오는 함수
 export const getSigungu = async (sido) => {
   try {
-    const response = await axios.get(`${apiUrl}/regions/sigungu`, { // 백틱 사용
+    const response = await axios.get(`${apiUrl}/regions/sigungu`, {
       params: {
-        sido, // 시도 파라미터를 쿼리스트링으로 전달
+        sido,
       },
     });
     return response.data;
@@ -30,7 +29,11 @@ export const getSigungu = async (sido) => {
 };
 
 // 회원가입 요청을 보내는 함수
-export const signUp = async (formData) => {
+export const signUp = async (formData, profileImage) => {
+  // 전달된 formData 확인 로그 추가
+  console.log("signUp 함수에서 받은 formData:", formData); 
+  console.log("signUp 함수에서 받은 profileImage:", profileImage); // profileImage 값이 없을 때 명확히 표시
+
   const signUpDto = {
     name: formData.name,
     email: formData.email,
@@ -39,26 +42,37 @@ export const signUp = async (formData) => {
     landlinePhone: formData.landlinePhone,
     sido: formData.sido,
     sigungu: formData.sigungu,
-    profileImageUrl: formData.profileImageUrl || "http://example.com/profile.jpg", // 프로필 이미지 URL 기본값
-    roles: "ROLE_CORPORATIONYET", // 기본 역할 설정
-    // roles: "ROLE_CORPORATION", // 기본 역할 설정
+    roles: "ROLE_CORPORATIONYET",
     isSocial: false,
     socialType: null,
     socialSerialNum: null,
   };
 
-  console.log("회원가입 요청 데이터:", signUpDto);
+  console.log("생성된 signUpDto:", signUpDto); // signUpDto 로그
+
+  // FormData 객체 생성
+  const formDataObj = new FormData();
+
+  // JSON 데이터를 Blob으로 변환하여 추가
+  formDataObj.append("signUpDto", new Blob([JSON.stringify(signUpDto)], { type: "application/json" }));
+
+  // 프로필 이미지를 profileImage 키로 추가 (없을 경우 빈 문자열로 대체)
+  formDataObj.append("profileImage", profileImage || "");
+
+  console.log("FormData에 추가된 signUpDto 및 profileImage:", formDataObj); // FormData 확인
 
   try {
-    const response = await axios.post(`${apiUrl}/users`, { signUpDto }); // 회원가입 POST 요청
-    // 응답 로그 출력
+    const response = await axios.post(`${apiUrl}/users`, formDataObj, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     console.log("회원가입 응답 데이터:", response.data);
-    return response.data; // 응답 데이터 반환
+    return response.data;
   } catch (error) {
-    console.error("Failed to sign up:", error);
+    console.error("회원가입 실패:", error.response ? error.response.data : error);
     throw error;
   }
-
 };
 
 export default { getSido, getSigungu, signUp };
