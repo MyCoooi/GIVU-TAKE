@@ -291,9 +291,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
+import com.project.givuandtake.PaymentsActivity
 import com.project.givuandtake.core.data.KakaoPaymentInfo
 import com.project.givuandtake.feature.payment.PaymentMethods_gift
 import com.project.givuandtake.feature.payment.PaymentViewModel
+import com.project.givuandtake.feature.payment.TossPaymentScreen
 
 @Composable
 fun PaymentScreen_gift(
@@ -380,6 +382,15 @@ fun PaymentTotalAndButton2_gift(
                 navController = navController,
                 viewModel = viewModel
             )
+
+
+//            TossPaymentScreen(
+//                amount = 10000,
+//                orderId = "wBWO9RJXO0UYqJMV4er8J",
+//                orderName = "Gift Payment",
+//                activity = PaymentsActivity // 현재 Activity 전달
+//            )
+
         }
     }
 }
