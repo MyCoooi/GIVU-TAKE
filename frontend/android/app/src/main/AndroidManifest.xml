@@ -30,6 +30,10 @@
 
         <activity android:name=".core.apis.WeatherApiService" android:exported="true" />
 
+        <activity
+            android:name=".PaymentsActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:exported="true" />
 
         <activity
             android:name=".SplashActivity"
@@ -51,7 +55,9 @@
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.GivuAndTake"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+
+            >
 
 
             <intent-filter tools:ignore="ExtraText">
