@@ -4,8 +4,8 @@ plugins {
     id("com.google.gms.google-services")
     id ("com.google.firebase.crashlytics")
     id("kotlin-parcelize")
-//    id("kotlin-kapt")
-//    id("com.google.devtools.ksp")
+    id("kotlin-kapt")
+    id("com.google.devtools.ksp")
 
 }
 
@@ -71,7 +71,7 @@ dependencies {
     // Room 추가
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-//    ksp("androidx.room:room-compiler:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
 
     implementation("com.naver.maps:map-sdk:3.19.1")
