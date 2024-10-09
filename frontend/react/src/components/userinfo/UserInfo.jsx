@@ -3,7 +3,7 @@ import Sidebar from "../Sidebar";
 import TokenManager from "../../utils/TokenManager";
 import { getUserInfo } from "../../apis/auth/apiUserInfo";
 import { useNavigate } from "react-router-dom"; // useNavigate 훅 추가
-import Swal from "sweetalert2"
+import Swal from "sweetalert2";
 import "./UserInfo.css";
 
 const UserInfo = () => {
@@ -42,7 +42,8 @@ const UserInfo = () => {
       }
     });
   };
-      // API 호출로 사용자 정보를 가져옴
+
+  // API 호출로 사용자 정보를 가져옴
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -58,12 +59,17 @@ const UserInfo = () => {
 
   return (
     <div className="user-info-page">
-      <Sidebar selectedMenu={selectedMenu} setSelectedMenu={setSelectedMenu} />
+      {/* Sidebar에 userInfo의 profileImageUrl을 전달 */}
+      <Sidebar 
+        selectedMenu={selectedMenu} 
+        setSelectedMenu={setSelectedMenu} 
+        profileImageUrl={userInfo.profileImageUrl} // 프로필 이미지 URL 전달
+      />
       <div className="user-info-container">
         <div className="user-info-header">
-        <button className="edit-button" onClick={() => navigate("/userinfoupdate")}>
-          수정
-        </button>
+          <button className="edit-button" onClick={() => navigate("/userinfoupdate")}>
+            수정
+          </button>
         </div>
         <div className="user-info-content">
           <div className="profile-picture">

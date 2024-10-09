@@ -17,6 +17,8 @@ export const apiDonationsDetail = async (giftIdx) => {
         id: giftDetail.giftIdx,
         giftName: giftDetail.giftName,
         corporationName: giftDetail.corporationName,
+        corporationSido: giftDetail.corporationSido,
+        corporationSigungu: giftDetail.corporationSigungu,
         categoryName: giftDetail.categoryName,
         giftThumbnail: giftDetail.giftThumbnail, // 썸네일 이미지
         giftContent: giftDetail.giftContent, // 기부품 상세 내용
