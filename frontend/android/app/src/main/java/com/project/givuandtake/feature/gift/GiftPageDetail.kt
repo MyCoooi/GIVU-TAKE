@@ -59,6 +59,8 @@ fun GiftPageDetail(
     val context = LocalContext.current  // 현재 Context
     val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
 
+    Log.d("giftDetail", "giftDetail : ${giftDetail}")
+
     // 페이지 로드 시 상품 상세 정보를 API로부터 불러옴
     LaunchedEffect(giftIdx) {
         GiftViewModel.fetchGiftDetail(token = accessToken, giftIdx = giftIdx)
