@@ -23,6 +23,14 @@ open class GiftViewModel(application: Application) : AndroidViewModel(applicatio
     open val allGiftDetails: StateFlow<List<GiftDetail>> = giftRepository.getAllGiftDetails()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    // 모든 데이터를 삭제하는 함수
+    fun deleteAllGiftDetails() {
+        viewModelScope.launch {
+            giftRepository.deleteAllGiftDetails()
+        }
+    }
+
+
     // 찜한 상품 ID 목록
     val wishlistItemsIds: StateFlow<Set<String>> = wishlistRepository.getWishlist(context)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
@@ -36,6 +44,8 @@ open class GiftViewModel(application: Application) : AndroidViewModel(applicatio
             favoriteIds.contains(gift.giftIdx.toString())
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+
 
     // 상품 상세 정보 관리 (MutableStateFlow로 관리)
     private val _giftDetail = MutableStateFlow<GiftDetailData?>(null)
