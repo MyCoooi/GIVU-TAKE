@@ -1,61 +1,44 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../Sidebar";
 import "./Funding.css";
-import { apiSearchFunding } from "../../apis/funding/apiSearchFunding";
-import { useNavigate, useLocation } from "react-router-dom"; // useLocation import 추가
+import { apiMyFunding } from "../../apis/funding/apiMyFunding";
+import { useNavigate } from "react-router-dom";
+import TokenManager from "../../utils/TokenManager";
 
 const Funding = () => {
   const [selectedMenu, setSelectedMenu] = useState("펀딩");
   const navigate = useNavigate();
-  const location = useLocation(); // useLocation 사용하여 이전 상태 받기
 
-  // 펀딩 종류와 상태를 관리하는 state
-  const [selectedType, setSelectedType] = useState(
-    new URLSearchParams(location.search).get("type") || "all"
-  ); // URL에서 type 상태 불러오기
-  const [selectedStatus, setSelectedStatus] = useState(
-    new URLSearchParams(location.search).get("status") || "all"
-  ); // URL에서 status 상태 불러오기
-
+  // 펀딩 상태를 관리하는 state
+  const [selectedStatus, setSelectedStatus] = useState("all");
   const [fundingList, setFundingList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
-  const fetchFundingList = async (type, state) => {
+  // API에서 펀딩 데이터 불러오기
+  const fetchMyFundingList = async (state) => {
     try {
-      let data = [];
-      if (type === "all" && state === "all") {
-        const disasterData0 = await apiSearchFunding("D", "0");
-        const disasterData1 = await apiSearchFunding("D", "1");
-        const disasterData2 = await apiSearchFunding("D", "2");
-        const regionalData0 = await apiSearchFunding("R", "0");
-        const regionalData1 = await apiSearchFunding("R", "1");
-        const regionalData2 = await apiSearchFunding("R", "2");
+      setLoading(true);
+      const accessToken = TokenManager.getAccessToken();
 
-        data = [
-          ...disasterData0,
-          ...disasterData1,
-          ...disasterData2,
-          ...regionalData0,
-          ...regionalData1,
-          ...regionalData2,
-        ];
-      } else if (state === "all") {
-        const data0 = await apiSearchFunding(type, "0");
-        const data1 = await apiSearchFunding(type, "1");
-        const data2 = await apiSearchFunding(type, "2");
+      let data = [];
+      if (state === "all") {
+        // "전체" 선택 시 상태 0, 1, 2 데이터를 모두 가져옴
+        const data0 = await apiMyFunding("0", accessToken);
+        const data1 = await apiMyFunding("1", accessToken);
+        const data2 = await apiMyFunding("2", accessToken);
 
         data = [...data0, ...data1, ...data2];
-      } else if (type === "all") {
-        const disasterData = await apiSearchFunding("D", state);
-        const regionalData = await apiSearchFunding("R", state);
-
-        data = [...disasterData, ...regionalData];
       } else {
-        data = await apiSearchFunding(type, state);
+        data = await apiMyFunding(state, accessToken);
       }
+
       setFundingList(data);
+      
+      // Zustand를 사용하여 fundingType을 상태로 저장
+      const types = data.map((funding) => funding.fundingType);
+      setFundingTypes(types); // fundingType 저장
     } catch (error) {
       console.error("펀딩 데이터를 가져오는 데 실패했습니다:", error);
     } finally {
@@ -64,17 +47,13 @@ const Funding = () => {
   };
 
   useEffect(() => {
-    fetchFundingList(selectedType, selectedStatus); // 선택된 필터로 데이터 불러오기
-  }, [selectedType, selectedStatus]);
+    fetchMyFundingList(selectedStatus); // 선택된 상태에 따라 데이터 불러오기
+  }, [selectedStatus]);
 
-  const handleFilterChange = (type, state) => {
-    setSelectedType(type);
+  const handleFilterChange = (state) => {
     setSelectedStatus(state);
-    setLoading(true);
-
-    // URL에 상태를 반영하여 저장
-    navigate(`/funding?type=${type}&status=${state}`);
-    fetchFundingList(type, state);
+    setCurrentPage(1);
+    fetchMyFundingList(state);
   };
 
   const handlePageChange = (pageNumber) => {
@@ -91,55 +70,39 @@ const Funding = () => {
       <Sidebar selectedMenu={selectedMenu} setSelectedMenu={setSelectedMenu} />
       <div className="funding-page-content">
         <div className="funding-header">
-          <h1>펀딩 관리</h1>
-          <button className="register-button" onClick={() => navigate("/funding/create-funding")}>
+          <h1>내 펀딩 관리</h1>
+          {/* 등록 버튼 추가 */}
+          <button
+            className="register-button"
+            onClick={() => navigate("/funding/create-funding")}
+          >
             등록
           </button>
         </div>
 
         <div className="filter-container">
-          <div className="funding-type-buttons">
-            <button
-              className={`filter-button ${selectedType === "all" ? "active" : ""}`}
-              onClick={() => handleFilterChange("all", selectedStatus)}
-            >
-              전체
-            </button>
-            <button
-              className={`filter-button ${selectedType === "D" ? "active" : ""}`}
-              onClick={() => handleFilterChange("D", selectedStatus)}
-            >
-              재난재해
-            </button>
-            <button
-              className={`filter-button ${selectedType === "R" ? "active" : ""}`}
-              onClick={() => handleFilterChange("R", selectedStatus)}
-            >
-              지역기부
-            </button>
-          </div>
           <div className="funding-status-buttons">
             <button
               className={`filter-button ${selectedStatus === "all" ? "active" : ""}`}
-              onClick={() => handleFilterChange(selectedType, "all")}
+              onClick={() => handleFilterChange("all")}
             >
               전체
             </button>
             <button
               className={`filter-button ${selectedStatus === "0" ? "active" : ""}`}
-              onClick={() => handleFilterChange(selectedType, "0")}
+              onClick={() => handleFilterChange("0")}
             >
               진행예정
             </button>
             <button
               className={`filter-button ${selectedStatus === "1" ? "active" : ""}`}
-              onClick={() => handleFilterChange(selectedType, "1")}
+              onClick={() => handleFilterChange("1")}
             >
               진행중
             </button>
             <button
               className={`filter-button ${selectedStatus === "2" ? "active" : ""}`}
-              onClick={() => handleFilterChange(selectedType, "2")}
+              onClick={() => handleFilterChange("2")}
             >
               완료
             </button>
@@ -147,8 +110,8 @@ const Funding = () => {
         </div>
 
         {loading ? (
-          <p>로딩 중...</p>
-        ) : (
+  <div style={{ display: "none" }}>로딩 중...</div>
+) : (
           <div className="funding-grid">
             {currentItems.length > 0 ? (
               currentItems.map((funding) => (
@@ -156,12 +119,14 @@ const Funding = () => {
                   key={funding.fundingIdx}
                   className="funding-card"
                   onClick={() =>
-                    navigate(`/funding/${funding.fundingIdx}`, {
-                      state: { type: selectedType, status: selectedStatus },
-                    })
+                    navigate(`/funding/${funding.fundingIdx}`)
                   }
                 >
-                  <div className="funding-image-placeholder">이미지</div>
+                  <img
+                    src={funding.thumbnail}
+                    alt="펀딩 썸네일"
+                    className="funding-thumbnail"
+                  />
                   <div className="funding-details">
                     <h2 className="funding-title">{funding.fundingTitle}</h2>
                     <div className="funding-info">
