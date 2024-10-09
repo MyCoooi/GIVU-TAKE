@@ -10,7 +10,7 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 
 interface CardApiService {
-    @GET("users/client/addresses")
+    @GET("users/client/cards")
     suspend fun getCardData(
         @Header("Authorization") token: String
     ): Response<CardData>

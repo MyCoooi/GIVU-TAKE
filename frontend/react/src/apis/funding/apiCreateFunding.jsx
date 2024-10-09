@@ -5,25 +5,41 @@ const apiUrl = "https://j11e202.p.ssafy.io/api";
 // 펀딩 등록 요청을 보내는 함수
 export const apiCreateFunding = async (fundingData, accessToken) => {
   try {
-    // API 요청
-    const response = await axios.post(
-      `${apiUrl}/government-fundings`,
-      {
-        fundingTitle: fundingData.fundingTitle,
-        fundingContent: fundingData.fundingContent,
-        goalMoney: fundingData.goalMoney,
-        startDate: fundingData.startDate,
-        endDate: fundingData.endDate,
-        fundingThumbnail: fundingData.fundingThumbnail, // 파일 업로드의 경우 적절히 처리 필요
-        fundingType: fundingData.fundingType,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`, // 인증 토큰 추가
-          "Content-Type": "application/json", // JSON 형식으로 요청
-        },
-      }
+    // FormData 객체 생성
+    const formData = new FormData();
+
+    // JSON 데이터를 Blob으로 변환하여 추가
+    const fundingAddDto = {
+      fundingTitle: fundingData.fundingTitle,
+      fundingContent: fundingData.fundingContent,
+      goalMoney: fundingData.goalMoney,
+      startDate: fundingData.startDate,
+      endDate: fundingData.endDate,
+      fundingType: fundingData.fundingType,
+    };
+
+    formData.append(
+      "fundingAddDto",
+      new Blob([JSON.stringify(fundingAddDto)], { type: "application/json" })
     );
+
+    // fundingThumbnail 이미지 파일 추가 (multipart/form-data)
+    if (fundingData.fundingThumbnail) {
+      formData.append("fundingThumbnail", fundingData.fundingThumbnail);
+    }
+
+    // contentImage 이미지 파일 추가 (multipart/form-data)
+    if (fundingData.contentImage) {
+      formData.append("contentImage", fundingData.contentImage);
+    }
+
+    // API 요청
+    const response = await axios.post(`${apiUrl}/government-fundings`, formData, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`, // 인증 토큰 추가
+        "Content-Type": "multipart/form-data", // 파일 업로드를 위한 헤더
+      },
+    });
 
     // 응답 확인
     if (response.data.success) {

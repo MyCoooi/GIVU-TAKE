@@ -12,30 +12,51 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberImagePainter
 import com.project.givuandtake.R
-import com.project.givuandtake.core.data.CartItem
-import com.project.givuandtake.core.datastore.getCartItems
-import com.project.givuandtake.core.datastore.saveCartItems
-import kotlinx.coroutines.runBlocking
+import com.project.givuandtake.core.data.CartItemData
+import com.project.givuandtake.core.datastore.TokenManager
+import kotlinx.coroutines.launch
 
 @Composable
 fun CartPage(navController: NavController, context: Context) {
-    // DataStore에서 장바구니 항목 불러오기
-    val cartItemsFlow = getCartItems(context)
-    val cartItems by cartItemsFlow.collectAsState(initial = emptyList())
+    val coroutineScope = rememberCoroutineScope()
+    var cartItems by remember { mutableStateOf(emptyList<CartItemData>()) }  // 장바구니 항목 상태
+    val scaffoldState = rememberScaffoldState()
+
+    // 장바구니 데이터를 API에서 불러오는 함수
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            val token = TokenManager.getAccessToken(context)
+            if (token != null) {
+                val result = fetchCartList("Bearer $token")
+                if (result != null) {
+                    cartItems = result.map { cartItemData ->
+                        CartItemData(
+                            cartIdx = cartItemData.cartIdx,
+                            giftIdx = cartItemData.giftIdx,
+                            giftName = cartItemData.giftName,
+                            giftThumbnail = cartItemData.giftThumbnail,  // 추가된 필드
+                            userIdx = cartItemData.userIdx,              // 추가된 필드
+                            price = cartItemData.price,
+                            amount = cartItemData.amount,
+                            location = cartItemData.location
+                        )
+                    }
+                } else {
+                    scaffoldState.snackbarHostState.showSnackbar("Failed to load cart items")
+                }
+            }
+        }
+    }
 
     Scaffold(
-        topBar = {
-            CartTopBar()
-        },
-        bottomBar = {
-            CartBottomBar(totalAmount = cartItems.sumOf { it.price * it.quantity })
-        }
+        topBar = { CartTopBar() },
+        bottomBar = { CartBottomBar(totalAmount = cartItems.sumOf { it.price * it.amount }) },
+        scaffoldState = scaffoldState
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -47,30 +68,33 @@ fun CartPage(navController: NavController, context: Context) {
                 CartItemView(
                     cartItem = cartItem,
                     onQuantityChange = { item, newQuantity ->
-                        // 수량 변경 시 처리 로직
-                        val updatedItems = cartItems.map {
-                            if (it == item) it.copy(quantity = newQuantity) else it
-                        }
-                        // DataStore에 업데이트된 리스트 저장
-                        runBlocking {
-                            saveCartItems(context, updatedItems)
+                        coroutineScope.launch {
+                            val result = updateCartItemQuantity(context, item.cartIdx, newQuantity)
+                            if (result) {
+                                // 수량 변경 성공 시 UI 업데이트
+                                val updatedItems = cartItems.map {
+                                    if (it == item) it.copy(amount = newQuantity) else it
+                                }
+                                cartItems = updatedItems
+                            }
                         }
                     },
                     onDeleteItem = { item ->
-                        // 삭제 시 처리 로직
-                        val updatedItems = cartItems.filter { it != item }
-                        // DataStore에 업데이트된 리스트 저장
-                        runBlocking {
-                            saveCartItems(context, updatedItems)
+                        coroutineScope.launch {
+                            val result = deleteCartItem(context, item.cartIdx)
+                            if (result) {
+                                // 삭제 성공 시 UI 업데이트
+                                cartItems = cartItems.filter { it != item }
+                            }
                         }
-                    }
+                    },
+                    context = context  // context 전달
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
 }
-
 
 @Composable
 fun CartTopBar() {
@@ -82,16 +106,20 @@ fun CartTopBar() {
 
 @Composable
 fun CartBottomBar(totalAmount: Int) {
-    Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
         // 결제 총 금액
         Text(text = "결제 총 금액", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-        Text(text = "₩${totalAmount}", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color(0xFF4099E9))
+        Text(text = "₩$totalAmount", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color(0xFF4099E9))
 
         Spacer(modifier = Modifier.height(8.dp))
 
         // 결제하기 버튼
         Button(
-            onClick = { /* TODO: Navigate to payment */ },
+            onClick = { /* TODO: 결제 페이지로 이동 */ },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
@@ -104,10 +132,12 @@ fun CartBottomBar(totalAmount: Int) {
 
 @Composable
 fun CartItemView(
-    cartItem: CartItem,
-    onQuantityChange: (CartItem, Int) -> Unit, // 수량 변경을 처리하는 콜백 함수
-    onDeleteItem: (CartItem) -> Unit // 삭제를 처리하는 콜백 함수
+    cartItem: CartItemData,
+    onQuantityChange: (CartItemData, Int) -> Unit,
+    onDeleteItem: (CartItemData) -> Unit,
+    context: Context
 ) {
+    val coroutineScope = rememberCoroutineScope()
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -115,45 +145,49 @@ fun CartItemView(
         elevation = 4.dp
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // 상품 정보
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(
-                    painter = painterResource(id = R.drawable.placeholder), // 상품 이미지
+                    painter = rememberImagePainter(data = cartItem.giftThumbnail),  // 실제 썸네일 URL 사용
                     contentDescription = "상품 이미지",
                     modifier = Modifier.size(80.dp)
                 )
-
                 Spacer(modifier = Modifier.width(16.dp))
-
                 Column {
-                    Text(text = "${cartItem.name}", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                    Text(text = "수량: ${cartItem.quantity}", fontSize = 14.sp)
-                    Text(text = "${cartItem.location}", fontSize = 14.sp, color = Color.Gray)
+                    Text(text = cartItem.giftName, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "수량: ${cartItem.amount}", fontSize = 14.sp)
+                    Text(text = cartItem.location ?: "위치 정보 없음", fontSize = 14.sp, color = Color.Gray)
                 }
-
                 Spacer(modifier = Modifier.weight(1f))
 
-                // 삭제 버튼
-                IconButton(onClick = { onDeleteItem(cartItem) }) {
+                IconButton(onClick = {
+                    coroutineScope.launch {
+//                        val result = deleteCartItem(context, cartItem.cartIdx)
+//                        if (result) {
+                        onDeleteItem(cartItem)
+//                        }
+                    }
+                }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.baseline_delete_24), // 삭제 아이콘
+                        painter = painterResource(id = R.drawable.baseline_delete_24),
                         contentDescription = "Delete Item",
                         tint = Color.Black,
-                        modifier = Modifier.size(24.dp) // 아이콘 크기 설정
+                        modifier = Modifier.size(24.dp)
                     )
                 }
-
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 수량 조절 버튼
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Button(
                     onClick = {
-                        // 수량 감소 로직 (최소 1개 이상이어야 함)
-                        if (cartItem.quantity > 1) {
-                            onQuantityChange(cartItem, cartItem.quantity - 1)
+                        if (cartItem.amount > 1) {
+                            coroutineScope.launch {
+                                val result = updateCartItemQuantity(context, cartItem.cartIdx, cartItem.amount - 1)
+                                if (result) {
+                                    onQuantityChange(cartItem, cartItem.amount - 1)
+                                }
+                            }
                         }
                     },
                     modifier = Modifier.size(40.dp),
@@ -161,32 +195,27 @@ fun CartItemView(
                 ) {
                     Text("-", color = Color.White, fontSize = 18.sp)
                 }
-
                 Spacer(modifier = Modifier.width(8.dp))
-
-                Text(text = "${cartItem.quantity}", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-
+                Text(text = "${cartItem.amount}", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.width(8.dp))
-
                 Button(
                     onClick = {
-                        // 수량 증가 로직
-                        onQuantityChange(cartItem, cartItem.quantity + 1)
+                        coroutineScope.launch {
+                            val result = updateCartItemQuantity(context, cartItem.cartIdx, cartItem.amount + 1)
+                            if (result) {
+                                onQuantityChange(cartItem, cartItem.amount + 1)
+                            }
+                        }
                     },
                     modifier = Modifier.size(40.dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFB3C3F4))
                 ) {
                     Text("+", color = Color.White, fontSize = 18.sp)
                 }
-
                 Spacer(modifier = Modifier.weight(1f))
 
-                // 총 구매 금액
-                Text(text = "₩${cartItem.price * cartItem.quantity}", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text(text = "₩${cartItem.price * cartItem.amount}", fontSize = 18.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
 }
-
-
-

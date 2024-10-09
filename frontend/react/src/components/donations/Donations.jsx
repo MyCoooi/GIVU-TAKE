@@ -1,17 +1,24 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../Sidebar"; // Sidebar import
 import "./Donations.css"; // 공통 CSS 파일
-import { apiSearchDonations } from "../../apis/donations/apiSearchDonations"; // API 함수 import
-import { useNavigate } from "react-router-dom"; // useNavigate import 추가
+import { apiMyDonations } from "../../apis/donations/apiMyDonations"; // API 함수 import
+import { getUserInfo } from "../../apis/auth/apiUserInfo"; // getUserInfo import
+import { useNavigate, useLocation } from "react-router-dom"; // useNavigate 및 useLocation import
 
 const Donations = () => {
-  const [selectedMenu, setSelectedMenu] = useState("기부품");
-  const [selectedType, setSelectedType] = useState(""); // 필터로 선택된 카테고리를 저장하는 상태값
   const navigate = useNavigate(); // useNavigate 훅
+  const location = useLocation(); // 현재 URL 정보를 가져오기 위한 useLocation 훅
 
-  // 기부품 리스트를 저장하는 state
+  const [selectedMenu, setSelectedMenu] = useState("기부품");
+
+  // URL 쿼리 파라미터에서 selectedType 가져오기 (없으면 기본값은 "전체")
+  const queryParams = new URLSearchParams(location.search);
+  const initialSelectedType = queryParams.get("type") || "전체";
+  const [selectedType, setSelectedType] = useState(initialSelectedType);
+
   const [donationList, setDonationList] = useState([]);
   const [loading, setLoading] = useState(true); // 로딩 상태 추가
+  const [corporationEmail, setCorporationEmail] = useState(""); // corporationEmail을 저장할 상태
 
   // 페이지네이션 관련 상태
   const [currentPage, setCurrentPage] = useState(1);
@@ -22,10 +29,21 @@ const Donations = () => {
     return new Intl.NumberFormat().format(price) + "원";
   };
 
-  // API 호출 함수
-  const fetchDonationList = async () => {
+  // 사용자 정보를 가져오는 함수 (email 포함)
+  const fetchUserInfo = async () => {
     try {
-      const data = await apiSearchDonations(currentPage, itemsPerPage); // API에서 기부품 데이터 가져오기
+      const userInfo = await getUserInfo(); // getUserInfo 호출
+      setCorporationEmail(userInfo.email); // email을 corporationEmail로 설정
+    } catch (error) {
+      console.error("사용자 정보를 가져오는 데 실패했습니다:", error);
+    }
+  };
+
+  // 기부품 조회 API 호출 함수
+  const fetchDonationList = async () => {
+    if (!corporationEmail) return; // corporationEmail이 없으면 API 호출 중단
+    try {
+      const data = await apiMyDonations(corporationEmail); // email로 API에서 기부품 데이터 가져오기
       setDonationList(data); // 받아온 데이터를 state에 저장
     } catch (error) {
       console.error("기부품 데이터를 가져오는 데 실패했습니다:", error);
@@ -34,15 +52,23 @@ const Donations = () => {
     }
   };
 
-  // 컴포넌트 마운트 시 API 호출
+  // 컴포넌트 마운트 시 사용자 정보와 기부품 리스트를 가져옴
   useEffect(() => {
-    fetchDonationList(); // 데이터 불러오기
-  }, [currentPage]); // 페이지 변경 시 데이터 갱신
+    fetchUserInfo(); // 사용자 정보 불러오기
+  }, []);
 
-  // 필터 버튼 클릭 시 상태 업데이트
+  // corporationEmail이 설정된 후 기부품 리스트를 가져옴
+  useEffect(() => {
+    if (corporationEmail) {
+      fetchDonationList(); // 기부품 리스트 불러오기
+    }
+  }, [corporationEmail, currentPage]); // corporationEmail과 페이지가 변경될 때마다 데이터 갱신
+
+  // 필터 버튼 클릭 시 상태 업데이트 및 URL 파라미터 갱신
   const handleFilterChange = (type) => {
     setSelectedType(type);
     setCurrentPage(1); // 필터가 변경될 때 첫 페이지로 이동
+    navigate(`?type=${type}`); // URL 쿼리 파라미터 갱신
   };
 
   // 페이지 변경 핸들러
@@ -52,7 +78,9 @@ const Donations = () => {
 
   // 선택된 필터에 맞는 기부품 목록을 필터링
   const filteredDonations = selectedType
-    ? donationList.filter((donation) => donation.categoryName === selectedType)
+    ? selectedType === "전체"
+      ? donationList
+      : donationList.filter((donation) => donation.categoryName === selectedType)
     : donationList;
 
   // 현재 페이지에서 보여줄 데이터 계산
@@ -75,6 +103,12 @@ const Donations = () => {
         </div>
         <div className="donations-category-and-dropdown">
           <div className="donations-type-buttons">
+            <button
+              className={`filter-button ${selectedType === "전체" ? "active" : ""}`}
+              onClick={() => handleFilterChange("전체")}
+            >
+              전체
+            </button>
             <button
               className={`filter-button ${selectedType === "지역상품권" ? "active" : ""}`}
               onClick={() => handleFilterChange("지역상품권")}

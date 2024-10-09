@@ -48,92 +48,88 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import coil.size.Scale
+import com.project.givuandtake.core.data.CartItemData
 
 import com.project.givuandtake.core.data.GiftDetail
 import com.project.givuandtake.core.datastore.TokenDataStore
 import com.project.givuandtake.core.datastore.TokenManager
-import com.project.givuandtake.core.datastore.getCartItems
 import com.project.givuandtake.feature.gift.GiftViewModel
 import com.project.givuandtake.feature.gift.addToFavorites
 import com.project.givuandtake.feature.mypage.MyDonation.WishlistViewModel
+import com.project.givuandtake.ui.theme.CustomTypography
+import com.project.givuandtake.ui.theme.GivuAndTakeTheme
+import com.project.givuandtake.ui.theme.gmarketSans
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import java.time.format.TextStyle
 
 
 @Composable
-fun GiftPage(navController: NavController, viewModel: GiftViewModel = viewModel(), wishlistViewModel: WishlistViewModel = viewModel()){ // WishlistViewModel도 주입받음
-    // ViewModel에서 필요한 데이터 가져오기
+fun GiftPage(
+    navController: NavController,
+    viewModel: GiftViewModel = viewModel(),
+    wishlistViewModel: WishlistViewModel = viewModel()
+) {
     val context = LocalContext.current
     val allProducts by viewModel.allGiftDetails.collectAsState()
-    val cartItemCount by viewModel.cartItemCount.collectAsState()
     val wishlistItems by viewModel.wishlistItemsIds.collectAsState()
 
-    val tokenDataStore = TokenDataStore(context)
-//    val Bearer_Token = "eyJhbGciOiJIUzUxMiJ9.eyJhdXRoIjoiUk9MRV9DT1JQT1JBVElPTllFVCIsInN1YiI6InNzYWZ5QGV4YW1wbGUuY29tIiwiaXNzIjoiY29tLmFjY2VwdGVkLmdpdnV0YWtlIiwibmJmIjoxNzI3NjYzNDM3LCJpYXQiOjE3Mjc2NjM0MzcsImV4cCI6MTc1OTE5OTQzNywianRpIjoiZWVmZjY1YmMtYmQ2Mi00OGFlLTk1Y2EtMTgzN2RmNTJhZWQyIn0.IaXBf_a262ItMrJC9ExSO4tBZT6i9jbIVDrC_7wi4lcPuaBA_uiUjXcRh1DyV24vO3iNoV7fXMXo3Bik81Z_tg"
+    // 토큰 불러오기
     val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
-//    val token = "Bearer $Bearer_Token" // 실제 Bearer 토큰
 
     // API에서 데이터를 불러오는 로직 추가
     LaunchedEffect(Unit) {
-        // 토큰 저장
-//        tokenDataStore.saveToken(token)
-        // 로그로 토큰 확인
         viewModel.fetchGiftsFromApi(accessToken) // API 호출
         Log.d("ApiCall", "Authorization 토큰:  $accessToken")
     }
-    Log.d("giftlist","${allProducts}")
 
-    // 장바구니 아이템을 상태로 저장
-    val cartItemsFlow = getCartItems(context) // getCartItems는 DataStore나 DB에서 장바구니 정보를 불러오는 함수
-    val cartItems by cartItemsFlow.collectAsState(initial = emptyList()) // 초기 상태는 빈 리스트로 설정
-
-
+    // 장바구니 항목을 API에서 불러오기
+    var cartItems by remember { mutableStateOf<List<CartItemData>>(emptyList()) }
+    LaunchedEffect(Unit) {
+        val result = fetchCartList(accessToken)
+        if (result != null) {
+            cartItems = result // API에서 불러온 장바구니 데이터로 갱신
+        } else {
+            Log.d("CartPage", "장바구니 데이터를 불러오는데 실패했습니다.")
+        }
+    }
 
     // 스크롤 상태를 추적하기 위한 rememberLazyListState
     val scrollState = rememberLazyListState()
-    // TopBar 가시성을 제어할 remember 변수
     var topBarVisible by remember { mutableStateOf(true) }
-
-    // 이전 스크롤 위치를 저장
     var previousScrollOffset by remember { mutableStateOf(0) }
 
-    // 스크롤 이벤트를 감지하여 TopBar의 가시성을 조절
+    // 스크롤 이벤트 감지하여 TopBar의 가시성 조절
     LaunchedEffect(scrollState) {
         snapshotFlow { scrollState.firstVisibleItemScrollOffset }
             .collect { currentScrollOffset ->
-                // 스크롤이 아래로 내려가면 TopBar를 숨기고, 위로 올라가면 보이도록 설정
                 if (currentScrollOffset > previousScrollOffset) {
-                    topBarVisible = false // 아래로 스크롤할 때 TopBar 숨기기
+                    topBarVisible = false
                 } else if (currentScrollOffset < previousScrollOffset) {
-                    topBarVisible = true // 위로 스크롤할 때 TopBar 보이기
+                    topBarVisible = true
                 }
-                // 현재 스크롤 오프셋을 저장
                 previousScrollOffset = currentScrollOffset
             }
     }
 
     // 전체를 LazyColumn으로 감싸서 스크롤 가능하게 함
     Box(modifier = Modifier.fillMaxSize()) {
-        // MiddleContent와 TopBar를 감싼 LazyColumn
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0xFFB3C3F4)), // 페이지 기본 배경색 설정
-            state = scrollState // 스크롤 상태 전달
+            state = scrollState
         ) {
             item {
-                // 상단에 TopBar 높이만큼 여백 추가
-                Spacer(modifier = Modifier.height(200.dp)) // TopBar의 높이를 고려하여 Spacer 추가
+                Spacer(modifier = Modifier.height(200.dp)) // TopBar 높이만큼 Spacer 추가
             }
-
-            // MiddleContent를 스크롤 안에 포함
             item {
                 MiddleContent(
                     navController = navController,
                     products = allProducts,
                     wishlistItems = wishlistItems,
                     onFavoriteToggle = { product ->
-                        wishlistViewModel.toggleWishlistItem(product) // 찜 상태 토글 함수 호출
+                        wishlistViewModel.toggleWishlistItem(product) // 찜 상태 토글
                     }
                 )
             }
@@ -142,16 +138,16 @@ fun GiftPage(navController: NavController, viewModel: GiftViewModel = viewModel(
         // TopBar를 보이거나 숨기는 애니메이션 처리
         AnimatedVisibility(
             visible = topBarVisible,
-            modifier = Modifier
-                .align(Alignment.TopCenter) // 화면 상단에 고정
+            modifier = Modifier.align(Alignment.TopCenter) // 화면 상단에 고정
         ) {
             TopBar(
                 navController = navController,
-                cartItemCount = cartItems.size, // 장바구니 아이템 개수 전달
+                cartItemCount = cartItems.size, // API에서 불러온 장바구니 아이템 개수 전달
             )
         }
     }
 }
+
 
 
 
@@ -181,7 +177,8 @@ fun TopBar(navController: NavController, cartItemCount: Int) {
             Text(
                 text = "GIVU & TAKE",
                 color = Color(0xFF8E8EBD), // 연한 보라색 텍스트 색상
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                style = CustomTypography.titleLarge // CustomTypography 적용
             )
         }
 
@@ -196,12 +193,13 @@ fun TopBar(navController: NavController, cartItemCount: Int) {
             Text(
                 text = "우리 고향 기부하기",
                 fontWeight = FontWeight.Bold,
-                fontSize = 25.sp
+                fontSize = 25.sp,
+                style = CustomTypography.bodyLarge // CustomTypography 적용
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // WishList 아이콘 추가
                 IconButton(onClick = {
-                    navController.navigate("wishlist_page")
+                    navController.navigate("wishlist")
                 }) {
                     Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "WishList")
                 }
@@ -292,33 +290,21 @@ fun MiddleContent(
                 Text(
                     text = "상품종류 순",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 25.sp
+                    fontSize = 25.sp,
+                    style = CustomTypography.bodyLarge // CustomTypography 적용
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
-            FilterButtons_category() // 카테고리 버튼
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // 맞춤 추천상품 텍스트
             Text(
                 text = "맞춤 추천상품",
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
+                fontSize = 25.sp,
+                style = CustomTypography.bodyLarge, // CustomTypography 적용
                 modifier = Modifier.padding(vertical = 16.dp)
             )
-            ProductGrid(
-                navController = navController,
-                products = products,
-                wishlistItems = wishlistItems,
-                onFavoriteToggle = onFavoriteToggle
-            )
-            Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "맞춤 추천상품",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                modifier = Modifier.padding(vertical = 16.dp)
-            )
             ProductGrid(
                 navController = navController,
                 products = products,
@@ -327,25 +313,10 @@ fun MiddleContent(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "맞춤 추천상품",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                modifier = Modifier.padding(vertical = 16.dp)
-            )
-            ProductGrid(
-                navController = navController,
-                products = products,
-                wishlistItems  = wishlistItems,
-                onFavoriteToggle = { product ->
-                    coroutineScope.launch {
-                        addToFavorites(context, product)
-                    }
-                }
-            )
         }
     }
 }
+
 
 
 @Composable
@@ -469,7 +440,6 @@ fun ProductCard(
                         .size(200.dp),
                     contentScale = ContentScale.Crop
                 )
-
             }
 
             // 상품명과 찜 아이콘
@@ -481,7 +451,7 @@ fun ProductCard(
                 Text(
                     text = product.giftName,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp, // 텍스트 크기를 설정
+                    style = CustomTypography.bodyLarge, // CustomTypography 적용
                     color = Color.Black // 텍스트 색상 설정
                 )
             }
@@ -502,6 +472,7 @@ fun ProductCard(
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = location,
+                        style = CustomTypography.bodyLarge, // CustomTypography 적용
                         fontSize = 12.sp,
                         color = Color.Gray
                     )
@@ -525,7 +496,8 @@ fun ProductCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "$${product.price}",
+                        text = "₩${product.priceFormatted}",
+                        style = CustomTypography.bodyLarge, // CustomTypography 적용
                         fontSize = 14.sp,
                         color = Color.Black // 텍스트 색상 설정
                     )
@@ -551,44 +523,58 @@ fun ProductCard(
 }
 
 
-
-
+@Composable
+fun CategoryScreen(navController: NavController) {
+    FilterButtons_category { categoryIdx ->
+        Log.d("category", "Navigating to category/$categoryIdx")
+        navController.navigate("category/$categoryIdx") // 네비게이션 호출
+    }
+}
 
 @Composable
-fun FilterButtons_category() {
+fun FilterButtons_category(onCategorySelected: (Int) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween // 아이템들이 한 줄에 균등하게 배치되도록 설정
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        CategoryButton(text = "지역상품권", icon = painterResource(id = R.drawable.local_product))
-        CategoryButton(text = "농축산물", icon = painterResource(id = R.drawable.agriculture_product))
-        CategoryButton(text = "수산물", icon = painterResource(id = R.drawable.seafood_product))
-        CategoryButton(text = "가공식품", icon = painterResource(id = R.drawable.processed_food))
-        CategoryButton(text = "공예품", icon = painterResource(id = R.drawable.craft_product))
+        CategoryButton(text = "지역상품권", icon = painterResource(id = R.drawable.local_product)) {
+            onCategorySelected(1) // 선택된 카테고리 인덱스를 전달
+        }
+        CategoryButton(text = "농축산물", icon = painterResource(id = R.drawable.agriculture_product)) {
+            onCategorySelected(2)
+        }
+        CategoryButton(text = "수산물", icon = painterResource(id = R.drawable.seafood_product)) {
+            onCategorySelected(3)
+        }
+        CategoryButton(text = "가공식품", icon = painterResource(id = R.drawable.processed_food)) {
+            onCategorySelected(4)
+        }
+        CategoryButton(text = "공예품", icon = painterResource(id = R.drawable.craft_product)) {
+            onCategorySelected(5)
+        }
     }
 }
 
-
 @Composable
-fun CategoryButton(text: String, icon: Painter) {
+fun CategoryButton(text: String, icon: Painter, onClick: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.padding(4.dp) // 최소한의 여백만 유지
+        modifier = Modifier
+            .padding(4.dp)
+            .clickable { onClick() } // 버튼 클릭 처리
     ) {
-        // Text positioned above the circle
         Text(
             text = text,
-            style = MaterialTheme.typography.body2,
-            modifier = Modifier.padding(bottom = 4.dp) // 텍스트와 원형 간 간격 최소화
+            style = CustomTypography.bodyLarge,
+            modifier = Modifier.padding(bottom = 4.dp)
         )
 
-        // Icon in a circle
         Box(
             modifier = Modifier
-                .size(64.dp) // 원형 크기 설정
+                .size(64.dp)
                 .clip(CircleShape)
                 .background(Color(0xFFB3C3F4)),
             contentAlignment = Alignment.Center
@@ -596,11 +582,15 @@ fun CategoryButton(text: String, icon: Painter) {
             Icon(
                 painter = icon,
                 contentDescription = null,
-                modifier = Modifier.size(32.dp) // 아이콘 크기
+                modifier = Modifier.size(32.dp)
             )
         }
     }
 }
+
+
+
+
 
 
 @Composable

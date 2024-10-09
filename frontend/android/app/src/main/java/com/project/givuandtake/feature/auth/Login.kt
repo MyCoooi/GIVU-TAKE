@@ -60,6 +60,7 @@ fun LoginScreen(navController: NavController) {
     // 앱 실행 시 토큰 확인
     LaunchedEffect(Unit) {
         val accessToken = TokenManager.getAccessToken(context)
+        Log.d("Token","token : ${accessToken}")
         if (accessToken != null) {
             // 액세스 토큰이 있으면 메인 페이지로 이동
             navController.navigate("mainpage") {
@@ -83,6 +84,10 @@ fun LoginScreen(navController: NavController) {
 
                         // 로그인 성공 후 토큰을 SharedPreferences에 저장
                         saveTokens(context, accessToken, refreshToken)
+                        // 저장 후 바로 SharedPreferences에서 값을 읽어 출력
+                        val storedAccessToken = TokenManager.getAccessToken(context)
+                        Log.d("StoredToken", "저장된 AccessToken: $storedAccessToken")
+
 
                         onResult("로그인 성공")
                     } else {

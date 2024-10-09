@@ -2,7 +2,9 @@ package com.project.givuandtake.core.data
 
 import kotlinx.serialization.Serializable
 
-data class CartItem(
+data class CartData(
+    val cartIdx: Int,   // 장바구니 항목 ID
+    val giftIdx: Int,   // giftIdx 추가
     val name: String,
     val price: Int,
     val quantity: Int,
@@ -34,8 +36,11 @@ data class CartItemData(
     val cartIdx: Int,
     val giftIdx: Int,
     val giftName: String,
-    val giftThumbnail: String,
+    val giftThumbnail: String?,
     val userIdx: Int,
     val amount: Int,
-    val price: Int
+    val price: Int,
+    val location: String? = null
 )
+
+
