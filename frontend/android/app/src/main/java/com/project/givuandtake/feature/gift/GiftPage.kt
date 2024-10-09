@@ -30,6 +30,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -76,6 +77,17 @@ fun GiftPage(
 
     // 토큰 불러오기
     val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
+
+    // 새로고침 버튼 추가: 새로고침 시 모든 데이터를 삭제하고 다시 불러오기
+    var isRefreshing by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isRefreshing) {
+        if (isRefreshing) {
+            viewModel.deleteAllGiftDetails() // 모든 데이터를 삭제
+            viewModel.fetchGiftsFromApi(accessToken) // 데이터를 다시 불러오기
+            isRefreshing = false // 새로고침 완료
+        }
+    }
 
     // API에서 데이터를 불러오는 로직 추가
     LaunchedEffect(Unit) {
@@ -143,6 +155,7 @@ fun GiftPage(
             TopBar(
                 navController = navController,
                 cartItemCount = cartItems.size, // API에서 불러온 장바구니 아이템 개수 전달
+                onRefresh = { isRefreshing = true } // 새로고침 콜백 전달
             )
         }
     }
@@ -152,7 +165,11 @@ fun GiftPage(
 
 
 @Composable
-fun TopBar(navController: NavController, cartItemCount: Int) {
+fun TopBar(
+    navController: NavController,
+    cartItemCount: Int,
+    onRefresh: () -> Unit // 새로고침 콜백을 전달받음
+) {
     // 검색어 상태를 TopBar 내부에서 관리
     var searchText by remember { mutableStateOf("") }
 
@@ -197,6 +214,13 @@ fun TopBar(navController: NavController, cartItemCount: Int) {
                 style = CustomTypography.bodyLarge // CustomTypography 적용
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
+                // 새로고침 아이콘 추가
+                IconButton(onClick = { onRefresh() }) {  // 새로고침 콜백 호출
+                    Icon(imageVector = Icons.Default.Refresh, contentDescription = "Refresh")
+                }
+                Spacer(modifier = Modifier.width(8.dp)) // 아이콘 사이 간격
+
+
                 // WishList 아이콘 추가
                 IconButton(onClick = {
                     navController.navigate("wishlist")
