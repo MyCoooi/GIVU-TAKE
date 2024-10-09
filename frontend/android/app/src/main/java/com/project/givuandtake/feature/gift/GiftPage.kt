@@ -317,6 +317,7 @@ fun MiddleContent(
                     fontSize = 25.sp,
                     style = CustomTypography.bodyLarge // CustomTypography 적용
                 )
+                CategoryScreen(navController)
             }
             Spacer(modifier = Modifier.height(16.dp))
 

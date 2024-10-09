@@ -47,6 +47,7 @@ class GiftRepository(private val context: Context) {
                                     categoryIdx = giftItem.categoryIdx,
                                     categoryName = giftItem.categoryName,
                                     giftThumbnail = giftItem.giftThumbnail,
+                                    giftContentImage = giftItem.giftContentImage, // 추가된 필드
                                     giftContent = giftItem.giftContent,
                                     price = giftItem.price,
                                     createdDate = giftItem.createdDate,
