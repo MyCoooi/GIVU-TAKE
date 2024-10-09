@@ -100,7 +100,7 @@ fun fetchTripIdDataWithOkHttp(areaCode: Int, sigunguCode: Int, onResult: (List<S
 
     // API URL
     val url =
-        "https://apis.data.go.kr/B551011/KorService1/areaBasedList1?serviceKey=$serviceKey&numOfRows=5&pageNo=1&MobileOS=ETC&MobileApp=AppTest&_type=json&contentTypeId=12&areaCode=$areaCode&sigunguCode=$sigunguCode"
+        "https://apis.data.go.kr/B551011/KorService1/areaBasedList1?serviceKey=$serviceKey&numOfRows=15&pageNo=1&MobileOS=ETC&MobileApp=AppTest&_type=json&contentTypeId=12&areaCode=$areaCode&sigunguCode=$sigunguCode"
 
     // API 요청 생성
     val request = Request.Builder()
