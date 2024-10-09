@@ -24,6 +24,11 @@
   line-height: 1.2;
   margin-bottom: 50px;
   text-align: center; /* 텍스트 중앙 정렬 */
+  text-shadow: 
+  -1px -1px 0 #000, /* 왼쪽 위 */
+  1px -1px 0 #000, /* 오른쪽 위 */
+ -1px  1px 0 #000, /* 왼쪽 아래 */
+  1px  1px 0 #000; /* 오른쪽 아래 */
 }
 
 /* 다운로드 버튼과 QR 코드가 나란히 배치되는 부분 */
