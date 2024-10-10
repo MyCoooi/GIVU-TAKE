@@ -19,6 +19,7 @@ const IntroPage = () => {
           <img src={loginIcon} alt="로그인" className="auth-icon" />
         </div>
 
+
         {/* 회원가입 아이콘과 설명 텍스트 */}
         <div className="auth-card" onClick={() => navigate('/signup')}>
           <img src={signupIcon} alt="회원가입" className="auth-icon" />
