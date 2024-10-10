@@ -11,6 +11,8 @@ import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.global.model.CreateLogDto;
 import com.accepted.givutake.global.model.ResponseDto;
 import com.accepted.givutake.global.service.UserViewLogService;
+import com.accepted.givutake.user.common.entity.Users;
+import com.accepted.givutake.user.common.repository.UsersRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -32,6 +34,7 @@ public class GiftController {
     private final GiftService giftService;
     private final UserViewLogService userViewLogService;
     private final GiftStatsService giftStatsService;
+    private final UsersRepository usersRepository;
 
     @GetMapping // 답례품 조회
     public ResponseEntity<ResponseDto> getGifts(
@@ -260,11 +263,13 @@ public class GiftController {
 
         String email = userDetails.getUsername();
 
+        Users user = usersRepository.findByEmail(email).orElseThrow(() -> new ApiException(ExceptionEnum.NOT_FOUND_USER_WITH_EMAIL_EXCEPTION));
+
         GiftStatisticsDto data = GiftStatisticsDto
                 .builder()
                 .giftYearStatisticsDto(giftService.getGiftYearStatistics(email, giftIdx))
                 .giftPurchaserDto(giftService.getGiftPurchaser(email, giftIdx))
-                .giftPercentageDto(giftStatsService.getGiftPercentage(giftIdx))
+                .giftPercentageDto(giftStatsService.getGiftPercentage(giftIdx, user.getUserIdx()))
                 .build();
 
         ResponseDto responseDto = ResponseDto.builder()
