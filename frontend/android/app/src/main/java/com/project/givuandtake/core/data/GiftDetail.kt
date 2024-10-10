@@ -30,11 +30,12 @@ data class GiftDetail(
     val categoryIdx: Int,                  // 카테고리 ID
     val categoryName: String,              // 카테고리 이름
     val giftThumbnail: String?,            // 상품 썸네일 (nullable)
+    val giftContentImage: String?,         // 상품 상세 이미지 (nullable)
     val giftContent: String?,              // 상품 설명 (nullable)
     val price: Int,                        // 상품 가격
     val createdDate: String?,              // 생성 날짜 (nullable)
     val modifiedDate: String?              // 수정 날짜 (nullable)
-){
+) {
     // 커스텀 getter로 location 값을 계산
     val location: String
         get() = "$corporationSido $corporationSigungu"
@@ -61,7 +62,7 @@ interface GiftDetailDao {
     suspend fun deleteAll()
 }
 
-@Database(entities = [GiftDetail::class], version = 2, exportSchema = false)
+@Database(entities = [GiftDetail::class], version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun giftDetailDao(): GiftDetailDao
 }
@@ -91,6 +92,12 @@ data class GiftDetailResponse(
     val data: GiftDetailData
 )
 
+data class GiftRecentResponse(
+    val success: Boolean,
+    val data: List<GiftDetailData>
+)
+
+
 data class GiftDetailData(
     val giftIdx: Int,               // 상품 ID
     val giftName: String,           // 상품 이름
@@ -101,6 +108,7 @@ data class GiftDetailData(
     val categoryIdx: Int,           // 카테고리 ID
     val categoryName: String,       // 카테고리 이름
     val giftThumbnail: String?,     // 상품 썸네일 URL
+    val giftContentImage: String?,
     val giftContent: String?,       // 상품 설명
     val price: Int,                 // 상품 가격
     val createdDate: String?,       // 생성 날짜

@@ -8,10 +8,13 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
@@ -52,26 +55,24 @@ fun GiftPageDetail(
     navController: NavController,  // 네비게이션 컨트롤러
     GiftViewModel : GiftViewModel = viewModel()  // 뷰 모델
 ) {
-    var searchText by remember { mutableStateOf("") }  // 검색창 입력 상태
     val giftDetail by GiftViewModel.giftDetail.collectAsState()  // 상품 상세 정보 상태
 
     val scope = rememberCoroutineScope()  // 코루틴 스코프
     val context = LocalContext.current  // 현재 Context
     val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
 
-    // 페이지 로드 시 상품 상세 정보를 API로부터 불러옴
+    Log.d("giftDetail", "giftDetail : ${giftDetail}")
+
     LaunchedEffect(giftIdx) {
         GiftViewModel.fetchGiftDetail(token = accessToken, giftIdx = giftIdx)
     }
 
-    // 장바구니 항목 API로 불러오기
     LaunchedEffect(Unit) {
         scope.launch {
             val result = fetchCartList(accessToken)
             if (result != null) {
                 cartItems.value = result
             } else {
-                // 에러 처리: 스낵바나 로그 추가 가능
                 Log.d("cart","Failed to load cart items")
             }
         }
@@ -80,12 +81,11 @@ fun GiftPageDetail(
     Scaffold(
         topBar = {
             GiftTopBar(
-                searchText = searchText,
-                onSearchTextChanged = { newText -> searchText = newText },  // 검색 텍스트 변경 콜백
                 cartItemCount = cartItems.value.size,  // 장바구니 아이템 개수
                 onCartClick = {
                     navController.navigate("cart_page")  // 장바구니 페이지로 이동
-                }
+                },
+                navController = navController
             )
         },
         bottomBar = {
@@ -138,7 +138,7 @@ fun GiftPageDetail(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp)
+//                .padding(16.dp)
         ) {
             // 상품 정보가 있을 때만 표시
             giftDetail?.let { detail ->
@@ -259,21 +259,27 @@ fun GiftInformation(giftDetail: GiftDetailData) {
 
     // 주소 정보
     Row(
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(horizontal = 10.dp)
     ) {
         Icon(
             imageVector = Icons.Default.Place,
             contentDescription = "Location icon",
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(20.dp)
         )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(text = giftDetail.location, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(text = giftDetail.location, fontSize = 16.sp)
     }
 
     Spacer(modifier = Modifier.height(8.dp))
 
     // 상품 정보
-    Text(text = giftDetail.giftName, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+    Text(
+        text = giftDetail.giftName,
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp,
+        modifier = Modifier.padding(horizontal = 10.dp)
+    )
     Spacer(modifier = Modifier.height(8.dp))
 
     // 가느다란 실선 추가
@@ -326,104 +332,53 @@ fun GiftInformation(giftDetail: GiftDetailData) {
 
 @Composable
 fun GiftTopBar(
-    searchText: String,
-    onSearchTextChanged: (String) -> Unit,
     cartItemCount: Int, // 장바구니 아이템 수
-    onCartClick: () -> Unit // 장바구니 아이콘 클릭 처리
+    onCartClick: () -> Unit, // 장바구니 아이콘 클릭 처리
+    navController: NavController
 ) {
-    // Column을 사용하여 상단 영역 구성
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0xFFFFFFFF))
-            .padding(16.dp) // 적절한 패딩 추가
-    ) {
-        // 상단 제목 부분
-        Text(
-            text = "GIVU & TAKE",
-            style = TextStyle(color = Color(0xFFA093DE)),
-            fontSize = 14.sp
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    )   {
+        Icon(
+            imageVector = Icons.Default.ArrowBack,
+            contentDescription = "Back",
+            tint = Color.Black,
+            modifier = Modifier
+                .size(28.dp)
+                .clickable { navController.popBackStack() }
         )
-        Spacer(modifier = Modifier.height(4.dp))
 
-        // 제목과 장바구니 아이콘을 한 줄로 배치
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween, // Row의 양 끝에 요소 배치
-            verticalAlignment = Alignment.CenterVertically
+        Spacer(modifier = Modifier.weight(1f))
+
+        Box(
+            modifier = Modifier.size(40.dp)
         ) {
-            // "우리 고향 기부하기" 텍스트
-            Text(
-                text = "우리 고향 기부하기",
-                fontSize = 20.sp,
-                color = Color.Black,
-                fontWeight = FontWeight.Bold // 텍스트를 진하게
-            )
+            IconButton(onClick = { onCartClick() }, modifier = Modifier.align(Alignment.TopEnd)) {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_add_shopping_cart_24), // 장바구니 아이콘
+                    contentDescription = "Cart Icon",
+                    tint = Color.Black
+                )
+            }
 
-            // 장바구니 아이콘과 아이템 수 표시
-            Box(
-                contentAlignment = Alignment.TopEnd, // 배지를 아이콘의 우측 상단에 배치
-                modifier = Modifier.size(40.dp)
-            ) {
-                IconButton(onClick = { onCartClick() }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_add_shopping_cart_24), // 장바구니 아이콘
-                        contentDescription = "Cart Icon",
-                        tint = Color.Black
+            if (cartItemCount > 0) {
+                Box(
+                    modifier = Modifier
+                        .size(16.dp)
+                        .background(Color.Red, shape = CircleShape)
+                        .align(Alignment.TopEnd)
+                ) {
+                    Text(
+                        text = cartItemCount.toString(),
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        modifier = Modifier.align(Alignment.Center)
                     )
-                }
-
-                // 장바구니 아이템 개수 표시 (배지)
-                if (cartItemCount > 0) {
-                    Box(
-                        modifier = Modifier
-                            .size(16.dp) // 배지 크기
-                            .background(Color.Red, shape = CircleShape) // 배지 모양과 색상
-                            .align(Alignment.TopEnd) // 배지를 우측 상단에 배치
-                    ) {
-                        Text(
-                            text = cartItemCount.toString(),
-                            color = Color.White,
-                            fontSize = 10.sp,
-                            modifier = Modifier.align(Alignment.Center) // 텍스트를 배지 중앙에 배치
-                        )
-                    }
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 검색창 추가
-        TextField(
-            value = searchText,
-            onValueChange = { newText -> onSearchTextChanged(newText) },
-            label = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically // 아이콘과 텍스트를 수평으로 정렬
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Search, // 돋보기 아이콘
-                        contentDescription = "Search Icon",
-                        modifier = Modifier.size(20.dp) // 아이콘 크기 조절
-                    )
-                    Spacer(modifier = Modifier.width(8.dp)) // 아이콘과 텍스트 사이의 간격
-                    Text("상품 이름 검색")
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp) // 검색창 높이 조절
-                .background(Color.White)
-                .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
-                .padding(4.dp),
-            singleLine = true,
-            colors = TextFieldDefaults.textFieldColors(
-                backgroundColor = Color.White,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            )
-        )
     }
 }
 
@@ -487,19 +442,32 @@ fun ProductIntroduction(giftDetail: GiftDetailData) {
         Spacer(modifier = Modifier.height(16.dp))
 
         // 상품 설명
-        val (thumbnailUrl, description) = giftDetail.giftContentDetails  // 썸네일 URL과 설명 파싱
+        val thumbnailUrl = giftDetail.giftContentImage  // 썸네일 URL과 설명 파싱
+        val description = giftDetail.giftContent
 
         if (thumbnailUrl != null) {
             // 상품 썸네일 이미지
-            Image(
-                painter = rememberImagePainter(data = thumbnailUrl),
-                contentDescription = "상품 썸네일",
+
+
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
+                    .fillMaxSize()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 200.dp, max = 8000.dp)
+                ) {
+                    Image(
+                        painter = rememberImagePainter(data = thumbnailUrl),
+                        contentDescription = "상품 썸네일",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp)),
+                        contentScale = ContentScale.FillWidth
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -512,7 +480,7 @@ fun ProductIntroduction(giftDetail: GiftDetailData) {
             )
         } else {
             Text(
-                text = "상품 설명이 없습니다.",
+                text = "",
                 fontSize = 16.sp,
                 color = Color.Gray
             )
@@ -643,7 +611,8 @@ fun RelatedRecommendations(navController: NavController, location: String) {
         // Related places button
         Button(onClick = {
             // 주변 관광지 버튼 클릭 시 지역 정보를 전달하며 관광 페이지로 이동
-            val shortLocation = location.takeLast(2)
+            val shortLocation = location.takeLast(3).substring(0, 2)
+
             navController.navigate("attraction?city=$shortLocation")
         }) {
             Text(text = "+ 주변 관광지")

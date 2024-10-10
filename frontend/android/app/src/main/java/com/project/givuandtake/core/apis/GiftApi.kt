@@ -1,14 +1,13 @@
 package com.project.givuandtake.core.apis
 
-import com.project.givuandtake.core.data.CartItemDataResponse
 import com.project.givuandtake.core.data.CartRequest
 import com.project.givuandtake.core.data.CartResponse
-import com.project.givuandtake.core.data.GiftDetail
+import com.project.givuandtake.core.data.Gift.WishlistResponse
 import com.project.givuandtake.core.data.GiftDetailResponse
 import com.project.givuandtake.core.data.GiftResponse
-import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
@@ -44,6 +43,36 @@ interface GiftApiService {
     suspend fun getGiftsByCategory(
         @Query("categoryIdx") categoryIdx: Int
     ): GiftResponse
+
+
+    // 최신 상품 검색 API
+    @GET("/api/gifts/recent")
+    suspend fun getRecentGifts(
+        @Header("Authorization") token: String
+    ) : Response<GiftResponse>
+
+
+    // GET 요청: 현재 사용자의 찜 목록을 가져옴
+    @GET("/api/users/wish")
+    suspend fun getWishlist(
+        @Header("Authorization") token: String
+    ): Response<WishlistResponse>
+
+    // POST 요청: 찜 목록에 추가
+    @POST("/api/users/wish")
+    suspend fun addToWishlist(
+        @Header("Authorization") token: String,
+        @Body body: Map<String, Int>
+    ): Response<Unit>
+
+    // DELETE 요청: 찜 목록에서 제거
+    @DELETE("/api/users/wish")
+    suspend fun removeFromWishlist(
+        @Header("Authorization") token: String,
+        @Query("wishIdx") wishIdx: Int
+    ): Response<Unit>
+
+
 
 }
 
