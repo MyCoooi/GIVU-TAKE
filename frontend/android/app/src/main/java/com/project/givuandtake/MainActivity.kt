@@ -43,6 +43,7 @@ import com.project.givuandtake.auth.SignupStep3
 import com.project.givuandtake.auth.SignupViewModel
 import com.project.givuandtake.core.data.CartItemData
 import com.project.givuandtake.core.data.KakaoPaymentInfo
+import com.project.givuandtake.core.data.KakaoPaymentInfo_funding
 import com.project.givuandtake.feature.attraction.FestivalPage
 import com.project.givuandtake.feature.attraction.LocationSelect
 import com.project.givuandtake.feature.attraction.TripPage
@@ -82,7 +83,9 @@ import com.project.givuandtake.feature.mypage.MyManagement.MyReview
 import com.project.givuandtake.feature.mypage.MyPageScreen
 //import com.project.givuandtake.feature.payment.KakaoPayManager
 import com.project.givuandtake.feature.payment.PaymentResultPage
+import com.project.givuandtake.feature.payment.PaymentResultPage_funding
 import com.project.givuandtake.feature.payment.PaymentSuccessPage
+import com.project.givuandtake.feature.payment.PaymentSuccessPage_funding
 import com.project.givuandtake.ui.navbar.BottomNavBar
 import com.project.givuandtake.ui.theme.CustomTypography
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
@@ -242,6 +245,27 @@ class MainActivity : ComponentActivity() {
                                 "payment_success",
                                 deepLinks = listOf(navDeepLink { uriPattern = "https://givuandtake/payment/success" })
                             ) { PaymentSuccessPage(navController = navController, paymentInfoJson = "") }
+
+                            composable(
+                                "payment_result_funding/{paymentInfoJson}"
+                            ) { backStackEntry ->
+                                val paymentInfoJson = backStackEntry.arguments?.getString("paymentInfoJson")
+                                paymentInfoJson?.let {
+                                    val paymentInfo = Gson().fromJson(it, KakaoPaymentInfo_funding::class.java)
+                                    PaymentResultPage_funding(navController = navController, paymentInfo = paymentInfo)
+                                }
+                            }
+
+                            // 펀딩 결제 성공 페이지 경로
+                            composable("payment_success_funding/{paymentInfoJson}") { backStackEntry ->
+                                val paymentInfoJson = backStackEntry.arguments?.getString("paymentInfoJson")
+                                paymentInfoJson?.let {
+                                    // JSON 문자열을 KakaoPaymentInfo_funding 객체로 변환
+                                    val paymentInfo = Gson().fromJson(it, KakaoPaymentInfo_funding::class.java)
+                                    // PaymentSuccessPage_funding으로 전달
+                                    PaymentSuccessPage_funding(navController = navController, paymentInfo = paymentInfo)
+                                }
+                            }
 
 
 
