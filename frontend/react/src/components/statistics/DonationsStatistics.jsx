@@ -9,6 +9,30 @@ import "./DonationsStatistics.css";
 import { apiMyDonations } from "../../apis/donations/apiMyDonations";
 import { getUserInfo } from "../../apis/auth/apiUserInfo";
 import { apiDonationsStatistics } from "../../apis/statistics/apiDonationsStatistics";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
 
 const DonationsStatistics = () => {
   const [selectedMenu, setSelectedMenu] = useState("통계");
@@ -121,8 +145,8 @@ const DonationsStatistics = () => {
 
               {/* 구매자 통계 박스 */}
               <Grid item xs={12} md={4}>
-              <TableContainer component={Paper} style={{ maxHeight: '100%', overflowY: 'auto' }}>
-              <Typography variant="h6" className="purchase-statistics-title">구매자 통계</Typography>
+                <TableContainer component={Paper} style={{ maxHeight: '100%', overflowY: 'auto' }}>
+                <Typography variant="h6" className="purchase-statistics-title">구매자 통계</Typography>
                   <Table aria-label="purchaser table">
                     <TableHead>
                       <TableRow>
