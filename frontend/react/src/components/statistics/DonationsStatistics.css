@@ -1,6 +1,6 @@
 .donations-statistics-container {
   display: flex;
-  height: 110vh;
+  height: 120vh;
 }
 
 .donations-statistics-content {
@@ -45,8 +45,8 @@
 }
 
 .donation-gender-statistics canvas, .donation-category-statistics canvas {
-  max-width: 150px;
-  max-height: 150px;
+  max-width: 200px;
+  max-height: 200px;
 }
 
 .pie-chart-title {
@@ -88,4 +88,8 @@
 
 .purchase-statistics-title {
   padding: 15px;
+}
+
+.purchaser table {
+  max-height: 400px;
 }
