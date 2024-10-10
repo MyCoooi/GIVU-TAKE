@@ -22,6 +22,7 @@ open class GiftViewModel(application: Application) : AndroidViewModel(applicatio
 
     // 모든 상품 목록
     open val allGiftDetails: StateFlow<List<GiftDetail>> = giftRepository.getAllGiftDetails()
+        .map { it.reversed() } // 리스트를 역순으로 변환
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // 모든 데이터를 삭제하는 함수

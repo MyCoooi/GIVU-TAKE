@@ -24,7 +24,9 @@ data class FundingDetailData(
     val startDate: String,
     val endDate: String,
     val fundingThumbnail: String,
-    val fundingContent: String
+    val fundingContent: String,
+    val fundingContentImage: String,
+    val fundingType: String
 )
 
 // Retrofit API 정의
