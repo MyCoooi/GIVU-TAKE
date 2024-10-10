@@ -41,7 +41,7 @@ fun PaymentResultPage(
 
     LaunchedEffect(uri) {
 
-        delay(5000L) // 5초 대기
+        delay(3000L) // 5초 대기
         Log.d("uri_pay:","uri : ${uri}")
         Log.d("uri_pay:","intent : ${intent}")
         // 결제 성공 페이지로 이동하면서 paymentInfoJson 전달
