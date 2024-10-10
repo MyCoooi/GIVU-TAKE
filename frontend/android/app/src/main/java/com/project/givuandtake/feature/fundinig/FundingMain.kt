@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -40,7 +41,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -323,8 +326,10 @@ fun FundingCardComposable(
             contentDescription = null,
             modifier = Modifier
                 .aspectRatio(1f)
-                .fillMaxWidth()
+                .fillMaxSize()
                 .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(8.dp)),  // 이미지에 둥근 모서리 적용
+            contentScale = ContentScale.Crop  // 이미지를 border 안에 꽉 채움
         )
 
         Spacer(modifier = Modifier.height(8.dp))
