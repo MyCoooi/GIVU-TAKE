@@ -57,7 +57,7 @@ import com.project.givuandtake.core.datastore.TokenDataStore
 import com.project.givuandtake.core.datastore.TokenManager
 import com.project.givuandtake.feature.gift.GiftViewModel
 import com.project.givuandtake.feature.gift.addToFavorites
-import com.project.givuandtake.feature.mypage.MyDonation.WishlistViewModel
+//import com.project.givuandtake.feature.mypage.MyDonation.WishlistViewModel
 import com.project.givuandtake.ui.theme.CustomTypography
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
 import com.project.givuandtake.ui.theme.gmarketSans
@@ -70,7 +70,7 @@ import java.time.format.TextStyle
 fun GiftPage(
     navController: NavController,
     viewModel: GiftViewModel = viewModel(),
-    wishlistViewModel: WishlistViewModel = viewModel()
+//    wishlistViewModel: WishlistViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val allProducts by viewModel.allGiftDetails.collectAsState()
@@ -375,7 +375,7 @@ fun ProductCard(
                     fontWeight = FontWeight.Normal,
                     fontSize = 15.sp,
                     color = Color.Black,
-                    maxLines = 2,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(1.dp))
