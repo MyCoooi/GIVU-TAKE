@@ -50,8 +50,8 @@ fun PaymentResultPage(
                     amount = paymentInfo.amount
                 )
                 val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
-
-                if (paymentInfo.paymentMethod == "신용, 체크 카드") {
+                Log.d("paymentInfo","paymentInfo : ${paymentInfo}")
+                if (paymentInfo.paymentMethod == "신용,체크+카드") {
                     // 신용/체크 카드 결제일 경우
                     Log.d("Payment", "신용, 체크 카드 결제 요청 처리 중...")
 
