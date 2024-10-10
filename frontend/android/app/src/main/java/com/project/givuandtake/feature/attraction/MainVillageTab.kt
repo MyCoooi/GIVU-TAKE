@@ -156,7 +156,7 @@ fun MainVillageTab(
         Spacer(modifier = Modifier.height(20.dp))
 
         if (villageData.isEmpty()) {
-            Text(text = "등록된 체험 마을이 없습니다.", modifier = Modifier.padding(16.dp))
+            Text(text = "등록된 체험 마을이 없습니다 😥", fontSize = 18.sp, modifier = Modifier.padding(16.dp))
         } else {
             Log.d("123456", "123456")
             Column(

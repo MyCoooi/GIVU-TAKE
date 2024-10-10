@@ -129,7 +129,7 @@ fun MarketItem(
 ) {
     Box(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .shadow(elevation = 4.dp, shape = RoundedCornerShape(12.dp))
             .background(Color.White, shape = RoundedCornerShape(12.dp))
             .padding(19.dp)
@@ -252,15 +252,13 @@ fun MainMarketTab(displayedCity: String) {
     Spacer(modifier = Modifier.height(16.dp))
 
     LazyRow(
-        modifier = Modifier
-            .fillMaxSize(),
         horizontalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         val filteredMarkets = marketProperties.filter { it.opn_per == "매일" }
 
         if (filteredMarkets.isEmpty()) {
             item {
-                Text(text = "상설 전통시장이 열리지 않아요.", fontSize = 18.sp, color = Color.Red, modifier = Modifier.padding(10.dp))
+                Text(text = "상설 전통시장이 열리지 않아요 😥", fontSize = 18.sp, color = Color.Red, modifier = Modifier.padding(10.dp))
             }
         } else {
             items(filteredMarkets) { market ->
@@ -286,13 +284,12 @@ fun MainMarketTab(displayedCity: String) {
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    // Market 정보
     Column(modifier = Modifier.fillMaxSize()) {
         val filteredMarkets = marketProperties.filter { it.opn_per != "매일" }
 
         when {
             filteredMarkets.isEmpty() -> {
-                Text(text = "정기 전통시장이 열리지 않아요", fontSize = 18.sp, color = Color.Red, modifier = Modifier.padding(10.dp))
+                Text(text = "정기 전통시장이 열리지 않아요 😥", fontSize = 18.sp, color = Color.Red, modifier = Modifier.padding(10.dp))
             }
             else -> {
                 filteredMarkets.take(3).forEach { market ->

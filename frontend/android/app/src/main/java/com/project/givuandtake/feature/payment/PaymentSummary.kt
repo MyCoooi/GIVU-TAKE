@@ -1,5 +1,10 @@
 package com.project.givuandtake.feature.payment
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,10 +27,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.project.givuandtake.core.data.KakaoPaymentInfo
 import com.project.givuandtake.core.data.KakaoPaymentInfo_funding
+import com.tosspayments.paymentsdk.PaymentWidget
+import com.tosspayments.paymentsdk.model.PaymentCallback
+import com.tosspayments.paymentsdk.model.PaymentWidgetStatusListener
+import com.tosspayments.paymentsdk.model.TossPaymentResult
+import com.tosspayments.paymentsdk.view.PaymentMethod
 
 @Composable
 fun PaymentTotalAndButton(
@@ -143,6 +154,7 @@ fun PaymentTotalAndButton_gift(
                 navController = navController,
                 viewModel = viewModel // ViewModel 전달
             )
+
         }
     }
 }
@@ -198,7 +210,135 @@ fun PaymentButton_gift(kakaoPaymentInfo: KakaoPaymentInfo, navController: NavCon
             color = Color.White
         )
     }
+
+
+
+
 }
+
+
+
+@Composable
+fun TossPaymentScreen(
+//    navController: NavController,
+//    viewModel: PaymentViewModel = viewModel(),
+    amount: Int, // 결제 금액
+    orderId: String, // 주문 ID
+    orderName: String, // 주문 이름
+    activity: AppCompatActivity // Activity를 명시적으로 전달
+) {
+    val clientKey = "test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq" // 클라이언트 키
+    val customerKey = "test_customer_123" // 구매자 키
+
+    if (activity != null) {
+        // PaymentWidget 초기화
+        val paymentWidget = remember {
+            PaymentWidget(
+                activity = activity,
+                clientKey = clientKey,
+                customerKey = customerKey
+            )
+        }
+
+        // UI 구성
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            PaymentMethodWidget(paymentWidget, amount)
+            AgreementWidget(paymentWidget)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    paymentWidget.requestPayment(
+                        paymentInfo = PaymentMethod.PaymentInfo(orderId, orderName),
+                        paymentCallback = object : PaymentCallback {
+                            override fun onPaymentSuccess(success: TossPaymentResult.Success) {
+                                Log.d("Payment Success", "결제 성공: ${success.paymentKey}")
+//                                viewModel.onPaymentSuccess(success)
+//                                navController.navigate("PaymentSuccessScreen")
+                            }
+
+                            override fun onPaymentFailed(fail: TossPaymentResult.Fail) {
+                                Log.e("Payment Fail", "결제 실패: ${fail.errorMessage}")
+//                                viewModel.onPaymentFail(fail)
+                            }
+                        }
+                    )
+                },
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A6CE3)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .height(50.dp)
+            ) {
+                Text(
+                    text = "토스 결제하기",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
+        }
+    } else {
+        Text("Activity를 찾을 수 없습니다.")
+    }
+}
+
+// Activity를 안전하게 가져오는 헬퍼 함수
+fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
+@Composable
+fun PaymentMethodWidget(paymentWidget: PaymentWidget, amount: Int) {
+    // 결제 방법을 렌더링하는 UI
+    AndroidView(
+        factory = { context ->
+            PaymentMethod(context).apply {
+                paymentWidget.renderPaymentMethods(
+                    this,
+                    amount = PaymentMethod.Rendering.Amount(amount),
+                    paymentWidgetStatusListener = object : PaymentWidgetStatusListener {
+                        override fun onLoad() {
+                            Log.d("PaymentWidget", "결제 위젯 로드 완료")
+                        }
+
+                        override fun onFail(fail: TossPaymentResult.Fail) {
+                            Log.e("PaymentWidget", "결제 위젯 로드 실패: ${fail.errorMessage}")
+                        }
+                    }
+                )
+            }
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+fun AgreementWidget(paymentWidget: PaymentWidget) {
+    // 약관 동의 위젯을 렌더링하는 UI
+    AndroidView(
+        factory = { context ->
+            com.tosspayments.paymentsdk.view.Agreement(context).apply {
+                paymentWidget.renderAgreement(this, null)
+            }
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+
+
+
+
+
+
 
 //@Composable
 //fun PaymentButton_gift(kakaoPaymentInfo: KakaoPaymentInfo, navController: NavController) {

@@ -26,6 +26,7 @@ import androidx.compose.material.Tab
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +43,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.project.givuandtake.R
@@ -103,9 +105,23 @@ fun GifImage(weatherDes: String) {
     )
 }
 
+
+class AttractionViewModel : ViewModel() {
+    // 탭 상태 관리
+    private val _selectedTabIndex = mutableStateOf(0)
+    val selectedTabIndex: State<Int> = _selectedTabIndex
+
+    // 탭 변경 함수
+    fun updateTabIndex(index: Int) {
+        _selectedTabIndex.value = index
+    }
+}
+
 @Composable
 fun AttractionMain(navController: NavController, city: String?) {
     val scrollState = rememberScrollState()
+    val viewModel: AttractionViewModel = viewModel()
+    val selectedTabIndex by viewModel.selectedTabIndex
 
     val displayedCity = city ?: "도 선택"
     Log.d("CitySelection", displayedCity)
@@ -155,7 +171,6 @@ fun AttractionMain(navController: NavController, city: String?) {
     var weatherMoreDes by remember { mutableStateOf("") }
 
     // 탭 상태 관리
-    var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("전통시장", "축제", "관광지", "체험마을")
 
     LaunchedEffect(Unit) {
@@ -214,7 +229,6 @@ fun AttractionMain(navController: NavController, city: String?) {
             .fillMaxSize()
             .verticalScroll(scrollState)
             .background(Color(0xFFB3C3F4)),
-        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
@@ -308,7 +322,7 @@ fun AttractionMain(navController: NavController, city: String?) {
             items(tabs.size) { index ->
                 Tab(
                     selected = selectedTabIndex == index,
-                    onClick = { selectedTabIndex = index },
+                    onClick = { viewModel.updateTabIndex(index) },
                     modifier = Modifier
                         .wrapContentWidth()
                         .padding(horizontal = 12.dp) // 탭 너비를 텍스트에 맞춤
@@ -333,7 +347,7 @@ fun AttractionMain(navController: NavController, city: String?) {
 
         Box(
             modifier = Modifier
-                .fillMaxHeight()
+                .height(600.dp)
                 .background(
                     color = Color.White,
                     shape = RoundedCornerShape(
@@ -346,15 +360,15 @@ fun AttractionMain(navController: NavController, city: String?) {
                 .padding(20.dp)
         ) {
             Column(
-                modifier = Modifier.fillMaxHeight()
-            ){
+                modifier = Modifier.fillMaxHeight()  // 높이를 모두 채우도록 설정
+            ) {
                 when (selectedTabIndex) {
                     0 -> {
                         MainMarketTab(displayedCity)
                     }
 
                     1 -> {
-                        MainFestivalTab(navController = navController, displayedCity=displayedCity)
+                        MainFestivalTab(navController = navController, displayedCity = displayedCity)
                     }
 
                     2 -> {
@@ -365,7 +379,8 @@ fun AttractionMain(navController: NavController, city: String?) {
                         MainVillageTab(navController = navController, displayedCity = displayedCity)
                     }
                 }
-                Spacer(modifier = Modifier.weight(1f))
+
+                Spacer(modifier = Modifier.weight(1f))  // 남는 공간을 모두 차지하도록 설정
             }
         }
     }
