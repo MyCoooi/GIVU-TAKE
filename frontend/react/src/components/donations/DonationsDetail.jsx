@@ -1,55 +1,73 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom"; 
-import Sidebar from "../Sidebar"; 
-import "./DonationsDetail.css"; 
-import Swal from "sweetalert2"; 
-import { apiDonationsDetail } from "../../apis/donations/apiDonationsDetail"; 
-import { apiDonationsSales } from "../../apis/donations/apiDonationsSales"; 
-import { apiDeleteDonations } from "../../apis/donations/apiDeleteDonations"; 
-import { apiUpdateDonations } from "../../apis/donations/apiUpdateDonations"; 
-import TokenManager from "../../utils/TokenManager"; 
+import { useNavigate, useParams } from "react-router-dom";
+import Sidebar from "../Sidebar";
+import "./DonationsDetail.css";
+import Swal from "sweetalert2";
+import { apiDonationsDetail } from "../../apis/donations/apiDonationsDetail";
+import { apiDonationsSales } from "../../apis/donations/apiDonationsSales";
+import { apiDeleteDonations } from "../../apis/donations/apiDeleteDonations";
+import { apiUpdateDonations } from "../../apis/donations/apiUpdateDonations";
+import { apiDonationsReview } from "../../apis/donations/apiDonationsReview";
+import TokenManager from "../../utils/TokenManager";
+import defaultProfile from "../../assets/student.png"; // 기본 프로필 이미지
 
 const DonationsDetail = () => {
   const navigate = useNavigate();
-  const { giftIdx } = useParams(); 
+  const { giftIdx } = useParams();
   const [selectedMenu, setSelectedMenu] = useState("기부품");
-  const [activeTab, setActiveTab] = useState("소개"); 
-  const [donation, setDonation] = useState(null); 
-  const [salesCount, setSalesCount] = useState(0); 
-  const [isEditing, setIsEditing] = useState(false); 
+  const [activeTab, setActiveTab] = useState("소개");
+  const [donation, setDonation] = useState(null);
+  const [salesCount, setSalesCount] = useState(0);
+  const [reviews, setReviews] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
   const [updatedDonation, setUpdatedDonation] = useState({
     giftName: "",
     price: "",
     giftThumbnail: "",
     giftContent: "",
-    giftContentImage: "", 
-    categoryName: "", 
+    giftContentImage: "",
+    categoryName: "",
   });
 
-  const categories = ["지역상품권", "농축산물", "수산물", "가공식품", "공예품"]; 
+  const categories = ["지역상품권", "농축산물", "수산물", "가공식품", "공예품"];
 
   useEffect(() => {
     const fetchDonationDetail = async () => {
       try {
-        const data = await apiDonationsDetail(giftIdx); 
+        const data = await apiDonationsDetail(giftIdx);
         setDonation(data);
         setUpdatedDonation({
           giftName: data.giftName,
           price: data.price?.toString(),
           giftThumbnail: data.giftThumbnail,
           giftContent: data.giftContent,
-          giftContentImage: data.giftContentImage, 
-          categoryName: data.categoryName, 
+          giftContentImage: data.giftContentImage,
+          categoryName: data.categoryName,
         });
-        const salesData = await apiDonationsSales(giftIdx); 
-        setSalesCount(salesData); 
+        const salesData = await apiDonationsSales(giftIdx);
+        setSalesCount(salesData);
       } catch (error) {
         console.error("기부품 상세 정보를 가져오는 데 실패했습니다:", error);
       }
     };
 
     fetchDonationDetail();
-  }, [giftIdx]); 
+  }, [giftIdx]);
+
+  useEffect(() => {
+    if (activeTab === "후기") {
+      const fetchReviews = async () => {
+        try {
+          const reviewData = await apiDonationsReview(giftIdx);
+          setReviews(reviewData);
+        } catch (error) {
+          console.error("후기를 불러오는 데 실패했습니다:", error);
+          setReviews([]);
+        }
+      };
+      fetchReviews();
+    }
+  }, [activeTab, giftIdx]);
 
   const handleDelete = () => {
     Swal.fire({
@@ -64,10 +82,10 @@ const DonationsDetail = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const accessToken = TokenManager.getAccessToken(); 
-          await apiDeleteDonations(giftIdx, accessToken); 
+          const accessToken = TokenManager.getAccessToken();
+          await apiDeleteDonations(giftIdx, accessToken);
           Swal.fire('삭제되었습니다!', '기부품이 성공적으로 삭제되었습니다.', 'success');
-          navigate("/donations"); 
+          navigate("/donations");
         } catch (error) {
           Swal.fire('삭제 실패', '기부품을 삭제하는 중 문제가 발생했습니다. 다시 시도해주세요.', 'error');
           console.error("기부품 삭제 실패:", error);
@@ -77,25 +95,25 @@ const DonationsDetail = () => {
   };
 
   const handleEditClick = () => {
-    setIsEditing(true); 
+    setIsEditing(true);
   };
 
   const handleCancelClick = () => {
-    setIsEditing(false); 
+    setIsEditing(false);
   };
 
   const handleSaveClick = async () => {
     try {
-      const accessToken = TokenManager.getAccessToken(); 
-      const categoryIdx = categories.indexOf(updatedDonation.categoryName) + 1; 
+      const accessToken = TokenManager.getAccessToken();
+      const categoryIdx = categories.indexOf(updatedDonation.categoryName) + 1;
 
       await apiUpdateDonations(giftIdx, {
         giftName: updatedDonation.giftName,
-        price: parseInt(updatedDonation.price, 10), 
+        price: parseInt(updatedDonation.price, 10),
         giftThumbnail: updatedDonation.giftThumbnail,
         giftContent: updatedDonation.giftContent,
-        giftContentImage: updatedDonation.giftContentImage, 
-        categoryIdx: categoryIdx 
+        giftContentImage: updatedDonation.giftContentImage,
+        categoryIdx: categoryIdx
       }, accessToken);
 
       Swal.fire({
@@ -104,10 +122,10 @@ const DonationsDetail = () => {
         icon: "success",
         confirmButtonText: "확인",
       }).then(() => {
-        window.location.reload(); 
+        window.location.reload();
       });
 
-      setIsEditing(false); 
+      setIsEditing(false);
     } catch (error) {
       Swal.fire({
         title: "수정 실패",
@@ -134,9 +152,9 @@ const DonationsDetail = () => {
           <div className="donations-description">
             <h2>기부품 소개</h2>
             {donation?.giftContentImage && (
-              <img 
-                src={donation.giftContentImage} 
-                alt="기부품 내용 이미지" 
+              <img
+                src={donation.giftContentImage}
+                alt="기부품 내용 이미지"
                 className="donations-content-image"
               />
             )}
@@ -157,19 +175,49 @@ const DonationsDetail = () => {
       case "후기":
         return (
           <div className="donations-reviews-section">
-            <p>후기 내용이 여기에 표시됩니다.</p>
+            {reviews.length > 0 ? (
+              reviews.map((review) => (
+                <div key={review.reviewIdx} className="review-item">
+                  <div className="review-header">
+                    <img
+                      src={review.userProfileImage || defaultProfile}
+                      alt={review.userName}
+                      className="review-user-image"
+                    />
+                    <div className="review-meta">
+                      <span className="review-user-name">{review.userName}</span>
+                      <span className="review-date">{new Date(review.createdDate).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                  <div className="review-content-wrapper">
+                    {review.reviewImage && (
+                      <img
+                        src={review.reviewImage}
+                        alt="후기 이미지"
+                        className="review-image"
+                      />
+                    )}
+                    <p className="review-content">{review.reviewContent}</p>
+                  </div>
+                  <div className="review-footer">
+                    <span className="review-likes">좋아요 {review.likedCount}</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p>후기가 없습니다.</p>
+            )}
           </div>
         );
       default:
         return null;
     }
   };
-  
 
   return (
     <div className="donations-detail-container">
       <Sidebar selectedMenu={selectedMenu} setSelectedMenu={setSelectedMenu} />
-      
+
       <div className="donations-detail-content">
         <h1 className="donations-detail-title">기부품 상세</h1>
 
@@ -206,80 +254,82 @@ const DonationsDetail = () => {
             )}
           </div>
         </div>
+                {/* activeTab이 "후기"일 때 기부품 내용 섹션을 감추기 */}
+        {activeTab !== "후기" && (
+          <div className="donations-detail-body">
+            <div className="donations-thumbnail-section">
+              {isEditing ? (
+                <img
+                  src={updatedDonation.giftThumbnail}
+                  alt="기부품 썸네일"
+                  className="donations-thumbnail"
+                />
+              ) : donation?.giftThumbnail ? (
+                <img
+                  src={donation.giftThumbnail}
+                  alt="기부품 썸네일"
+                  className="donations-thumbnail"
+                />
+              ) : (
+                <div className="donations-thumbnail-placeholder">썸네일</div>
+              )}
+            </div>
 
-        <div className="donations-detail-body">
-          <div className="donations-thumbnail-section">
-            {isEditing ? (
-              <img
-                src={updatedDonation.giftThumbnail} 
-                alt="기부품 썸네일"
-                className="donations-thumbnail"
-              />
-            ) : donation?.giftThumbnail ? (
-              <img
-                src={donation.giftThumbnail}
-                alt="기부품 썸네일"
-                className="donations-thumbnail"
-              />
-            ) : (
-              <div className="donations-thumbnail-placeholder">썸네일</div>
-            )}
+            <div className="donations-info-section">
+              {isEditing ? (
+                <>
+                  <div className="input-row">
+                    <label htmlFor="giftName">기부품 이름:</label>
+                    <input
+                      id="giftName"
+                      type="text"
+                      name="giftName"
+                      value={updatedDonation.giftName}
+                      onChange={handleChange}
+                      className="edit-input"
+                    />
+                  </div>
+                  <div className="input-row">
+                    <label htmlFor="price">가격:</label>
+                    <input
+                      id="price"
+                      type="text"
+                      name="price"
+                      value={updatedDonation.price}
+                      onChange={handleChange}
+                      className="edit-input"
+                    />
+                  </div>
+                  <div className="input-row">
+                    <label htmlFor="category">카테고리:</label>
+                    <select
+                      id="category"
+                      name="categoryName"
+                      value={updatedDonation.categoryName}
+                      onChange={handleChange}
+                      className="edit-input"
+                    >
+                      {categories.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h2 className="donations-title">{donation?.giftName}</h2>
+                  <p className="donations-price">가격: {donation?.price?.toLocaleString()}원</p>
+                  <p className="donations-category">카테고리: {donation?.categoryName}</p>
+                </>
+              )}
+              <p className="donations-stock">판매량: {salesCount}개</p>
+              <p className="donations-corporationName">판매자: {donation?.corporationSido} {donation?.corporationSigungu} </p>
+              <p className="donations-date">등록일: {new Date(donation?.createdDate).toLocaleDateString()}</p>
+            </div>
           </div>
-
-          <div className="donations-info-section">
-            {isEditing ? (
-              <>
-                <div className="input-row">
-                  <label htmlFor="giftName">기부품 이름:</label>
-                  <input
-                    id="giftName"
-                    type="text"
-                    name="giftName"
-                    value={updatedDonation.giftName}
-                    onChange={handleChange}
-                    className="edit-input"
-                  />
-                </div>
-                <div className="input-row">
-                  <label htmlFor="price">가격:</label>
-                  <input
-                    id="price"
-                    type="text"
-                    name="price"
-                    value={updatedDonation.price}
-                    onChange={handleChange}
-                    className="edit-input"
-                  />
-                </div>
-                <div className="input-row">
-                  <label htmlFor="category">카테고리:</label>
-                  <select
-                    id="category"
-                    name="categoryName"
-                    value={updatedDonation.categoryName}
-                    onChange={handleChange}
-                    className="edit-input"
-                  >
-                    {categories.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </>
-            ) : (
-              <>
-                <h2 className="donations-title">{donation?.giftName}</h2>
-                <p className="donations-price">가격: {donation?.price?.toLocaleString()}원</p>
-                <p className="donations-category">카테고리: {donation?.categoryName}</p>
-              </>
-            )}
-            <p className="donations-stock">판매량: {salesCount}개</p> 
-            <p className="donations-corporationName">판매자: {donation?.corporationSido} {donation?.corporationSigungu} </p>
-            <p className="donations-date">등록일: {new Date(donation?.createdDate).toLocaleDateString()}</p>
-          </div>
-        </div>
+        )}
 
         {renderContent()}
       </div>
