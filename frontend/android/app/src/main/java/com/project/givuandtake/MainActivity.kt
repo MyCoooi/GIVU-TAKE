@@ -369,7 +369,9 @@ class MainActivity : ComponentActivity() {
                             currentDestination != "personalinquirywrite" &&
                             currentDestination != "cardbookupdate" &&
                             currentDestination != "writegiftreview/{gift}" &&
-                            currentDestination != "donationdetails"
+                            currentDestination != "donationdetails" &&
+                            currentDestination != "gift_page_detail/{giftIdx}" &&
+                            currentDestination != "payment_page_gift?name={name}&location={location}&price={price}&quantity={quantity}&thumbnailUrl={thumbnailUrl}&giftIdx={giftIdx}"
                         ) {
                             BottomNavBar(navController, selectedItem) { newIndex ->
                                 selectedItem = newIndex

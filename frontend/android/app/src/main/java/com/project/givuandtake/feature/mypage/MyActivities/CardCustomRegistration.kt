@@ -376,7 +376,7 @@ fun CardCustomRegistration(cardNumber: String, validThru: String, navController:
 
     val cardRequest =  CardPostData(
         cardCompany = "${selectedBank?.name}",
-        cardNumber = formattedCardNumber,
+        cardNumber = cardNumber,
         cardCVC = cvcCode,
         cardExpiredDate = "20$expiryYear-$expiryMonth-28",
         cardPassword = password,
