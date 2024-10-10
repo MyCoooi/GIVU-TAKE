@@ -73,7 +73,8 @@ class CardPostViewModel : ViewModel() {
 
                 if (response.isSuccessful) {
                     Log.d("CardPost", "등록 성공")
-                    navController.navigate("cardbook")
+                    navController.popBackStack() // 첫 번째 뒤로 가기
+                    navController.popBackStack() // 두 번째 뒤로 가기
                 } else {
                     Log.e("CardPost", "주소 등록 실패: ${response.errorBody()?.string()}")
                 }
@@ -376,7 +377,7 @@ fun CardCustomRegistration(cardNumber: String, validThru: String, navController:
 
     val cardRequest =  CardPostData(
         cardCompany = "${selectedBank?.name}",
-        cardNumber = cardNumber,
+        cardNumber = formattedCardNumber,
         cardCVC = cvcCode,
         cardExpiredDate = "20$expiryYear-$expiryMonth-28",
         cardPassword = password,
