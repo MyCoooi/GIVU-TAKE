@@ -48,6 +48,8 @@ import com.project.givuandtake.core.data.Gift.ReviewData
 import com.project.givuandtake.core.data.GiftDetail
 import com.project.givuandtake.core.data.GiftDetailData
 import com.project.givuandtake.core.datastore.TokenManager
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import retrofit2.Response
 
 class GiftReviewModel : ViewModel() {
@@ -138,6 +140,7 @@ class GiftReviewModel : ViewModel() {
         }
     }
 }
+
 fun GiftDetailData.toGiftDetail(): GiftDetail {
     return GiftDetail(
         giftIdx = this.giftIdx,
@@ -166,12 +169,20 @@ fun GiftPageDetail(
     cartItems: MutableState<List<CartItemData>>,  // 장바구니 항목 상태
     navController: NavController,  // 네비게이션 컨트롤러
     giftViewModel: GiftViewModel = viewModel(),  // 상품 뷰 모델
-//    wishlistViewModel: WishlistViewModel = viewModel()  // 위시리스트 뷰 모델
 ) {
     // 상품 상세 정보 상태
     val giftDetail by giftViewModel.giftDetail.collectAsState()
 
     val wishlistItems by giftViewModel.wishlistItems.collectAsState()
+
+    // 리뷰 상태
+    val viewModel : GiftReviewModel = viewModel()
+    LaunchedEffect(Unit) {
+        viewModel.fetchGiftReviews(giftIdx)
+    }
+
+    val reviews by viewModel.reviews
+
 
 
     // 코루틴 스코프
@@ -214,7 +225,9 @@ fun GiftPageDetail(
                                 val updatedCartItems = fetchCartList(accessToken)
                                 // cartItems에 새로운 장바구니 데이터를 추가
                                 if (updatedCartItems != null) {
-                                    cartItems = cartItems + updatedCartItems // 리스트를 합치는 방식으로 갱신
+                                    Log.d("cartItems","cartItems : ${cartItems}")
+                                    Log.d("cartItems","updatedCartItems : ${updatedCartItems}")
+                                    cartItems = updatedCartItems // 리스트를 합치는 방식으로 갱신
                                 }
                                 Log.d("GiftPageDetail", "상품이 장바구니에 성공적으로 추가되었습니다.")
                             } else {
@@ -297,7 +310,7 @@ fun GiftPageDetail(
                 item {
                     when (TabState.selectedTabIndex) {
                         0 -> ProductIntroduction(giftDetail = detail)
-//                        1 -> ProductReview(reviews = dummyReviews, viewModel = giftViewModel, token = accessToken)  // 리뷰 탭
+                        1 -> ProductReview(reviews = reviews, viewModel = viewModel, token = accessToken)  // 리뷰 탭
                         2 -> RelatedRecommendations(navController = navController, location = detail.location)  // 연관 추천 탭
                     }
                 }
@@ -484,7 +497,9 @@ fun GiftTopBar(
     navController: NavController
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     )   {
@@ -646,7 +661,9 @@ fun ProductReview(reviews: List<ReviewData>, viewModel: GiftReviewModel, token: 
                         Image(
                             painter = painterResource(id = R.drawable.good),
                             contentDescription = "Example Icon",
-                            modifier = Modifier.padding(horizontal = 10.dp).size(16.dp)
+                            modifier = Modifier
+                                .padding(horizontal = 10.dp)
+                                .size(16.dp)
                         )
                         Text(
                             text = "${review.likedCount}",
@@ -711,5 +728,7 @@ val dummyReviews = listOf(
         imageUrl = R.drawable.placeholder  // 후기 이미지 S3 URL
     )
 )
+
+
 
 
