@@ -1,114 +1,235 @@
-import React, { useState, useEffect } from "react";
-import Sidebar from "../Sidebar"; // Sidebar import
-import "./DonationsStatistics.css"; // 공통 CSS 파일
+import React, { useState, useEffect, useRef } from "react";
+import Sidebar from "../Sidebar";
+import { Line, Pie, Bar } from "react-chartjs-2";
+import {
+  Typography, MenuItem, Select, FormControl, InputLabel, Box, Grid,
+  Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow
+} from "@mui/material";
+import "./DonationsStatistics.css";
 import { apiMyDonations } from "../../apis/donations/apiMyDonations";
-import { getUserInfo } from "../../apis/auth/apiUserInfo"; // getUserInfo import
+import { getUserInfo } from "../../apis/auth/apiUserInfo";
 import { apiDonationsStatistics } from "../../apis/statistics/apiDonationsStatistics";
 
 const DonationsStatistics = () => {
   const [selectedMenu, setSelectedMenu] = useState("통계");
-  const [donations, setDonations] = useState([]); // 기부품 목록
-  const [selectedDonationIdx, setSelectedDonationIdx] = useState(""); // 선택된 기부품의 idx
-  const [donationStatistics, setDonationStatistics] = useState(null); // 통계 데이터
-  const [errorMessage, setErrorMessage] = useState(null); // 오류 메시지
-  const [corporationEmail, setCorporationEmail] = useState(""); // 사용자 이메일 상태
+  const [selectedDonation, setSelectedDonation] = useState(null);
+  const [donations, setDonations] = useState([]);
+  const [donationStatistics, setDonationStatistics] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // 사용자 정보를 불러오는 함수
-  const fetchUserInfo = async () => {
-    try {
-      const userInfo = await getUserInfo(); // 사용자 정보 API 호출
-      setCorporationEmail(userInfo.email); // 이메일 상태에 저장
-    } catch (error) {
-      console.error("사용자 정보를 가져오는 데 실패했습니다:", error);
-    }
-  };
+  const chartContainerRef = useRef(null);
+  const [chartHeight, setChartHeight] = useState(0);
 
-  // 기부품 목록을 불러오는 함수
-  const fetchDonations = async () => {
-    if (!corporationEmail) return; // 이메일이 없으면 호출 중단
-    try {
-      const donationData = await apiMyDonations(corporationEmail); // 이메일로 기부품 API 호출
-      setDonations(donationData); // 가져온 기부품 목록 설정
-    } catch (error) {
-      console.error("기부품 목록 불러오기 실패:", error);
-    }
-  };
-
-  // 컴포넌트가 마운트되면 사용자 정보를 가져오고, 기부품 목록을 불러옴
   useEffect(() => {
-    fetchUserInfo(); // 사용자 정보 불러오기
+    const fetchDonations = async () => {
+      try {
+        const userInfo = await getUserInfo();
+        const email = userInfo.email;
+        const donationData = await apiMyDonations(email);
+        setDonations(donationData);
+      } catch (error) {
+        console.error("기부 목록을 가져오는 데 실패했습니다:", error);
+      }
+    };
+
+    fetchDonations();
   }, []);
 
-  // corporationEmail이 설정되면 기부품 목록을 가져옴
   useEffect(() => {
-    if (corporationEmail) {
-      fetchDonations();
-    }
-  }, [corporationEmail]);
-
-  // 드롭다운에서 기부품 선택 시 처리
-  const handleDonationChange = async (event) => {
-    const donationIdx = event.target.value;
-    setSelectedDonationIdx(donationIdx); // 선택된 기부품의 idx 설정
-
-    // 기부품 통계 불러오기
-    if (donationIdx) {
-      try {
-        const statisticsData = await apiDonationsStatistics(donationIdx);
-        setDonationStatistics(statisticsData); // 통계 데이터 저장
-        setErrorMessage(null); // 오류 메시지 초기화
-      } catch (error) {
-        console.error("기부품 통계 불러오기 실패:", error);
-        setDonationStatistics(null);
-        setErrorMessage("기부품 통계를 불러오는 데 실패했습니다.");
+    const fetchDonationStatistics = async () => {
+      if (selectedDonation) {
+        setLoading(true);
+        try {
+          const statistics = await apiDonationsStatistics(selectedDonation);
+          setDonationStatistics(statistics);
+        } catch (error) {
+          console.error("기부 통계를 가져오는 데 실패했습니다:", error);
+        } finally {
+          setLoading(false);
+        }
       }
-    } else {
-      setDonationStatistics(null);
-    }
+    };
+
+    fetchDonationStatistics();
+  }, [selectedDonation]);
+
+  const handleDonationChange = (event) => {
+    setSelectedDonation(event.target.value);
+    setDonationStatistics(null);
   };
 
   return (
     <div className="donations-statistics-container">
       <Sidebar selectedMenu={selectedMenu} setSelectedMenu={setSelectedMenu} />
+
       <div className="donations-statistics-content">
-        <div className="donations-select-container">
-          <h2>기부품을 선택해 주세요.</h2>
-          <div className="donations-dropdown">
-            <select
-              id="donations-select"
-              name="donations-select"
-              value={selectedDonationIdx}
-              onChange={handleDonationChange}
-            >
-              <option value="">기부품 선택</option>
+        <Typography variant="h4" className="donations-statistics-title">
+          {selectedDonation
+            ? `${donations.find(d => d.giftIdx === selectedDonation)?.giftName} 통계`
+            : "기부품을 선택해 주세요."}
+        </Typography>
+
+        <div className="donations-statistics-buttons">
+          <FormControl variant="outlined" className="donations-dropdown">
+            <InputLabel>기부품 선택</InputLabel>
+            <Select value={selectedDonation || ""} onChange={handleDonationChange} label="기부품 선택">
               {donations.map((donation) => (
-                <option key={donation.giftIdx} value={donation.giftIdx}>
+                <MenuItem key={donation.giftIdx} value={donation.giftIdx}>
                   {donation.giftName}
-                </option>
+                </MenuItem>
               ))}
-            </select>
-          </div>
-
-          {/* 통계 데이터가 있을 경우 텍스트로 표시 */}
-          {donationStatistics && (
-            <div className="donation-statistics-data">
-              <h3>기부 통계</h3>
-              <p>연간 통계: {JSON.stringify(donationStatistics.giftYearStatistics)}</p>
-              <p>성별 비율: {JSON.stringify(donationStatistics.giftPercentageByGender)}</p>
-              <p>카테고리 비율: {JSON.stringify(donationStatistics.giftPercentageByCategory)}</p>
-              <p>연령대 비율: {JSON.stringify(donationStatistics.giftPercentageByAge)}</p>
-              <h4>구매자 목록:</h4>
-              <ul>
-                {donationStatistics.giftPurchasers.map((purchaser, index) => (
-                  <li key={index}>{purchaser.name}: {purchaser.price}원</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* 오류 메시지 표시 */}
-          {errorMessage && <p className="error-message">{errorMessage}</p>}
+            </Select>
+          </FormControl>
         </div>
+
+        {loading ? (
+          <Typography variant="h6" className="loading-message">로딩 중...</Typography>
+        ) : donationStatistics ? (
+          <>
+            <Grid container spacing={4} className="donations-statistics-main">
+              {/* 기간 통계 차트 */}
+              <Grid item xs={12} md={8}>
+                <Box className="chart-container" ref={chartContainerRef}>
+                  <Typography variant="h6">기간 통계</Typography>
+                  <Line
+                    data={{
+                      labels: [...Array(12).keys()].map(i => i + 1), // 1~12월
+                      datasets: [{
+                        label: "월별 기부금액",
+                        data: donationStatistics.giftYearStatistics.slice(1), // 첫번째 값 무시
+                        fill: true,
+                        backgroundColor: "rgba(102, 178, 255, 0.2)",
+                        borderColor: "rgba(102, 178, 255, 1)",
+                      }],
+                    }}
+                    options={{
+                      scales: {
+                        y: {
+                          beginAtZero: true,
+                          ticks: {
+                            stepSize: 5, // y축을 5단위로 설정
+                            callback: function(value) {
+                              return value;
+                            }
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </Box>
+              </Grid>
+
+              {/* 구매자 통계 박스 */}
+              <Grid item xs={12} md={4}>
+              <TableContainer component={Paper} style={{ maxHeight: '100%', overflowY: 'auto' }}>
+              <Typography variant="h6" className="purchase-statistics-title">구매자 통계</Typography>
+                  <Table aria-label="purchaser table">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>이름</TableCell>
+                        <TableCell align="right">금액</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {donationStatistics?.giftPurchasers.map((purchaser, index) => (
+                        <TableRow key={index}>
+                          <TableCell component="th" scope="row">
+                            {purchaser.name}
+                          </TableCell>
+                          <TableCell align="right">{purchaser.price.toLocaleString()}원</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Grid>
+            </Grid>
+
+            <Grid container spacing={4} className="donations-statistics-second-row">
+  {/* 카테고리 통계 (0.5 비율) */}
+  <Grid item xs={6} md={3}> {/* Changed from xs={4} to xs={3} */}
+    <Box className="donation-category-statistics">
+      <Typography variant="h6" className="pie-chart-title">카테고리별 통계</Typography>
+      <Pie
+        data={{
+          labels: donationStatistics?.giftPercentageByCategory
+            ? Object.keys(donationStatistics.giftPercentageByCategory)
+            : [],
+          datasets: [{
+            data: donationStatistics?.giftPercentageByCategory
+              ? Object.values(donationStatistics.giftPercentageByCategory).map(item => item.count)
+              : [],
+            backgroundColor: ["#FFCE56", "#4BC0C0", "#9966FF"],
+          }],
+        }}
+      />
+    </Box>
+  </Grid>
+
+  {/* 성별 통계 (0.5 비율) */}
+  <Grid item xs={6} md={3}> {/* Changed from xs={4} to xs={3} */}
+    <Box className="donation-gender-statistics">
+      <Typography variant="h6" className="pie-chart-title">구매자 비율</Typography>
+      <div className="pie-chart-container">
+        <div className="chart">
+          <Pie
+            data={{
+              labels: ["남성", "여성"],
+              datasets: [{
+                data: [
+                  donationStatistics.giftPercentageByGender.male?.count || 0,
+                  donationStatistics.giftPercentageByGender.female?.count || 0
+                ],
+                backgroundColor: ["#36A2EB", "#FF6384"],
+              }],
+            }}
+          />
+        </div>
+      </div>
+    </Box>
+  </Grid>
+
+  {/* 연령대 통계 (1 비율) */}
+  <Grid item xs={12} md={6}> {/* Keep this wider (xs={6}) */}
+    <Box className="donation-age-statistics">
+      <Typography variant="h6">연령대 통계</Typography>
+      <Bar
+        data={{
+          labels: ["20s", "30s", "40s", "50s", "60+"],
+          datasets: [{
+            label: "연령대별 기부자 수",
+            data: [
+              donationStatistics.giftPercentageByAge["20s"]?.count || 0,
+              donationStatistics.giftPercentageByAge["30s"]?.count || 0,
+              donationStatistics.giftPercentageByAge["40s"]?.count || 0,
+              donationStatistics.giftPercentageByAge["50s"]?.count || 0,
+              donationStatistics.giftPercentageByAge["60+"]?.count || 0
+            ],
+            backgroundColor: "rgba(75, 192, 192, 0.2)",
+            borderColor: "rgba(75, 192, 192, 1)",
+            borderWidth: 1,
+          }]
+        }}
+        options={{
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1,
+              }
+            }
+          }
+        }}
+      />
+    </Box>
+  </Grid>
+</Grid>
+          </>
+        ) : (
+          <Typography variant="h6" className="no-donation-message">
+            기부품을 선택해 주세요.
+          </Typography>
+        )}
       </div>
     </div>
   );
