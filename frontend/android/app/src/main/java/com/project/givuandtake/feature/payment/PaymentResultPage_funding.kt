@@ -11,6 +11,7 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -89,7 +90,11 @@ fun PaymentResultPage_funding(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("결제 대기 중") })
+            TopAppBar(
+                title = { Text("결제 대기 중") },
+                backgroundColor = Color(0xFFA093DE),  // 원하는 배경색으로 설정
+                contentColor = Color.Black  // 텍스트 및 아이콘 색상 설정
+            )
         },
         content = {
             Box(
