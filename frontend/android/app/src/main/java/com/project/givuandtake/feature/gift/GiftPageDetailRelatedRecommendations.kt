@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -68,7 +69,7 @@ fun RelatedRecommendations(navController: NavController, location: String) {
     }
 
     Column(modifier = Modifier.padding(8.dp)) {
-        // 카드 내부에 이미지와 설명
+        // 위치 텍스트
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 painter = painterResource(id = R.drawable.baseline_location_on_24),
@@ -81,31 +82,33 @@ fun RelatedRecommendations(navController: NavController, location: String) {
                 fontFamily = gmarketSans
             )
         }
+
+        // 이미지를 박스 안에 꽉 채워서 배치
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp)
+                .padding(8.dp)
+                .clip(shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+                .background(Color.White) // 배경색 추가
+        ) {
+            Image(
+                painter = painterResource(id = imageRes),
+                contentDescription = "Map image",
+                modifier = Modifier
+                    .fillMaxSize()
+            )
+        }
+
+        // 설명 부분을 카드로 따로 배치
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(500.dp)
                 .padding(8.dp),
             elevation = 4.dp,
             backgroundColor = Color.White
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                // Location information
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // 이미지 및 설명
-                Image(
-                    painter = painterResource(id = imageRes),
-                    contentDescription = "Map image",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(300.dp)
-                        .padding(8.dp)
-                        .clip(shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
                 Text(
                     text = description,
                     fontFamily = gmarketSans,

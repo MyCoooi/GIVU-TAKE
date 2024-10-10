@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -374,7 +375,7 @@ fun GiftBottomBar(
                     modifier = Modifier.size(40.dp) // 아이콘 크기 조절
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.baseline_add_shopping_cart_24), // 장바구니 아이콘
+                        imageVector = Icons.Default.ShoppingCart, // 장바구니 아이콘
                         contentDescription = "Cart Icon",
                         tint = Color.Black,
                         modifier = Modifier.size(32.dp) // 아이콘 크기 설정
@@ -503,9 +504,9 @@ fun GiftTopBar(
         ) {
             IconButton(onClick = { onCartClick() }, modifier = Modifier.align(Alignment.TopEnd)) {
                 Icon(
-                    painter = painterResource(id = R.drawable.baseline_add_shopping_cart_24), // 장바구니 아이콘
+                    imageVector = Icons.Default.ShoppingCart, // 장바구니 아이콘
                     contentDescription = "Cart Icon",
-                    tint = Color.White
+                    tint = Color.Black
                 )
             }
 
