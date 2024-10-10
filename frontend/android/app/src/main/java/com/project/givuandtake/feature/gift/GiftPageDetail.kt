@@ -122,7 +122,8 @@ fun GiftPageDetail(
                                             userIdx = 0,  // 필요 시 수정
                                             amount = 1,
                                             price = detail.price,
-                                            location = detail.location
+                                            sido = detail.corporationSido,
+                                            sigungu = detail.corporationSigungu
                                         )
                                     )
                                 }
