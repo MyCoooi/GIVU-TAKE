@@ -16,12 +16,12 @@ import java.util.Map;
 public class GiftStatsService {
 
     private final GiftPercentageRepository giftPercentageRepository;
-    public GiftPercentageDto getGiftPercentage(Integer giftIdx) {
+    public GiftPercentageDto getGiftPercentage(Integer giftIdx, long userIdx) {
         List<Object[]> results;
         if (giftIdx == null) {
             results = giftPercentageRepository.getOverallGiftStatistics();
         } else {
-            results = giftPercentageRepository.getGiftStatisticsByGiftId(giftIdx);
+            results = giftPercentageRepository.getGiftStatisticsByGiftId(giftIdx, userIdx);
         }
 
         GiftPercentageDto giftPercentageDto = new GiftPercentageDto();
