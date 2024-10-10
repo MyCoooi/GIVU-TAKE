@@ -185,7 +185,7 @@ fun PaymentSuccessPage(
                 if (giftDetail?.location != null) {
                     Button(
                         onClick = {
-                            val shortLocation = giftDetail.location.takeLast(3)
+                            val shortLocation = giftDetail.location.takeLast(3).substring(0, 2)
                             navController.navigate("attraction?city=$shortLocation")
                         },
                         colors = ButtonDefaults.buttonColors(
