@@ -119,7 +119,7 @@ const DonationsStatistics = () => {
                     data={{
                       labels: [...Array(12).keys()].map(i => i + 1), // 1~12월
                       datasets: [{
-                        label: "월별 기부금액",
+                        label: "월별 구매량",
                         data: donationStatistics.giftYearStatistics.slice(1), // 첫번째 값 무시
                         fill: true,
                         backgroundColor: "rgba(102, 178, 255, 0.2)",
@@ -160,7 +160,9 @@ const DonationsStatistics = () => {
                           <TableCell component="th" scope="row">
                             {purchaser.name}
                           </TableCell>
-                          <TableCell align="right">{purchaser.price.toLocaleString()}원</TableCell>
+                          <TableCell align="right">
+                          {(Math.round(purchaser.price / 1000) * 1000).toLocaleString()}원
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
