@@ -34,13 +34,14 @@ public class ClientController {
     private final FundingParticipantService fundingParticipantService;
     private final CardService cardService;
 
-    // jwt 토큰으로 모든 주소 조회
+    // jwt 토큰으로 조건에 맞는 모든 주소 조회
     @GetMapping("/addresses")
-    public ResponseEntity<ResponseDto> getAddressesByJwt(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<ResponseDto> getAddressesByJwt(@AuthenticationPrincipal UserDetails userDetails,
+                                                         @RequestParam(required = false) Boolean isRepresentative) {
         String email = userDetails.getUsername();
 
         // AddressViewDto로 변환
-        List<AddressViewDto> addressViewDtoList = clientService.getAddressesByEmail(email).stream()
+        List<AddressViewDto> addressViewDtoList = clientService.getAddressesByEmail(email, isRepresentative).stream()
                 .map(AddressViewDto::toDto)
                 .collect(Collectors.toList());
 
