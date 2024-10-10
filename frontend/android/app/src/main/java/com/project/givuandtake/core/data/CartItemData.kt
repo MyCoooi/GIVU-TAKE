@@ -38,21 +38,17 @@ data class CartItemData(
     val giftIdx: Int,
     val giftName: String,
     val giftThumbnail: String?,
+    val sido: String,
+    val sigungu: String,
     val userIdx: Int,
     val amount: Int,
     val price: Int,
-    var location: String? = null  // 초기화 후 값을 설정
 ) {
-    init {
-        location = extractLocationFromGiftName(giftName)  // giftName을 기반으로 location 값 설정
-    }
+    // sido와 sigungu를 결합한 location 변수를 추가
+    val location: String
+        get() = "$sido $sigungu"
 }
 
-// 대괄호 [] 안의 내용을 추출하는 함수
-fun extractLocationFromGiftName(giftName: String): String {
-    val regex = "\\[(.*?)\\]".toRegex()  // 대괄호 안의 텍스트를 추출하는 정규식
-    val matchResult = regex.find(giftName)
-    return matchResult?.groupValues?.get(1) ?: "Unknown"  // 매칭된 값이 있으면 반환, 없으면 "Unknown"
-}
+
 
 
