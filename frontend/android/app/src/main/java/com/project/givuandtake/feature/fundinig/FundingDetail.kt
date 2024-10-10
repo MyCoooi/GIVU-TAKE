@@ -68,6 +68,10 @@ fun FundingDetailPage(
     val tabs = listOf("사업소개", "응원메시지", "기부후기")
     val gson = Gson() // Gson 객체 생성
 
+    // 날짜 비교에 필요한 LocalDateTime 가져오기
+    val currentDate = java.time.LocalDate.now()
+
+
     // 응원 메시지 데이터를 위한 상태 변수
     var comments by remember { mutableStateOf<List<CommentData>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) } // 데이터 로딩 상태
@@ -134,7 +138,12 @@ fun FundingDetailPage(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("펀딩 상세보기") },
+                title = {
+                    Text(
+                        text = "펀딩 상세보기",
+                        fontWeight = FontWeight.Medium  // 글꼴 두께를 Medium으로 설정
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "뒤로가기")
@@ -143,19 +152,32 @@ fun FundingDetailPage(
             )
         },
         bottomBar = {
-            Button(
-                onClick = {
-                    // fundingDetail을 JSON으로 변환하여 넘김
-                    val fundingDetailJson = gson.toJson(fundingDetail)
-                    val encodedFundingDetailJson = URLEncoder.encode(fundingDetailJson, StandardCharsets.UTF_8.toString())
-                    navController.navigate("payment/$encodedFundingDetailJson")
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
-            ) {
-                Text(text = "기부하기", color = Color.White)
+            fundingDetail?.let { detail ->
+                // 종료된 펀딩인지 확인 (endDate가 현재 날짜보다 이전이면 완료)
+                val isFundingComplete = detail.endDate < currentDate.toString()
+
+                Button(
+                    onClick = {
+                        if (!isFundingComplete) {
+                            // 기부하기 동작
+                            val fundingDetailJson = gson.toJson(fundingDetail)
+                            val encodedFundingDetailJson = URLEncoder.encode(fundingDetailJson, StandardCharsets.UTF_8.toString())
+                            navController.navigate("payment/$encodedFundingDetailJson")
+                        }
+                    },
+                    enabled = !isFundingComplete, // 펀딩이 종료되면 버튼 비활성화
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isFundingComplete) Color.Gray else Color.Blue  // 종료되면 회색 버튼
+                    )
+                ) {
+                    Text(
+                        text = if (isFundingComplete) "펀딩 종료됨" else "기부하기",
+                        color = Color.White
+                    )
+                }
             }
         }
     ) { innerPadding ->
@@ -167,6 +189,7 @@ fun FundingDetailPage(
                     .fillMaxSize()
             ) {
                 // 이미지 표시
+// 이미지 표시
                 AsyncImage(
                     model = detail.fundingThumbnail,
                     contentDescription = null,
@@ -177,8 +200,9 @@ fun FundingDetailPage(
                             width = 2.dp,
                             color = Color.Gray,
                             shape = RoundedCornerShape(8.dp)
-                        ),
-                    contentScale = ContentScale.Fit
+                        )
+                        .clip(RoundedCornerShape(8.dp)),  // 이미지도 border처럼 둥글게
+                    contentScale = ContentScale.Crop  // 이미지를 border 안에 꽉 채움
                 )
 
                 Column(
@@ -193,7 +217,8 @@ fun FundingDetailPage(
                             contentDescription = "위치 아이콘",
                             modifier = Modifier.size(20.dp)
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(8.dp)
+                            .height(8.dp))
                         Text(
                             text = "${detail.sido} ${detail.sigungu}",
                             style = MaterialTheme.typography.bodyMedium
@@ -281,8 +306,36 @@ fun FundingDetailPage(
 
                 when (selectedTabIndex) {
                     0 -> {
-                        Text(text = detail.fundingContent)
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            // 이미지 표시 (fundingContentImage가 null 또는 빈 문자열이 아닐 경우)
+                            if (!detail.fundingContentImage.isNullOrEmpty()) {
+                                AsyncImage(
+                                    model = detail.fundingContentImage,
+                                    contentDescription = "사업 소개 이미지",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .aspectRatio(1f)
+                                        .border(
+                                            width = 2.dp,
+                                            color = Color.Gray,
+                                            shape = RoundedCornerShape(8.dp)
+                                        )
+                                        .clip(RoundedCornerShape(8.dp)),  // 이미지도 border처럼 둥글게
+                                    contentScale = ContentScale.Crop  // 이미지를 border 안에 꽉 채움
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                            }
+                            // 텍스트 표시 (fundingContent)
+                            Text(
+                                text = detail.fundingContent,
+                                modifier = Modifier.padding(bottom = 16.dp)
+                            )
+                        }
                     }
 
                     1 -> {

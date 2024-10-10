@@ -19,8 +19,9 @@ import {
   Title,
   Tooltip,
   Legend,
-  ArcElement,
+  ArcElement
 } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(
   CategoryScale,
@@ -31,7 +32,8 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement
+  ArcElement,
+  ChartDataLabels
 );
 
 const DonationsStatistics = () => {
@@ -119,7 +121,7 @@ const DonationsStatistics = () => {
                     data={{
                       labels: [...Array(12).keys()].map(i => i + 1), // 1~12월
                       datasets: [{
-                        label: "월별 기부금액",
+                        label: "월별 구매량",
                         data: donationStatistics.giftYearStatistics.slice(1), // 첫번째 값 무시
                         fill: true,
                         backgroundColor: "rgba(102, 178, 255, 0.2)",
@@ -132,9 +134,6 @@ const DonationsStatistics = () => {
                           beginAtZero: true,
                           ticks: {
                             stepSize: 5, // y축을 5단위로 설정
-                            callback: function(value) {
-                              return value;
-                            }
                           },
                         },
                       },
@@ -145,7 +144,7 @@ const DonationsStatistics = () => {
 
               {/* 구매자 통계 박스 */}
               <Grid item xs={12} md={4}>
-                <TableContainer component={Paper} style={{ maxHeight: '100%', overflowY: 'auto' }}>
+                <TableContainer component={Paper} style={{ maxHeight: '415px', overflowY: 'auto' }}>
                 <Typography variant="h6" className="purchase-statistics-title">구매자 통계</Typography>
                   <Table aria-label="purchaser table">
                     <TableHead>
@@ -160,7 +159,9 @@ const DonationsStatistics = () => {
                           <TableCell component="th" scope="row">
                             {purchaser.name}
                           </TableCell>
-                          <TableCell align="right">{purchaser.price.toLocaleString()}원</TableCell>
+                          <TableCell align="right">
+                          {(Math.round(purchaser.price / 1000) * 1000).toLocaleString()}원
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -171,14 +172,16 @@ const DonationsStatistics = () => {
 
             <Grid container spacing={4} className="donations-statistics-second-row">
   {/* 카테고리 통계 (0.5 비율) */}
-  <Grid item xs={6} md={3}> {/* Changed from xs={4} to xs={3} */}
+  <Grid item xs={6} md={3}>
     <Box className="donation-category-statistics">
-      <Typography variant="h6" className="pie-chart-title">카테고리별 통계</Typography>
+      <Typography variant="h6" className="pie-chart-title">동일 카테고리</Typography>
       <Pie
         data={{
           labels: donationStatistics?.giftPercentageByCategory
-            ? Object.keys(donationStatistics.giftPercentageByCategory)
-            : [],
+          ? Object.keys(donationStatistics.giftPercentageByCategory).map(label =>
+            label.length > 10 ? `${label.substring(0, 10)}...` : label
+          )
+        : [],
           datasets: [{
             data: donationStatistics?.giftPercentageByCategory
               ? Object.values(donationStatistics.giftPercentageByCategory).map(item => item.count)
@@ -186,12 +189,33 @@ const DonationsStatistics = () => {
             backgroundColor: ["#FFCE56", "#4BC0C0", "#9966FF"],
           }],
         }}
+        options={{
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(tooltipItem) {
+                  // 해당 레이블의 전체 텍스트를 반환하여 hover 시 표시
+                  const fullLabel = Object.keys(donationStatistics.giftPercentageByCategory)[tooltipItem.dataIndex];
+                  const value = tooltipItem.raw;
+                  return `${fullLabel}: ${value}`;
+                }
+              }
+            },
+            datalabels: {
+              formatter: (value) => `${value}`,
+              color: '#fff',
+              font: {
+                weight: 'bold',
+              }
+              }
+          }
+        }}
       />
     </Box>
   </Grid>
 
   {/* 성별 통계 (0.5 비율) */}
-  <Grid item xs={6} md={3}> {/* Changed from xs={4} to xs={3} */}
+  <Grid item xs={6} md={3}>
     <Box className="donation-gender-statistics">
       <Typography variant="h6" className="pie-chart-title">구매자 비율</Typography>
       <div className="pie-chart-container">
@@ -214,7 +238,7 @@ const DonationsStatistics = () => {
   </Grid>
 
   {/* 연령대 통계 (1 비율) */}
-  <Grid item xs={12} md={6}> {/* Keep this wider (xs={6}) */}
+  <Grid item xs={12} md={6}>
     <Box className="donation-age-statistics">
       <Typography variant="h6">연령대 통계</Typography>
       <Bar

@@ -40,6 +40,7 @@ import com.project.givuandtake.feature.payment.AmountInputField
 import com.project.givuandtake.feature.payment.PaymentMethods_funding
 import com.project.givuandtake.feature.payment.PaymentMethods_gift
 import com.project.givuandtake.feature.payment.PaymentViewModel
+import java.net.URLDecoder
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
@@ -105,13 +106,18 @@ fun PaymentScreen(
                         imageVector = Icons.Default.ArrowBack,
                         contentDescription = "뒤로 가기",
                         modifier = Modifier
-                            .size(24.dp)
+                            .size(22.dp)
                             .clickable { navController.popBackStack() }
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                }
+                    Text(
+                        text = "펀딩 결제",
+                        fontSize = 22.sp,  // 적절한 글자 크기 설정
+                        fontWeight = FontWeight.Medium,  // 글자 두께 설정
+                        color = Color.Black  // 글자 색상 설정
+                    )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                }
 
                 // 펀딩 정보 섹션
                 PaymentProjectInfo_funding(
@@ -170,6 +176,14 @@ fun PaymentProjectInfo_funding(
     onAmountChange: (Int) -> Unit
 ) {
     var currentAmount by remember { mutableStateOf(0) }
+    val decodedFundingTitle = URLDecoder.decode(fundingDetail.fundingTitle, "UTF-8")
+
+    // 펀딩 유형에 따른 텍스트 설정
+    val fundingTypeText = when (fundingDetail.fundingType) {
+        "D" -> "재난·재해"
+        "R" -> "지역기부"
+        else -> "기타"
+    }
 
     Surface(
         shape = RoundedCornerShape(12.dp),
@@ -207,17 +221,18 @@ fun PaymentProjectInfo_funding(
                     verticalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.height(100.dp)
                 ) {
+                    // 펀딩 유형 표시 (D -> 재난·재해, R -> 지역기부)
                     Text(
-                        text = fundingDetail.fundingTitle,
+                        text = "$fundingTypeText",  // 변환된 텍스트 표시
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = decodedFundingTitle,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
-                    Text(
-                        text = fundingDetail.fundingContent,
-                        fontSize = 16.sp,
-                        color = Color.Gray
-                    )
-
+                    // 위치 정보 추가 (sido와 sigungu)
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -236,7 +251,6 @@ fun PaymentProjectInfo_funding(
                     }
                 }
             }
-
             Spacer(modifier = Modifier.height(16.dp))
 
             // 금액 입력 필드 및 버튼
