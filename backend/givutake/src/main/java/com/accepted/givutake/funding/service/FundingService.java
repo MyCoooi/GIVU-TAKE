@@ -66,6 +66,8 @@ public class FundingService {
                 predicates.add(criteriaBuilder.equal(root.get("state"), state));
             }
 
+            predicates.add(criteriaBuilder.equal(root.get("isDeleted"), false));
+
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
 
