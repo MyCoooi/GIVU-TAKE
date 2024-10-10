@@ -118,24 +118,39 @@ const FundingStatistics = () => {
               <Box className="chart-container" ref={chartContainerRef}>
                 <Typography variant="h6">기간 통계</Typography>
                 <Line
-                  data={{
-                    labels: fundingStatistics.fundingDayStatistic?.map((_, index) => `Day ${index + 1}`) || [],
-                    datasets: [{
-                      label: "일별 모금액",
-                      data: fundingStatistics.fundingDayStatistic || [],
-                      fill: true,
-                      backgroundColor: "rgba(102, 178, 255, 0.2)",
-                      borderColor: "rgba(102, 178, 255, 1)",
-                    }],
-                  }}
-                  options={{
-                    scales: {
-                      y: {
-                        beginAtZero: true,
-                      },
-                    },
-                  }}
-                />
+  data={{
+    labels: fundingStatistics.fundingDayStatistic?.map((_, index) => `Day ${index + 1}`) || [],
+    datasets: [{
+      label: "일별 모금액",
+      data: fundingStatistics.fundingDayStatistic || [],
+      fill: true,
+      backgroundColor: "rgba(102, 178, 255, 0.2)",
+      borderColor: "rgba(102, 178, 255, 1)",
+    }],
+  }}
+  options={{
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
+    plugins: {
+      tooltip: {
+        enabled: true,  // 툴팁 활성화 (hover 시 가격 표시)
+        callbacks: {
+          label: function(tooltipItem) {
+            return `${tooltipItem.raw.toLocaleString()}원`;  // 가격에 세 자리마다 쉼표 추가
+          }
+        }
+      },
+      datalabels: {
+        display: false,  // 데이터 라벨은 표시하지 않음
+      },
+    },
+  }}
+/>
+
+
               </Box>
             </Grid>
 

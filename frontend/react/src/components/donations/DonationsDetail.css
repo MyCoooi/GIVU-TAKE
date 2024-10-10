@@ -1,7 +1,7 @@
 /* 기부품 상세 컨테이너 스타일 */
 .donations-detail-container {
   display: flex;
-  height: 100vh;
+  height: 120vh;
 }
 
 .donations-detail-content {
