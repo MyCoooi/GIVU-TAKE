@@ -33,7 +33,7 @@ import com.project.givuandtake.ui.theme.gmarketSans
 fun RelatedRecommendations(navController: NavController, location: String) {
     Log.d("location","location : ${location}")
     val (description, imageRes) = when (location) {
-        "전라북도 임실군" -> Pair(
+        "전북특별자치도 임실군" -> Pair(
             "전라북도 임실군은 치즈의 고장으로 널리 알려진 지역입니다. 임실 치즈 테마파크는 다양한 체험 프로그램을 제공하며 가족 단위 관광객들에게 인기가 많습니다. 또한, 섬진강 자전거길과 자연경관도 유명합니다.",
             R.drawable.p_imsil // 임실 이미지
         )
@@ -49,7 +49,7 @@ fun RelatedRecommendations(navController: NavController, location: String) {
             "경상북도 문경시는 문경새재로 유명한 도시입니다. 문경새재와 함께 전통 도자기와 오미자가 유명하며, 문경 오미자 축제는 많은 관광객을 불러모읍니다.",
             R.drawable.p_mungyeong // 문경 이미지
         )
-        "강원도 태백시" -> Pair(
+        "강원특별자치도 태백시" -> Pair(
             "강원도 태백시는 태백산을 중심으로 한 자연경관이 자랑입니다. 겨울철 태백산 눈축제와 태백 석탄박물관이 주요 명소입니다.",
             R.drawable.p_taebaek // 태백 이미지
         )
