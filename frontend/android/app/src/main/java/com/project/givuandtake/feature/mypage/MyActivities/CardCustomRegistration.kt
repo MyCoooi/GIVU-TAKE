@@ -73,9 +73,7 @@ class CardPostViewModel : ViewModel() {
 
                 if (response.isSuccessful) {
                     Log.d("CardPost", "등록 성공")
-                    navController.navigate("cardbook") {
-                        popUpTo("CardPost") { inclusive = true } // 중복 방지를 위해 이전 스택 제거
-                    }
+                    navController.navigate("cardbook")
                 } else {
                     Log.e("CardPost", "주소 등록 실패: ${response.errorBody()?.string()}")
                 }
@@ -668,7 +666,7 @@ fun CardCustomRegistration(cardNumber: String, validThru: String, navController:
                         scope.launch {
                             viewModel.postCardData(accessToken, cardRequest, context, navController)
                         }
-                              },
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .shadow(8.dp, RoundedCornerShape(24.dp))

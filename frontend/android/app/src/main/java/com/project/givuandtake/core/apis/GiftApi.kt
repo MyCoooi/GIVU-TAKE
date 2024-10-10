@@ -2,6 +2,8 @@ package com.project.givuandtake.core.apis
 
 import com.project.givuandtake.core.data.CartRequest
 import com.project.givuandtake.core.data.CartResponse
+import com.project.givuandtake.core.data.Gift.PurchaseRequest
+import com.project.givuandtake.core.data.Gift.PurchaseResponse
 import com.project.givuandtake.core.data.Gift.WishlistResponse
 import com.project.givuandtake.core.data.GiftDetailResponse
 import com.project.givuandtake.core.data.GiftResponse
@@ -73,6 +75,11 @@ interface GiftApiService {
     ): Response<Unit>
 
 
+    @POST("/api/purchases")
+    suspend fun postPurchase(
+        @Header("Authorization") token: String,
+        @Body purchaseRequest: PurchaseRequest
+    ): Response<PurchaseResponse>
 
 }
 
