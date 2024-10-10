@@ -56,6 +56,7 @@ public class CartService {
                 .giftIdx(cart.getGifts().getGiftIdx())
                 .giftName(cart.getGifts().getGiftName())
                 .giftThumbnail(cart.getGifts().getGiftThumbnail())
+                .corporationName(cart.getGifts().getCorporations().getName())
                 .userIdx(user.getUserIdx())
                 .amount(cart.getAmount())
                 .price(cart.getAmount()*cart.getGifts().getPrice())
