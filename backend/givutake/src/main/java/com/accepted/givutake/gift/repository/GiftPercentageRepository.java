@@ -105,7 +105,7 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
                 WHERE g.gift_idx = :giftIdx
             )
             SELECT
-                'gift' AS stat_type,
+                'category' AS stat_type,
                 gift_name AS name,
                 SUM(amount) AS count,
                 SUM(amount) / MAX(category_total_amount) * 100 AS percentage
