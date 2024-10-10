@@ -1,6 +1,8 @@
 package com.project.payment
 
+import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,14 +19,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Divider
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,21 +44,57 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.google.gson.Gson
 import com.project.givuandtake.R
+import com.project.givuandtake.core.apis.Address.AddressApi
+import com.project.givuandtake.core.apis.UserInfoApi
+import com.project.givuandtake.core.apis.UserInfoResponse
+import com.project.givuandtake.core.data.Address.AddressData
+import com.project.givuandtake.core.data.Address.UserAddress
 import com.project.givuandtake.core.data.Card.UserCard
 import com.project.givuandtake.core.data.KakaoPaymentInfo
 import com.project.givuandtake.core.datastore.TokenManager
 import com.project.givuandtake.feature.mypage.MyActivities.CardBank
 import com.project.givuandtake.feature.mypage.MyActivities.CardViewModel
+import com.project.givuandtake.feature.mypage.MyDonation.formatPrice
 import com.project.givuandtake.feature.payment.PaymentMethods_gift
 import com.project.givuandtake.feature.payment.PaymentViewModel
+import kotlinx.coroutines.launch
+import okhttp3.internal.format
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
+class GiftPaymentViewModel : ViewModel() {
+
+    private val _addresses = mutableStateOf<List<UserAddress>>(emptyList())
+    val addresses: State<List<UserAddress>> = _addresses
+
+    fun fetchUserAddresses(token: String) {
+        viewModelScope.launch {
+            try {
+                val response: Response<AddressData> = AddressApi.api.getAddressData("$token")
+                if (response.isSuccessful) {
+                    val addresses = response.body()?.data
+                    addresses?.let {
+                        _addresses.value = it
+                    }
+                } else {
+                    Log.e("UserAddresses", "Error: ${response.code()} ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e("UserAddresses", "Exception: ${e.message}")
+            }
+        }
+    }
+}
 
 @Composable
 fun PaymentScreen_gift(
@@ -71,9 +113,39 @@ fun PaymentScreen_gift(
     var amount by remember { mutableStateOf(quantity) }
     val context = LocalContext.current
 
+    var userInfo by remember { mutableStateOf<UserInfoResponse?>(null) }
+    val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
+    val addressviewModel: GiftPaymentViewModel = viewModel()
+
+    LaunchedEffect(Unit) {
+        addressviewModel.fetchUserAddresses(accessToken)
+    }
+
+    val addresses by addressviewModel.addresses
+
+    // API 호출
+    LaunchedEffect(Unit) {
+        UserInfoApi.api.getUserInfo(accessToken).enqueue(object : Callback<UserInfoResponse> {
+            override fun onResponse(
+                call: Call<UserInfoResponse>,
+                response: Response<UserInfoResponse>
+            ) {
+                if (response.isSuccessful) {
+                    userInfo = response.body()
+                    Log.d("UserInfo", "User Data: ${response.body()}")
+                } else {
+                    Log.d("UserInfo", "Error: ${response.code()}")
+                }
+            }
+            override fun onFailure(call: Call<UserInfoResponse>, t: Throwable) {
+                Log.e("UserInfo", "API Call Failed: ${t.message}")
+            }
+        })
+    }
+
     // 사용자 이름과 주소 (더미 데이터)
-    val userName = "홍길동" // 사용자 이름
-    val userAddress = "서울특별시 강남구 테헤란로 123" // 사용자 주소
+    val userName = userInfo?.data?.name
+    val userAddress = addresses
 
     // 은행 정보 리스트
     val bankList = listOf(
@@ -111,14 +183,14 @@ fun PaymentScreen_gift(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 80.dp) // 결제 버튼 영역 확보를 위해 여백 추가
         ) {
             item {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
@@ -127,156 +199,175 @@ fun PaymentScreen_gift(
                             .size(24.dp)
                             .clickable { navController.popBackStack() } // 뒤로 가기
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-//                    Text(
-//                        text = "결제 정보",
-//                        fontSize = 20.sp,
-//                        fontWeight = FontWeight.Bold
-//                    )
+                    Spacer(modifier = Modifier.weight(0.8f))
+                    Text(
+                        text = "주문서",
+                        fontSize = 20.sp,
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
                 }
-                // 사용자 이름과 주소 정보
-                UserInfoSection(userName = userName, userAddress = userAddress)
-                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            item {
+                Column() {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.padding(horizontal = 20.dp),
+
+                        ) {
+                        userInfo?.data?.name?.let { userName ->
+                            Text(
+                                text = userName,
+                                fontSize = 18.sp
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    color = Color.LightGray,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .padding(vertical = 1.dp, horizontal = 8.dp)
+                        ) {
+                            Text(
+                                text = "기본 배송지",
+                                fontSize = 12.sp,
+                                color = Color.White
+                            )
+                        }
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    addresses?.firstOrNull()?.let { firstAddress ->
+                        val fullAddress =
+                            "${firstAddress.roadAddress} ${firstAddress.detailAddress}"
+
+                        Text(
+                            text = fullAddress,
+                            modifier = Modifier.padding(horizontal = 20.dp),
+                            fontSize = 18.sp
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(7.dp))
+
+                    userInfo?.data?.mobilePhone?.let { mobilePhone ->
+                        Text(
+                            text = mobilePhone,
+                            fontSize = 13.sp,
+                            modifier = Modifier.padding(horizontal = 20.dp)
+                        )
+                    }
+                }
+            }
+
+            item {
+                Divider(
+                    color = Color(0xFFDAEBFD),
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+
+            item {
+                Text(
+                    text = "주문 상품",
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp),
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
 
                 // 상단 상품 정보
                 PaymentProjectInfo_gift(
                     name = name,
                     location = location,
                     quantity = quantity,
-                    thumbnailUrl = thumbnailUrl
+                    thumbnailUrl = thumbnailUrl,
+                    price = price
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
+            }
 
-                // 결제 수단 선택 UI
+            item {
+                Divider(
+                    color = Color(0xFFDAEBFD),
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+
+            item {
+                Text(
+                    text = "결제 수단",
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp),
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
                 PaymentMethods_gift(
                     selectedMethod = selectedMethod,
                     onMethodSelected = { method -> selectedMethod = method },
-                    registeredCards = registeredCards, // 등록된 카드 리스트 전달
-                    bankList = bankList, // 은행 정보 전달
-                    selectedCard = selectedCard, // 선택된 카드 전달
+                    registeredCards = registeredCards,
+                    bankList = bankList,
+                    selectedCard = selectedCard,
                     onCardSelected = { card -> selectedCard = card },
                     navController = navController
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
             }
+
+            item {
+                Row(
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                ) {
+                    PaymentTotal_gift(totalAmount)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    PaymentButton_gift(
+                        kakaoPaymentInfo = KakaoPaymentInfo(
+                            giftIdx = giftIdx,
+                            paymentMethod = selectedMethod,
+                            amount = amount
+                        ),
+                        navController = navController,
+                        viewModel = viewModel,
+                        selectedMethod = selectedMethod
+                    )
+                }
+            }
         }
+    }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 하단에 고정된 결제 총 금액과 결제 버튼
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            // 결제 금액 표시
-            PaymentTotal_gift(totalAmount)
-
-            // 결제 버튼
-            PaymentButton_gift(
-                kakaoPaymentInfo = KakaoPaymentInfo(
-                    giftIdx = giftIdx,
-                    paymentMethod = selectedMethod,
-                    amount = amount
-                ),
-                navController = navController,
-                viewModel = viewModel,
-                selectedMethod = selectedMethod
-            )
-        }
     }
-}
-
-@Composable
-fun UserInfoSection(userName: String, userAddress: String) {
-    Surface(
-        shape = RoundedCornerShape(12.dp),
-        color = Color.White,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        shadowElevation = 4.dp // 그림자 추가로 카드처럼 보이게 설정
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp) // 내부 여백 추가
-        ) {
-            Text(
-                text = "이름: $userName",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "주소: $userAddress",
-                fontSize = 16.sp,
-                color = Color.Gray
-            )
-        }
-    }
-}
 
 
 @Composable
 fun PaymentTotal_gift(amount: Int) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .padding(end = 16.dp)
+        verticalArrangement = Arrangement.Center,
     ) {
         Text(
             text = "결제 총 금액",
             fontSize = 14.sp,
-            color = Color(0xFF1E88E5)
+            color = Color(0xFFB3C3F4)
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "₩${String.format("%,d", amount)}",
-            fontSize = 18.sp,
+            text = "${String.format("%,d", amount)} ₩",
+            fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black
         )
     }
 }
-
-//@Composable
-//fun PaymentMethods_gift(
-//    selectedMethod: String,
-//    onMethodSelected: (String) -> Unit
-//) {
-//    Column {
-//        Text(text = "결제 수단", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-//
-//        Spacer(modifier = Modifier.height(8.dp))
-//
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.SpaceBetween
-//        ) {
-//            PaymentMethodOption(
-//                methodName = "카카오페이",
-//                isSelected = selectedMethod == "KAKAO",
-//                onClick = { onMethodSelected("KAKAO") }
-//            )
-//            PaymentMethodOption(
-//                methodName = "토스페이",
-//                isSelected = selectedMethod == "TOSS",
-//                onClick = { onMethodSelected("TOSS") }
-//            )
-//            PaymentMethodOption(
-//                methodName = "페이코",
-//                isSelected = selectedMethod == "PAYCO",
-//                onClick = { onMethodSelected("PAYCO") }
-//            )
-//        }
-//    }
-//}
 
 @Composable
 fun PaymentMethodOption(
@@ -322,18 +413,17 @@ fun PaymentButton_gift(
             } else if (selectedMethod == "신용,체크 카드") {
                 // 신용/체크 카드 결제 로직
                 navController.navigate("payment_result/$encodedPaymentInfoJson")
-//
             }
         },
         shape = RoundedCornerShape(24.dp),
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp),
-        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF9C88FF))
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFB3C3F4))
     ) {
         Text(
             text = "결제하기",
-            fontSize = 16.sp,
+            fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White
         )
@@ -342,78 +432,56 @@ fun PaymentButton_gift(
 
 
 @Composable
-fun PaymentProjectInfo_gift(name: String, location: String, quantity: Int, thumbnailUrl: String) {
-    Surface(
-        shape = RoundedCornerShape(12.dp),
-        color = Color.White,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        shadowElevation = 4.dp
+fun PaymentProjectInfo_gift(name: String, location: String, quantity: Int, thumbnailUrl: String, price: Int) {
+    Spacer(modifier = Modifier.height(10.dp))
+    Box(
+        modifier = Modifier.padding(horizontal = 20.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = Color(0xFFE0E0E0),
-                    modifier = Modifier.size(100.dp)
+        Row() {
+            Image(
+                painter = rememberImagePainter(data = thumbnailUrl),
+                contentDescription = "상품 썸네일",
+                modifier = Modifier
+                    .width(80.dp)
+                    .height(100.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+
+            Column() {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Image(
-                        painter = rememberImagePainter(data = thumbnailUrl),
-                        contentDescription = "상품 썸네일",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(100.dp)
-                            .clip(RoundedCornerShape(8.dp)),
-                        contentScale = ContentScale.Crop
+                    Icon(
+                        imageVector = Icons.Default.Place,
+                        contentDescription = "Location icon",
+                        modifier = Modifier.size(20.dp),
+                        tint = Color(0xFFDAEBFD)
                     )
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Column(
-                    verticalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.height(120.dp)
-                ) {
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = name,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Text(
-                        text = "구매 수량 : $quantity",
+                        text = location,
                         fontSize = 16.sp,
                         color = Color.Gray
                     )
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = "Location",
-                            tint = Color.Gray,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = location,
-                            fontSize = 14.sp,
-                            color = Color.Gray
-                        )
-                    }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(5.dp))
+                Text(
+                    text = "$name",
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(start = 3.dp)
+                )
+
+                Spacer(modifier = Modifier.height(5.dp))
+                Text(
+                    text = "${formatPrice(price = price)} \\ * $quantity 개",
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(start = 3.dp)
+                )
+            }
         }
     }
 }
