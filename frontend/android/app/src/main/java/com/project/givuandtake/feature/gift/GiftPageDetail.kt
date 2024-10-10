@@ -693,23 +693,71 @@ fun ProductReview(reviews: List<ReviewData>, viewModel: GiftReviewModel, token: 
 }
 
 
-val dummyReviews = listOf(
-    Review(
-//        userProfileUrl = "https://s3.example.com/user1-profile.jpg"
-        userProfileUrl = R.drawable.blank,  // 유저 프로필 S3 URL
-        reviewerName = "김싸피",
-        reviewCreateTime = "2024 . 09 . 04",  // 후기 작성 날짜
-        reviewText = "치악산 복숭아 당도 최고!",
-//        imageUrl = "https://s3.example.com/review1-image.jpg"  // 후기 이미지 S3 URL
-        imageUrl = R.drawable.placeholder  // 후기 이미지 S3 URL
-    ),
-    Review(
-        userProfileUrl = R.drawable.blank,  // 유저 프로필 S3 URL
-        reviewerName = "이싸피",
-        reviewCreateTime = "2024 . 09 . 05",  // 후기 작성 날짜
-        reviewText = "복숭아가 정말 달아요!",
-        imageUrl = R.drawable.placeholder  // 후기 이미지 S3 URL
-    )
-)
+@Composable
+fun RelatedRecommendations(navController: NavController, location: String) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        // Location information
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                painter = painterResource(id = R.drawable.baseline_location_on_24),
+                contentDescription = "Location icon"
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("$location", fontSize = 14.sp)
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // Map placeholder
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(700.dp)
+                .background(Color.White)
+                .border(
+                    width = 1.dp,
+                    color = Color.Black
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 2.dp), // 좌우 여백 추가,
+                horizontalAlignment = Alignment.CenterHorizontally // 중앙 정렬
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.gangwondo_wonju),
+                    contentDescription = "Map image",
+                    modifier = Modifier
+                        .size(300.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp)) // 이미지와 텍스트 사이 간격
+                Text(
+                    text = "강원특별자치도 원주시는 치악산국립공원을 중심으로 한 자연경관을 자랑하는 지역으로, 수도권과의 접근성이 좋아 관광객들이 자주 찾는 도시입니다.\n" +
+                            "\n" +
+                            "주요 관광지로는 빼어난 경치를 자랑하는 치악산국립공원이 있으며, 특히 남대봉에서의 전망이 매우 뛰어납니다. 오크밸리는 스키장과 골프장, 그리고 현대적인 예술 작품이 전시된 뮤지엄 산이 있어 사계절 내내 관광객들이 찾는 인기 명소입니다. 또한, 간현유원지는 여름철 피서지로 유명하며, 소금산 출렁다리 개장 이후 많은 관광객을 끌어모으고 있습니다.\n" +
+                            "\n" +
+                            "역사적으로 중요한 유적지로는 법천사지가 있으며, 국보급 유물인 지광국사탑이 복원될 예정입니다. 이 외에도 고려시대의 세곡미를 보관하던 흥원창, 그리고 박경리 작가의 집필 장소를 기념한 박경리문학공원 등이 있습니다.\n" +
+                            "\n" +
+                            "원주는 한지의 명맥을 이어온 지역으로, 매년 한지 문화제가 개최되며, 원주의 주요 특산품으로 한지가 유명합니다.",
+                    modifier = Modifier.padding(horizontal = 8.dp) // 글자 좌우 여백 추가
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Related places button
+        Button(onClick = {
+            // 주변 관광지 버튼 클릭 시 지역 정보를 전달하며 관광 페이지로 이동
+            val shortLocation = location.takeLast(3).substring(0, 2)
+
+            navController.navigate("attraction?city=$shortLocation")
+        }) {
+            Text(text = "+ 주변 관광지")
+        }
+    }
+}
 
 
