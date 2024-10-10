@@ -325,7 +325,7 @@ fun FundingDetails(navController: NavController) {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            itemsIndexed(myfundings) { index, funding ->
+            itemsIndexed(myfundings.reversed()) { index, funding ->
                 Column() {
                     Row(
                         horizontalArrangement = Arrangement.Center,
