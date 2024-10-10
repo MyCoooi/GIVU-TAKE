@@ -53,6 +53,7 @@ fun PaymentScreen(
     val gson = Gson()
     // JSON 문자열을 FundingDetailData 객체로 변환
     val fundingDetail = gson.fromJson(fundingDetailJson, FundingDetailData::class.java)
+    Log.d("fundingDetail","fundingDetail : ${fundingDetail}")
 
     var selectedMethod by remember { mutableStateOf("KAKAO") } // 결제 수단 상태
     var selectedCard by remember { mutableStateOf<UserCard?>(null) } // 선택된 카드 상태
