@@ -660,7 +660,7 @@ fun RelatedRecommendations(navController: NavController, location: String) {
         // Related places button
         Button(onClick = {
             // 주변 관광지 버튼 클릭 시 지역 정보를 전달하며 관광 페이지로 이동
-            val shortLocation = location.takeLast(2)
+            val shortLocation = location.takeLast(3)
             navController.navigate("attraction?city=$shortLocation")
         }) {
             Text(text = "+ 주변 관광지")
