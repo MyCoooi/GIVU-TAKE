@@ -8,16 +8,12 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,7 +21,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,13 +31,109 @@ import com.project.givuandtake.core.data.CartItemData
 import com.project.givuandtake.core.data.Review
 import kotlinx.coroutines.launch
 import androidx.compose.material3.IconButton
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextDecoration
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.project.givuandtake.core.apis.Gift.GiftReviewApi
+import com.project.givuandtake.core.apis.Gift.GiftReviewLikeDeleteApi
+import com.project.givuandtake.core.apis.Gift.GiftReviewLikeGetApi
+import com.project.givuandtake.core.apis.Gift.GiftReviewLikePostApi
+import com.project.givuandtake.core.data.Gift.GiftReviewData
+import com.project.givuandtake.core.data.Gift.ReviewData
 import com.project.givuandtake.core.data.GiftDetailData
 import com.project.givuandtake.core.datastore.TokenManager
+import retrofit2.Response
 
+class GiftReviewModel : ViewModel() {
 
+    private val _reviews = mutableStateOf<List<ReviewData>>(emptyList())
+    val reviews: State<List<ReviewData>> = _reviews
+
+    private val _isLiked = mutableStateOf(false)
+    val isLiked: State<Boolean> = _isLiked
+
+    fun fetchGiftReviews(giftIdx: Int, pageNo: Int = 1, pageSize: Int = 50, isOrderLiked: Boolean = true) {
+        viewModelScope.launch {
+            try {
+                val response: Response<GiftReviewData> = GiftReviewApi.api.getGiftReviewData(
+                    giftIdx = giftIdx,
+                    pageNo = pageNo,
+                    pageSize = pageSize,
+                    isOrderLiked = isOrderLiked
+                )
+                if (response.isSuccessful) {
+                    val reviews = response.body()?.data
+                    reviews?.let {
+                        _reviews.value = it
+                    }
+                } else {
+                    Log.e("GiftReviews", "Error: ${response.code()} ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e("GiftReviews", "Exception: ${e.message}")
+            }
+        }
+    }
+
+    fun checkIfLiked(reviewIdx: Int, token: String) {
+        viewModelScope.launch {
+            try {
+                val response = GiftReviewLikeGetApi.api.GiftReviewLikeGetData(
+                    reviewIdx = reviewIdx,
+                    authToken = token
+                )
+                if (response.isSuccessful) {
+                    _isLiked.value = response.body()?.data ?: false
+                    Log.d("CheckIfLiked", "Review liked status: ${_isLiked.value}")
+                } else {
+                    Log.e("CheckIfLiked", "Error: ${response.code()} ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e("CheckIfLiked", "Exception: ${e.message}")
+            }
+        }
+    }
+
+    fun likeReview(reviewIdx: Int, token: String) {
+        viewModelScope.launch {
+            try {
+                val response = GiftReviewLikePostApi.api.getGiftReviewLikePostData(
+                    reviewIdx = reviewIdx,
+                    authToken = token
+                )
+                if (response.isSuccessful) {
+                    Log.d("LikeReview", "Review liked successfully")
+                    // 성공 시 필요한 추가 처리(예: UI 업데이트)를 여기에 작성
+                } else {
+                    Log.e("LikeReview", "Error: ${response.code()} ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e("LikeReview", "Exception: ${e.message}")
+            }
+        }
+    }
+
+    fun unlikeReview(reviewIdx: Int, token: String) {
+        viewModelScope.launch {
+            try {
+                val response = GiftReviewLikeDeleteApi.api.GiftReviewLikeDeleteData(
+                    reviewIdx = reviewIdx,
+                    authToken = token
+                )
+                if (response.isSuccessful) {
+                    Log.d("UnlikeReview", "Review unliked successfully")
+                    // You can update the UI here after unliking the review, if needed
+                } else {
+                    Log.e("UnlikeReview", "Error: ${response.code()} ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e("UnlikeReview", "Exception: ${e.message}")
+            }
+        }
+    }
+}
 
 object TabState {
     var selectedTabIndex by mutableStateOf(0) // Compose가 상태 변화를 감지할 수 있도록 mutableStateOf 사용
@@ -56,16 +147,19 @@ fun GiftPageDetail(
     GiftViewModel : GiftViewModel = viewModel()  // 뷰 모델
 ) {
     val giftDetail by GiftViewModel.giftDetail.collectAsState()  // 상품 상세 정보 상태
-
+    Log.d("adsfaeradsf", "$giftIdx")
     val scope = rememberCoroutineScope()  // 코루틴 스코프
     val context = LocalContext.current  // 현재 Context
     val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
+    val viewModel: GiftReviewModel = viewModel()
 
     Log.d("giftDetail", "giftDetail : ${giftDetail}")
 
     LaunchedEffect(giftIdx) {
+        viewModel.fetchGiftReviews(giftIdx)
         GiftViewModel.fetchGiftDetail(token = accessToken, giftIdx = giftIdx)
     }
+    val reviews by viewModel.reviews
 
     LaunchedEffect(Unit) {
         scope.launch {
@@ -79,15 +173,6 @@ fun GiftPageDetail(
     }
 
     Scaffold(
-        topBar = {
-            GiftTopBar(
-                cartItemCount = cartItems.value.size,  // 장바구니 아이템 개수
-                onCartClick = {
-                    navController.navigate("cart_page")  // 장바구니 페이지로 이동
-                },
-                navController = navController
-            )
-        },
         bottomBar = {
             giftDetail?.let { detail ->
                 GiftBottomBar(
@@ -105,20 +190,19 @@ fun GiftPageDetail(
                                     updatedCartItems[existingItemIndex] = existingItem.copy(amount = updatedQuantity)
                                 }
                             } else {
-                                // 새로 추가 API 호출
                                 val success = addToCartApi(context, detail.giftIdx, 1)
                                 if (success) {
-                                    // 이미 addToCartApi에서 장바구니에 추가가 되었으므로, 중복 추가를 피하기 위해 UI 갱신만
                                     updatedCartItems.add(
                                         CartItemData(
-                                            cartIdx = 0,  // 서버에서 할당된 값을 나중에 받아야 함
+                                            cartIdx = 0,
                                             giftIdx = detail.giftIdx,
                                             giftName = detail.giftName,
-                                            giftThumbnail = detail.giftThumbnail ?: "",  // null일 경우 기본값 빈 문자열
-                                            userIdx = 0,  // 필요 시 수정
+                                            giftThumbnail = detail.giftThumbnail ?: "",
+                                            userIdx = 0,
                                             amount = 1,
                                             price = detail.price,
-                                            location = detail.location
+                                            sido = detail.corporationSido,
+                                            sigungu = detail.corporationSigungu
                                         )
                                     )
                                 }
@@ -133,20 +217,51 @@ fun GiftPageDetail(
         }
 
     ) { innerPadding ->
-        // 상품 상세 정보를 보여주는 컨텐츠 부분
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-//                .padding(16.dp)
         ) {
-            // 상품 정보가 있을 때만 표시
             giftDetail?.let { detail ->
                 item {
-                    GiftInformation(giftDetail = detail)  // 상품 정보 표시
+                    Box() {
+                        Image(
+                            painter = rememberImagePainter(detail.giftThumbnail),  // 실제 이미지 경로 사용
+                            contentDescription = "상품 이미지",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(350.dp),
+                            contentScale = ContentScale.Crop
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(250.dp)
+                                .background(
+                                    brush = Brush.verticalGradient(
+                                        colors = listOf(
+                                            Color.Transparent,
+                                            Color.Black.copy(alpha = 0.5f)
+                                        ),
+                                        startY = 250f,
+                                        endY = 0f
+                                    )
+                                )
+                        )
+                        GiftTopBar(
+                            cartItemCount = cartItems.value.size,
+                            onCartClick = {
+                                navController.navigate("cart_page")
+                            },
+                            navController = navController
+                        )
+                    }
                 }
 
-                // 탭 섹션
+                item {
+                    GiftInformation(giftDetail = detail)
+                }
+
                 item {
                     GiftTabs(
                         selectedTabIndex = TabState.selectedTabIndex,
@@ -154,11 +269,10 @@ fun GiftPageDetail(
                     )
                 }
 
-                // 탭에 따라 다른 내용을 표시
                 item {
                     when (TabState.selectedTabIndex) {
                         0 -> ProductIntroduction(giftDetail = detail)  // 상품 소개 탭
-                        1 -> ProductReview(reviews = dummyReviews)  // 리뷰 탭 (더미 데이터)
+                        1 -> ProductReview(reviews = reviews, viewModel = viewModel, token = accessToken)  // 리뷰 탭 (더미 데이터)
                         2 -> RelatedRecommendations(navController = navController, location = detail.location)  // 연관 추천 탭
                     }
                 }
@@ -246,15 +360,6 @@ fun GiftBottomBar(
 
 @Composable
 fun GiftInformation(giftDetail: GiftDetailData) {
-    Image(
-        painter = rememberImagePainter(giftDetail.giftThumbnail),  // 실제 이미지 경로 사용
-        contentDescription = "상품 이미지",
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(250.dp),
-        contentScale = ContentScale.Crop
-    )
-
     Spacer(modifier = Modifier.height(16.dp))
 
     // 주소 정보
@@ -269,65 +374,34 @@ fun GiftInformation(giftDetail: GiftDetailData) {
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(text = giftDetail.location, fontSize = 16.sp)
+        Spacer(modifier = Modifier.weight(1f))
+
     }
 
     Spacer(modifier = Modifier.height(8.dp))
 
-    // 상품 정보
+    Divider(
+        color = Color(0xFFDAEBFD),
+        thickness = 1.dp,
+        modifier = Modifier.fillMaxWidth()
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+
     Text(
         text = giftDetail.giftName,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.Medium,
         fontSize = 20.sp,
         modifier = Modifier.padding(horizontal = 10.dp)
     )
     Spacer(modifier = Modifier.height(8.dp))
 
-    // 가느다란 실선 추가
-    Divider(
-        color = Color.Gray,  // 실선 색상 설정
-        thickness = 1.dp,  // 실선 두께 설정
-        modifier = Modifier.fillMaxWidth()  // 실선의 길이를 박스 전체에 맞춤
+    Text(
+        text = "${giftDetail.priceFormatted} 원",
+        fontSize = 25.sp,
+        fontWeight = FontWeight.Medium,
+        color = Color.Black,
+        modifier = Modifier.padding(horizontal = 10.dp)
     )
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    // 가격과 후기 링크
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .width(200.dp)
-                .height(50.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color(0xFFA093DE))
-                .padding(8.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = "₩${giftDetail.priceFormatted} 원", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
-        }
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "후기 ${dummyReviews.size}개 보기",
-                fontSize = 16.sp,
-                textDecoration = TextDecoration.Underline,
-                color = Color(0xFFB3C3F4),
-                modifier = Modifier.clickable {
-                    TabState.selectedTabIndex = 1  // 리뷰 탭으로 전환
-                }
-            )
-            Icon(
-                imageVector = Icons.Default.ArrowForward,
-                contentDescription = "Arrow Icon",
-                modifier = Modifier.size(16.dp)
-            )
-        }
-    }
 }
 
 @Composable
@@ -344,7 +418,7 @@ fun GiftTopBar(
         Icon(
             imageVector = Icons.Default.ArrowBack,
             contentDescription = "Back",
-            tint = Color.Black,
+            tint = Color.White,
             modifier = Modifier
                 .size(28.dp)
                 .clickable { navController.popBackStack() }
@@ -359,7 +433,7 @@ fun GiftTopBar(
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_add_shopping_cart_24), // 장바구니 아이콘
                     contentDescription = "Cart Icon",
-                    tint = Color.Black
+                    tint = Color.White
                 )
             }
 
@@ -389,8 +463,8 @@ fun GiftTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
 
     TabRow(
         selectedTabIndex = selectedTabIndex,
-        backgroundColor = Color.White,  // 전체 탭의 배경색을 흰색으로 설정
-        contentColor = Color.Blue,     // 선택된 탭의 인디케이터 색상
+        backgroundColor = Color.White,
+        contentColor = Color(0xFFDAEBFD),
         modifier = Modifier.fillMaxWidth()
     ) {
         tabs.forEachIndexed { index, tabTitle ->
@@ -401,54 +475,22 @@ fun GiftTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
                         onTabSelected(index)
                     }
                 },
-                selectedContentColor = Color.Black, // 선택된 탭의 텍스트 색상
-                unselectedContentColor = Color.Gray, // 선택되지 않은 탭의 텍스트 색상
+                selectedContentColor = Color.Black,
+                unselectedContentColor = Color.Gray,
                 text = { Text(tabTitle) }
             )
         }
     }
-    Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(10.dp))
 }
 
 @Composable
 fun ProductIntroduction(giftDetail: GiftDetailData) {
     Column(modifier = Modifier.padding(16.dp)) {
-        // 상품 이름
-        Text(
-            text = giftDetail.giftName,  // 상품 이름
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // 회사 이름 및 위치
-        Text(
-            text = "제공 회사: ${giftDetail.corporationName} (${giftDetail.location})",
-            fontSize = 16.sp,
-            color = Color.Gray
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 가격
-        Text(
-            text = "가격: ₩${giftDetail.priceFormatted}",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Green
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 상품 설명
-        val thumbnailUrl = giftDetail.giftContentImage  // 썸네일 URL과 설명 파싱
+        val thumbnailUrl = giftDetail.giftContentImage
         val description = giftDetail.giftContent
 
         if (thumbnailUrl != null) {
-            // 상품 썸네일 이미지
-
-
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -469,7 +511,7 @@ fun ProductIntroduction(giftDetail: GiftDetailData) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+//            Spacer(modifier = Modifier.height(16.dp))
         }
 
         // 상품 설명
@@ -490,33 +532,52 @@ fun ProductIntroduction(giftDetail: GiftDetailData) {
 
 
 @Composable
-fun ProductReview(reviews: List<Review>) {
-    // 전체 내용을 스크롤 가능하게 설정
+fun ProductReview(reviews: List<ReviewData>, viewModel: GiftReviewModel, token: String) {
     Column(
         modifier = Modifier
-            .fillMaxSize() // 화면을 가득 채우도록 설정
-//            .verticalScroll(rememberScrollState()) // 스크롤 가능하게 설정
+            .fillMaxSize()
             .padding(16.dp)
     ) {
         reviews.forEach { review ->
-            // 리뷰 표시
             Column(modifier = Modifier.fillMaxWidth()) {
-                // 사용자 프로필과 리뷰 텍스트
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth() // 가로 크기를 채움
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Image(
-                        painter = rememberImagePainter(data = review.userProfileUrl),
+                        painter = rememberImagePainter(data = review.userProfileImage),
                         contentDescription = "User profile",
                         modifier = Modifier
-                            .size(80.dp)
+                            .size(60.dp)
                             .clip(CircleShape)
+                            .border(2.dp, Color(0xFFDAEBFD), CircleShape)
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Column {
-                        Text(review.reviewerName, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                        Text(review.reviewCreateTime, fontSize = 14.sp)
+                        Text(review.userName, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(review.modifiedDate.substringBefore("T"), fontSize = 14.sp)
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    Row(
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .clickable {
+                                Log.d("LikeReview", "$token, ${review.reviewIdx}")
+                                viewModel.likeReview(review.reviewIdx, token)
+                            },
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.good),
+                            contentDescription = "Example Icon",
+                            modifier = Modifier.padding(horizontal = 10.dp).size(16.dp)
+                        )
+                        Text(
+                            text = "${review.likedCount}",
+                            fontSize = 20.sp
+                        )
                     }
                 }
 
@@ -526,27 +587,32 @@ fun ProductReview(reviews: List<Review>) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth() // 가로 크기를 채움
-                        .height(300.dp) // 높이를 명시적으로 설정
+                        .height(200.dp) // 높이를 명시적으로 설정
                         .border(
-                            width = 2.dp,
-                            color = Color.Black,
+                            width = 1.dp,
+                            color = Color(0xFFDAEBFD),
                             shape = RoundedCornerShape(8.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        painter = rememberImagePainter(data = review.imageUrl),
+                        painter = rememberImagePainter(data = review.reviewImage),
                         contentDescription = "Review image",
-                        modifier = Modifier.fillMaxSize() // 가로, 세로 모두 채우기
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 리뷰 텍스트
-                Text(review.reviewText, fontSize = 20.sp)
+                Text(review.reviewContent, fontSize = 20.sp, modifier = Modifier.padding(horizontal =  10.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                Spacer(modifier = Modifier.height(24.dp)) // 리뷰들 사이의 간격
+                Divider(
+                    color = Color(0xFFDAEBFD),
+                    thickness = 1.dp,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(20.dp))
             }
         }
     }
