@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class FundingParticipantViewDto {
 
+    private long participateIdx;
     private int fundingIdx;
     private String fundingThumbnail;
     private String fundingTitle;
@@ -24,6 +25,7 @@ public class FundingParticipantViewDto {
     public static FundingParticipantViewDto toDto(FundingParticipants fundingParticipants) {
         Fundings fundings = fundingParticipants.getFundings();
         return FundingParticipantViewDto.builder()
+                .participateIdx(fundingParticipants.getParticipantIdx())
                 .fundingIdx(fundings.getFundingIdx())
                 .fundingThumbnail(fundings.getFundingThumbnail())
                 .fundingTitle(fundings.getFundingTitle())
