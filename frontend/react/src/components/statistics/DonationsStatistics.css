@@ -1,16 +1,31 @@
-.page-layout {
+.donations-statistics-container {
   display: flex;
   height: 100vh;
 }
 
-.page-content {
+.donations-statistics-content {
   flex-grow: 1;
-  padding: 40px;
-  background-color: #FBFAFF;
+  padding: 20px;
+  background-color: #fbfaff;
+}
+
+.donations-select-container h2 {
+  font-size: 36px;
+  text-align: left;
+  margin-top: 0px;
+}
+
+.donations-dropdown {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 20px;
-  font-weight: bold;
-  color: #333;
+  gap: 10px;
+  margin-bottom: 20px;
+  max-width: 200px;
+}
+
+.donations-dropdown select {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%; /* 드롭다운이 부모 컨테이너에 맞게 너비를 차지하도록 설정 */
 }
