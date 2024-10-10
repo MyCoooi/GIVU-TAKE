@@ -2,6 +2,7 @@ package com.project.givuandtake.core.data
 
 import kotlinx.serialization.Serializable
 
+@Serializable
 data class CartData(
     val cartIdx: Int,   // 장바구니 항목 ID
     val giftIdx: Int,   // giftIdx 추가
@@ -40,7 +41,18 @@ data class CartItemData(
     val userIdx: Int,
     val amount: Int,
     val price: Int,
-    val location: String? = null
-)
+    var location: String? = null  // 초기화 후 값을 설정
+) {
+    init {
+        location = extractLocationFromGiftName(giftName)  // giftName을 기반으로 location 값 설정
+    }
+}
+
+// 대괄호 [] 안의 내용을 추출하는 함수
+fun extractLocationFromGiftName(giftName: String): String {
+    val regex = "\\[(.*?)\\]".toRegex()  // 대괄호 안의 텍스트를 추출하는 정규식
+    val matchResult = regex.find(giftName)
+    return matchResult?.groupValues?.get(1) ?: "Unknown"  // 매칭된 값이 있으면 반환, 없으면 "Unknown"
+}
 
 

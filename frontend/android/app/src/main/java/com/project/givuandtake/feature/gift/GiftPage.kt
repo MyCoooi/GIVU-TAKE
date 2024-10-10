@@ -44,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -73,12 +74,10 @@ fun GiftPage(
 ) {
     val context = LocalContext.current
     val allProducts by viewModel.allGiftDetails.collectAsState()
-    val wishlistItems by viewModel.wishlistItemsIds.collectAsState()
+//    val wishlistItems by viewModel.wishlistItemsIds.collectAsState()
+    val wishlistItems by viewModel.wishlistItems.collectAsState()
 
-    // 토큰 불러오기
     val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
-
-    // 새로고침 버튼 추가: 새로고침 시 모든 데이터를 삭제하고 다시 불러오기
     var isRefreshing by remember { mutableStateOf(false) }
 
     LaunchedEffect(isRefreshing) {
@@ -111,51 +110,31 @@ fun GiftPage(
     var topBarVisible by remember { mutableStateOf(true) }
     var previousScrollOffset by remember { mutableStateOf(0) }
 
-    // 스크롤 이벤트 감지하여 TopBar의 가시성 조절
-    LaunchedEffect(scrollState) {
-        snapshotFlow { scrollState.firstVisibleItemScrollOffset }
-            .collect { currentScrollOffset ->
-                if (currentScrollOffset > previousScrollOffset) {
-                    topBarVisible = false
-                } else if (currentScrollOffset < previousScrollOffset) {
-                    topBarVisible = true
-                }
-                previousScrollOffset = currentScrollOffset
-            }
-    }
-
-    // 전체를 LazyColumn으로 감싸서 스크롤 가능하게 함
-    Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFFB3C3F4)), // 페이지 기본 배경색 설정
-            state = scrollState
-        ) {
-            item {
-                Spacer(modifier = Modifier.height(200.dp)) // TopBar 높이만큼 Spacer 추가
-            }
-            item {
-                MiddleContent(
-                    navController = navController,
-                    products = allProducts,
-                    wishlistItems = wishlistItems,
-                    onFavoriteToggle = { product ->
-                        wishlistViewModel.toggleWishlistItem(product) // 찜 상태 토글
-                    }
-                )
-            }
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFDAEBFD)), // 페이지 기본 배경색 설정
+        state = scrollState
+    ) {
+        item { TopBar(
+            navController = navController,
+            cartItemCount = cartItems.size,
+            onRefresh = { isRefreshing = true} )
         }
 
-        // TopBar를 보이거나 숨기는 애니메이션 처리
-        AnimatedVisibility(
-            visible = topBarVisible,
-            modifier = Modifier.align(Alignment.TopCenter) // 화면 상단에 고정
-        ) {
-            TopBar(
+        item {
+            MiddleContent(
                 navController = navController,
-                cartItemCount = cartItems.size, // API에서 불러온 장바구니 아이템 개수 전달
-                onRefresh = { isRefreshing = true } // 새로고침 콜백 전달
+                products = allProducts,
+                wishlistItems = wishlistItems.map { it.giftIdx.toString() }.toSet(), // wishlistItems를 Set<String>으로 변환
+                onFavoriteToggle = { product ->
+                    if (wishlistItems.map { it.giftIdx }.contains(product.giftIdx)) {
+                        viewModel.removeFromWishlist(accessToken, wishlistItems.first { it.giftIdx == product.giftIdx }.wishIdx) // 찜 상태에서 제거
+                    } else {
+                        viewModel.addToWishlist(accessToken, product.giftIdx) // 찜 상태로 추가
+                    }
+                },
+                token = accessToken
             )
         }
     }
@@ -168,7 +147,7 @@ fun GiftPage(
 fun TopBar(
     navController: NavController,
     cartItemCount: Int,
-    onRefresh: () -> Unit // 새로고침 콜백을 전달받음
+    onRefresh: () -> Unit
 ) {
     // 검색어 상태를 TopBar 내부에서 관리
     var searchText by remember { mutableStateOf("") }
@@ -176,31 +155,10 @@ fun TopBar(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFFB3C3F4)) // 전체 배경색을 설정
-            .padding(16.dp) // 전체 패딩 설정
+            .background(Color(0xFFDAEBFD))
+            .padding(16.dp)
     ) {
-        // 로고와 텍스트를 상단에 배치
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start,
-            modifier = Modifier.fillMaxWidth() // Row가 전체 너비를 차지하도록 설정
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.logo), // 로고 이미지 리소스
-                contentDescription = "Logo",
-                modifier = Modifier.size(40.dp) // 이미지 크기 설정
-            )
-            Spacer(modifier = Modifier.width(8.dp)) // 로고와 텍스트 사이 간격
-            Text(
-                text = "GIVU & TAKE",
-                color = Color(0xFF8E8EBD), // 연한 보라색 텍스트 색상
-                fontWeight = FontWeight.Bold,
-                style = CustomTypography.titleLarge // CustomTypography 적용
-            )
-        }
-
-        // 텍스트와 장바구니 아이콘을 같은 Row에 배치
-        Spacer(modifier = Modifier.height(8.dp)) // 로고와 텍스트 사이에 간격 추가
+        Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -208,70 +166,35 @@ fun TopBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "우리 고향 기부하기",
-                fontWeight = FontWeight.Bold,
-                fontSize = 25.sp,
-                style = CustomTypography.bodyLarge // CustomTypography 적용
+                text = "고향사랑기부몰",
+                fontWeight = FontWeight.Medium,
+                fontSize = 23.sp,
+                style = CustomTypography.bodyLarge,
+                modifier = Modifier.padding(start = 5.dp)
             )
+
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // 새로고침 아이콘 추가
-                IconButton(onClick = { onRefresh() }) {  // 새로고침 콜백 호출
+                IconButton(onClick = { onRefresh() }) {
                     Icon(imageVector = Icons.Default.Refresh, contentDescription = "Refresh")
                 }
-                Spacer(modifier = Modifier.width(8.dp)) // 아이콘 사이 간격
-
-
-                // WishList 아이콘 추가
                 IconButton(onClick = {
                     navController.navigate("wishlist")
                 }) {
                     Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "WishList")
                 }
-                Spacer(modifier = Modifier.width(8.dp)) // 아이콘 사이 간격
-                // Cart 아이콘
                 CartIcon(cartItemCount = cartItemCount, onCartClick = {
-                    navController.navigate("cart_page") // Cart 페이지로 이동
+                    navController.navigate("cart_page")
                 })
             }
         }
+        Spacer(modifier = Modifier.height(8.dp))
 
-        // 검색창
-        Spacer(modifier = Modifier.height(8.dp)) // 텍스트와 검색창 사이에 간격 추가
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .background(Color.White, shape = RoundedCornerShape(24.dp)) // 검색창 둥근 테두리 적용
-                .border(1.dp, Color.Black, shape = RoundedCornerShape(24.dp)) // 테두리
-                .padding(horizontal = 16.dp), // 내부 패딩
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_search_24), // 검색 아이콘 리소스
-                    contentDescription = "Search Icon",
-                    tint = Color.Gray,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp)) // 검색 아이콘과 텍스트 필드 사이 간격
-                TextField(
-                    value = searchText,
-                    onValueChange = { newText -> searchText = newText },
-                    placeholder = { Text("검색어를 입력하세요") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    colors = TextFieldDefaults.textFieldColors(
-                        backgroundColor = Color.Transparent, // 배경 투명
-                        focusedIndicatorColor = Color.Transparent, // 포커스 시 인디케이터 제거
-                        unfocusedIndicatorColor = Color.Transparent // 포커스 해제 시 인디케이터 제거
-                    ),
-                    singleLine = true
-                )
-            }
-        }
+        SearchBar(
+            searchText = searchText,
+            onSearchTextChange = { newText -> searchText = newText }
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        CategoryScreen(navController)
     }
 }
 
@@ -281,7 +204,8 @@ fun MiddleContent(
     navController: NavController,
     products: List<GiftDetail>,
     wishlistItems: Set<String>,
-    onFavoriteToggle: (GiftDetail) -> Unit
+    onFavoriteToggle: (GiftDetail) -> Unit,
+    token: String
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -290,43 +214,23 @@ fun MiddleContent(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                color = Color(0xFFFFFFFF), // 배경색 설정
-                shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp) // 상단을 둥글게 설정
+                color = Color(0xFFFFFFFF),
+                shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp)
             )
-            .padding(horizontal = 16.dp) // 전체 내부 패딩 설정
+            .padding(horizontal = 16.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // 상단 아이콘 및 텍스트
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start,
-                modifier = Modifier.padding(top = 16.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_search_24), // 검색 아이콘 리소스
-                    contentDescription = "Search Icon",
-                    tint = Color.Black,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "상품종류 순",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 25.sp,
-                    style = CustomTypography.bodyLarge // CustomTypography 적용
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(30.dp))
 
             // 맞춤 추천상품 텍스트
             Text(
-                text = "맞춤 추천상품",
-                fontWeight = FontWeight.Bold,
-                fontSize = 25.sp,
-                style = CustomTypography.bodyLarge, // CustomTypography 적용
-                modifier = Modifier.padding(vertical = 16.dp)
+                text = "🎁 신상품 🎁",
+                fontWeight = FontWeight.Medium,
+                fontSize = 20.sp,
+                style = CustomTypography.bodyLarge,
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp)
             )
 
             ProductGrid(
@@ -337,6 +241,16 @@ fun MiddleContent(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "💡 최근 구매한 지역상품 💡",
+                fontWeight = FontWeight.Medium,
+                fontSize = 20.sp,
+                style = CustomTypography.bodyLarge,
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp)
+            )
+            RecentGiftPage(navController = navController, token = token )
+            
         }
     }
 }
@@ -385,34 +299,25 @@ fun ProductGrid(
     wishlistItems: Set<String>,
     onFavoriteToggle: (GiftDetail) -> Unit
 ) {
-    // LazyRow를 감싸는 Box에 테두리 추가
-    Box(
+    LazyRow(
         modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp)) // 모서리 둥글게 설정
-            .padding(vertical = 8.dp) // 위아래 여백
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp) // 카드 간격 설정
     ) {
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp), // 내부 여백 추가
-            horizontalArrangement = Arrangement.spacedBy(16.dp) // 카드 간격 설정
-        ) {
-            // n개씩 묶어서 슬라이드 되도록 설정
-            items(products.chunked(1)) { rowProducts ->
-                Column(
-                    modifier = Modifier.fillMaxHeight(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp) // 세로 간격 설정
-                ) {
-                    rowProducts.forEach { product ->
-                        val isFavorite =  wishlistItems.contains(product.giftIdx.toString()) // 찜 상태 확인
-                        ProductCard(
-                            product = product,
-                            isFavorite = isFavorite,
-                            onFavoriteToggle = onFavoriteToggle,
-                            navController = navController
-                        )
-                    }
+        // n개씩 묶어서 슬라이드 되도록 설정
+        items(products.chunked(1)) { rowProducts ->
+            Column(
+                modifier = Modifier.fillMaxHeight(),
+                verticalArrangement = Arrangement.spacedBy(10.dp) // 세로 간격 설정
+            ) {
+                rowProducts.forEach { product ->
+                    val isFavorite =  wishlistItems.contains(product.giftIdx.toString()) // 찜 상태 확인
+                    ProductCard(
+                        product = product,
+                        isFavorite = isFavorite,
+                        onFavoriteToggle = onFavoriteToggle,
+                        navController = navController
+                    )
                 }
             }
         }
@@ -429,117 +334,98 @@ fun ProductCard(
     modifier: Modifier = Modifier // modifier 추가
 ) {
     val location = "${product.corporationSido} ${product.corporationSigungu}"
-    Log.d("product", "${product}")
+//    Log.d("product", "${product}")
+
     Card(
         shape = RoundedCornerShape(16.dp), // 카드 모서리를 둥글게 설정
         modifier = modifier
             .padding(8.dp)
-            .width(200.dp)
+            .width(180.dp)
             .height(300.dp)
             .clickable {
                 navController.navigate("gift_page_detail/${product.giftIdx}")
-            },
+            }
+            .border(
+                width = 1.dp,
+                color = Color(0x60FBAFFF),
+                shape = RoundedCornerShape(12.dp)
+            ),
         elevation = 4.dp,
-        backgroundColor = Color(0xFFF7F7FB) // 배경색을 연한 색으로 변경
+        backgroundColor = Color(0xFFFBFAFF)
+
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp), // 패딩을 설정하여 전체적으로 여백을 확보
-            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // 상품 이미지와 찜 아이콘을 같은 Box에 배치
-            Box(
+            Image(
+                painter = rememberImagePainter(product.giftThumbnail),  // 실제 이미지 경로 사용
+                contentDescription = "상품 이미지",
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp) // 이미지 높이를 적당히 줄임
-                    .clip(RoundedCornerShape(12.dp)) // 이미지를 둥글게 클립
-                    .background(Color(0xFFEEEEEE)) // 이미지 배경을 회색으로 설정
-                    .border(1.dp, Color(0xFFDDDDDD), RoundedCornerShape(12.dp)) // 테두리 설정
-            ) {
-                Image(
-                    painter = rememberImagePainter(product.giftThumbnail),  // 실제 이미지 경로 사용
-                    contentDescription = "상품 이미지",
-                    modifier = Modifier
-                        .size(200.dp),
-                    contentScale = ContentScale.Crop
-                )
-            }
+                    .size(180.dp),
+                contentScale = ContentScale.Crop
+            )
 
-            // 상품명과 찜 아이콘
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier.padding(10.dp).weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
                     text = product.giftName,
-                    fontWeight = FontWeight.Bold,
-                    style = CustomTypography.bodyLarge, // CustomTypography 적용
-                    color = Color.Black // 텍스트 색상 설정
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 15.sp,
+                    color = Color.Black,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
-            }
+                Spacer(modifier = Modifier.height(1.dp))
 
-            // 위치 정보
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         imageVector = Icons.Default.LocationOn,
                         contentDescription = "Location Icon",
-                        modifier = Modifier.size(14.dp), // 아이콘 크기를 줄임
+                        modifier = Modifier.size(14.dp),
                         tint = Color.Gray
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(2.dp))
                     Text(
                         text = location,
-                        style = CustomTypography.bodyLarge, // CustomTypography 적용
+                        style = CustomTypography.bodyLarge,
                         fontSize = 12.sp,
                         color = Color.Gray
                     )
                 }
-            }
+                Spacer(modifier = Modifier.height(1.dp))
 
-            // 가격 정보
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                horizontalArrangement = Arrangement.SpaceBetween, // 가격과 아이콘을 양 끝에 배치
-                verticalAlignment = Alignment.CenterVertically // 수직 정렬을 중앙으로 맞춤
-            ) {
-                // 가격 정보
-                Box(
+                Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp)) // 가격 버튼을 둥글게 설정
-                        .background(Color(0xFFD1E9FF)) // 연한 파란색 배경
-                        .padding(horizontal = 16.dp, vertical = 8.dp), // 패딩 설정
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "₩${product.priceFormatted}",
-                        style = CustomTypography.bodyLarge, // CustomTypography 적용
-                        fontSize = 14.sp,
+                        text = "${product.priceFormatted} ₩",
+                        style = CustomTypography.bodyLarge,
+                        fontSize = 17.sp,
                         color = Color.Black // 텍스트 색상 설정
                     )
-                }
 
-                // 찜 아이콘
-                IconButton(
-                    onClick = {
-                        Log.d("ProductCard", "Favorite button clicked for product: ${product.giftName}, isFavorite: $isFavorite")
-                        onFavoriteToggle(product) },
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    Icon(
-                        imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                        contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
-                        tint = if (isFavorite) Color(0xFFDC143C) else Color(0xFFB3B3B3), // 아이콘 색상을 변경
+                    // 찜 아이콘
+                    IconButton(
+                        onClick = {
+//                            Log.d("ProductCard", "Favorite button clicked for product: ${product.giftName}, isFavorite: $isFavorite")
+                            onFavoriteToggle(product) },
                         modifier = Modifier.size(24.dp)
-                    )
+                    ) {
+                        Icon(
+                            imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                            contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                            tint = if (isFavorite) Color(0xFFDC143C) else Color(0xFFB3B3B3), // 아이콘 색상을 변경
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
         }
@@ -560,7 +446,7 @@ fun FilterButtons_category(onCategorySelected: (Int) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(4.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         CategoryButton(text = "지역상품권", icon = painterResource(id = R.drawable.local_product)) {
@@ -587,28 +473,19 @@ fun CategoryButton(text: String, icon: Painter, onClick: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = Modifier
-            .padding(4.dp)
-            .clickable { onClick() } // 버튼 클릭 처리
+            .clickable { onClick() }
     ) {
+
+        Icon(
+            painter = icon,
+            contentDescription = null,
+            modifier = Modifier.size(65.dp),
+            tint = Color.Unspecified
+        )
         Text(
             text = text,
-            style = CustomTypography.bodyLarge,
-            modifier = Modifier.padding(bottom = 4.dp)
         )
 
-        Box(
-            modifier = Modifier
-                .size(64.dp)
-                .clip(CircleShape)
-                .background(Color(0xFFB3C3F4)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painter = icon,
-                contentDescription = null,
-                modifier = Modifier.size(32.dp)
-            )
-        }
     }
 }
 

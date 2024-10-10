@@ -8,8 +8,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
@@ -489,19 +491,32 @@ fun ProductIntroduction(giftDetail: GiftDetailData) {
         Spacer(modifier = Modifier.height(16.dp))
 
         // 상품 설명
-        val (thumbnailUrl, description) = giftDetail.giftContentDetails  // 썸네일 URL과 설명 파싱
+        val thumbnailUrl = giftDetail.giftContentImage  // 썸네일 URL과 설명 파싱
+        val description = giftDetail.giftContent
 
         if (thumbnailUrl != null) {
             // 상품 썸네일 이미지
-            Image(
-                painter = rememberImagePainter(data = thumbnailUrl),
-                contentDescription = "상품 썸네일",
+
+
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
+                    .fillMaxSize()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 200.dp, max = 8000.dp)
+                ) {
+                    Image(
+                        painter = rememberImagePainter(data = thumbnailUrl),
+                        contentDescription = "상품 썸네일",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp)),
+                        contentScale = ContentScale.FillWidth
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -514,7 +529,7 @@ fun ProductIntroduction(giftDetail: GiftDetailData) {
             )
         } else {
             Text(
-                text = "상품 설명이 없습니다.",
+                text = "",
                 fontSize = 16.sp,
                 color = Color.Gray
             )
@@ -645,7 +660,7 @@ fun RelatedRecommendations(navController: NavController, location: String) {
         // Related places button
         Button(onClick = {
             // 주변 관광지 버튼 클릭 시 지역 정보를 전달하며 관광 페이지로 이동
-            val shortLocation = location.takeLast(2)
+            val shortLocation = location.takeLast(3)
             navController.navigate("attraction?city=$shortLocation")
         }) {
             Text(text = "+ 주변 관광지")
