@@ -80,6 +80,7 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
             order_stats AS (
                 SELECT
                     o.gift_idx,
+                    c.category_name,
                     g.gift_name,
                     u.is_male,
                     FLOOR(DATEDIFF(CURDATE(), u.birth) / 365) AS age,
@@ -89,6 +90,7 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
                 JOIN users u ON o.user_idx = u.user_idx
                 JOIN gifts g ON o.gift_idx = g.gift_idx
                 JOIN category_gifts cg ON g.category_idx = cg.category_idx
+                JOIN categories c ON c.category_idx = g.category_idx
                 WHERE g.corporation_idx = :userIdx
             ),
             gift_stats AS (
@@ -105,7 +107,7 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
                 WHERE g.gift_idx = :giftIdx
             )
             SELECT
-                'gift' AS stat_type,
+                category_name AS stat_type,
                 gift_name AS name,
                 SUM(amount) AS count,
                 SUM(amount) / MAX(category_total_amount) * 100 AS percentage
