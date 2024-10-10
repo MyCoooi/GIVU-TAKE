@@ -73,6 +73,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 //    kapt("androidx.room:room-compiler:2.6.1")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.10")
+    implementation("com.android.billingclient:billing-ktx:7.1.1")
     ksp("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
 

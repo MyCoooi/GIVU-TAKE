@@ -33,10 +33,11 @@ private fun String.toCartItemData(): CartItemData {
         giftIdx = parts.getOrNull(1)?.toIntOrNull() ?: 0,  // giftIdx가 없거나 변환에 실패하면 기본값 0 사용
         giftName = parts.getOrNull(2) ?: "Unknown",        // giftName이 없으면 기본값 사용
         giftThumbnail = parts.getOrNull(3) ?: "",          // giftThumbnail이 없으면 빈 문자열 사용
-        userIdx = parts.getOrNull(4)?.toIntOrNull() ?: 0,   // userIdx가 없으면 기본값 0 사용
+        userIdx = parts.getOrNull(4)?.toIntOrNull() ?: 0,  // userIdx가 없으면 기본값 0 사용
         amount = parts.getOrNull(5)?.toIntOrNull() ?: 1,   // amount가 없으면 기본값 1 사용
         price = parts.getOrNull(6)?.toIntOrNull() ?: 0,    // price가 없으면 기본값 0 사용
-        location = parts.getOrNull(7) ?: "Unknown"        // location이 없으면 기본값 사용
+        sido = parts.getOrNull(7) ?: "Unknown",            // sido가 없으면 기본값 사용
+        sigungu = parts.getOrNull(8) ?: "Unknown"          // sigungu가 없으면 기본값 사용
     )
 }
 
