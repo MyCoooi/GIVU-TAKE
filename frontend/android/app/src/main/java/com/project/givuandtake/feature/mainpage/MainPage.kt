@@ -237,7 +237,7 @@ fun GiftCard(gift: Gift, index: Int, navController: NavController) {
     Box(
         modifier = Modifier
             .width(200.dp)
-            .height(300.dp)
+            .height(320.dp)
             .padding(8.dp)
             .shadow(
                 elevation = 4.dp,
