@@ -31,12 +31,6 @@
 
 .donations-save-button-unique:hover {
   background-color: #5b4ead;
-  color: white;
-  font-size: 16px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
 }
 
 .donations-details-unique {
@@ -67,40 +61,6 @@
   color: #888;
 }
 
-.donations-image-upload {
-  margin-top: 0px;
-}
-
-.donations-image-upload label {
-  font-size: 16px;
-  color: #ffffff;
-}
-
-.donations-image-upload input[type="file"] {
-  display: none; /* 기본 파일 선택 버튼 숨기기 */
-}
-
-.donations-custom-file-upload {
-  display: inline-block;
-  padding: 5px 10px;
-  cursor: pointer;
-  background-color: #6a5acd;
-  border: 2px solid #6a5acd;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.donations-custom-file-upload:hover {
-  background-color: #5b4ead;
-  border: 2px solid #5b4ead;
-  color: white;
-}
-
-.donations-image-upload-unique input {
-  margin-top: 10px;
-}
-
 .donations-details-section-unique {
   flex-grow: 1;
   display: flex;
@@ -114,28 +74,102 @@
   border: 1px solid #ccc;
   border-radius: 8px;
   width: 50%;
+  margin-bottom: 20px; /* 입력 필드 아래에 간격 추가 */
 }
 
 .category-select-unique {
   padding: 10px;
-  width: 240pxx;
   border: 1px solid #ccc;
   border-radius: 8px;
   width: 53%;
 }
 
+.donations-image-upload-wrapper {
+  display: flex;
+  justify-content: space-between; /* 버튼 그룹과 미리보기를 양쪽에 배치 */
+  align-items: flex-start; /* 상단 정렬 */
+  gap: 20px; /* 버튼과 미리보기 사이의 간격 */
+  width: 100%; /* 전체 너비 차지 */
+}
+
+.donations-button-group {
+  display: flex;
+  gap: 10px; /* 버튼 간격 */
+}
+
+.donations-content-image-preview-right {
+  width: 300px;
+  height: 300px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #ccc;
+  margin-top: -240px; /* 상품명 입력란과 일직선으로 맞추기 위한 조정 */
+}
+
+.donations-content-image-inside-preview-right {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 파일 선택 버튼 숨기기 */
+input[type="file"] {
+  display: none;
+}
+
+.donations-custom-file-upload {
+  display: inline-block;
+  padding: 5px 10px;
+  cursor: pointer;
+  background-color: #6a5acd;
+  border: 2px solid #6a5acd;
+  color: white;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.donations-custom-file-upload:hover {
+  background-color: #5b4ead;
+  border: 2px solid #5b4ead;
+  color: white;
+}
+
+.donations-content-file-upload {
+  display: inline-block;
+  padding: 5px 10px;
+  cursor: pointer;
+  background-color: #8a2be2;
+  border: 2px solid #8a2be2;
+  color: white;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.donations-content-file-upload:hover {
+  background-color: #7a1eda;
+  border: 2px solid #7a1eda;
+  color: white;
+}
 
 .donations-description-section-unique {
   margin-top: 20px;
 }
 
+.description-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .donations-description-textarea-unique {
   width: 100%;
-  height: 300px;
   padding: 10px;
   border-radius: 8px;
   border: 1px solid #ccc;
   font-size: 16px;
-  resize: none;
   white-space: pre-wrap;
+  overflow: hidden;
+  min-height: 300px;
 }

@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.Typography
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -41,6 +43,7 @@ import com.project.givuandtake.auth.SignupStep3
 import com.project.givuandtake.auth.SignupViewModel
 import com.project.givuandtake.core.data.CartItemData
 import com.project.givuandtake.core.data.KakaoPaymentInfo
+import com.project.givuandtake.core.data.KakaoPaymentInfo_funding
 import com.project.givuandtake.feature.attraction.FestivalPage
 import com.project.givuandtake.feature.attraction.LocationSelect
 import com.project.givuandtake.feature.attraction.TripPage
@@ -51,6 +54,7 @@ import com.project.givuandtake.feature.fundinig.FundingMainPage
 //import com.project.givuandtake.feature.funding.navigation.MainFundingCard
 //import com.project.givuandtake.feature.fundinig.FundingDetailPage
 import com.project.givuandtake.feature.gift.CartPage
+import com.project.givuandtake.feature.gift.CartViewModel
 import com.project.givuandtake.feature.gift.GiftListScreen
 import com.project.givuandtake.feature.gift.GiftPage
 import com.project.givuandtake.feature.gift.GiftPageDetail
@@ -79,13 +83,15 @@ import com.project.givuandtake.feature.mypage.MyManagement.MyReview
 import com.project.givuandtake.feature.mypage.MyPageScreen
 //import com.project.givuandtake.feature.payment.KakaoPayManager
 import com.project.givuandtake.feature.payment.PaymentResultPage
+import com.project.givuandtake.feature.payment.PaymentResultPage_funding
 import com.project.givuandtake.feature.payment.PaymentSuccessPage
+import com.project.givuandtake.feature.payment.PaymentSuccessPage_funding
 import com.project.givuandtake.ui.navbar.BottomNavBar
 import com.project.givuandtake.ui.theme.CustomTypography
 import com.project.givuandtake.ui.theme.GivuAndTakeTheme
 import com.project.payment.PaymentScreen
 import com.project.payment.PaymentScreen_gift
-
+import kotlinx.serialization.json.Json
 
 
 class MainActivity : ComponentActivity() {
@@ -176,15 +182,24 @@ class MainActivity : ComponentActivity() {
                                 GiftListScreen(categoryIdx = categoryIdx, navController = navController) // categoryIdx 전달
                             }
 
-
-
-
-
                             // 장바구니 페이지
                             composable("cart_page") {
                                 val context = LocalContext.current // LocalContext를 사용하여 Context 가져오기
                                 CartPage(navController = navController, context = context) // context 전달
                             }
+
+//                            // 결제 페이지_답례품
+//                            composable(
+//                                route = "payment_page_gift"
+//                            ) {
+//                                val cartViewModel: CartViewModel = viewModel()
+//
+//                                // StateFlow를 collectAsState로 감지하여 cartItems를 관찰
+//                                val cartItems = cartViewModel.cartItems.collectAsState()
+//                                Log.d("cartItems","cartItems 확인 : ${cartItems}")
+//                                // 결제 화면으로 넘김
+//                                PaymentScreen_gift(navController, cartItems.value)
+//                            }
 
                             // 결제 페이지_답례품
                             composable(
@@ -207,10 +222,6 @@ class MainActivity : ComponentActivity() {
 
                                 PaymentScreen_gift(navController, name, location, price, quantity, thumbnailUrl, giftIdx) // giftIdx 추가하여 전달
                             }
-
-
-
-
 
                             composable("payment_result/{paymentInfoJson}",
                                 arguments = listOf(navArgument("paymentInfoJson") { type = NavType.StringType })
@@ -235,9 +246,34 @@ class MainActivity : ComponentActivity() {
                                 deepLinks = listOf(navDeepLink { uriPattern = "https://givuandtake/payment/success" })
                             ) { PaymentSuccessPage(navController = navController, paymentInfoJson = "") }
 
+                            composable(
+                                "payment_result_funding/{paymentInfoJson}"
+                            ) { backStackEntry ->
+                                val paymentInfoJson = backStackEntry.arguments?.getString("paymentInfoJson")
+                                paymentInfoJson?.let {
+                                    val paymentInfo = Gson().fromJson(it, KakaoPaymentInfo_funding::class.java)
+                                    PaymentResultPage_funding(navController = navController, paymentInfo = paymentInfo)
+                                }
+                            }
+
+                            // 펀딩 결제 성공 페이지 경로
+                            composable("payment_success_funding/{paymentInfoJson}") { backStackEntry ->
+                                val paymentInfoJson = backStackEntry.arguments?.getString("paymentInfoJson")
+                                paymentInfoJson?.let {
+                                    // JSON 문자열을 KakaoPaymentInfo_funding 객체로 변환
+                                    val paymentInfo = Gson().fromJson(it, KakaoPaymentInfo_funding::class.java)
+                                    // PaymentSuccessPage_funding으로 전달
+                                    PaymentSuccessPage_funding(navController = navController, paymentInfo = paymentInfo)
+                                }
+                            }
 
 
-                            // 마이 페이지
+
+                            // 관광 페이지
+                            composable("attraction/{city}") { backStackEntry ->
+                                val city = backStackEntry.arguments?.getString("city")
+                                AttractionMain(navController, city ?: "영도")
+                            }
                             composable("locationSelection") {
                                 LocationSelect(navController)
                             }

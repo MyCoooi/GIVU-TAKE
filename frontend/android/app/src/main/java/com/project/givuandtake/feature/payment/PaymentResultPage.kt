@@ -38,10 +38,10 @@ fun PaymentResultPage(
     val gson = remember { Gson() }
     // paymentInfo 객체를 JSON 문자열로 변환
     val paymentInfoJson = gson.toJson(paymentInfo)
-
+    Log.d("funding", "funding_result : ${paymentInfoJson}")
     LaunchedEffect(uri) {
 
-        delay(5000L) // 5초 대기
+        delay(3000L) // 5초 대기
         Log.d("uri_pay:","uri : ${uri}")
         Log.d("uri_pay:","intent : ${intent}")
         // 결제 성공 페이지로 이동하면서 paymentInfoJson 전달
