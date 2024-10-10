@@ -8,15 +8,12 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,7 +21,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,13 +31,109 @@ import com.project.givuandtake.core.data.CartItemData
 import com.project.givuandtake.core.data.Review
 import kotlinx.coroutines.launch
 import androidx.compose.material3.IconButton
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextDecoration
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.project.givuandtake.core.apis.Gift.GiftReviewApi
+import com.project.givuandtake.core.apis.Gift.GiftReviewLikeDeleteApi
+import com.project.givuandtake.core.apis.Gift.GiftReviewLikeGetApi
+import com.project.givuandtake.core.apis.Gift.GiftReviewLikePostApi
+import com.project.givuandtake.core.data.Gift.GiftReviewData
+import com.project.givuandtake.core.data.Gift.ReviewData
 import com.project.givuandtake.core.data.GiftDetailData
 import com.project.givuandtake.core.datastore.TokenManager
+import retrofit2.Response
 
+class GiftReviewModel : ViewModel() {
 
+    private val _reviews = mutableStateOf<List<ReviewData>>(emptyList())
+    val reviews: State<List<ReviewData>> = _reviews
+
+    private val _isLiked = mutableStateOf(false)
+    val isLiked: State<Boolean> = _isLiked
+
+    fun fetchGiftReviews(giftIdx: Int, pageNo: Int = 1, pageSize: Int = 50, isOrderLiked: Boolean = true) {
+        viewModelScope.launch {
+            try {
+                val response: Response<GiftReviewData> = GiftReviewApi.api.getGiftReviewData(
+                    giftIdx = giftIdx,
+                    pageNo = pageNo,
+                    pageSize = pageSize,
+                    isOrderLiked = isOrderLiked
+                )
+                if (response.isSuccessful) {
+                    val reviews = response.body()?.data
+                    reviews?.let {
+                        _reviews.value = it
+                    }
+                } else {
+                    Log.e("GiftReviews", "Error: ${response.code()} ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e("GiftReviews", "Exception: ${e.message}")
+            }
+        }
+    }
+
+    fun checkIfLiked(reviewIdx: Int, token: String) {
+        viewModelScope.launch {
+            try {
+                val response = GiftReviewLikeGetApi.api.GiftReviewLikeGetData(
+                    reviewIdx = reviewIdx,
+                    authToken = token
+                )
+                if (response.isSuccessful) {
+                    _isLiked.value = response.body()?.data ?: false
+                    Log.d("CheckIfLiked", "Review liked status: ${_isLiked.value}")
+                } else {
+                    Log.e("CheckIfLiked", "Error: ${response.code()} ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e("CheckIfLiked", "Exception: ${e.message}")
+            }
+        }
+    }
+
+    fun likeReview(reviewIdx: Int, token: String) {
+        viewModelScope.launch {
+            try {
+                val response = GiftReviewLikePostApi.api.getGiftReviewLikePostData(
+                    reviewIdx = reviewIdx,
+                    authToken = token
+                )
+                if (response.isSuccessful) {
+                    Log.d("LikeReview", "Review liked successfully")
+                    // 성공 시 필요한 추가 처리(예: UI 업데이트)를 여기에 작성
+                } else {
+                    Log.e("LikeReview", "Error: ${response.code()} ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e("LikeReview", "Exception: ${e.message}")
+            }
+        }
+    }
+
+    fun unlikeReview(reviewIdx: Int, token: String) {
+        viewModelScope.launch {
+            try {
+                val response = GiftReviewLikeDeleteApi.api.GiftReviewLikeDeleteData(
+                    reviewIdx = reviewIdx,
+                    authToken = token
+                )
+                if (response.isSuccessful) {
+                    Log.d("UnlikeReview", "Review unliked successfully")
+                    // You can update the UI here after unliking the review, if needed
+                } else {
+                    Log.e("UnlikeReview", "Error: ${response.code()} ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e("UnlikeReview", "Exception: ${e.message}")
+            }
+        }
+    }
+}
 
 object TabState {
     var selectedTabIndex by mutableStateOf(0) // Compose가 상태 변화를 감지할 수 있도록 mutableStateOf 사용
@@ -54,44 +146,33 @@ fun GiftPageDetail(
     navController: NavController,  // 네비게이션 컨트롤러
     GiftViewModel : GiftViewModel = viewModel()  // 뷰 모델
 ) {
-    var searchText by remember { mutableStateOf("") }  // 검색창 입력 상태
     val giftDetail by GiftViewModel.giftDetail.collectAsState()  // 상품 상세 정보 상태
-
+    Log.d("adsfaeradsf", "$giftIdx")
     val scope = rememberCoroutineScope()  // 코루틴 스코프
     val context = LocalContext.current  // 현재 Context
     val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
+    val viewModel: GiftReviewModel = viewModel()
 
     Log.d("giftDetail", "giftDetail : ${giftDetail}")
 
-    // 페이지 로드 시 상품 상세 정보를 API로부터 불러옴
     LaunchedEffect(giftIdx) {
+        viewModel.fetchGiftReviews(giftIdx)
         GiftViewModel.fetchGiftDetail(token = accessToken, giftIdx = giftIdx)
     }
+    val reviews by viewModel.reviews
 
-    // 장바구니 항목 API로 불러오기
     LaunchedEffect(Unit) {
         scope.launch {
             val result = fetchCartList(accessToken)
             if (result != null) {
                 cartItems.value = result
             } else {
-                // 에러 처리: 스낵바나 로그 추가 가능
                 Log.d("cart","Failed to load cart items")
             }
         }
     }
 
     Scaffold(
-        topBar = {
-            GiftTopBar(
-                searchText = searchText,
-                onSearchTextChanged = { newText -> searchText = newText },  // 검색 텍스트 변경 콜백
-                cartItemCount = cartItems.value.size,  // 장바구니 아이템 개수
-                onCartClick = {
-                    navController.navigate("cart_page")  // 장바구니 페이지로 이동
-                }
-            )
-        },
         bottomBar = {
             giftDetail?.let { detail ->
                 GiftBottomBar(
@@ -109,17 +190,15 @@ fun GiftPageDetail(
                                     updatedCartItems[existingItemIndex] = existingItem.copy(amount = updatedQuantity)
                                 }
                             } else {
-                                // 새로 추가 API 호출
                                 val success = addToCartApi(context, detail.giftIdx, 1)
                                 if (success) {
-                                    // 이미 addToCartApi에서 장바구니에 추가가 되었으므로, 중복 추가를 피하기 위해 UI 갱신만
                                     updatedCartItems.add(
                                         CartItemData(
-                                            cartIdx = 0,  // 서버에서 할당된 값을 나중에 받아야 함
+                                            cartIdx = 0,
                                             giftIdx = detail.giftIdx,
                                             giftName = detail.giftName,
-                                            giftThumbnail = detail.giftThumbnail ?: "",  // null일 경우 기본값 빈 문자열
-                                            userIdx = 0,  // 필요 시 수정
+                                            giftThumbnail = detail.giftThumbnail ?: "",
+                                            userIdx = 0,
                                             amount = 1,
                                             price = detail.price,
                                             sido = detail.corporationSido,
@@ -138,20 +217,51 @@ fun GiftPageDetail(
         }
 
     ) { innerPadding ->
-        // 상품 상세 정보를 보여주는 컨텐츠 부분
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp)
         ) {
-            // 상품 정보가 있을 때만 표시
             giftDetail?.let { detail ->
                 item {
-                    GiftInformation(giftDetail = detail)  // 상품 정보 표시
+                    Box() {
+                        Image(
+                            painter = rememberImagePainter(detail.giftThumbnail),  // 실제 이미지 경로 사용
+                            contentDescription = "상품 이미지",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(350.dp),
+                            contentScale = ContentScale.Crop
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(250.dp)
+                                .background(
+                                    brush = Brush.verticalGradient(
+                                        colors = listOf(
+                                            Color.Transparent,
+                                            Color.Black.copy(alpha = 0.5f)
+                                        ),
+                                        startY = 250f,
+                                        endY = 0f
+                                    )
+                                )
+                        )
+                        GiftTopBar(
+                            cartItemCount = cartItems.value.size,
+                            onCartClick = {
+                                navController.navigate("cart_page")
+                            },
+                            navController = navController
+                        )
+                    }
                 }
 
-                // 탭 섹션
+                item {
+                    GiftInformation(giftDetail = detail)
+                }
+
                 item {
                     GiftTabs(
                         selectedTabIndex = TabState.selectedTabIndex,
@@ -159,11 +269,10 @@ fun GiftPageDetail(
                     )
                 }
 
-                // 탭에 따라 다른 내용을 표시
                 item {
                     when (TabState.selectedTabIndex) {
                         0 -> ProductIntroduction(giftDetail = detail)  // 상품 소개 탭
-                        1 -> ProductReview(reviews = dummyReviews)  // 리뷰 탭 (더미 데이터)
+                        1 -> ProductReview(reviews = reviews, viewModel = viewModel, token = accessToken)  // 리뷰 탭 (더미 데이터)
                         2 -> RelatedRecommendations(navController = navController, location = detail.location)  // 연관 추천 탭
                     }
                 }
@@ -251,184 +360,99 @@ fun GiftBottomBar(
 
 @Composable
 fun GiftInformation(giftDetail: GiftDetailData) {
-    Image(
-        painter = rememberImagePainter(giftDetail.giftThumbnail),  // 실제 이미지 경로 사용
-        contentDescription = "상품 이미지",
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(250.dp),
-        contentScale = ContentScale.Crop
-    )
-
     Spacer(modifier = Modifier.height(16.dp))
 
     // 주소 정보
     Row(
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(horizontal = 10.dp)
     ) {
         Icon(
             imageVector = Icons.Default.Place,
             contentDescription = "Location icon",
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(20.dp)
         )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(text = giftDetail.location, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(text = giftDetail.location, fontSize = 16.sp)
+        Spacer(modifier = Modifier.weight(1f))
+
     }
 
     Spacer(modifier = Modifier.height(8.dp))
 
-    // 상품 정보
-    Text(text = giftDetail.giftName, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-    Spacer(modifier = Modifier.height(8.dp))
-
-    // 가느다란 실선 추가
     Divider(
-        color = Color.Gray,  // 실선 색상 설정
-        thickness = 1.dp,  // 실선 두께 설정
-        modifier = Modifier.fillMaxWidth()  // 실선의 길이를 박스 전체에 맞춤
+        color = Color(0xFFDAEBFD),
+        thickness = 1.dp,
+        modifier = Modifier.fillMaxWidth()
     )
+    Spacer(modifier = Modifier.height(8.dp))
 
-    Spacer(modifier = Modifier.height(16.dp))
+    Text(
+        text = giftDetail.giftName,
+        fontWeight = FontWeight.Medium,
+        fontSize = 20.sp,
+        modifier = Modifier.padding(horizontal = 10.dp)
+    )
+    Spacer(modifier = Modifier.height(8.dp))
 
-    // 가격과 후기 링크
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .width(200.dp)
-                .height(50.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color(0xFFA093DE))
-                .padding(8.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = "₩${giftDetail.priceFormatted} 원", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
-        }
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "후기 ${dummyReviews.size}개 보기",
-                fontSize = 16.sp,
-                textDecoration = TextDecoration.Underline,
-                color = Color(0xFFB3C3F4),
-                modifier = Modifier.clickable {
-                    TabState.selectedTabIndex = 1  // 리뷰 탭으로 전환
-                }
-            )
-            Icon(
-                imageVector = Icons.Default.ArrowForward,
-                contentDescription = "Arrow Icon",
-                modifier = Modifier.size(16.dp)
-            )
-        }
-    }
+    Text(
+        text = "${giftDetail.priceFormatted} 원",
+        fontSize = 25.sp,
+        fontWeight = FontWeight.Medium,
+        color = Color.Black,
+        modifier = Modifier.padding(horizontal = 10.dp)
+    )
 }
 
 @Composable
 fun GiftTopBar(
-    searchText: String,
-    onSearchTextChanged: (String) -> Unit,
     cartItemCount: Int, // 장바구니 아이템 수
-    onCartClick: () -> Unit // 장바구니 아이콘 클릭 처리
+    onCartClick: () -> Unit, // 장바구니 아이콘 클릭 처리
+    navController: NavController
 ) {
-    // Column을 사용하여 상단 영역 구성
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0xFFFFFFFF))
-            .padding(16.dp) // 적절한 패딩 추가
-    ) {
-        // 상단 제목 부분
-        Text(
-            text = "GIVU & TAKE",
-            style = TextStyle(color = Color(0xFFA093DE)),
-            fontSize = 14.sp
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    )   {
+        Icon(
+            imageVector = Icons.Default.ArrowBack,
+            contentDescription = "Back",
+            tint = Color.White,
+            modifier = Modifier
+                .size(28.dp)
+                .clickable { navController.popBackStack() }
         )
-        Spacer(modifier = Modifier.height(4.dp))
 
-        // 제목과 장바구니 아이콘을 한 줄로 배치
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween, // Row의 양 끝에 요소 배치
-            verticalAlignment = Alignment.CenterVertically
+        Spacer(modifier = Modifier.weight(1f))
+
+        Box(
+            modifier = Modifier.size(40.dp)
         ) {
-            // "우리 고향 기부하기" 텍스트
-            Text(
-                text = "우리 고향 기부하기",
-                fontSize = 20.sp,
-                color = Color.Black,
-                fontWeight = FontWeight.Bold // 텍스트를 진하게
-            )
+            IconButton(onClick = { onCartClick() }, modifier = Modifier.align(Alignment.TopEnd)) {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_add_shopping_cart_24), // 장바구니 아이콘
+                    contentDescription = "Cart Icon",
+                    tint = Color.White
+                )
+            }
 
-            // 장바구니 아이콘과 아이템 수 표시
-            Box(
-                contentAlignment = Alignment.TopEnd, // 배지를 아이콘의 우측 상단에 배치
-                modifier = Modifier.size(40.dp)
-            ) {
-                IconButton(onClick = { onCartClick() }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_add_shopping_cart_24), // 장바구니 아이콘
-                        contentDescription = "Cart Icon",
-                        tint = Color.Black
+            if (cartItemCount > 0) {
+                Box(
+                    modifier = Modifier
+                        .size(16.dp)
+                        .background(Color.Red, shape = CircleShape)
+                        .align(Alignment.TopEnd)
+                ) {
+                    Text(
+                        text = cartItemCount.toString(),
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        modifier = Modifier.align(Alignment.Center)
                     )
-                }
-
-                // 장바구니 아이템 개수 표시 (배지)
-                if (cartItemCount > 0) {
-                    Box(
-                        modifier = Modifier
-                            .size(16.dp) // 배지 크기
-                            .background(Color.Red, shape = CircleShape) // 배지 모양과 색상
-                            .align(Alignment.TopEnd) // 배지를 우측 상단에 배치
-                    ) {
-                        Text(
-                            text = cartItemCount.toString(),
-                            color = Color.White,
-                            fontSize = 10.sp,
-                            modifier = Modifier.align(Alignment.Center) // 텍스트를 배지 중앙에 배치
-                        )
-                    }
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 검색창 추가
-        TextField(
-            value = searchText,
-            onValueChange = { newText -> onSearchTextChanged(newText) },
-            label = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically // 아이콘과 텍스트를 수평으로 정렬
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Search, // 돋보기 아이콘
-                        contentDescription = "Search Icon",
-                        modifier = Modifier.size(20.dp) // 아이콘 크기 조절
-                    )
-                    Spacer(modifier = Modifier.width(8.dp)) // 아이콘과 텍스트 사이의 간격
-                    Text("상품 이름 검색")
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp) // 검색창 높이 조절
-                .background(Color.White)
-                .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
-                .padding(4.dp),
-            singleLine = true,
-            colors = TextFieldDefaults.textFieldColors(
-                backgroundColor = Color.White,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            )
-        )
     }
 }
 
@@ -439,8 +463,8 @@ fun GiftTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
 
     TabRow(
         selectedTabIndex = selectedTabIndex,
-        backgroundColor = Color.White,  // 전체 탭의 배경색을 흰색으로 설정
-        contentColor = Color.Blue,     // 선택된 탭의 인디케이터 색상
+        backgroundColor = Color.White,
+        contentColor = Color(0xFFDAEBFD),
         modifier = Modifier.fillMaxWidth()
     ) {
         tabs.forEachIndexed { index, tabTitle ->
@@ -451,54 +475,22 @@ fun GiftTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
                         onTabSelected(index)
                     }
                 },
-                selectedContentColor = Color.Black, // 선택된 탭의 텍스트 색상
-                unselectedContentColor = Color.Gray, // 선택되지 않은 탭의 텍스트 색상
+                selectedContentColor = Color.Black,
+                unselectedContentColor = Color.Gray,
                 text = { Text(tabTitle) }
             )
         }
     }
-    Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(10.dp))
 }
 
 @Composable
 fun ProductIntroduction(giftDetail: GiftDetailData) {
     Column(modifier = Modifier.padding(16.dp)) {
-        // 상품 이름
-        Text(
-            text = giftDetail.giftName,  // 상품 이름
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // 회사 이름 및 위치
-        Text(
-            text = "제공 회사: ${giftDetail.corporationName} (${giftDetail.location})",
-            fontSize = 16.sp,
-            color = Color.Gray
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 가격
-        Text(
-            text = "가격: ₩${giftDetail.priceFormatted}",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Green
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 상품 설명
-        val thumbnailUrl = giftDetail.giftContentImage  // 썸네일 URL과 설명 파싱
+        val thumbnailUrl = giftDetail.giftContentImage
         val description = giftDetail.giftContent
 
         if (thumbnailUrl != null) {
-            // 상품 썸네일 이미지
-
-
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -519,7 +511,7 @@ fun ProductIntroduction(giftDetail: GiftDetailData) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+//            Spacer(modifier = Modifier.height(16.dp))
         }
 
         // 상품 설명
@@ -540,33 +532,52 @@ fun ProductIntroduction(giftDetail: GiftDetailData) {
 
 
 @Composable
-fun ProductReview(reviews: List<Review>) {
-    // 전체 내용을 스크롤 가능하게 설정
+fun ProductReview(reviews: List<ReviewData>, viewModel: GiftReviewModel, token: String) {
     Column(
         modifier = Modifier
-            .fillMaxSize() // 화면을 가득 채우도록 설정
-//            .verticalScroll(rememberScrollState()) // 스크롤 가능하게 설정
+            .fillMaxSize()
             .padding(16.dp)
     ) {
         reviews.forEach { review ->
-            // 리뷰 표시
             Column(modifier = Modifier.fillMaxWidth()) {
-                // 사용자 프로필과 리뷰 텍스트
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth() // 가로 크기를 채움
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Image(
-                        painter = rememberImagePainter(data = review.userProfileUrl),
+                        painter = rememberImagePainter(data = review.userProfileImage),
                         contentDescription = "User profile",
                         modifier = Modifier
-                            .size(80.dp)
+                            .size(60.dp)
                             .clip(CircleShape)
+                            .border(2.dp, Color(0xFFDAEBFD), CircleShape)
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Column {
-                        Text(review.reviewerName, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                        Text(review.reviewCreateTime, fontSize = 14.sp)
+                        Text(review.userName, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(review.modifiedDate.substringBefore("T"), fontSize = 14.sp)
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    Row(
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .clickable {
+                                Log.d("LikeReview", "$token, ${review.reviewIdx}")
+                                viewModel.likeReview(review.reviewIdx, token)
+                            },
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.good),
+                            contentDescription = "Example Icon",
+                            modifier = Modifier.padding(horizontal = 10.dp).size(16.dp)
+                        )
+                        Text(
+                            text = "${review.likedCount}",
+                            fontSize = 20.sp
+                        )
                     }
                 }
 
@@ -576,27 +587,32 @@ fun ProductReview(reviews: List<Review>) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth() // 가로 크기를 채움
-                        .height(300.dp) // 높이를 명시적으로 설정
+                        .height(200.dp) // 높이를 명시적으로 설정
                         .border(
-                            width = 2.dp,
-                            color = Color.Black,
+                            width = 1.dp,
+                            color = Color(0xFFDAEBFD),
                             shape = RoundedCornerShape(8.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        painter = rememberImagePainter(data = review.imageUrl),
+                        painter = rememberImagePainter(data = review.reviewImage),
                         contentDescription = "Review image",
-                        modifier = Modifier.fillMaxSize() // 가로, 세로 모두 채우기
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 리뷰 텍스트
-                Text(review.reviewText, fontSize = 20.sp)
+                Text(review.reviewContent, fontSize = 20.sp, modifier = Modifier.padding(horizontal =  10.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                Spacer(modifier = Modifier.height(24.dp)) // 리뷰들 사이의 간격
+                Divider(
+                    color = Color(0xFFDAEBFD),
+                    thickness = 1.dp,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(20.dp))
             }
         }
     }
@@ -661,7 +677,8 @@ fun RelatedRecommendations(navController: NavController, location: String) {
         // Related places button
         Button(onClick = {
             // 주변 관광지 버튼 클릭 시 지역 정보를 전달하며 관광 페이지로 이동
-            val shortLocation = location.takeLast(3)
+            val shortLocation = location.takeLast(3).substring(0, 2)
+
             navController.navigate("attraction?city=$shortLocation")
         }) {
             Text(text = "+ 주변 관광지")
