@@ -353,10 +353,6 @@ fun GiftBottomBar(
     }
 }
 
-
-
-
-
 @Composable
 fun GiftInformation(giftDetail: GiftDetailData) {
     Spacer(modifier = Modifier.height(16.dp))
@@ -684,24 +680,5 @@ fun RelatedRecommendations(navController: NavController, location: String) {
         }
     }
 }
-
-val dummyReviews = listOf(
-    Review(
-//        userProfileUrl = "https://s3.example.com/user1-profile.jpg"
-        userProfileUrl = R.drawable.blank,  // 유저 프로필 S3 URL
-        reviewerName = "김싸피",
-        reviewCreateTime = "2024 . 09 . 04",  // 후기 작성 날짜
-        reviewText = "치악산 복숭아 당도 최고!",
-//        imageUrl = "https://s3.example.com/review1-image.jpg"  // 후기 이미지 S3 URL
-        imageUrl = R.drawable.placeholder  // 후기 이미지 S3 URL
-    ),
-    Review(
-        userProfileUrl = R.drawable.blank,  // 유저 프로필 S3 URL
-        reviewerName = "이싸피",
-        reviewCreateTime = "2024 . 09 . 05",  // 후기 작성 날짜
-        reviewText = "복숭아가 정말 달아요!",
-        imageUrl = R.drawable.placeholder  // 후기 이미지 S3 URL
-    )
-)
 
 
