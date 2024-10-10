@@ -13,6 +13,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -42,6 +44,7 @@ import com.project.givuandtake.core.apis.Gift.GiftReviewLikeGetApi
 import com.project.givuandtake.core.apis.Gift.GiftReviewLikePostApi
 import com.project.givuandtake.core.data.Gift.GiftReviewData
 import com.project.givuandtake.core.data.Gift.ReviewData
+import com.project.givuandtake.core.data.GiftDetail
 import com.project.givuandtake.core.data.GiftDetailData
 import com.project.givuandtake.core.datastore.TokenManager
 import retrofit2.Response
@@ -134,7 +137,24 @@ class GiftReviewModel : ViewModel() {
         }
     }
 }
-
+fun GiftDetailData.toGiftDetail(): GiftDetail {
+    return GiftDetail(
+        giftIdx = this.giftIdx,
+        giftName = this.giftName,
+        corporationIdx = this.corporationIdx,
+        corporationName = this.corporationName,
+        corporationSido = this.corporationSido,
+        corporationSigungu = this.corporationSigungu,
+        categoryIdx = this.categoryIdx,
+        categoryName = this.categoryName,
+        giftThumbnail = this.giftThumbnail,
+        giftContentImage = this.giftContentImage,
+        giftContent = this.giftContent,
+        price = this.price,
+        createdDate = this.createdDate,
+        modifiedDate = this.modifiedDate
+    )
+}
 object TabState {
     var selectedTabIndex by mutableStateOf(0) // Compose가 상태 변화를 감지할 수 있도록 mutableStateOf 사용
 }
@@ -144,78 +164,77 @@ fun GiftPageDetail(
     giftIdx: Int,  // 상품 ID
     cartItems: MutableState<List<CartItemData>>,  // 장바구니 항목 상태
     navController: NavController,  // 네비게이션 컨트롤러
-    GiftViewModel : GiftViewModel = viewModel()  // 뷰 모델
+    giftViewModel: GiftViewModel = viewModel(),  // 상품 뷰 모델
+//    wishlistViewModel: WishlistViewModel = viewModel()  // 위시리스트 뷰 모델
 ) {
-    val giftDetail by GiftViewModel.giftDetail.collectAsState()  // 상품 상세 정보 상태
-    Log.d("adsfaeradsf", "$giftIdx")
-    val scope = rememberCoroutineScope()  // 코루틴 스코프
-    val context = LocalContext.current  // 현재 Context
-    val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
-    val viewModel: GiftReviewModel = viewModel()
+    // 상품 상세 정보 상태
+    val giftDetail by giftViewModel.giftDetail.collectAsState()
 
-    Log.d("giftDetail", "giftDetail : ${giftDetail}")
+    val wishlistItems by giftViewModel.wishlistItems.collectAsState()
+
+
+    // 코루틴 스코프
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val accessToken = "Bearer ${TokenManager.getAccessToken(context)}"
 
     LaunchedEffect(giftIdx) {
-        viewModel.fetchGiftReviews(giftIdx)
-        GiftViewModel.fetchGiftDetail(token = accessToken, giftIdx = giftIdx)
-    }
-    val reviews by viewModel.reviews
+        giftViewModel.fetchGiftDetail(token = accessToken, giftIdx = giftIdx)
+        giftViewModel.fetchWishlist(accessToken)  // 추가: wishlist 데이터를 로드
 
+    }
+
+    // 장바구니 항목을 API에서 불러오기
+    var cartItems by remember { mutableStateOf<List<CartItemData>>(emptyList()) }
     LaunchedEffect(Unit) {
-        scope.launch {
-            val result = fetchCartList(accessToken)
-            if (result != null) {
-                cartItems.value = result
-            } else {
-                Log.d("cart","Failed to load cart items")
-            }
+        val result = fetchCartList(accessToken)
+        if (result != null) {
+            cartItems = result // API에서 불러온 장바구니 데이터로 갱신
+        } else {
+            Log.d("CartPage", "장바구니 데이터를 불러오는데 실패했습니다.")
         }
     }
+    Log.d("cartItems", "cartItems : ${cartItems}")
+
 
     Scaffold(
+
         bottomBar = {
             giftDetail?.let { detail ->
+                val isFavorite = wishlistItems.any { it.giftIdx == detail.giftIdx }
+                Log.d("wishlistItems","wishlistItems : ${wishlistItems}")
                 GiftBottomBar(
                     onAddToCart = {
                         scope.launch {
-                            // 이미 같은 상품이 장바구니에 있는지 확인
-                            val updatedCartItems = cartItems.value.toMutableList()
-                            val existingItemIndex = updatedCartItems.indexOfFirst { it.giftName == detail.giftName }
-                            if (existingItemIndex != -1) {
-                                // 수량 증가 API 호출
-                                val existingItem = updatedCartItems[existingItemIndex]
-                                val updatedQuantity = existingItem.amount + 1
-                                val success = updateCartItemQuantity(context, existingItem.giftIdx, updatedQuantity)
-                                if (success) {
-                                    updatedCartItems[existingItemIndex] = existingItem.copy(amount = updatedQuantity)
+                            // 장바구니에 아이템 추가하는 API 호출
+                            val success = addToCartApi(context, detail.giftIdx, 1)
+                            if (success) {
+                                // 장바구니 데이터를 갱신하기 위한 함수 호출
+                                val updatedCartItems = fetchCartList(accessToken)
+                                // cartItems에 새로운 장바구니 데이터를 추가
+                                if (updatedCartItems != null) {
+                                    cartItems = cartItems + updatedCartItems // 리스트를 합치는 방식으로 갱신
                                 }
+                                Log.d("GiftPageDetail", "상품이 장바구니에 성공적으로 추가되었습니다.")
                             } else {
-                                val success = addToCartApi(context, detail.giftIdx, 1)
-                                if (success) {
-                                    updatedCartItems.add(
-                                        CartItemData(
-                                            cartIdx = 0,
-                                            giftIdx = detail.giftIdx,
-                                            giftName = detail.giftName,
-                                            giftThumbnail = detail.giftThumbnail ?: "",
-                                            userIdx = 0,
-                                            amount = 1,
-                                            price = detail.price,
-                                            sido = detail.corporationSido,
-                                            sigungu = detail.corporationSigungu
-                                        )
-                                    )
-                                }
+                                Log.e("GiftPageDetail", "장바구니 추가에 실패했습니다.")
                             }
-                            cartItems.value = updatedCartItems  // UI 갱신
                         }
                     },
-                    navController = navController,  // 네비게이션 컨트롤러 전달
-                    giftDetail = detail  // 상품 정보 전달
+                    onFavoriteToggle = { product ->
+                        if (wishlistItems.map { it.giftIdx }.contains(product.giftIdx)) {
+                            giftViewModel.removeFromWishlist(accessToken, wishlistItems.first { it.giftIdx == product.giftIdx }.wishIdx) // 찜 상태에서 제거
+                        } else {
+                            giftViewModel.addToWishlist(accessToken, product.giftIdx) // 찜 상태로 추가
+                        }
+                    },
+                    navController = navController,
+                    giftDetail = detail,
+                    isFavorite = isFavorite,
+                    cartItems = cartItems
                 )
             }
         }
-
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -223,16 +242,18 @@ fun GiftPageDetail(
                 .padding(innerPadding)
         ) {
             giftDetail?.let { detail ->
+                // 상품 이미지 및 상단 바
                 item {
-                    Box() {
+                    Box {
                         Image(
-                            painter = rememberImagePainter(detail.giftThumbnail),  // 실제 이미지 경로 사용
+                            painter = rememberImagePainter(detail.giftThumbnail),
                             contentDescription = "상품 이미지",
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(350.dp),
                             contentScale = ContentScale.Crop
                         )
+                        // 검은색 반투명 그라디언트 효과
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -249,7 +270,7 @@ fun GiftPageDetail(
                                 )
                         )
                         GiftTopBar(
-                            cartItemCount = cartItems.value.size,
+                            cartItemCount = cartItems.size,
                             onCartClick = {
                                 navController.navigate("cart_page")
                             },
@@ -258,26 +279,28 @@ fun GiftPageDetail(
                     }
                 }
 
+                // 상품 정보
                 item {
                     GiftInformation(giftDetail = detail)
                 }
 
+                // 탭 UI
                 item {
                     GiftTabs(
                         selectedTabIndex = TabState.selectedTabIndex,
-                        onTabSelected = { TabState.selectedTabIndex = it }  // 탭 선택 콜백
+                        onTabSelected = { TabState.selectedTabIndex = it }
                     )
                 }
 
+                // 선택된 탭에 따른 내용 표시
                 item {
                     when (TabState.selectedTabIndex) {
-                        0 -> ProductIntroduction(giftDetail = detail)  // 상품 소개 탭
-                        1 -> ProductReview(reviews = reviews, viewModel = viewModel, token = accessToken)  // 리뷰 탭 (더미 데이터)
+                        0 -> ProductIntroduction(giftDetail = detail)
+//                        1 -> ProductReview(reviews = dummyReviews, viewModel = giftViewModel, token = accessToken)  // 리뷰 탭
                         2 -> RelatedRecommendations(navController = navController, location = detail.location)  // 연관 추천 탭
                     }
                 }
             } ?: run {
-                // 상품 정보가 없을 때 로딩 메시지 표시
                 item {
                     Text("Loading...", Modifier.padding(16.dp))
                 }
@@ -286,16 +309,16 @@ fun GiftPageDetail(
     }
 }
 
-
 @Composable
 fun GiftBottomBar(
     onAddToCart: () -> Unit,
     navController: NavController,
-    giftDetail: GiftDetailData
+    isFavorite: Boolean,
+    onFavoriteToggle: (GiftDetail) -> Unit,
+    giftDetail: GiftDetailData,
+    cartItems: List<CartItemData>, // 장바구니 상태를 전달받음
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    var isAddingToCart by remember { mutableStateOf(false) } // 장바구니 추가 중인지 확인하는 상태
-
+    var showAlert by remember { mutableStateOf(false) } // 경고창 상태 관리
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -308,52 +331,101 @@ fun GiftBottomBar(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val context = LocalContext.current  // 현재 Context 가져오기
-            Button(
-                onClick = {
-                    if (!isAddingToCart) { // 장바구니 추가 중이 아니면 실행
-                        coroutineScope.launch {
-                            isAddingToCart = true // 장바구니 추가 시작
-
-                            // 장바구니 추가 로직 호출
-                            try {
-                                onAddToCart()  // UI 업데이트 및 장바구니 추가 담당
-                            } catch (e: Exception) {
-                                println("장바구니 추가 실패: ${e.localizedMessage}")
-                            } finally {
-                                isAddingToCart = false // 요청 완료 후 다시 버튼 활성화
-                            }
-                        }
-                    }
-                },
-                enabled = !isAddingToCart, // 요청 중일 때 버튼 비활성화
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 4.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color.LightGray)
+            // 찜하기 버튼
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("장바구니")
+                IconButton(
+                    onClick = {
+                        onFavoriteToggle(giftDetail.toGiftDetail())
+                    },
+                    modifier = Modifier.size(40.dp) // 아이콘 크기 조절
+                ) {
+                    Icon(
+                        imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                        contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                        tint = if (isFavorite) Color.Red else Color(0xFFB3B3B3), // 아이콘 색상 설정
+                        modifier = Modifier.size(32.dp) // 아이콘 크기 설정
+
+                    )
+                }
+                Text(
+                    text = "찜",
+                    fontSize = 12.sp, // 글자 크기 조절
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Red
+                )
             }
 
+            // 장바구니 버튼
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                IconButton(
+                    onClick = {
+                        // 이미 장바구니에 있는지 확인
+                        val isAlreadyInCart = cartItems.any { it.giftIdx == giftDetail.giftIdx }
+                        if (isAlreadyInCart) {
+                            showAlert = true // 경고창 표시
+                        } else {
+                            onAddToCart() // 장바구니에 추가
+                        }
+                    },
+                    modifier = Modifier.size(40.dp) // 아이콘 크기 조절
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_add_shopping_cart_24), // 장바구니 아이콘
+                        contentDescription = "Cart Icon",
+                        tint = Color.Black,
+                        modifier = Modifier.size(32.dp) // 아이콘 크기 설정
+                    )
+                }
+                Text(
+                    text = "장바구니",
+                    fontSize = 12.sp, // 글자 크기 조절
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+            // 기부하기 버튼
             Button(
                 onClick = {
                     navController.navigate(
-                        "payment_page_gift?name=${Uri.encode(giftDetail.giftName)}&location=${Uri.encode(giftDetail.location)}&price=${giftDetail.price}&quantity=1&thumbnailUrl=${Uri.encode(giftDetail.giftThumbnail)}&giftIdx=${giftDetail.giftIdx}" // 썸네일 URL 전달
+                        "payment_page_gift?name=${Uri.encode(giftDetail.giftName)}&location=${Uri.encode(giftDetail.location)}&price=${giftDetail.price}&quantity=1&thumbnailUrl=${Uri.encode(giftDetail.giftThumbnail)}&giftIdx=${giftDetail.giftIdx}"
                     )
                 },
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 4.dp),
                 shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFB3C3F4))
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFB3C3F4)),
+                modifier = Modifier
+                    .width(270.dp) // 버튼을 화면 가로 크기만큼 길게
+                    .padding(horizontal = 16.dp) // 좌우 여백을 추가
             ) {
                 Text("기부하기", color = Color.White)
             }
+
         }
     }
-}
+    // 경고창(AlertDialog)
+    if (showAlert) {
+        AlertDialog(
+            onDismissRequest = { showAlert = false }, // 닫기 버튼 클릭 시
+            title = {
+                Text(text = "장바구니 알림")
+            },
+            text = {
+                Text(text = "이미 장바구니에 있는 상품입니다!")
+            },
+            confirmButton = {
+                Button(onClick = { showAlert = false }) {
+                    Text("확인")
+                }
+            }
+        )
+    }
 
+
+
+}
 
 
 
@@ -437,6 +509,7 @@ fun GiftTopBar(
                 )
             }
 
+            Log.d("cartItemCount","cartItemCount : ${cartItemCount}")
             if (cartItemCount > 0) {
                 Box(
                     modifier = Modifier
@@ -618,73 +691,6 @@ fun ProductReview(reviews: List<ReviewData>, viewModel: GiftReviewModel, token: 
     }
 }
 
-
-@Composable
-fun RelatedRecommendations(navController: NavController, location: String) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        // Location information
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                painter = painterResource(id = R.drawable.baseline_location_on_24),
-                contentDescription = "Location icon"
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("$location", fontSize = 14.sp)
-        }
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        // Map placeholder
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(700.dp)
-                .background(Color.White)
-                .border(
-                    width = 1.dp,
-                    color = Color.Black
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 2.dp), // 좌우 여백 추가,
-                horizontalAlignment = Alignment.CenterHorizontally // 중앙 정렬
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.gangwondo_wonju),
-                    contentDescription = "Map image",
-                    modifier = Modifier
-                        .size(300.dp)
-                )
-                Spacer(modifier = Modifier.height(16.dp)) // 이미지와 텍스트 사이 간격
-                Text(
-                    text = "강원특별자치도 원주시는 치악산국립공원을 중심으로 한 자연경관을 자랑하는 지역으로, 수도권과의 접근성이 좋아 관광객들이 자주 찾는 도시입니다.\n" +
-                            "\n" +
-                            "주요 관광지로는 빼어난 경치를 자랑하는 치악산국립공원이 있으며, 특히 남대봉에서의 전망이 매우 뛰어납니다. 오크밸리는 스키장과 골프장, 그리고 현대적인 예술 작품이 전시된 뮤지엄 산이 있어 사계절 내내 관광객들이 찾는 인기 명소입니다. 또한, 간현유원지는 여름철 피서지로 유명하며, 소금산 출렁다리 개장 이후 많은 관광객을 끌어모으고 있습니다.\n" +
-                            "\n" +
-                            "역사적으로 중요한 유적지로는 법천사지가 있으며, 국보급 유물인 지광국사탑이 복원될 예정입니다. 이 외에도 고려시대의 세곡미를 보관하던 흥원창, 그리고 박경리 작가의 집필 장소를 기념한 박경리문학공원 등이 있습니다.\n" +
-                            "\n" +
-                            "원주는 한지의 명맥을 이어온 지역으로, 매년 한지 문화제가 개최되며, 원주의 주요 특산품으로 한지가 유명합니다.",
-                    modifier = Modifier.padding(horizontal = 8.dp) // 글자 좌우 여백 추가
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Related places button
-        Button(onClick = {
-            // 주변 관광지 버튼 클릭 시 지역 정보를 전달하며 관광 페이지로 이동
-            val shortLocation = location.takeLast(3).substring(0, 2)
-
-            navController.navigate("attraction?city=$shortLocation")
-        }) {
-            Text(text = "+ 주변 관광지")
-        }
-    }
-}
 
 val dummyReviews = listOf(
     Review(
