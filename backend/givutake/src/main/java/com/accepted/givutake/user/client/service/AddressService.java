@@ -5,11 +5,14 @@ import com.accepted.givutake.global.exception.ApiException;
 import com.accepted.givutake.user.client.entity.Addresses;
 import com.accepted.givutake.user.client.repository.AddressRepository;
 import com.accepted.givutake.user.common.entity.Users;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,8 +42,29 @@ public class AddressService {
 
     // userIdx에 해당하는 유저의 모든 주소록 조회
     // (삭제 처리된 주소 제외하며, isRepresentative가 true인 정보 먼저 조회)
-    public List<Addresses> getAddressesByUsers(Users users) {
-        return addressRepository.findByUsersAndIsDeletedFalseOrderByIsRepresentativeDesc(users);
+    public List<Addresses> getAddressesByUsers(Users users, Boolean isRepresentative) {
+
+        Specification<Addresses> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // 사용자 조건
+            predicates.add(criteriaBuilder.equal(root.get("users"), users));
+
+            // 삭제 조건
+            predicates.add(criteriaBuilder.equal(root.get("isDeleted"), false));
+
+            // 대표 주소 조건
+            if (isRepresentative != null) {
+                predicates.add(criteriaBuilder.equal(root.get("isRepresentative"), isRepresentative));
+            }
+
+            // 정렬 조건 (isRepresentative 내림차순)
+            query.orderBy(criteriaBuilder.desc(root.get("isRepresentative")));
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return addressRepository.findAll(spec);
     }
 
     // addressIdx에 해당하는 주소 조회(삭제된 주소는 조회 불가)
