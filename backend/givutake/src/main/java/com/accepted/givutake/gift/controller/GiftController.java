@@ -80,6 +80,9 @@ public class GiftController {
             @Valid @RequestPart(value = "createGiftDto") CreateGiftDto request,
             @RequestPart(value = "thumbnailImage", required = false) MultipartFile thumbnailImage,
             @RequestPart(value = "contentImage", required = false) MultipartFile contentImage) {
+        GrantedAuthority firstAuthority = userDetails.getAuthorities().stream().findFirst().orElseThrow(() -> new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION));
+        if(!firstAuthority.getAuthority().equals("ROLE_CORPORATION"))throw new ApiException(ExceptionEnum.ACCESS_DENIED_EXCEPTION);
+        System.out.println(firstAuthority.getAuthority());
         Gifts gift = giftService.createGift(userDetails.getUsername(), request, thumbnailImage, contentImage);
         CreateLogDto logDto = CreateLogDto.builder()
                 .contentType(ContentTypeEnum.GIFT)
