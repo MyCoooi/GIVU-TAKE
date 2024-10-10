@@ -5,7 +5,7 @@ const apiDonationsStatistics = async (donationIdx) => {
   const accessToken = TokenManager.getAccessToken();  // Get the access token
   try {
     const response = await axios.get(
-      `https://j11e202.p.ssafy.io/api/gifts/statistics/${donationIdx}`, 
+      `https://j11e202.p.ssafy.io/api/gifts/statistics?giftIdx=${donationIdx}`, // 쿼리 파라미터로 전달
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,  // Set Bearer token
@@ -40,4 +40,4 @@ const apiDonationsStatistics = async (donationIdx) => {
   }
 };
 
-export { apiDonationsStatistics };  // Export the apiDonationsStatistics function
+export { apiDonationsStatistics };
