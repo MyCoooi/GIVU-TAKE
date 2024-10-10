@@ -39,13 +39,14 @@ public class FundingController {
     @GetMapping("/my-fundings")
     public ResponseEntity<ResponseDto> getMyFundingList(@AuthenticationPrincipal UserDetails userDetails,
                                                         @RequestParam(required = false) Byte state,
+                                                        @RequestParam(required = false) Character type,
                                                         @RequestParam(required = false, defaultValue = "0") int pageNo,
                                                         @RequestParam(required = false, defaultValue = "10") int pageSize) {
 
         String email = userDetails.getUsername();
 
         List<FundingViewDto> fundingViewDtoList =
-                fundingService.getMyFundingList(email, state, pageNo, pageSize)
+                fundingService.getMyFundingList(email, state, type, pageNo, pageSize)
                         .stream()
                         .map(FundingViewDto::toDto)
                         .collect(Collectors.toList());
