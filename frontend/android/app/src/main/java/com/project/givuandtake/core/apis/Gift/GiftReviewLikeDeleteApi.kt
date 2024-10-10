@@ -1,27 +1,26 @@
-package com.project.givuandtake.core.apis.Address
+package com.project.givuandtake.core.apis.Gift
 
-import com.project.givuandtake.core.data.Address.AddressPostData
-import retrofit2.http.POST
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.Header
+import retrofit2.http.Path
 
-interface AddressPostApiService {
-    @POST("users/client/addresses")
-    suspend fun postAddressData(
-        @Header("Authorization") token: String,
-        @Body addressRequest: AddressPostData
-    ): Response<AddressPostData>
+interface GiftReviewLikeDeleteService {
+    @DELETE("gifts/review/{reviewIdx}/deleteLiked")
+    suspend fun GiftReviewLikeDeleteData(
+        @Path("reviewIdx") reviewIdx: Int,
+        @Header("Authorization") authToken: String
+    ): Response<Void>
 }
 
-object AddressPostApi {
-    const val BASE_URL = "https://j11e202.p.ssafy.io/api/"
+object GiftReviewLikeDeleteApi {
+    private const val BASE_URL = "https://j11e202.p.ssafy.io/api/"
 
-    val api: AddressPostApiService by lazy {
+    val api: GiftReviewLikeDeleteService by lazy {
         // HttpLoggingInterceptor 추가
         val logging = HttpLoggingInterceptor()
         logging.setLevel(HttpLoggingInterceptor.Level.BODY)
@@ -35,6 +34,6 @@ object AddressPostApi {
             .client(client)  // OkHttpClient 설정
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(AddressPostApiService::class.java)
+            .create(GiftReviewLikeDeleteService::class.java)
     }
 }
