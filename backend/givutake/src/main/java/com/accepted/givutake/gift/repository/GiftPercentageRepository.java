@@ -89,7 +89,7 @@ public interface GiftPercentageRepository extends JpaRepository<Orders, Integer>
                 JOIN users u ON o.user_idx = u.user_idx
                 JOIN gifts g ON o.gift_idx = g.gift_idx
                 JOIN category_gifts cg ON g.category_idx = cg.category_idx
-                WHERE u.user_idx = :userIdx
+                WHERE g.corporation_idx = :userIdx
             ),
             gift_stats AS (
                 SELECT
