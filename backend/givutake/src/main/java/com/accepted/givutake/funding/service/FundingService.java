@@ -47,7 +47,7 @@ public class FundingService {
     }
 
     // 자신이 작성한 모든 펀딩 조회
-    public List<Fundings> getMyFundingList(String email, Byte state, int pageNo, int pageSize) {
+    public List<Fundings> getMyFundingList(String email, Byte state, Character type, int pageNo, int pageSize) {
         // 1. DB에서 유저 조회
         UserDto savedUserDto = userService.getUserByEmail(email);
         Users savedUsers = savedUserDto.toEntity();
@@ -64,6 +64,11 @@ public class FundingService {
             // 상태 조건 (state가 null이 아닌 경우에만 추가)
             if (state != null) {
                 predicates.add(criteriaBuilder.equal(root.get("state"), state));
+            }
+
+            // 상태 조건 (type이 null이 아닌 경우에만 추가)
+            if(type != null) {
+                predicates.add(criteriaBuilder.equal(root.get("fundingType"), type));
             }
 
             predicates.add(criteriaBuilder.equal(root.get("isDeleted"), false));

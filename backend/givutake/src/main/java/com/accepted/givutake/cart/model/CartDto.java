@@ -12,7 +12,8 @@ public class CartDto {
     private Integer giftIdx;
     private String giftName;
     private String giftThumbnail;
-    private String corporationName;
+    private String sido;
+    private String sigungu;
     private Integer userIdx;
     private Integer amount;
     private Integer price;
