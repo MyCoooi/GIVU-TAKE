@@ -49,20 +49,27 @@ import com.project.givuandtake.feature.mypage.MyActivities.CardBank
 import com.project.givuandtake.feature.mypage.MyActivities.CardList
 
 @Composable
-fun PaymentMethods() {
-    var selectedMethod by remember { mutableStateOf("") } // 선택된 결제 수단 상태
-
+fun PaymentMethods_funding(
+    selectedMethod: String,
+    onMethodSelected: (String) -> Unit,
+    registeredCards: List<UserCard>,
+    bankList: List<CardBank>,
+    selectedCard: UserCard?,
+    onCardSelected: (UserCard) -> Unit,
+    navController: NavController // 카드 등록 화면으로 이동할 NavController 추가
+) {
     Surface(
         shape = RoundedCornerShape(12.dp),
         color = Color.White,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp), // 좌우 16dp, 상하 8dp의 패딩 추가
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         shadowElevation = 4.dp
     ) {
         Column(
-            modifier = Modifier.padding(16.dp) // Column 내부에도 패딩 추가 가능
+            modifier = Modifier.padding(16.dp)
         ) {
+            // 결제 수단 제목
             Text(
                 text = "결제 수단",
                 fontSize = 18.sp,
@@ -71,153 +78,79 @@ fun PaymentMethods() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 결제 수단을 두 개씩 나란히 배치
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
+            // 신용 / 체크 카드 옵션
+            PaymentMethodButtonWithIcon(
+                methodName = "신용 / 체크 카드",
+                iconResId = R.drawable.logo, // 적절한 이미지 리소스를 사용하세요
+                selected = selectedMethod == "신용,체크 카드",
+                onClick = { onMethodSelected("신용,체크 카드") }
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // 카카오페이 옵션
+            PaymentMethodButtonWithIcon(
+                methodName = "카카오페이",
+                iconResId = R.drawable.kakao, // 적절한 이미지 리소스를 사용하세요
+                selected = selectedMethod == "KAKAO",
+                onClick = { onMethodSelected("KAKAO") }
+            )
+
+            // 신용 / 체크 카드가 선택된 경우 등록된 카드 표시
+            if (selectedMethod == "신용,체크 카드") {
+                Spacer(modifier = Modifier.height(16.dp))
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    PaymentMethodButtonWithIcon(
-                        "신용 / 체크 카드",
-                        R.drawable.logo,
-                        Modifier.weight(1f),
-                        selected = selectedMethod == "신용 / 체크 카드", // 선택 상태 전달
-                        onClick = { selectedMethod = "신용 / 체크 카드" } // 선택된 결제 수단 업데이트
+                    Text(
+                        text = "등록된 카드",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
                     )
-                    PaymentMethodButtonWithIcon(
-                        "카카오 페이",
-                        R.drawable.kakao,
-                        Modifier.weight(1f),
-                        selected = selectedMethod == "카카오 페이", // 선택 상태 전달
-                        onClick = { selectedMethod = "카카오 페이" } // 선택된 결제 수단 업데이트
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    PaymentMethodButtonWithIcon(
-                        "네이버 페이",
-                        R.drawable.naver,
-                        Modifier.weight(1f),
-                        selected = selectedMethod == "네이버 페이", // 선택 상태 전달
-                        onClick = { selectedMethod = "네이버 페이" } // 선택된 결제 수단 업데이트
-                    )
-                    PaymentMethodButtonWithIcon(
-                        "토스 페이",
-                        R.drawable.toss_logo,
-                        Modifier.weight(1f),
-                        selected = selectedMethod == "토스 페이", // 선택 상태 전달
-                        onClick = { selectedMethod = "토스 페이" } // 선택된 결제 수단 업데이트
-                    )
+
+                    // 카드 등록 버튼 추가
+                    Button(
+                        onClick = { navController.navigate("cardregistration") }, // 카드 등록 화면으로 이동
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00796B)),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.height(40.dp)
+                    ) {
+                        Text(text = "카드 등록", color = Color.White)
+                    }
                 }
 
-                // 신용/체크 카드나 카카오 페이가 선택된 경우에만 카드사 선택 표시
-                if (selectedMethod == "신용 / 체크 카드" || selectedMethod == "카카오 페이") {
-                    CardSelectionDropdown()
+                Spacer(modifier = Modifier.height(16.dp))
+
+                if (registeredCards.isNotEmpty()) {
+                    // 등록된 카드 리스트를 가로 스크롤할 수 있게 변경
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(registeredCards) { card ->
+                            val bank = bankList.firstOrNull { it.name == card.cardCompany }
+                            CardItemScrollable(
+                                card = card,
+                                bank = bank,
+                                selected = card == selectedCard,
+                                onCardSelected = { onCardSelected(card) }
+                            )
+                        }
+                    }
+                } else {
+                    Text(
+                        text = "등록된 카드가 없습니다.",
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
                 }
             }
         }
     }
 }
-
-
-@Composable
-fun PaymentMethodButtonWithIcon(
-    methodName: String,
-    iconResId: Int,
-    modifier: Modifier = Modifier,
-    selected: Boolean, // 선택 상태를 인자로 추가
-    onClick: () -> Unit // 클릭 이벤트를 추가
-) {
-    val backgroundColor = if (selected) Color(0xFFDAEBFD) else Color(0xFFFFFFFF) // 선택 여부에 따라 배경색 변경
-
-    Box(
-        modifier = modifier
-            .clickable(onClick = onClick) // 클릭 이벤트 추가
-            .background(backgroundColor, shape = RoundedCornerShape(8.dp))
-            .border(BorderStroke(1.dp, Color(0xFFB3C3F4)), shape = RoundedCornerShape(8.dp))
-            .padding(16.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Icon(
-                painter = painterResource(id = iconResId),
-                contentDescription = methodName,
-                modifier = Modifier.size(24.dp),
-                tint = Color.Unspecified // 아이콘에 색상을 적용하지 않음, 원래 색상 유지
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = methodName,
-                fontSize = 16.sp,
-                color = Color.Black
-            )
-        }
-    }
-}
-
-@Composable
-fun CardSelectionDropdown() {
-    var expanded by remember { mutableStateOf(false) }
-    var selectedCard by remember { mutableStateOf("카드사 선택") }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White, shape = RoundedCornerShape(8.dp))
-            .border(BorderStroke(1.dp, Color.Gray), shape = RoundedCornerShape(8.dp))
-            .padding(16.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { expanded = true }, // Text와 Icon을 같이 클릭할 수 있게 설정
-            verticalAlignment = Alignment.CenterVertically, // 아이콘과 텍스트를 수직으로 중앙 정렬
-            horizontalArrangement = Arrangement.SpaceBetween // 양 끝으로 배치
-        ) {
-            Text(
-                text = selectedCard,
-                color = Color.Gray
-            )
-            Icon(
-                imageVector = Icons.Outlined.KeyboardArrowDown,
-                contentDescription = "Dropdown Arrow",
-                tint = Color.Gray // 화살표 색상 설정
-            )
-        }
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            DropdownMenuItem(onClick = {
-                selectedCard = "국민카드"
-                expanded = false
-            }) {
-                Text("국민카드")
-            }
-            DropdownMenuItem(onClick = {
-                selectedCard = "우리카드"
-                expanded = false
-            }) {
-                Text("우리카드")
-            }
-            DropdownMenuItem(onClick = {
-                selectedCard = "신한카드"
-                expanded = false
-            }) {
-                Text("신한카드")
-            }
-        }
-    }
-}
-
 
 
 
