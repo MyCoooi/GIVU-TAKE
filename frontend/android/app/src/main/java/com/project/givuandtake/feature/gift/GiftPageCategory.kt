@@ -230,12 +230,11 @@ fun GiftItem(gift: GiftDetail, navController: NavController) {
                         color = Color.Gray
                     )
                 }
-
-                // 가격과 찜 아이콘이 카드 하단에 고정되도록
             }
+
             Box(
                 modifier = Modifier
-                    .align(Alignment.BottomCenter) // 하단 중앙에 위치하도록 설정
+                    .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .padding(10.dp)
             ) {
@@ -251,19 +250,6 @@ fun GiftItem(gift: GiftDetail, navController: NavController) {
                          fontSize = 17.sp,
                          color = Color.Black
                      )
-//                         IconButton(
-//                            onClick = {
-//                                onFavoriteToggle(gift)
-//                            },
-//                            modifier = Modifier.size(24.dp)
-//                         ) {
-//                            Icon(
-//                                imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-//                                contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
-//                                tint = if (isFavorite) Color(0xFFDC143C) else Color(0xFFB3B3B3),
-//                                modifier = Modifier.size(24.dp)
-//                            )
-//                         }
                 }
             }
         }

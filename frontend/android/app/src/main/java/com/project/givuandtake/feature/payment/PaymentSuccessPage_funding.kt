@@ -43,6 +43,7 @@ fun PaymentSuccessPage_funding(
             fundingDetail = fetchedDetail
         }
     }
+    Log.d("funding","funding_success : ${fundingDetail}")
 
     Scaffold(
         topBar = {
