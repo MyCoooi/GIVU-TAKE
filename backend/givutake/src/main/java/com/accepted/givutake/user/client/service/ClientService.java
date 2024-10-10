@@ -43,14 +43,14 @@ public class ClientService {
     private final PdfService pdfService;
     private final FundingParticipantService fundingParticipantService;
 
-    // 아이디가 email인 사용자의 모든 주소 조회
-    public List<Addresses> getAddressesByEmail(String email) {
+    // 아이디가 email인 사용자의 조건에 맞는 모든 주소 조회
+    public List<Addresses> getAddressesByEmail(String email, Boolean isRepresentative) {
         // 1. email로 유저 조회
         UserDto savedUserDto = userService.getUserByEmail(email);
         Users savedUsers = savedUserDto.toEntity();
 
         // 2. 아이디가 email인 회원의 모든 주소록 가져오기(삭제 처리된 주소록 제외)
-        return addressService.getAddressesByUsers(savedUsers);
+        return addressService.getAddressesByUsers(savedUsers, isRepresentative);
     }
 
     // 아이디가 email인 사용자의 특정 주소 상세 조회
