@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+PyJWT
+python-multipart
+pydantic
+pydantic-settings
+python-dotenv
