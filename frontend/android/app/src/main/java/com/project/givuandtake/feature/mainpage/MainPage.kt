@@ -520,7 +520,7 @@ fun MainPage(navController: NavController) {
     )
 
     val citiesWithImages: Map<String, List<Pair<String, Int>>> = mapOf(
-        "아이들과 함께 가기 좋은 자연 체험지" to listOf(
+        "아이들과 가기 좋은 자연 체험지" to listOf(
             Pair("함평", R.drawable.hampyeong),
             Pair("보성", R.drawable.bosung),
             Pair("태안", R.drawable.taean)
@@ -546,7 +546,7 @@ fun MainPage(navController: NavController) {
             Pair("보성", R.drawable.bosung),
             Pair("하동", R.drawable.hadong)
         ),
-        "아이들을 위한 체험 프로그램이 많은 곳" to listOf(
+        "아이들을 위한 체험 프로그램 많은 곳" to listOf(
             Pair("임실", R.drawable.imsil),
             Pair("신안", R.drawable.sinan),
             Pair("고성", R.drawable.gosung)
@@ -704,14 +704,6 @@ fun MainPage(navController: NavController) {
 
         items(topfunding.take(3)) { funding ->
             FundingCard(funding = funding, navController = navController)
-        }
-
-
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = { navController.navigate("auth") }) {
-                Text(text = "Auth")
-            }
         }
     }
 }
