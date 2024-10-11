@@ -68,8 +68,8 @@
 ![메인페이지 GIF](https://lab.ssafy.com/-/ide/project/s11-fintech-finance-sub1/S11P21E202/tree/master/-/exec/gifs/메인페이지.gif)
 
 ### 2. **기부**
-![기능 설명 GIF](기능명1.gif)
-
+![기부메인페이지 GIF](https://lab.ssafy.com/-/ide/project/s11-fintech-finance-sub1/S11P21E202/tree/master/-/exec/gifs/기부메인페이지.gif)
+![기부상세페이지 GIF](https://lab.ssafy.com/-/ide/project/s11-fintech-finance-sub1/S11P21E202/tree/master/-/exec/gifs/기부상세페이지.gif)
 
 ### 3. **관광**
 ![관광메인페이지 GIF](https://lab.ssafy.com/-/ide/project/s11-fintech-finance-sub1/S11P21E202/tree/master/-/exec/gifs/관광메인페이지.gif)
