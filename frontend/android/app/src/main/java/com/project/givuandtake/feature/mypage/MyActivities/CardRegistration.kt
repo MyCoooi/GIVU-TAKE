@@ -297,6 +297,14 @@ fun CardRegistration(navController: NavController) {
         hasCameraPermission = granted
     }
 
+    var isLoading by remember { mutableStateOf(false) }
+
+    // UI에서 스피너를 보여주는 부분
+    if (isLoading) {
+        CircularProgressIndicator(modifier = Modifier.fillMaxSize())
+    }
+
+
     val context = LocalContext.current
     LaunchedEffect(Unit) {
         if (ContextCompat.checkSelfPermission(
@@ -415,7 +423,9 @@ fun CardRegistration(navController: NavController) {
                                             Log.e("PreviewSizeError", "PreviewView size is not ready")
                                         }
 
+
                                         croppedImage?.let { croppedBitmap ->
+
                                             sendImageToApi(croppedBitmap, selectedFormat,
                                                 onResponse = { response ->
                                                     apiResponse = response  // API 응답 저장
