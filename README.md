@@ -64,27 +64,30 @@
 ## 🛠 서비스 소개
 ---
 
-### 1. **기부**
+### 1. **메인페이지**
+![메인페이지 GIF](https://lab.ssafy.com/-/ide/project/s11-fintech-finance-sub1/S11P21E202/tree/master/-/exec/gifs/메인페이지.gif)
+
+### 2. **기부**
 ![기능 설명 GIF](기능명1.gif)
 
 
-### 2. **관광**
+### 3. **관광**
 ![관광메인페이지 GIF](https://lab.ssafy.com/-/ide/project/s11-fintech-finance-sub1/S11P21E202/tree/master/-/exec/gifs/관광메인페이지.gif)
 ![관광축제 GIF](https://lab.ssafy.com/-/ide/project/s11-fintech-finance-sub1/S11P21E202/tree/master/-/exec/gifs/관광메인축제.gif)
 ![관광관광지 GIF](https://lab.ssafy.com/-/ide/project/s11-fintech-finance-sub1/S11P21E202/tree/master/-/exec/gifs/관광관광지.gif)
 ![관광체험마을 GIF](https://lab.ssafy.com/-/ide/project/s11-fintech-finance-sub1/S11P21E202/tree/master/-/exec/gifs/관광체험마을.gif)
 
-### 3. **펀딩**
+### 4. **펀딩**
 ![펀딩상세보기 GIF](https://lab.ssafy.com/-/ide/project/s11-fintech-finance-sub1/S11P21E202/tree/master/-/exec/gifs/펀딩상세보기.gif)
 ![펀딩전체보기 GIF](https://lab.ssafy.com/-/ide/project/s11-fintech-finance-sub1/S11P21E202/tree/master/-/exec/gifs/펀딩전체보기.gif)
 
-### 4. **결제**
-![펀딩전체보기 GIF](https://lab.ssafy.com/-/ide/project/s11-fintech-finance-sub1/S11P21E202/tree/master/-/exec/gifs/펀딩전체보기.gif)
-![펀딩전체보기 GIF](https://lab.ssafy.com/-/ide/project/s11-fintech-finance-sub1/S11P21E202/tree/master/-/exec/gifs/펀딩전체보기.gif)
-![펀딩전체보기 GIF](https://lab.ssafy.com/-/ide/project/s11-fintech-finance-sub1/S11P21E202/tree/master/-/exec/gifs/펀딩전체보기.gif)
+### 5. **결제**
+![결제카드OCR GIF](https://lab.ssafy.com/-/ide/project/s11-fintech-finance-sub1/S11P21E202/tree/master/-/exec/gifs/결제카드OCR.gif)
+![결제카드 GIF](https://lab.ssafy.com/-/ide/project/s11-fintech-finance-sub1/S11P21E202/tree/master/-/exec/gifs/결제카드.gif)
+![결제카카오페이 GIF](https://lab.ssafy.com/-/ide/project/s11-fintech-finance-sub1/S11P21E202/tree/master/-/exec/gifs/결제카카오페이.gif)
 
 
-### 5. **마이페이지**
+### 6. **마이페이지**
 ![마이페이지나의기부 GIF](https://lab.ssafy.com/-/ide/project/s11-fintech-finance-sub1/S11P21E202/tree/master/-/exec/gifs/마이페이지나의기부.gif)
 ![마이페이지나의활동 GIF](https://lab.ssafy.com/-/ide/project/s11-fintech-finance-sub1/S11P21E202/tree/master/-/exec/gifs/마이페이지나의활동.gif)
 ![마이페이지주소록 GIF](https://lab.ssafy.com/-/ide/project/s11-fintech-finance-sub1/S11P21E202/tree/master/-/exec/gifs/마이페이지주소록.gif)
