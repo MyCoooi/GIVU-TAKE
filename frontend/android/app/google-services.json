@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "922143119647",
+    "project_id": "givuandtake-1063b",
+    "storage_bucket": "givuandtake-1063b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:922143119647:android:28c9573acfb3497444f82a",
+        "android_client_info": {
+          "package_name": "com.project.givuandtake"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "{실제 키를 넣으세요}"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
