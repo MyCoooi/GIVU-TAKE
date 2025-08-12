@@ -78,28 +78,28 @@
 <img src="https://github.com/user-attachments/assets/c4d11f10-8f94-4d3d-a2a3-1f506495c1a2" width="300"/>
 
 ### 2. **기부**
-<img src="/uploads/0e8b0e4104eff5937867ad8f6ef71da8/기부메인페이지.gif" width="300"/>
-<img src="/uploads/9b12f3225bb96ff580df919320a9fbc8/기부상세페이지.gif" width="300"/>
+<img src="https://github.com/user-attachments/assets/99e51e6c-5649-44b0-9dc4-d99d7a4f9784" width="300"/>
+<img src="https://github.com/user-attachments/assets/61aef314-fc6c-4bea-a144-d43b049d9ebd" width="300"/>
 
 ### 3. **관광**
-<img src="/uploads/06a8bedec0ea754dd1dc71c21f340191/KakaoTalk_20241011_161618472_02.gif" width="300"/>
-<img src="/uploads/fadd58a1e741f6108cfe042475e07e91/KakaoTalk_20241011_161618472_03.gif" width="300"/>
-<img src="/uploads/e603057479dbc746c368b27da257a713/관광관광지.gif" width="300"/>
-<img src="/uploads/9e5a990eb6db24b1b5ce70417b41f89b/KakaoTalk_20241011_161546678.gif" width="300"/>
+<img src="https://github.com/user-attachments/assets/e09a5b2c-4d37-4ecc-b77d-9030671b8747" width="300"/>
+<img src="https://github.com/user-attachments/assets/77d0e86e-73f8-45a6-9da3-0f7ee96c78f4" width="300"/>
+<img src="https://github.com/user-attachments/assets/0055da2e-f130-428e-96fc-05376246ad40" width="300"/>
+<img src="https://github.com/user-attachments/assets/28a12d00-2375-4799-9111-6c9c801f0609" width="300"/>
 
 ### 4. **펀딩**
-<img src="/uploads/53d422c487c81f1c65188332ff75d523/KakaoTalk_20241011_161618472_05.gif" width="300"/>
-<img src="/uploads/da831a83f7b386ed0633b1df236961bd/펀딩상세보기.gif" width="300"/>
+<img src="https://github.com/user-attachments/assets/34b85192-2c6a-413d-89e7-77b0d67ea9ce" width="300"/>
+<img src="https://github.com/user-attachments/assets/b8926d90-9a87-4abf-a8a0-2ecfe8601e20" width="300"/>
 
 ### 5. **결제**
-<img src="/uploads/c45e1dc9ea053fd299c9107c125874f4/결제카드OCR.gif" width="300"/>
-<img src="/uploads/e831f7da7f69f2d0734b578913966fa8/KakaoTalk_20241011_161618472_01.gif" width="300"/>
-<img src="/uploads/c325ee1acb63a2604f47cb3e09d3d79b/결제카카오페이.gif" width="300"/>
+<img src="https://github.com/user-attachments/assets/39933015-5d96-420f-88bf-0ed3a3b89046" width="300"/>
+<img src="https://github.com/user-attachments/assets/957d44cb-494d-4b11-933f-d37d2470ffd6" width="300"/>
+<img src="https://github.com/user-attachments/assets/d35f45d4-b399-44d2-8a89-f531e361baff" width="300"/>
 
 ### 6. **마이페이지**
-<img src="/uploads/74bfb6c7aa94b852e23fb048626afcf3/마이페이지나의기부.gif" width="300"/>
-<img src="/uploads/ff2f477124a6105e9ded70cc813c6c40/KakaoTalk_20241011_161618472.gif" width="300"/>
-<img src="/uploads/98c077061edc9681b8115c147798ae45/KakaoTalk_20241011_161512182.gif" width="300"/>
+<img src="https://github.com/user-attachments/assets/48949ade-e5eb-4098-b86a-e5a89b155fad" width="300"/>
+<img src="https://github.com/user-attachments/assets/4c2fa324-b88f-4d7a-8cea-f787f2e2eb18" width="300"/>
+<img src="https://github.com/user-attachments/assets/baa630a0-dfb8-4d84-bab1-a3abef8d9b23" width="300"/>
 
 
 ## 🛠 서비스 특장점
